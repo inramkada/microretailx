@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RAMENLABS.AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/scrollreveal"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #0f0f0f, #1a1a1a);
+      color: white;
+      overflow-x: hidden;
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+  </style>
+</head>
+<body class="text-white">
+
+  <section class="h-screen flex flex-col justify-center items-center text-center px-4">
+    <h1 class="text-6xl md:text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 fade-in">
+      RAMENLABS.AI
+    </h1>
+    <p class="mt-4 text-2xl tracking-wide text-gray-400 fade-in">AI-COMMERCE INFRASTRUCTURE</p>
+    <p class="mt-2 text-md text-gray-500 fade-in">Dubai • Delaware • Estonia</p>
+  </section>
+
+  <section id="features" class="py-20 px-6 md:px-24 grid md:grid-cols-3 gap-10">
+    <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl shadow-xl p-10 hover:scale-105 transition-transform fade-in text-center">
+      <h2 class="text-2xl font-semibold text-cyan-400">Artificial Intelligence</h2>
+    </div>
+    <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl shadow-xl p-10 hover:scale-105 transition-transform fade-in text-center">
+      <h2 class="text-2xl font-semibold text-purple-400">E-Commerce Logistics</h2>
+    </div>
+    <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl shadow-xl p-10 hover:scale-105 transition-transform fade-in text-center">
+      <h2 class="text-2xl font-semibold text-green-400">Global Infrastructure</h2>
+      <p class="mt-2 text-sm text-gray-400">Dubai • Delaware • Estonia</p>
+    </div>
+  </section>
+
+  <script>
+    ScrollReveal().reveal('.fade-in', {
+      distance: '40px',
+      duration: 1000,
+      easing: 'ease-out',
+      origin: 'bottom',
+      interval: 200
+    });
+  </script>
+
+</body>
+</html>
