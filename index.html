@@ -1,79 +1,164 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>microretailX - Blockchain Visual</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>microretailX</title>
   <style>
     html, body {
       margin: 0;
-      overflow: hidden;
       height: 100%;
-      background: #0d1117;
+      overflow: hidden;
+      background-color: #0d1117;
+      font-family: 'Segoe UI', sans-serif;
     }
-    #bg {
+
+    .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
+
+    p {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+
+    canvas {
       position: fixed;
       top: 0;
       left: 0;
+      pointer-events: none;
+    }
+
+    #bg {
       z-index: 0;
     }
-    .title {
-      position: relative;
+
+    #particlesCanvas {
       z-index: 1;
-      color: white;
-      text-align: center;
-      top: 40%;
-      font-family: 'Segoe UI', sans-serif;
     }
   </style>
 </head>
 <body>
 
-<div class="title">
-  <h1>microretailX</h1>
-  <p>Blockchain Systems – Visual Power</p>
-</div>
+  <div class="title">
+    <h1>microretailX</h1>
+    <p>XSHADOWS OPS &nbsp;&nbsp; DELAWARE &nbsp;&nbsp; DUBAI &nbsp;&nbsp; ESTONIA &nbsp;&nbsp; HONG KONG</p>
+  </div>
 
-<canvas id="bg"></canvas>
+  <canvas id="bg"></canvas>
+  <canvas id="particlesCanvas"></canvas>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
-<script>
-  const canvas = document.getElementById('bg');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-
-  // Crear geometría tipo red de nodos
-  const geometry = new THREE.BufferGeometry();
-  const count = 200;
-  const positions = new Float32Array(count * 3);
-  for (let i = 0; i < count * 3; i++) {
-    positions[i] = (Math.random() - 0.5) * 30;
-  }
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-  const material = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.2 });
-  const particles = new THREE.Points(geometry, material);
-  scene.add(particles);
-
-  camera.position.z = 15;
-
-  function animate() {
-    requestAnimationFrame(animate);
-    particles.rotation.y += 0.001;
-    particles.rotation.x += 0.0005;
-    renderer.render(scene, camera);
-  }
-
-  animate();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+  <!-- THREE.js fondo 3D estilo IOHK -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
+  <script>
+    const bgCanvas = document.getElementById('bg');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-</script>
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    const geometry = new THREE.BufferGeometry();
+    const count = 200;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i++) {
+      positions[i] = (Math.random() - 0.5) * 30;
+    }
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.2 });
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    camera.position.z = 15;
+    function animate3D() {
+      requestAnimationFrame(animate3D);
+      points.rotation.y += 0.001;
+      points.rotation.x += 0.0005;
+      renderer.render(scene, camera);
+    }
+    animate3D();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+
+  <!-- Partículas que siguen el cursor -->
+  <script>
+    const canvas = document.getElementById('particlesCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    let particles = [];
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 4 + 1;
+        this.speedX = Math.random() * 3 - 1.5;
+        this.speedY = Math.random() * 3 - 1.5;
+        this.alpha = 1;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha -= 0.01;
+      }
+
+      draw() {
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = "#00ffff";
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].alpha <= 0) {
+          particles.splice(i, 1);
+          i--;
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+
+    window.addEventListener('mousemove', e => {
+      for (let i = 0; i < 5; i++) {
+        particles.push(new Particle(e.x, e.y));
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+  </script>
 
 </body>
 </html>
