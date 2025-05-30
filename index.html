@@ -1,78 +1,33 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Prueba Efecto Cursor</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>microretailX</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background-color: #111;
+      background-color: #0d1117;
       overflow: hidden;
-    }
-    canvas {
-      display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="canvas"></canvas>
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    let particles = [];
-
-    class Particle {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = Math.random() * 5 + 2;
-        this.speedX = Math.random() * 3 - 1.5;
-        this.speedY = Math.random() * 3 - 1.5;
-        this.opacity = 1;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        this.opacity -= 0.01;
-      }
-
-      draw() {
-        ctx.fillStyle = `rgba(0, 255, 255, ${this.opacity})`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
     }
 
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p, i) => {
-        p.update();
-        p.draw();
-        if (p.opacity <= 0) particles.splice(i, 1);
-      });
-      requestAnimationFrame(animate);
+    .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
     }
 
-    window.addEventListener('mousemove', (e) => {
-      for (let i = 0; i < 5; i++) {
-        particles.push(new Particle(e.x, e.y));
-      }
-    });
-
-    animate();
-  </script>
-</body>
-</html>
+    h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
 
     p {
       margin-top: 10px;
@@ -81,7 +36,7 @@
     }
 
     canvas {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       z-index: 0;
@@ -92,7 +47,7 @@
 
   <div class="title">
     <h1>microretailX</h1>
-    <p>XSHADOWS OPS    DELAWARE    DUBAI    ESTONIA    HONG KONG</p>
+    <p>XSHADOWS OPS &nbsp;&nbsp; DELAWARE &nbsp;&nbsp; DUBAI &nbsp;&nbsp; ESTONIA &nbsp;&nbsp; HONG KONG</p>
   </div>
 
   <canvas id="cursorCanvas"></canvas>
