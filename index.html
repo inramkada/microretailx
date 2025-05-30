@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>microretailX</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <style>
     html, body {
       margin: 0;
@@ -55,18 +56,18 @@
 
   <div class="title">
     <h1>microretailX</h1>
-    <p>XSHADOWS OPS</p>
+    <p>XSHADOWS OPS &nbsp;&nbsp; DELAWARE &nbsp;&nbsp; DUBAI &nbsp;&nbsp; ESTONIA &nbsp;&nbsp; HONG KONG</p>
   </div>
 
   <canvas id="bg"></canvas>
   <canvas id="particlesCanvas"></canvas>
 
-  <!-- THREE.js fondo 3D estilo IOHK -->
+  <!-- Three.js efecto IOHK fondo -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
   <script>
     const bgCanvas = document.getElementById('bg');
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -83,12 +84,14 @@
     scene.add(points);
 
     camera.position.z = 15;
+
     function animate3D() {
       requestAnimationFrame(animate3D);
       points.rotation.y += 0.001;
       points.rotation.x += 0.0005;
       renderer.render(scene, camera);
     }
+
     animate3D();
 
     window.addEventListener('resize', () => {
