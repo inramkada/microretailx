@@ -1,6 +1,12 @@
+
 window.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('cursorCanvas');
-  if (!canvas) return;
+  // Garantiza que el canvas exista, o lo crea dinámicamente
+  let canvas = document.getElementById('cursorCanvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'cursorCanvas';
+    document.body.appendChild(canvas);
+  }
 
   const ctx = canvas.getContext('2d');
 
@@ -9,6 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
   canvas.width = width;
   canvas.height = height;
 
+  // Estilos seguros para que siempre esté detrás y sin interferencia
   canvas.style.position = 'fixed';
   canvas.style.top = '0';
   canvas.style.left = '0';
