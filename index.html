@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>microretailX :: Gato Ciborg</title>
+  <title>CyberCat 3D</title>
   <style>
     html, body {
       margin: 0;
@@ -19,11 +19,9 @@
 </head>
 <body>
 
-<!-- El script ahora será un módulo -->
 <script type="module">
   import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
   import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/loaders/GLTFLoader.js';
-  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/controls/OrbitControls.js';
 
   let scene, camera, renderer, model;
 
@@ -39,21 +37,23 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x222222, 1.2);
+    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
     scene.add(light);
 
-    // Fondo muy tenue
-    scene.background = new THREE.Color(0x0d1117);
-
-    // Carga del modelo 3D (gato ciborg)
     const loader = new GLTFLoader();
-    loader.load('https://raw.githubusercontent.com/BaronWatts/models/main/cyberCat/scene.gltf', function (gltf) {
-      model = gltf.scene;
-      model.scale.set(0.9, 0.9, 0.9);
-      scene.add(model);
-    });
+    loader.load(
+      'https://raw.githubusercontent.com/BaronWatts/models/main/cyberCat/scene.gltf',
+      function (gltf) {
+        model = gltf.scene;
+        model.scale.set(1.5, 1.5, 1.5);
+        scene.add(model);
+      },
+      undefined,
+      function (error) {
+        console.error('Error cargando el gato ciborg:', error);
+      }
+    );
 
-    // Eventos
     window.addEventListener('resize', onWindowResize, false);
     document.addEventListener('mousemove', onMouseMove, false);
   }
@@ -74,8 +74,8 @@
   function animate() {
     requestAnimationFrame(animate);
     if (model) {
-      model.rotation.y = mouseX * 0.6;
-      model.rotation.x = mouseY * 0.3;
+      model.rotation.y = mouseX * 0.5;
+      model.rotation.x = mouseY * 0.2;
     }
     renderer.render(scene, camera);
   }
