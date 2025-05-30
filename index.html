@@ -1,59 +1,79 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>microretailX</title>
+  <meta charset="UTF-8">
+  <title>microretailX - Blockchain Visual</title>
   <style>
     html, body {
       margin: 0;
-      padding: 0;
-      height: 100%;
-      background-color: #0d1117;
       overflow: hidden;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
+      height: 100%;
+      background: #0d1117;
     }
-
-    .title {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 10;
-    }
-
-    h1 {
-      font-size: 3rem;
-      margin: 0;
-    }
-
-    p {
-      margin-top: 10px;
-      font-size: 1.2rem;
-      color: #aaa;
-    }
-
-    canvas {
+    #bg {
       position: fixed;
       top: 0;
       left: 0;
       z-index: 0;
-      pointer-events: none;
+    }
+    .title {
+      position: relative;
+      z-index: 1;
+      color: white;
+      text-align: center;
+      top: 40%;
+      font-family: 'Segoe UI', sans-serif;
     }
   </style>
 </head>
 <body>
 
-  <div class="title">
-    <h1>microretailX</h1>
-    <p>XSHADOWS OPS &nbsp;&nbsp; DELAWARE &nbsp;&nbsp; DUBAI &nbsp;&nbsp; ESTONIA &nbsp;&nbsp; HONG KONG</p>
-  </div>
+<div class="title">
+  <h1>microretailX</h1>
+  <p>Blockchain Systems – Visual Power</p>
+</div>
 
-  <canvas id="cursorCanvas"></canvas>
-  <script src="particles.js"></script>
+<canvas id="bg"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
+<script>
+  const canvas = document.getElementById('bg');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+
+  // Crear geometría tipo red de nodos
+  const geometry = new THREE.BufferGeometry();
+  const count = 200;
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count * 3; i++) {
+    positions[i] = (Math.random() - 0.5) * 30;
+  }
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+  const material = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.2 });
+  const particles = new THREE.Points(geometry, material);
+  scene.add(particles);
+
+  camera.position.z = 15;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    particles.rotation.y += 0.001;
+    particles.rotation.x += 0.0005;
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
 
 </body>
 </html>
-
