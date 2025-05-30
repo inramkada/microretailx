@@ -5,94 +5,96 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>microretailX</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <style>
     html, body {
       margin: 0;
-      height: 100%;
+      padding: 0;
       overflow: hidden;
+      height: 100%;
       background-color: #0d1117;
+      color: white;
       font-family: 'Segoe UI', sans-serif;
     }
 
-    .title {
+    .overlay-text {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      color: white;
-      z-index: 10;
+      z-index: 1;
     }
 
-    h1 {
+    .overlay-text h1 {
       font-size: 3rem;
       margin: 0;
     }
 
-    p {
-      margin-top: 10px;
+    .overlay-text p {
       font-size: 1.2rem;
-      color: #aaa;
+      margin-top: 0.5rem;
+      color: #ccc;
     }
 
     canvas {
+      display: block;
       position: fixed;
       top: 0;
       left: 0;
-      pointer-events: none;
-    }
-
-    #bg {
       z-index: 0;
-    }
-
-    #particlesCanvas {
-      z-index: 1;
     }
   </style>
 </head>
 <body>
 
-  <div class="title">
-    <h1>microretailX</h1>
-    <p>XSHADOWS OPS &nbsp;&nbsp;</p>
+  <div class="overlay-text">
+    <h1><strong>microretailX</strong></h1>
+    <p>XSHADOWS OPS</p>
   </div>
 
-  <canvas id="bg"></canvas>
-  <canvas id="particlesCanvas"></canvas>
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
 
-  <!-- Three.js efecto IOHK fondo -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
   <script>
-    const bgCanvas = document.getElementById('bg');
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 50;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
 
-    const geometry = new THREE.BufferGeometry();
-    const count = 200;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i++) {
-      positions[i] = (Math.random() - 0.5) * 30;
+    const particles = new THREE.Geometry();
+    const particleCount = 300;
+
+    for (let i = 0; i < particleCount; i++) {
+      const x = THREE.MathUtils.randFloatSpread(100);
+      const y = THREE.MathUtils.randFloatSpread(100);
+      const z = THREE.MathUtils.randFloatSpread(100);
+      particles.vertices.push(new THREE.Vector3(x, y, z));
     }
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.2 });
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
 
-    camera.position.z = 15;
+    const material = new THREE.PointsMaterial({
+      color: 0x00ffff,
+      size: 1.5
+    });
 
-    function animate3D() {
-      requestAnimationFrame(animate3D);
-      points.rotation.y += 0.001;
-      points.rotation.x += 0.0005;
+    const pointCloud = new THREE.Points(particles, material);
+    scene.add(pointCloud);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      pointCloud.rotation.x += 0.001;
+      pointCloud.rotation.y += 0.001;
       renderer.render(scene, camera);
     }
 
-    animate3D();
+    animate();
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -100,68 +102,5 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
-
-  <!-- Partículas que siguen el cursor -->
-  <script>
-    const canvas = document.getElementById('particlesCanvas');
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-
-    let particles = [];
-
-    class Particle {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = Math.random() * 4 + 1;
-        this.speedX = Math.random() * 3 - 1.5;
-        this.speedY = Math.random() * 3 - 1.5;
-        this.alpha = 1;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        this.alpha -= 0.01;
-      }
-
-      draw() {
-        ctx.globalAlpha = this.alpha;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = "#00ffff";
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, width, height);
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-        if (particles[i].alpha <= 0) {
-          particles.splice(i, 1);
-          i--;
-        }
-      }
-      requestAnimationFrame(animateParticles);
-    }
-
-    animateParticles();
-
-    window.addEventListener('mousemove', e => {
-      for (let i = 0; i < 5; i++) {
-        particles.push(new Particle(e.x, e.y));
-      }
-    });
-
-    window.addEventListener('resize', () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    });
-  </script>
-
 </body>
 </html>
