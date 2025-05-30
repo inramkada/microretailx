@@ -2,8 +2,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>CyberCat 3D</title>
+  <meta charset="UTF-8" />
+  <title>CyberCat :: microretailX</title>
   <style>
     html, body {
       margin: 0;
@@ -29,23 +29,33 @@
   animate();
 
   function init() {
+    // Escena
     scene = new THREE.Scene();
+
+    // Cámara
     camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.set(0, 1.2, 5);
 
+    // Renderizador
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
+    // Luz ambiental
+    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.4);
     scene.add(light);
 
+    // Fondo oscuro pro
+    scene.background = new THREE.Color(0x0d1117);
+
+    // Cargar modelo .gltf de gato ciborg
     const loader = new GLTFLoader();
     loader.load(
       'https://raw.githubusercontent.com/BaronWatts/models/main/cyberCat/scene.gltf',
       function (gltf) {
         model = gltf.scene;
         model.scale.set(1.5, 1.5, 1.5);
+        model.position.y = -1;
         scene.add(model);
       },
       undefined,
@@ -54,12 +64,13 @@
       }
     );
 
+    // Eventos
     window.addEventListener('resize', onWindowResize, false);
     document.addEventListener('mousemove', onMouseMove, false);
   }
 
+  // Movimiento de cabeza con cursor
   let mouseX = 0, mouseY = 0;
-
   function onMouseMove(event) {
     mouseX = (event.clientX / window.innerWidth) * 2 - 1;
     mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
