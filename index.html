@@ -1,55 +1,128 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>microretailX</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/scrollreveal"></script>
+  <title>MicroRetailX Landing</title>
   <style>
-    body {
-      background: linear-gradient(to bottom right, #0f0f0f, #1a1a1a);
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #0d1117;
+      overflow: hidden;
       color: white;
-      overflow-x: hidden;
+      font-family: 'Segoe UI', sans-serif;
     }
-    .fade-in {
-      opacity: 0;
-      transform: translateY(30px);
+
+    .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
+
+    p {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
   </style>
 </head>
-<body class="text-white">
+<body>
 
-  <section class="h-screen flex flex-col justify-center items-center text-center px-4">
-    <h1 class="text-6xl md:text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 fade-in">
-      RAMENLABS.AI
-    </h1>
-    <p class="mt-4 text-2xl tracking-wide text-gray-400 fade-in">AI-COMMERCE INFRASTRUCTURE</p>
-    <p class="mt-2 text-md text-gray-500 fade-in">Dubai • Delaware • Estonia</p>
-  </section>
+  <div class="title">
+    <h1>MicroRetailX</h1>
+    <p>Comercio inteligente impulsado por IA</p>
+  </div>
 
-  <section id="features" class="py-20 px-6 md:px-24 grid md:grid-cols-3 gap-10">
-    <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl shadow-xl p-10 hover:scale-105 transition-transform fade-in text-center">
-      <h2 class="text-2xl font-semibold text-cyan-400">Artificial Intelligence</h2>
-    </div>
-    <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl shadow-xl p-10 hover:scale-105 transition-transform fade-in text-center">
-      <h2 class="text-2xl font-semibold text-purple-400">E-Commerce Logistics</h2>
-    </div>
-    <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl shadow-xl p-10 hover:scale-105 transition-transform fade-in text-center">
-      <h2 class="text-2xl font-semibold text-green-400">Global Infrastructure</h2>
-      <p class="mt-2 text-sm text-gray-400">Dubai • Delaware • Estonia</p>
-    </div>
-  </section>
+  <canvas id="cursorCanvas"></canvas>
 
   <script>
-    ScrollReveal().reveal('.fade-in', {
-      distance: '40px',
-      duration: 1000,
-      easing: 'ease-out',
-      origin: 'bottom',
-      interval: 200
+    const canvas = document.getElementById('cursorCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    let particles = [];
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 4 + 1;
+        this.speedX = Math.random() * 3 - 1.5;
+        this.speedY = Math.random() * 3 - 1.5;
+        this.alpha = 1;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha -= 0.01;
+        if (this.alpha < 0) this.alpha = 0;
+      }
+
+      draw() {
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = "#00ffff";
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function handleParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+
+        if (particles[i].alpha === 0) {
+          particles.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      handleParticles();
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    window.addEventListener('mousemove', (event) => {
+      for (let i = 0; i < 5; i++) {
+        particles.push(new Particle(event.x, event.y));
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     });
   </script>
-
 </body>
 </html>
