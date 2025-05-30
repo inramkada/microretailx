@@ -1,1 +1,59 @@
-<script src="particles.js"></script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>microretailX</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #0d1117;
+      overflow: hidden;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
+
+    p {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title">
+    <h1>microretailX</h1>
+    <p>XSHADOWS OPS &nbsp;&nbsp; DELAWARE &nbsp;&nbsp; DUBAI &nbsp;&nbsp; ESTONIA &nbsp;&nbsp; HONG KONG</p>
+  </div>
+
+  <canvas id="cursorCanvas"></canvas>
+  <script src="particles.js"></script>
+
+</body>
+</html>
+
