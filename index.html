@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>microretailX :: seguimiento IA</title>
+  <title>microretailX :: Gato Ciborg</title>
   <style>
     body, html {
       margin: 0;
@@ -41,9 +41,9 @@ function init() {
   scene.add(light);
 
   const loader = new THREE.GLTFLoader();
-  loader.load('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF/Fox.gltf', function(gltf) {
+  loader.load('URL_DEL_MODELO.glb', function(gltf) {
     model = gltf.scene;
-    model.scale.set(0.02, 0.02, 0.02);
+    model.scale.set(1.5, 1.5, 1.5);
     scene.add(model);
   });
 
