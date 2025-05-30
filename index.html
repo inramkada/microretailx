@@ -8,17 +8,31 @@
     html, body {
       margin: 0;
       padding: 0;
+      overflow: hidden;
       height: 100%;
       background-color: #0d1117;
-      overflow: hidden;
     }
+
+    #background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
+
     canvas {
       display: block;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
 
+<div id="background"></div>
+
+<!-- Gato ciborg 3D -->
 <script type="module">
   import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
   import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/loaders/GLTFLoader.js';
@@ -29,26 +43,20 @@
   animate();
 
   function init() {
-    // Escena
     scene = new THREE.Scene();
-
-    // Cámara
     camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.set(0, 1.2, 5);
 
-    // Renderizador
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.top = 0;
+    renderer.domElement.style.left = 0;
     document.body.appendChild(renderer.domElement);
 
-    // Luz ambiental
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.4);
+    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
     scene.add(light);
 
-    // Fondo oscuro pro
-    scene.background = new THREE.Color(0x0d1117);
-
-    // Cargar modelo .gltf de gato ciborg
     const loader = new GLTFLoader();
     loader.load(
       'https://raw.githubusercontent.com/BaronWatts/models/main/cyberCat/scene.gltf',
@@ -60,17 +68,16 @@
       },
       undefined,
       function (error) {
-        console.error('Error cargando el gato ciborg:', error);
+        console.error('Error cargando el modelo:', error);
       }
     );
 
-    // Eventos
     window.addEventListener('resize', onWindowResize, false);
     document.addEventListener('mousemove', onMouseMove, false);
   }
 
-  // Movimiento de cabeza con cursor
   let mouseX = 0, mouseY = 0;
+
   function onMouseMove(event) {
     mouseX = (event.clientX / window.innerWidth) * 2 - 1;
     mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -90,6 +97,59 @@
     }
     renderer.render(scene, camera);
   }
+</script>
+
+<!-- Particles.js para red de triángulos -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+  particlesJS("background", {
+    particles: {
+      number: {
+        value: 100,
+        density: { enable: true, value_area: 800 }
+      },
+      color: { value: "#888888" },
+      shape: {
+        type: "triangle",
+        stroke: { width: 0, color: "#000000" }
+      },
+      opacity: {
+        value: 0.4,
+        random: false
+      },
+      size: {
+        value: 3,
+        random: true
+      },
+      line_linked: {
+        enable: true,
+        distance: 130,
+        color: "#888888",
+        opacity: 0.5,
+        width: 1
+      },
+      move: {
+        enable: true,
+        speed: 2,
+        direction: "none",
+        random: false,
+        straight: false,
+        out_mode: "out"
+      }
+    },
+    interactivity: {
+      detect_on: "canvas",
+      events: {
+        onhover: { enable: true, mode: "repulse" },
+        onclick: { enable: false },
+        resize: true
+      },
+      modes: {
+        repulse: { distance: 150, duration: 0.4 }
+      }
+    },
+    retina_detect: true
+  });
 </script>
 
 </body>
