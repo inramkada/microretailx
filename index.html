@@ -2,13 +2,26 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>microretailX</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       overflow: hidden;
       background-color: #0d1117;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+    }
+    #canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
     }
     .title {
       position: absolute;
@@ -16,8 +29,6 @@
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 1.8rem;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
       white-space: nowrap;
       z-index: 10;
     }
@@ -27,65 +38,156 @@
   </style>
 </head>
 <body>
+  <canvas id="canvas"></canvas>
   <div class="title">XSHADOWS OPS by <strong>microretailX</strong></div>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
   <script>
-    let scene = new THREE.Scene();
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    let renderer = new THREE.WebGLRenderer({antialias: true});
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
-    // Gris X
-    let material = new THREE.LineBasicMaterial({ color: 0x999999 });
-    let points = [];
-    for (let i = -5; i <= 5; i += 1) {
-      points.push(new THREE.Vector3(i, i, 0));
-      points.push(new THREE.Vector3(i, -i, 0));
-    }
-    let geometry = new THREE.BufferGeometry().setFromPoints(points);
-    let line = new THREE.LineSegments(geometry, material);
-    scene.add(line);
+    const particles = [];
+    const catPoints = [];
+    let dissolveX = false;
+    let clickCount = 0;
+    let showCat = false;
 
-    // Partículas para explosión
-    let particleGeometry = new THREE.BufferGeometry();
-    let particleCount = 200;
-    let positions = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 2;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 2;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
-    }
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    let particleMaterial = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.05 });
-    let particles = new THREE.Points(particleGeometry, particleMaterial);
-    particles.visible = false;
-    scene.add(particles);
+    // Geometría angular del gato (inspiración zorro Metamask)
+    const catShape = [
+      [-60, -60], [0, -80], [60, -60], [45, -30], [30, 0],
+      [60, 30], [30, 60], [0, 40], [-30, 60], [-60, 30],
+      [-30, 0], [-45, -30], [0, -30], [20, -10], [-20, -10], [0, 10]
+    ];
 
-    camera.position.z = 10;
-    let clicked = false;
-
-    function animate() {
-      requestAnimationFrame(animate);
-      if (clicked) {
-        particles.rotation.x += 0.002;
-        particles.rotation.y += 0.002;
-      }
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('click', () => {
-      line.visible = false;
-      particles.visible = true;
-      clicked = true;
+    const mouse = { x: width / 2, y: height / 2 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
     });
+
+    function randomColor() {
+      const palette = ["#00ffcc", "#ffffff", "#ff00aa", "#66ffff", "#99ccff"];
+      return palette[Math.floor(Math.random() * palette.length)];
+    }
+
+    function createParticle(x, y, color, glow = false) {
+      return {
+        x, y,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        color,
+        absorbed: false,
+        target: null,
+        glow,
+        pulse: Math.random() * 100
+      };
+    }
+
+    function createXShape() {
+      const spacing = 20;
+      const range = 300;
+      for (let i = -range; i <= range; i += spacing) {
+        particles.push(createParticle(width / 2 + i, height / 2 + i, "#00ffcc", true));
+        particles.push(createParticle(width / 2 + i, height / 2 - i, "#00ffcc", true));
+      }
+    }
+
+    function prepareCatTargets() {
+      catPoints.length = 0;
+      for (let [cx, cy] of catShape) {
+        for (let i = 0; i < 5; i++) {
+          let offsetX = (Math.random() - 0.5) * 8;
+          let offsetY = (Math.random() - 0.5) * 8;
+          catPoints.push({
+            x: width / 2 + (cx * 2 + offsetX),
+            y: height / 2 + (cy * 2 + offsetY),
+            occupied: false
+          });
+        }
+      }
+    }
+
+    function absorbToCat() {
+      for (let p of particles) {
+        if (!p.absorbed) {
+          let target = catPoints.find(pt => !pt.occupied);
+          if (target) {
+            p.target = target;
+            target.occupied = true;
+            p.absorbed = true;
+          }
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      for (let p of particles) {
+        if (p.absorbed && p.target) {
+          p.x += (p.target.x + (mouse.x - width / 2) * 0.1 - p.x) * 0.2;
+          p.y += (p.target.y + (mouse.y - height / 2) * 0.1 - p.y) * 0.2;
+        } else if (dissolveX) {
+          p.x += p.vx;
+          p.y += p.vy;
+        }
+
+        p.pulse += 0.1;
+        const pulseColor = `hsl(${(p.pulse * 10) % 360}, 100%, 70%)`;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = pulseColor;
+        if (p.glow) {
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = pulseColor;
+        }
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        for (let q of particles) {
+          const dx = p.x - q.x;
+          const dy = p.y - q.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > 0 && dist < 100) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = `rgba(0,255,204,${1 - dist / 100})`;
+            ctx.lineWidth = 0.2;
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
 
     window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     });
+
+    window.addEventListener('click', () => {
+      clickCount++;
+      if (!dissolveX) {
+        dissolveX = true;
+      } else {
+        for (let i = 0; i < 30; i++) {
+          const x = mouse.x + (Math.random() - 0.5) * 80;
+          const y = mouse.y + (Math.random() - 0.5) * 80;
+          particles.push(createParticle(x, y, randomColor()));
+        }
+      }
+      if (clickCount >= 10 && !showCat) {
+        showCat = true;
+        prepareCatTargets();
+        absorbToCat();
+      }
+    });
+
+    createXShape();
+    draw();
   </script>
 </body>
 </html>
