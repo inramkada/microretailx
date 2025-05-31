@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>XSHADOWS OPS</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #0d1117;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+    }
+
+    #title {
+      position: absolute;
+      top: 5%;
+      width: 100%;
+      text-align: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      z-index: 10;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="title">XSHADOWS OPS by <strong>microretailX</strong></div>
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 4;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const loader = new GLTFLoader();
+    let model;
+    loader.load('gat.glb', function (gltf) {
+      model = gltf.scene;
+      model.scale.set(1, 1, 1);
+      scene.add(model);
+    });
+
+    const light = new THREE.DirectionalLight(0xffffff, 2);
+    light.position.set(2, 2, 5);
+    scene.add(light);
+
+    const ambient = new THREE.AmbientLight(0x404040);
+    scene.add(ambient);
+
+    // Mouse tracking
+    const mouse = new THREE.Vector2();
+    document.addEventListener('mousemove', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (model) {
+        model.rotation.y += 0.002;
+        model.position.x += (mouse.x * 2 - model.position.x) * 0.05;
+        model.position.y += (mouse.y * 2 - model.position.y) * 0.05;
+      }
+      renderer.render(scene, camera);
+    }
+
+    animate();
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
