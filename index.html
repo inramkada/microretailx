@@ -85,7 +85,6 @@
   </script>
 
   <script>
-    // FONDO CONEXIONES
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let width, height, points;
@@ -99,20 +98,32 @@
     function generatePoints() {
       points = [];
       const spacing = 60;
+      const midX = width / 2;
+      const midY = height / 2;
+      const range = 300;
+
       for (let x = 0; x < width; x += spacing) {
         for (let y = 0; y < height; y += spacing) {
-          points.push({
-            x: x + Math.random() * 20 - 10,
-            y: y + Math.random() * 20 - 10,
-            vx: Math.random() * 0.2 - 0.1,
-            vy: Math.random() * 0.2 - 0.1
-          });
+          const dx = x - midX;
+          const dy = y - midY;
+          const enX = Math.abs(dx - dy) < 20 || Math.abs(dx + dy) < 20;
+          const enCentro = Math.abs(dx) < range && Math.abs(dy) < range;
+
+          if (enX && enCentro) {
+            points.push({
+              x: x + Math.random() * 10 - 5,
+              y: y + Math.random() * 10 - 5,
+              vx: Math.random() * 0.2 - 0.1,
+              vy: Math.random() * 0.2 - 0.1
+            });
+          }
         }
       }
     }
 
     function draw() {
       ctx.clearRect(0, 0, width, height);
+      const t = Date.now() * 0.001;
 
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
@@ -122,21 +133,27 @@
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
+        const hue = (i * 10 + t * 80) % 360;
+        const color = `hsl(${hue}, 100%, 60%)`;
+
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#00ffcc";
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
         ctx.fill();
+        ctx.shadowBlur = 0;
 
         for (let j = i + 1; j < points.length; j++) {
           const q = points[j];
           const dx = p.x - q.x;
           const dy = p.y - q.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          if (dist < 110) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(0,255,204,${1 - dist / 120})`;
+            ctx.strokeStyle = `hsla(${hue}, 100%, 60%, ${1 - dist / 110})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -157,9 +174,10 @@
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 80) { // EFECTO DE REPULSIÓN REDUCIDO
-          p.vx += dx / dist * 0.03;
-          p.vy += dy / dist * 0.03;
+        if (dist < 100) {
+          const force = (100 - dist) / 100;
+          p.vx += (dx / dist) * force * 0.6;
+          p.vy += (dy / dist) * force * 0.6;
         }
       }
     }, 16);
