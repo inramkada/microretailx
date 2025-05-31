@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOWS OPS by microretailX</title>
   <style>
     html, body {
       margin: 0;
@@ -59,7 +58,7 @@
     scene.add(pointLight);
 
     const loader = new GLTFLoader();
-    loader.load('Raccoon Head.glb', function(gltf) {
+    loader.load('./Raccoon Head.glb', function(gltf) {
       const model = gltf.scene;
       model.scale.set(1.6, 1.6, 1.6);
       scene.add(model);
