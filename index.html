@@ -2,99 +2,79 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>microretailX :: Gato Ciborg</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>microretailX</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #0d1117;
+      color: white;
     }
-    canvas {
-      display: block;
+
+    #background {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 0;
+    }
+
+    .overlay-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 1;
+    }
+
+    .overlay-text h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
+
+    .overlay-text p {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
 
-<script type="module">
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
-  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/loaders/GLTFLoader.js';
+  <div id="background"></div>
 
-  let scene, camera, renderer, model;
+  <div class="overlay-text">
+    <h1><strong>microretailX</strong></h1>
+    <p>XSHADOWS OPS</p>
+  </div>
 
-  let mouseX = 0;
-  let mouseY = 0;
+  <!-- Three.js (requerido por Vanta) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+  <!-- Vanta.js efecto tipo red/trama blockchain -->
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
 
-  init();
-  animate();
-
-  function init() {
-    // Escena
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0d1117);
-
-    // Cámara
-    camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.2, 6);
-
-    // Render
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    // Luz
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-    hemiLight.position.set(0, 20, 0);
-    scene.add(hemiLight);
-
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(-3, 10, -10);
-    scene.add(dirLight);
-
-    // Cargar modelo
-    const loader = new GLTFLoader();
-    loader.load(
-      'https://raw.githubusercontent.com/BaronWatts/models/main/cyberCat/scene.gltf',
-      function (gltf) {
-        model = gltf.scene;
-        model.scale.set(1.2, 1.2, 1.2);
-        model.position.set(0, -1.5, 0); // Centrar verticalmente
-        scene.add(model);
-      },
-      undefined,
-      function (error) {
-        console.error('Error al cargar el modelo:', error);
-      }
-    );
-
-    // Eventos
-    window.addEventListener('resize', onWindowResize, false);
-    document.addEventListener('mousemove', onMouseMove, false);
-  }
-
-  function onMouseMove(event) {
-    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-  }
-
-  function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  function animate() {
-    requestAnimationFrame(animate);
-    if (model) {
-      model.rotation.y = mouseX * 0.4;
-      model.rotation.x = mouseY * 0.2;
-    }
-    renderer.render(scene, camera);
-  }
-</script>
+  <script>
+    VANTA.NET({
+      el: "#background",
+      mouseControls: false,
+      touchControls: false,
+      gyroControls: false,
+      minHeight: 200.00,
+      minWidth: 200.00,
+      scale: 1.0,
+      scaleMobile: 1.0,
+      color: 0x00ffff,
+      backgroundColor: 0x0d1117,
+      points: 12.00,
+      maxDistance: 25.00,
+      spacing: 18.00
+    });
+  </script>
 
 </body>
 </html>
