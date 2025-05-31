@@ -37,6 +37,9 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // Declaración anticipada de mouse para evitar errores
+    const mouse = { x: 0.5, y: 0.5 };
+
     // Luz ambiental
     let ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
@@ -67,7 +70,7 @@
     ];
 
     for (let i = 0; i < faceCoords.length; i++) {
-      facePoints.push(0, 0, 0); // Todos se inician en el centro
+      facePoints.push(0, 0, 0);
       faceData.push({ target: new THREE.Vector3(...faceCoords[i]), active: false });
     }
 
@@ -107,7 +110,6 @@
 
     animate();
 
-    const mouse = { x: 0.5, y: 0.5 };
     window.addEventListener('mousemove', e => {
       mouse.x = e.clientX / window.innerWidth;
       mouse.y = e.clientY / window.innerHeight;
@@ -126,4 +128,3 @@
   </script>
 </body>
 </html>
-
