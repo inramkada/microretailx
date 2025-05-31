@@ -49,11 +49,17 @@
     const particles = [];
     const catPoints = [];
     let dissolveX = false;
+    let clickCount = 0;
+    let showCat = false;
 
-    const catShape = [
-      [0, -80], [40, -60], [60, -20], [40, 0], [60, 20], [40, 60],
-      [0, 80], [-40, 60], [-60, 20], [-40, 0], [-60, -20], [-40, -60],
-      [0, -40], [20, -40], [-20, -40], [0, 0], [20, 20], [-20, 20], [0, 40]
+    // Gato poligonal simplificado en 3D
+    const catShape3D = [
+      { x: 0, y: -80, z: 0 }, { x: 40, y: -60, z: 20 }, { x: 60, y: -20, z: -20 },
+      { x: 40, y: 0, z: 20 }, { x: 60, y: 20, z: -20 }, { x: 40, y: 60, z: 20 },
+      { x: 0, y: 80, z: 0 }, { x: -40, y: 60, z: -20 }, { x: -60, y: 20, z: 20 },
+      { x: -40, y: 0, z: -20 }, { x: -60, y: -20, z: 20 }, { x: -40, y: -60, z: -20 },
+      { x: 0, y: -40, z: 0 }, { x: 20, y: -40, z: 20 }, { x: -20, y: -40, z: -20 },
+      { x: 0, y: 0, z: 0 }, { x: 20, y: 20, z: 20 }, { x: -20, y: 20, z: -20 }, { x: 0, y: 40, z: 0 }
     ];
 
     const mouse = { x: width / 2, y: height / 2 };
@@ -62,6 +68,11 @@
       mouse.y = e.clientY;
     });
 
+    function randomColor() {
+      const palette = ["#00ffcc", "#ffffff", "#ff00aa", "#66ffff", "#99ccff"];
+      return palette[Math.floor(Math.random() * palette.length)];
+    }
+
     function createParticle(x, y, color) {
       return {
         x, y,
@@ -69,7 +80,8 @@
         vy: (Math.random() - 0.5) * 2,
         color,
         absorbed: false,
-        target: null
+        target: null,
+        pulse: Math.random() * 100
       };
     }
 
@@ -83,10 +95,12 @@
     }
 
     function prepareCatTargets() {
-      for (let [cx, cy] of catShape) {
+      catPoints.length = 0;
+      for (let point of catShape3D) {
         catPoints.push({
-          x: width / 2 + cx * 2,
-          y: height / 2 + cy * 2,
+          x: width / 2 + point.x * 2,
+          y: height / 2 + point.y * 2,
+          z: point.z,
           occupied: false
         });
       }
@@ -110,18 +124,23 @@
 
       for (let p of particles) {
         if (p.absorbed && p.target) {
-          p.x += (p.target.x + (mouse.x - width / 2) * 0.1 - p.x) * 0.05;
-          p.y += (p.target.y + (mouse.y - height / 2) * 0.1 - p.y) * 0.05;
+          p.x += (p.target.x + (mouse.x - width / 2) * 0.1 - p.x) * 0.1;
+          p.y += (p.target.y + (mouse.y - height / 2) * 0.1 - p.y) * 0.1;
         } else if (dissolveX) {
           p.x += p.vx;
           p.y += p.vy;
         }
 
+        // Pulsos eléctricos
+        p.pulse += 0.1;
+        const pulseColor = `hsl(${(p.pulse * 10) % 360}, 100%, 70%)`;
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
+        ctx.fillStyle = pulseColor;
         ctx.fill();
 
+        // Conexiones tipo blockchain
         for (let q of particles) {
           const dx = p.x - q.x;
           const dy = p.y - q.y;
@@ -146,16 +165,19 @@
     });
 
     window.addEventListener('click', () => {
+      clickCount++;
       if (!dissolveX) {
         dissolveX = true;
-        prepareCatTargets();
-        absorbToCat();
       } else {
         for (let i = 0; i < 20; i++) {
           const x = mouse.x + (Math.random() - 0.5) * 60;
           const y = mouse.y + (Math.random() - 0.5) * 60;
-          particles.push(createParticle(x, y, "#ff6ec7"));
+          particles.push(createParticle(x, y, randomColor()));
         }
+      }
+      if (clickCount === 10 && !showCat) {
+        showCat = true;
+        prepareCatTargets();
         absorbToCat();
       }
     });
@@ -165,4 +187,3 @@
   </script>
 </body>
 </html>
-
