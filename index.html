@@ -4,80 +4,72 @@
   <meta charset="UTF-8">
   <title>XSHADOWS OPS by microretailX</title>
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
+      background-color: black;
       overflow: hidden;
-      height: 100%;
-      background: #000;
       font-family: 'Segoe UI', sans-serif;
-      color: white;
     }
-    canvas {
-      display: block;
-    }
-    .title {
+    #title {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.8rem;
-      z-index: 10;
+      bottom: 40px;
+      width: 100%;
       text-align: center;
-    }
-    .title strong {
-      font-weight: 800;
+      color: white;
+      font-size: 24px;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
-  <div class="title">XSHADOWS OPS by <strong>microretailX</strong></div>
+  <div id="title">XSHADOWS OPS by <strong>microretailX</strong></div>
   <script type="module">
     import * as THREE from './three.module.min.js';
-    import { OrbitControls } from './jsm/controls/OrbitControls.js';
     import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
+    // Scene setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1, 2.5);
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 2;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambientLight);
+
+    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 2;
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-
-    const pointLight = new THREE.PointLight(0x00ffff, 2, 100);
-    pointLight.position.set(0, 2, 2);
-    scene.add(pointLight);
-
+    // Load GLB model
     const loader = new GLTFLoader();
-    loader.load('./Raccoon Head.glb', function(gltf) {
+    loader.load('./Raccoon Head.glb', function (gltf) {
       const model = gltf.scene;
-      model.scale.set(1.6, 1.6, 1.6);
+      model.scale.set(1.5, 1.5, 1.5);
       scene.add(model);
-    }, undefined, function(error) {
-      console.error('Error al cargar el modelo:', error);
+      animate();
+    }, undefined, function (error) {
+      console.error('Error loading GLB:', error);
     });
 
+    // Resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    const animate = () => {
+    // Animation loop
+    function animate() {
       requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
-    };
-    animate();
+    }
   </script>
 </body>
 </html>
