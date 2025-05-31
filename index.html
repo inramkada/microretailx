@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XSHADOWS OPS by microretailX</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    #loading {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      text-align: center;
+      color: white;
+      font-size: 20px;
+    }
+    #title {
+      position: absolute;
+      bottom: 5%;
+      width: 100%;
+      text-align: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Cargando modelo 3D...</div>
+  <div id="title">XSHADOWS OPS by <strong>microretailX</strong></div>
+  <script type="module">
+    import * as THREE from './three.module.min.js';
+    import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from './jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const loader = new GLTFLoader();
+    loader.load('./Raccoon Head.glb', function (gltf) {
+      document.getElementById('loading').style.display = 'none';
+      gltf.scene.scale.set(10, 10, 10);
+      scene.add(gltf.scene);
+    });
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    camera.position.z = 5;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
