@@ -15,13 +15,8 @@
       font-family: 'Segoe UI', sans-serif;
       color: white;
     }
-    #canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
+    canvas {
+      display: block;
     }
     .title {
       position: absolute;
@@ -31,6 +26,7 @@
       font-size: 1.8rem;
       white-space: nowrap;
       z-index: 10;
+      pointer-events: none;
     }
     .title strong {
       font-weight: bold;
@@ -38,156 +34,79 @@
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
   <div class="title">XSHADOWS OPS by <strong>microretailX</strong></div>
-  <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
 
-    const particles = [];
-    const catPoints = [];
-    let dissolveX = false;
-    let clickCount = 0;
-    let showCat = false;
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/loaders/GLTFLoader.js';
 
-    // Geometría angular del gato (inspiración zorro Metamask)
-    const catShape = [
-      [-60, -60], [0, -80], [60, -60], [45, -30], [30, 0],
-      [60, 30], [30, 60], [0, 40], [-30, 60], [-60, 30],
-      [-30, 0], [-45, -30], [0, -30], [20, -10], [-20, -10], [0, 10]
-    ];
+    let scene, camera, renderer, model;
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
 
-    const mouse = { x: width / 2, y: height / 2 };
-    window.addEventListener('mousemove', e => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
+    const mouse = { x: 0, y: 0 };
 
-    function randomColor() {
-      const palette = ["#00ffcc", "#ffffff", "#ff00aa", "#66ffff", "#99ccff"];
-      return palette[Math.floor(Math.random() * palette.length)];
+    init();
+    animate();
+
+    function init() {
+      // Escena
+      scene = new THREE.Scene();
+
+      // Cámara
+      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.z = 5;
+
+      // Render
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Luz
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(0, 2, 5);
+      scene.add(light);
+
+      const ambient = new THREE.AmbientLight(0x888888);
+      scene.add(ambient);
+
+      // Cargar modelo GLB
+      const loader = new GLTFLoader();
+      loader.load('/gat.glb', (gltf) => {
+        model = gltf.scene;
+        model.scale.set(1.5, 1.5, 1.5);
+        scene.add(model);
+      });
+
+      // Listener de ratón
+      document.addEventListener('mousemove', (event) => {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        targetX = mouse.x * 2;
+        targetY = mouse.y * 1.5;
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     }
 
-    function createParticle(x, y, color, glow = false) {
-      return {
-        x, y,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        color,
-        absorbed: false,
-        target: null,
-        glow,
-        pulse: Math.random() * 100
-      };
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Interpolación suave para seguir al cursor
+      currentX += (targetX - currentX) * 0.05;
+      currentY += (targetY - currentY) * 0.05;
+
+      if (model) {
+        model.rotation.y = currentX;
+        model.rotation.x = currentY * 0.5;
+      }
+
+      renderer.render(scene, camera);
     }
-
-    function createXShape() {
-      const spacing = 20;
-      const range = 300;
-      for (let i = -range; i <= range; i += spacing) {
-        particles.push(createParticle(width / 2 + i, height / 2 + i, "#00ffcc", true));
-        particles.push(createParticle(width / 2 + i, height / 2 - i, "#00ffcc", true));
-      }
-    }
-
-    function prepareCatTargets() {
-      catPoints.length = 0;
-      for (let [cx, cy] of catShape) {
-        for (let i = 0; i < 5; i++) {
-          let offsetX = (Math.random() - 0.5) * 8;
-          let offsetY = (Math.random() - 0.5) * 8;
-          catPoints.push({
-            x: width / 2 + (cx * 2 + offsetX),
-            y: height / 2 + (cy * 2 + offsetY),
-            occupied: false
-          });
-        }
-      }
-    }
-
-    function absorbToCat() {
-      for (let p of particles) {
-        if (!p.absorbed) {
-          let target = catPoints.find(pt => !pt.occupied);
-          if (target) {
-            p.target = target;
-            target.occupied = true;
-            p.absorbed = true;
-          }
-        }
-      }
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, width, height);
-
-      for (let p of particles) {
-        if (p.absorbed && p.target) {
-          p.x += (p.target.x + (mouse.x - width / 2) * 0.1 - p.x) * 0.2;
-          p.y += (p.target.y + (mouse.y - height / 2) * 0.1 - p.y) * 0.2;
-        } else if (dissolveX) {
-          p.x += p.vx;
-          p.y += p.vy;
-        }
-
-        p.pulse += 0.1;
-        const pulseColor = `hsl(${(p.pulse * 10) % 360}, 100%, 70%)`;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = pulseColor;
-        if (p.glow) {
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = pulseColor;
-        }
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        for (let q of particles) {
-          const dx = p.x - q.x;
-          const dy = p.y - q.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist > 0 && dist < 100) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(0,255,204,${1 - dist / 100})`;
-            ctx.lineWidth = 0.2;
-            ctx.stroke();
-          }
-        }
-      }
-
-      requestAnimationFrame(draw);
-    }
-
-    window.addEventListener('resize', () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    });
-
-    window.addEventListener('click', () => {
-      clickCount++;
-      if (!dissolveX) {
-        dissolveX = true;
-      } else {
-        for (let i = 0; i < 30; i++) {
-          const x = mouse.x + (Math.random() - 0.5) * 80;
-          const y = mouse.y + (Math.random() - 0.5) * 80;
-          particles.push(createParticle(x, y, randomColor()));
-        }
-      }
-      if (clickCount >= 10 && !showCat) {
-        showCat = true;
-        prepareCatTargets();
-        absorbToCat();
-      }
-    });
-
-    createXShape();
-    draw();
   </script>
 </body>
 </html>
