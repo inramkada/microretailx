@@ -3,139 +3,170 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>XSHADOWS :: microretailX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>microretailX</title>
   <style>
     html, body {
       margin: 0;
+      padding: 0;
       height: 100%;
       overflow: hidden;
       background-color: #0d1117;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
     }
-    #bg {
+
+    #canvas {
       position: fixed;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-    canvas {
-      display: block;
-      position: absolute;
       top: 0;
       left: 0;
-      z-index: 1;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
     }
-    audio {
-      display: none;
+
+    .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      text-align: center;
+      z-index: 10;
+    }
+
+    #toggle-sound {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0d1117;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+      padding: 12px 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      z-index: 9999;
+      box-shadow: 0 0 15px #00ffcc88;
     }
   </style>
 </head>
 <body>
+  <canvas id="canvas"></canvas>
+  <div class="title">XSHADOWS OPS <strong>microretailX</strong></div>
 
-<div id="bg"></div>
-<audio autoplay loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/10/03/audio_2840d28e27.mp3" type="audio/mpeg">
-</audio>
+  <audio id="bg-audio" loop preload="auto">
+    <source src="https://inramkada.github.io/microretailx/audio/space-ambiance.mp3" type="audio/mpeg">
+    Tu navegador no soporta audio.
+  </audio>
 
-<!-- Particles.js: malla de fondo -->
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-<script>
-  particlesJS("bg", {
-    particles: {
-      number: { value: 150, density: { enable: true, value_area: 800 } },
-      color: { value: "#aaaaaa" },
-      shape: { type: "triangle" },
-      opacity: { value: 0.5 },
-      size: { value: 2, random: true },
-      line_linked: {
-        enable: true,
-        distance: 180,
-        color: "#bbbbbb",
-        opacity: 0.6,
-        width: 1.2
-      },
-      move: {
-        enable: true,
-        speed: 1.8,
-        direction: "none",
-        random: false,
-        straight: false,
-        out_mode: "out"
+  <button id="toggle-sound">🔊 Activar sonido interestelar</button>
+
+  <script>
+    // CONTROL AUDIO
+    const audio = document.getElementById('bg-audio');
+    const btn = document.getElementById('toggle-sound');
+    let isPlaying = false;
+
+    btn.addEventListener('click', () => {
+      if (!isPlaying) {
+        audio.volume = 0.07;
+        audio.play().then(() => {
+          btn.innerText = '🔇 Silenciar universo';
+          isPlaying = true;
+        }).catch(err => console.log("Autoplay bloqueado:", err));
+      } else {
+        audio.pause();
+        btn.innerText = '🔊 Activar sonido interestelar';
+        isPlaying = false;
       }
-    },
-    interactivity: {
-      events: {
-        onhover: { enable: true, mode: "repulse" },
-        resize: true
-      },
-      modes: {
-        repulse: { distance: 120, duration: 0.4 }
-      }
-    },
-    retina_detect: true
-  });
-</script>
-
-<!-- Gato ciborg 3D -->
-<script type="module">
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
-  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/loaders/GLTFLoader.js';
-
-  let scene, camera, renderer, model;
-
-  init();
-  animate();
-
-  function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.5, 4);
-
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.domElement.style.position = "absolute";
-    document.body.appendChild(renderer.domElement);
-
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
-    scene.add(light);
-
-    const loader = new GLTFLoader();
-    loader.load(
-      'https://raw.githubusercontent.com/BaronWatts/models/main/cyberCat/scene.gltf',
-      function (gltf) {
-        model = gltf.scene;
-        model.scale.set(1.6, 1.6, 1.6);
-        model.position.y = -1.2;
-        scene.add(model);
-      },
-      undefined,
-      function (error) {
-        console.error("Error al cargar el modelo:", error);
-      }
-    );
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
     });
+  </script>
 
-    document.addEventListener('mousemove', e => {
-      mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-      mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
-  }
+  <script>
+    // FONDO CONEXIONES
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, points;
 
-  let mouseX = 0, mouseY = 0;
-
-  function animate() {
-    requestAnimationFrame(animate);
-    if (model) {
-      model.rotation.y = mouseX * 0.5;
-      model.rotation.x = mouseY * 0.2;
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      generatePoints();
     }
-    renderer.render(scene, camera);
-  }
-</script>
 
+    function generatePoints() {
+      points = [];
+      const spacing = 60;
+      for (let x = 0; x < width; x += spacing) {
+        for (let y = 0; y < height; y += spacing) {
+          points.push({
+            x: x + Math.random() * 20 - 10,
+            y: y + Math.random() * 20 - 10,
+            vx: Math.random() * 0.2 - 0.1,
+            vy: Math.random() * 0.2 - 0.1
+          });
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#00ffcc";
+        ctx.fill();
+
+        for (let j = i + 1; j < points.length; j++) {
+          const q = points[j];
+          const dx = p.x - q.x;
+          const dy = p.y - q.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = `rgba(0,255,204,${1 - dist / 120})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    let mouse = { x: 0, y: 0 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    setInterval(() => {
+      for (const p of points) {
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 80) { // EFECTO DE REPULSIÓN REDUCIDO
+          p.vx += dx / dist * 0.03;
+          p.vy += dy / dist * 0.03;
+        }
+      }
+    }, 16);
+
+    window.addEventListener('resize', resize);
+    resize();
+    draw();
+  </script>
 </body>
 </html>
