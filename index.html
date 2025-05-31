@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -46,78 +47,62 @@
     animate();
 
     function init() {
-      // Escena
       scene = new THREE.Scene();
 
-      // Cámara
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.z = 6;
 
-      // Renderizador
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Luces
-      const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+      const ambient = new THREE.AmbientLight(0xffffff, 0.5);
       scene.add(ambient);
 
-      const directional = new THREE.DirectionalLight(0xffffff, 1);
-      directional.position.set(3, 5, 5);
-      scene.add(directional);
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(2, 4, 5);
+      scene.add(light);
 
-      // Grupo base del gato
       group = new THREE.Group();
 
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.2, roughness: 0.8 });
-      const eyeMat = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff });
+      const matHead = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.4, roughness: 0.7 });
+      const matEye = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff });
+      const matNose = new THREE.MeshStandardMaterial({ color: 0xff0088 });
+      const matEar = new THREE.MeshStandardMaterial({ color: 0x444444 });
 
       // Cabeza
-      const head = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), bodyMat);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(1.5, 32, 32), matHead);
+      head.scale.y = 0.9;
       group.add(head);
 
       // Orejas
-      const earL = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.8, 16), bodyMat);
-      earL.position.set(-0.6, 1, 0);
+      const earL = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.2, 16), matEar);
+      earL.position.set(-0.9, 1.2, 0);
       earL.rotation.z = Math.PI / 10;
       group.add(earL);
 
-      const earR = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.8, 16), bodyMat);
-      earR.position.set(0.6, 1, 0);
+      const earR = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.2, 16), matEar);
+      earR.position.set(0.9, 1.2, 0);
       earR.rotation.z = -Math.PI / 10;
       group.add(earR);
 
       // Ojos
-      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), eyeMat);
-      eyeL.position.set(-0.35, 0.2, 0.9);
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), matEye);
+      eyeL.position.set(-0.45, 0.1, 1.3);
       group.add(eyeL);
 
-      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), eyeMat);
-      eyeR.position.set(0.35, 0.2, 0.9);
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), matEye);
+      eyeR.position.set(0.45, 0.1, 1.3);
       group.add(eyeR);
 
       // Nariz
-      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 12), new THREE.MeshStandardMaterial({ color: 0xff0077 }));
-      nose.rotation.x = Math.PI / 2;
-      nose.position.set(0, 0, 1);
+      const nose = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), matNose);
+      nose.position.set(0, -0.3, 1.35);
       group.add(nose);
 
-      // Cuerpo (simplificado como esfera)
-      const body = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 32), bodyMat);
-      body.position.set(0, -1.5, 0);
-      group.add(body);
-
-      // Cola
-      const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.5, 8), bodyMat);
-      tail.position.set(-0.6, -2, -0.5);
-      tail.rotation.x = Math.PI / 3;
-      group.add(tail);
-
-      // Posicionar grupo
-      group.position.y = -0.5;
       scene.add(group);
 
-      // Movimiento con el ratón
+      // Movimiento suave del cursor
       document.addEventListener('mousemove', (event) => {
         const x = (event.clientX / window.innerWidth) * 2 - 1;
         const y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -135,12 +120,11 @@
     function animate() {
       requestAnimationFrame(animate);
 
-      // Interpolación para suavizar el seguimiento
       currentX += (targetX - currentX) * 0.05;
       currentY += (targetY - currentY) * 0.05;
 
       group.rotation.y = currentX;
-      group.rotation.x = currentY * 0.5;
+      group.rotation.x = currentY * 0.4;
 
       renderer.render(scene, camera);
     }
