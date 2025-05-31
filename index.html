@@ -2,185 +2,90 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>microretailX</title>
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
       overflow: hidden;
       background-color: #0d1117;
-      font-family: 'Segoe UI', sans-serif;
-      color: white;
     }
-
-    #canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
-    }
-
     .title {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 1.5rem;
+      font-size: 1.8rem;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
       white-space: nowrap;
       z-index: 10;
     }
-
-    #toggle-sound {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #0d1117;
-      color: #00ffcc;
-      border: 1px solid #00ffcc;
-      padding: 12px 20px;
-      font-family: 'Segoe UI', sans-serif;
-      font-size: 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      z-index: 9999;
-      box-shadow: 0 0 15px #00ffcc88;
+    .title strong {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
-  <div class="title">XSHADOWS OPS by microretailX</div>
-
-  <audio id="bg-audio" loop preload="auto">
-    <source src="https://inramkada.github.io/microretailx/audio/space-ambiance.mp3" type="audio/mpeg">
-    Tu navegador no soporta audio.
-  </audio>
-
-  <button id="toggle-sound">🔊 Activar sonido interestelar</button>
-
+  <div class="title">XSHADOWS OPS by <strong>microretailX</strong></div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
   <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let scene = new THREE.Scene();
+    let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    let renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    const particles = [];
-
-    function randomColor() {
-      const palette = ["#00ffcc", "#ffffff", "#ff00aa", "#66ffff", "#99ccff"];
-      return palette[Math.floor(Math.random() * palette.length)];
+    // Gris X
+    let material = new THREE.LineBasicMaterial({ color: 0x999999 });
+    let points = [];
+    for (let i = -5; i <= 5; i += 1) {
+      points.push(new THREE.Vector3(i, i, 0));
+      points.push(new THREE.Vector3(i, -i, 0));
     }
+    let geometry = new THREE.BufferGeometry().setFromPoints(points);
+    let line = new THREE.LineSegments(geometry, material);
+    scene.add(line);
 
-    function createNode(x, y) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 2;
-      return {
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        color: randomColor()
-      };
+    // Partículas para explosión
+    let particleGeometry = new THREE.BufferGeometry();
+    let particleCount = 200;
+    let positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 2;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 2;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
     }
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    let particleMaterial = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.05 });
+    let particles = new THREE.Points(particleGeometry, particleMaterial);
+    particles.visible = false;
+    scene.add(particles);
 
-    function createXShape() {
-      const count = 60;
-      const radius = 100;
-      for (let i = 0; i < count; i++) {
-        const angle = (Math.PI * 2 * i) / count;
-        const x = width / 2 + radius * Math.cos(angle) * (i % 2 === 0 ? 1 : -1);
-        const y = height / 2 + radius * Math.sin(angle) * (i % 2 === 0 ? 1 : -1);
-        particles.push(createNode(x, y));
+    camera.position.z = 10;
+    let clicked = false;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (clicked) {
+        particles.rotation.x += 0.002;
+        particles.rotation.y += 0.002;
       }
+      renderer.render(scene, camera);
     }
+    animate();
 
-    function connectParticles() {
-      for (let i = 0; i < particles.length; i++) {
-        const a = particles[i];
-        for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(0,255,204,${1 - dist / 100})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      }
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, width, height);
-
-      // actualiza y dibuja puntos
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // rebote en los bordes
-        if (p.x < 0 || p.x > width) p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 6;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-
-      connectParticles();
-      requestAnimationFrame(draw);
-    }
-
-    window.addEventListener("click", (e) => {
-      const clusterSize = 30;
-      for (let i = 0; i < clusterSize; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = Math.random() * 40;
-        const x = e.clientX + Math.cos(angle) * radius;
-        const y = e.clientY + Math.sin(angle) * radius;
-        particles.push(createNode(x, y));
-      }
+    window.addEventListener('click', () => {
+      line.visible = false;
+      particles.visible = true;
+      clicked = true;
     });
 
-    window.addEventListener("resize", () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     });
-
-    // sonido
-    const audio = document.getElementById("bg-audio");
-    const btn = document.getElementById("toggle-sound");
-    let isPlaying = false;
-
-    btn.addEventListener("click", () => {
-      if (!isPlaying) {
-        audio.volume = 0.07;
-        audio.play().then(() => {
-          btn.innerText = "🔇 Silenciar universo";
-          isPlaying = true;
-        }).catch(err => console.log("Autoplay bloqueado:", err));
-      } else {
-        audio.pause();
-        btn.innerText = "🔊 Activar sonido interestelar";
-        isPlaying = false;
-      }
-    });
-
-    createXShape();
-    draw();
   </script>
 </body>
 </html>
