@@ -2,101 +2,116 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS by microretailX</title>
+  <title>microretailX // Gato Neuronal</title>
   <style>
-    html, body { margin: 0; padding: 0; background: #0d1117; overflow: hidden; }
+    body { margin: 0; overflow: hidden; background-color: #0d1117; }
     canvas { display: block; }
-    .title {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-family: monospace;
-      font-size: 1.6rem;
-      z-index: 10;
-    }
   </style>
 </head>
 <body>
-<div class="title">XSHADOWS OPS by <strong>microretailX</strong></div>
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157/build/three.module.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.157/examples/jsm/controls/OrbitControls.js';
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-camera.position.z = 40;
+    let scene = new THREE.Scene();
+    let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 250;
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+    let renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-// Placeholder con 300 puntos compactados (aleatorios coherentes, no dispersos)
-const vertices = Array.from({length: 300}, () =>
-  new THREE.Vector3(
-    (Math.random() - 0.5) * 20,
-    (Math.random() - 0.5) * 20,
-    (Math.random() - 0.5) * 20
-  )
-);
+    let controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
-const pointMat = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.3 });
-const geometry = new THREE.BufferGeometry().setFromPoints(vertices);
-const points = new THREE.Points(geometry, pointMat);
-scene.add(points);
+    const particleCount = 200;
+    let particles = [];
+    const nodes = [];
 
-// Conexiones tipo blockchain
-const lines = new THREE.Group();
-for (let i = 0; i < vertices.length; i++) {
-  for (let j = i + 1; j < vertices.length; j++) {
-    if (vertices[i].distanceTo(vertices[j]) < 6) {
-      const lineGeo = new THREE.BufferGeometry().setFromPoints([vertices[i], vertices[j]]);
-      const lineMat = new THREE.LineBasicMaterial({ color: 0x3399ff, opacity: 0.2, transparent: true });
-      lines.add(new THREE.Line(lineGeo, lineMat));
+    const particleGeometry = new THREE.SphereGeometry(1.8, 6, 6);
+    const particleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+
+    for (let i = 0; i < particleCount; i++) {
+      let particle = new THREE.Mesh(particleGeometry, particleMaterial.clone());
+      particle.position.set(
+        (Math.random() - 0.5) * 400,
+        (Math.random() - 0.5) * 400,
+        (Math.random() - 0.5) * 400
+      );
+      scene.add(particle);
+      particles.push({ mesh: particle, target: null, absorbed: false });
     }
-  }
-}
-scene.add(lines);
 
-// Cursor rotación lerp
-let targetRotation = new THREE.Vector2();
-window.addEventListener('mousemove', e => {
-  targetRotation.x = (e.clientY / window.innerHeight - 0.5) * Math.PI;
-  targetRotation.y = (e.clientX / window.innerWidth - 0.5) * Math.PI;
-});
+    // Gato simplificado con 300 nodos definidos manualmente (random 3D positions)
+    for (let i = 0; i < 300; i++) {
+      const node = new THREE.Vector3(
+        Math.sin(i * 0.3) * 80 + (Math.random() - 0.5) * 10,
+        Math.cos(i * 0.5) * 50 + (Math.random() - 0.5) * 10,
+        Math.sin(i * 0.7) * 40 + (Math.random() - 0.5) * 10
+      );
+      nodes.push({ pos: node, occupied: false });
+    }
 
-// Clics y efectos
-let clickCount = 0;
-const originalColor = 0x00ffff;
-const redColor = 0xff0000;
+    // Red neuronal visual
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x66ffff, transparent: true, opacity: 0.4 });
+    const lineGeometry = new THREE.BufferGeometry();
+    const linePositions = new Float32Array(particleCount * 6); // line start and end
+    lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+    const lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
+    scene.add(lineMesh);
 
-window.addEventListener('click', () => {
-  clickCount++;
-  if (clickCount === 6) {
-    points.visible = true;
-    lines.visible = true;
-  }
-  if (clickCount === 23) {
-    scene.fog = new THREE.Fog(0x0d1117, 20, 60);
-  }
-  if (clickCount > 23 && (clickCount - 23) % 10 === 0) {
-    pointMat.color.set(redColor);
-  }
-  if (clickCount >= 100 && clickCount % 23 === 0) {
-    while (scene.children.length > 0) scene.remove(scene.children[0]);
-  }
-});
+    // Absorción lógica
+    function absorbParticles() {
+      for (let p of particles) {
+        if (!p.absorbed) {
+          const target = nodes.find(n => !n.occupied);
+          if (target) {
+            p.target = target;
+            target.occupied = true;
+            p.absorbed = true;
+          }
+        }
+      }
+    }
 
-// Animación
-function animate() {
-  requestAnimationFrame(animate);
-  points.rotation.x += (targetRotation.x - points.rotation.x) * 0.05;
-  points.rotation.y += (targetRotation.y - points.rotation.y) * 0.05;
-  lines.rotation.x = points.rotation.x;
-  lines.rotation.y = points.rotation.y;
-  renderer.render(scene, camera);
-}
-animate();
-</script>
+    absorbParticles();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        if (p.absorbed && p.target) {
+          let mesh = p.mesh;
+          mesh.position.lerp(p.target.pos, 0.07);
+
+          // Optional pulsing color
+          const t = Date.now() * 0.002 + i;
+          mesh.material.color.setHSL((t % 360) / 360, 1, 0.6);
+
+          // Update line
+          linePositions[i * 6 + 0] = mesh.position.x;
+          linePositions[i * 6 + 1] = mesh.position.y;
+          linePositions[i * 6 + 2] = mesh.position.z;
+
+          linePositions[i * 6 + 3] = p.target.pos.x;
+          linePositions[i * 6 + 4] = p.target.pos.y;
+          linePositions[i * 6 + 5] = p.target.pos.z;
+        }
+      }
+
+      lineGeometry.attributes.position.needsUpdate = true;
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
