@@ -3,9 +3,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; font-src *;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
   <title>microretailX</title>
+
   <style>
     html, body {
       margin: 0;
@@ -112,7 +113,7 @@
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
 
-        // Si el cursor se ha movido, los puntos "gato" persiguen el cursor, los demás se dispersan
+        // Movimiento condicional según tipo
         let tx = p.tx;
         let ty = p.ty;
 
@@ -129,7 +130,7 @@
         p.x = lerp(p.x, tx, 0.08);
         p.y = lerp(p.y, ty, 0.08);
 
-        // Dibujo punto
+        // Dibuja punto
         ctx.beginPath();
         ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
