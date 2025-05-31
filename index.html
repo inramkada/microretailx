@@ -4,198 +4,151 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>microretailX</title>
+  <title>XSHADOWS OPS by microretailX</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
+      background: #0d1117;
       overflow: hidden;
-      background-color: #0d1117;
       font-family: 'Segoe UI', sans-serif;
       color: white;
     }
-
-    canvas {
-      display: block;
+    #bg, #three {
       position: absolute;
       top: 0;
       left: 0;
+      z-index: 0;
     }
-
     .title {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2rem;
-      text-align: center;
-      font-weight: bold;
+      font-size: 1.8rem;
       z-index: 10;
       color: white;
-      text-shadow: 0 0 20px #00ffff, 0 0 40px #005577;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+  <canvas id="bg"></canvas>
   <div class="title">XSHADOWS OPS by <strong>microretailX</strong></div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/examples/js/loaders/GLTFLoader.js"></script>
 
   <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const bgCanvas = document.getElementById('bg');
+    const ctx = bgCanvas.getContext('2d');
+    let width = bgCanvas.width = window.innerWidth;
+    let height = bgCanvas.height = window.innerHeight;
 
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-
-    let mouse = { x: width / 2, y: height / 2 };
-    let clickCount = 0;
     let points = [];
-    let targetShape = [];
-    let formingShape = false;
+    const spacing = 50;
 
-    class Point {
-      constructor(x, y, isNeuron=false) {
-        this.x = x;
-        this.y = y;
-        this.vx = 0;
-        this.vy = 0;
-        this.tx = x;
-        this.ty = y;
-        this.color = isNeuron ? '#00ffaa' : '#ffffff';
-        this.isNeuron = isNeuron;
-        this.pulse = Math.random() < 0.05;
-      }
-
-      update() {
-        if (formingShape) {
-          // Lerp hacia destino
-          this.x += (this.tx - this.x) * 0.07;
-          this.y += (this.ty - this.y) * 0.07;
-        } else {
-          // Movimiento libre
-          this.vx += (Math.random() - 0.5) * 0.2;
-          this.vy += (Math.random() - 0.5) * 0.2;
-          this.x += this.vx;
-          this.y += this.vy;
-          this.vx *= 0.9;
-          this.vy *= 0.9;
-        }
-
-        const dx = this.x - mouse.x;
-        const dy = this.y - mouse.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 80) {
-          this.vx += dx / dist * 0.4;
-          this.vy += dy / dist * 0.4;
-        }
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.pulse ? 3 : 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
+    function generateX() {
+      for (let i = 0; i < width; i += spacing) {
+        points.push({ x: i, y: i, vx: 0, vy: 0 });
+        points.push({ x: i, y: height - i, vx: 0, vy: 0 });
       }
     }
 
-    function createXStructure() {
-      points = [];
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const spread = 80;
-
-      for (let i = -spread; i <= spread; i += 5) {
-        points.push(new Point(centerX + i, centerY + i, true));
-        points.push(new Point(centerX + i, centerY - i, true));
-      }
-    }
-
-    function createTargetFace() {
-      targetShape = [];
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const radius = 60;
-      for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-        const x = centerX + Math.cos(angle) * radius;
-        const y = centerY + Math.sin(angle) * radius;
-        targetShape.push([x, y]);
-      }
-      for (let i = 0; i < points.length && i < targetShape.length; i++) {
-        points[i].tx = targetShape[i][0];
-        points[i].ty = targetShape[i][1];
-        points[i].color = '#00ffcc';
-      }
-    }
-
-    function connectPoints() {
+    function drawConnections() {
       for (let i = 0; i < points.length; i++) {
-        const p1 = points[i];
         for (let j = i + 1; j < points.length; j++) {
-          const p2 = points[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
+          const dx = points[i].x - points[j].x;
+          const dy = points[i].y - points[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
             ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
+            ctx.moveTo(points[i].x, points[i].y);
+            ctx.lineTo(points[j].x, points[j].y);
             ctx.strokeStyle = `rgba(0,255,204,${1 - dist / 100})`;
-            ctx.lineWidth = 0.4;
+            ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
       }
     }
 
-    function explode() {
-      for (let i = 0; i < 60; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 4;
-        const px = width / 2 + Math.cos(angle) * 10;
-        const py = height / 2 + Math.sin(angle) * 10;
-        const p = new Point(px, py);
-        p.vx = Math.cos(angle) * speed;
-        p.vy = Math.sin(angle) * speed;
-        p.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
-        points.push(p);
-      }
-    }
-
-    function draw() {
-      ctx.fillStyle = 'rgba(13,17,23,0.3)';
-      ctx.fillRect(0, 0, width, height);
-
+    function drawDots() {
       for (const p of points) {
-        p.update();
-        p.draw();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#00ffc0';
+        ctx.fill();
       }
-
-      connectPoints();
-      requestAnimationFrame(draw);
     }
 
-    canvas.addEventListener('click', () => {
-      clickCount++;
-      explode();
-      if (clickCount === 1) {
-        formingShape = true;
-        createTargetFace();
-      }
-    });
+    function animateCanvas() {
+      ctx.clearRect(0, 0, width, height);
+      drawConnections();
+      drawDots();
+      requestAnimationFrame(animateCanvas);
+    }
 
-    window.addEventListener('mousemove', e => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
+    generateX();
+    animateCanvas();
 
     window.addEventListener('resize', () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = bgCanvas.width = window.innerWidth;
+      height = bgCanvas.height = window.innerHeight;
     });
 
-    createXStructure();
-    draw();
+    window.addEventListener('click', () => {
+      if (scene.getObjectByName('X')) {
+        scene.remove(scene.getObjectByName('X'));
+        // Activar absorción o animación
+      }
+    });
+
+    // THREE.JS SETUP
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    renderer.domElement.style.zIndex = 1;
+    renderer.domElement.style.position = "absolute";
+
+    const ambient = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambient);
+
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      'https://yourdomain.com/cyborg-cat.glb', // 🔁 Reemplaza esta URL con la del modelo real
+      function (gltf) {
+        const model = gltf.scene;
+        model.name = "CyborgCat";
+        model.scale.set(2, 2, 2);
+        scene.add(model);
+
+        // Cursor tracking con lerp
+        const target = new THREE.Vector3();
+        document.addEventListener('mousemove', (e) => {
+          const x = (e.clientX / window.innerWidth) * 2 - 1;
+          const y = -(e.clientY / window.innerHeight) * 2 + 1;
+          target.x = x;
+          target.y = y;
+        });
+
+        function animateModel() {
+          requestAnimationFrame(animateModel);
+          model.rotation.y += (target.x * 0.5 - model.rotation.y) * 0.05;
+          model.rotation.x += (target.y * 0.5 - model.rotation.x) * 0.05;
+          renderer.render(scene, camera);
+        }
+        animateModel();
+      },
+      undefined,
+      function (error) {
+        console.error("Error cargando modelo:", error);
+      }
+    );
   </script>
 </body>
 </html>
+
