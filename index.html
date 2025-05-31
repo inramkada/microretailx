@@ -15,6 +15,7 @@
       font-family: 'Segoe UI', sans-serif;
       color: white;
     }
+
     #canvas {
       position: fixed;
       top: 0;
@@ -23,20 +24,24 @@
       height: 100vh;
       z-index: 0;
     }
+
     .title {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2rem;
+      font-size: 1.8rem;
       text-align: center;
       z-index: 10;
+      font-weight: bold;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffcc;
     }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <div class="title">😼 microretailX GATO NODAL</div>
+  <div class="title">XSHADOWS OPS<br>by <strong>microretailX</strong></div>
 
   <script>
     const canvas = document.getElementById('canvas');
@@ -46,14 +51,17 @@
     let points = [];
     let mouse = { x: 0, y: 0 };
 
-    // 💠 Puntos base (figura tipo gato low poly)
+    // Gato estilo low poly (simplificado)
     const catShape = [
       [0, -80], [40, -60], [60, -20], [40, 0], [60, 20], [40, 60],
       [0, 80], [-40, 60], [-60, 20], [-40, 0], [-60, -20], [-40, -60],
       [0, -40], [20, -40], [-20, -40], [0, 0], [20, 20], [-20, 20], [0, 40]
     ];
 
-    // Escalado y centrado de los puntos
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
     function initPoints() {
       points = catShape.map(([x, y]) => {
         return {
@@ -67,22 +75,17 @@
       });
     }
 
-    function lerp(a, b, t) {
-      return a + (b - a) * t;
-    }
-
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      // Dibujar conexiones entre puntos cercanos
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
 
-        // Movimiento hacia la posición objetivo (formar el gato)
-        p.x = lerp(p.x, p.tx + mouse.x * 0.03, 0.08);
-        p.y = lerp(p.y, p.ty + mouse.y * 0.03, 0.08);
+        // Movimiento hacia la posición del gato ajustada con el cursor
+        p.x = lerp(p.x, p.tx + mouse.x * 30, 0.05);
+        p.y = lerp(p.y, p.ty + mouse.y * 30, 0.05);
 
-        // Punto
+        // Dibuja punto
         ctx.beginPath();
         ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
         ctx.fillStyle = "#00ffcc";
@@ -97,11 +100,11 @@
           const dx = p.x - q.x;
           const dy = p.y - q.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 60) {
+          if (dist < 70) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(0,255,204,${1 - dist / 60})`;
+            ctx.strokeStyle = `rgba(0,255,204,${1 - dist / 70})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -118,8 +121,8 @@
     }
 
     window.addEventListener('mousemove', e => {
-      mouse.x = (e.clientX - width / 2) / 100;
-      mouse.y = (e.clientY - height / 2) / 100;
+      mouse.x = (e.clientX - width / 2) / width;
+      mouse.y = (e.clientY - height / 2) / height;
     });
 
     window.addEventListener('resize', resize);
