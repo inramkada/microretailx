@@ -2,116 +2,140 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>microretailX // Gato Neuronal</title>
+  <title>microretailX - Gato Neuronal</title>
   <style>
-    body { margin: 0; overflow: hidden; background-color: #0d1117; }
-    canvas { display: block; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #0d1117;
+    }
+    canvas {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157/build/three.module.js';
-    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.157/examples/jsm/controls/OrbitControls.js';
+    import * as THREE from 'https://unpkg.com/three@0.157.0/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.157.0/examples/jsm/controls/OrbitControls.js';
 
-    let scene = new THREE.Scene();
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.z = 250;
-
-    let renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    let controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-
-    const particleCount = 200;
+    let scene, camera, renderer, controls;
+    let clickCount = 0;
     let particles = [];
-    const nodes = [];
+    let brainNodes = [];
+    let targetIndex = 0;
 
-    const particleGeometry = new THREE.SphereGeometry(1.8, 6, 6);
-    const particleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+    init();
+    animate();
 
-    for (let i = 0; i < particleCount; i++) {
-      let particle = new THREE.Mesh(particleGeometry, particleMaterial.clone());
-      particle.position.set(
-        (Math.random() - 0.5) * 400,
-        (Math.random() - 0.5) * 400,
-        (Math.random() - 0.5) * 400
-      );
-      scene.add(particle);
-      particles.push({ mesh: particle, target: null, absorbed: false });
-    }
+    function init() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 80);
 
-    // Gato simplificado con 300 nodos definidos manualmente (random 3D positions)
-    for (let i = 0; i < 300; i++) {
-      const node = new THREE.Vector3(
-        Math.sin(i * 0.3) * 80 + (Math.random() - 0.5) * 10,
-        Math.cos(i * 0.5) * 50 + (Math.random() - 0.5) * 10,
-        Math.sin(i * 0.7) * 40 + (Math.random() - 0.5) * 10
-      );
-      nodes.push({ pos: node, occupied: false });
-    }
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
 
-    // Red neuronal visual
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x66ffff, transparent: true, opacity: 0.4 });
-    const lineGeometry = new THREE.BufferGeometry();
-    const linePositions = new Float32Array(particleCount * 6); // line start and end
-    lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
-    const lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
-    scene.add(lineMesh);
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
 
-    // Absorción lógica
-    function absorbParticles() {
-      for (let p of particles) {
-        if (!p.absorbed) {
-          const target = nodes.find(n => !n.occupied);
-          if (target) {
-            p.target = target;
-            target.occupied = true;
-            p.absorbed = true;
-          }
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+      scene.add(ambientLight);
+
+      generateBrainNodes();
+
+      window.addEventListener('click', () => {
+        clickCount++;
+        for (let i = 0; i < 30; i++) {
+          const particle = createParticle();
+          scene.add(particle.mesh);
+          particles.push(particle);
         }
+
+        if (clickCount === 6) {
+          showBrainStructure();
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    function generateBrainNodes() {
+      const geometry = new THREE.SphereGeometry(0.5, 6, 6);
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+      const radius = 20;
+
+      for (let i = 0; i < 300; i++) {
+        const phi = Math.acos(-1 + (2 * i) / 300);
+        const theta = Math.sqrt(300 * Math.PI) * phi;
+        const x = radius * Math.cos(theta) * Math.sin(phi);
+        const y = radius * Math.sin(theta) * Math.sin(phi);
+        const z = radius * Math.cos(phi);
+
+        const node = new THREE.Mesh(geometry, material.clone());
+        node.position.set(x, y, z);
+        node.visible = false;
+        brainNodes.push(node);
+        scene.add(node);
       }
     }
 
-    absorbParticles();
+    function showBrainStructure() {
+      brainNodes.forEach(node => node.visible = true);
+    }
+
+    function createParticle() {
+      const geometry = new THREE.SphereGeometry(0.3, 6, 6);
+      const material = new THREE.MeshBasicMaterial({ color: new THREE.Color(Math.random(), Math.random(), Math.random()) });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 100
+      );
+      return {
+        mesh,
+        velocity: new THREE.Vector3(
+          (Math.random() - 0.5) * 0.5,
+          (Math.random() - 0.5) * 0.5,
+          (Math.random() - 0.5) * 0.5
+        ),
+        absorbed: false,
+        target: null
+      };
+    }
 
     function animate() {
       requestAnimationFrame(animate);
-
-      for (let i = 0; i < particles.length; i++) {
-        let p = particles[i];
-        if (p.absorbed && p.target) {
-          let mesh = p.mesh;
-          mesh.position.lerp(p.target.pos, 0.07);
-
-          // Optional pulsing color
-          const t = Date.now() * 0.002 + i;
-          mesh.material.color.setHSL((t % 360) / 360, 1, 0.6);
-
-          // Update line
-          linePositions[i * 6 + 0] = mesh.position.x;
-          linePositions[i * 6 + 1] = mesh.position.y;
-          linePositions[i * 6 + 2] = mesh.position.z;
-
-          linePositions[i * 6 + 3] = p.target.pos.x;
-          linePositions[i * 6 + 4] = p.target.pos.y;
-          linePositions[i * 6 + 5] = p.target.pos.z;
-        }
-      }
-
-      lineGeometry.attributes.position.needsUpdate = true;
       controls.update();
+
+      particles.forEach(p => {
+        if (!p.absorbed && clickCount >= 6 && targetIndex < brainNodes.length) {
+          p.target = brainNodes[targetIndex];
+          p.absorbed = true;
+          targetIndex++;
+        }
+
+        if (p.absorbed && p.target) {
+          p.mesh.position.lerp(p.target.position, 0.07);
+          if (p.mesh.position.distanceTo(p.target.position) < 0.1) {
+            p.mesh.position.copy(p.target.position);
+            p.mesh.material.color.set(0xff00ff);
+            scene.remove(p.mesh);
+          }
+        } else {
+          p.mesh.position.add(p.velocity);
+        }
+      });
+
       renderer.render(scene, camera);
     }
-
-    animate();
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
   </script>
 </body>
 </html>
