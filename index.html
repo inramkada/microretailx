@@ -64,9 +64,11 @@
   <button id="toggle-sound">🔊 Activar sonido interestelar</button>
 
   <script>
+    // CONTROL AUDIO
     const audio = document.getElementById('bg-audio');
     const btn = document.getElementById('toggle-sound');
     let isPlaying = false;
+
     btn.addEventListener('click', () => {
       if (!isPlaying) {
         audio.volume = 0.07;
@@ -85,34 +87,62 @@
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    let width, height, points = [], explosions = [];
+    let width, height;
+    let points = [];
 
     function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      generatePoints();
+      generateInitialPoints();
     }
 
-    function generatePoints() {
+    function generateInitialPoints() {
       points = [];
-      const spacing = 40;
+      const spacing = 20;
       const midX = width / 2;
       const midY = height / 2;
-      const range = 400;
+      const range = 300;
 
       for (let x = 0; x < width; x += spacing) {
         for (let y = 0; y < height; y += spacing) {
           const dx = x - midX;
           const dy = y - midY;
-          const enX = Math.abs(dx - dy) < 25 || Math.abs(dx + dy) < 25;
+          const enX = Math.abs(dx - dy) < 20 || Math.abs(dx + dy) < 20;
           const enCentro = Math.abs(dx) < range && Math.abs(dy) < range;
+
           if (enX && enCentro) {
             points.push({
               x: x + Math.random() * 10 - 5,
               y: y + Math.random() * 10 - 5,
-              vx: Math.random() * 0.4 - 0.2,
-              vy: Math.random() * 0.4 - 0.2,
-              pulse: Math.random() > 0.8 // Solo algunos reaccionan al audio
+              vx: Math.random() * 0.2 - 0.1,
+              vy: Math.random() * 0.2 - 0.1
+            });
+          }
+        }
+      }
+    }
+
+    function addPointsOnClick(x, y) {
+      const spacing = 20;
+      const midX = width / 2;
+      const midY = height / 2;
+      const range = 300;
+
+      for (let dx = -range; dx <= range; dx += spacing) {
+        for (let dy = -range; dy <= range; dy += spacing) {
+          const px = x + dx;
+          const py = y + dy;
+          const dX = px - midX;
+          const dY = py - midY;
+          const enX = Math.abs(dX - dY) < 20 || Math.abs(dX + dY) < 20;
+          const enCentro = Math.abs(dX) < range && Math.abs(dY) < range;
+
+          if (enX && enCentro) {
+            points.push({
+              x: px + Math.random() * 10 - 5,
+              y: py + Math.random() * 10 - 5,
+              vx: Math.random() * 0.2 - 0.1,
+              vy: Math.random() * 0.2 - 0.1
             });
           }
         }
@@ -122,21 +152,20 @@
     function draw() {
       ctx.clearRect(0, 0, width, height);
       const t = Date.now() * 0.001;
-      const audioLevel = Math.sin(t * 2) * 0.5 + 0.5; // fake sync
 
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
         p.x += p.vx;
         p.y += p.vy;
+
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
         const hue = (i * 10 + t * 80) % 360;
         const color = `hsl(${hue}, 100%, 60%)`;
-        const radius = p.pulse ? 2 + audioLevel * 4 : 2;
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
         ctx.fillStyle = color;
         ctx.shadowColor = color;
         ctx.shadowBlur = 10;
@@ -148,33 +177,19 @@
           const dx = p.x - q.x;
           const dy = p.y - q.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          if (dist < 110) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `hsla(${hue}, 100%, 60%, ${1 - dist / 120})`;
+            ctx.strokeStyle = `hsla(${hue}, 100%, 60%, ${1 - dist / 110})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
       }
 
-      for (const ex of explosions) {
-        const radius = (Date.now() - ex.time) / 2;
-        ctx.beginPath();
-        ctx.arc(ex.x, ex.y, radius, 0, 2 * Math.PI);
-        ctx.strokeStyle = `rgba(255,255,255,${1 - radius / 200})`;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-      }
-
-      explosions = explosions.filter(e => Date.now() - e.time < 800);
       requestAnimationFrame(draw);
     }
-
-    window.addEventListener('click', e => {
-      explosions.push({ x: e.clientX, y: e.clientY, time: Date.now() });
-    });
 
     let mouse = { x: 0, y: 0 };
     window.addEventListener('mousemove', e => {
@@ -194,6 +209,10 @@
         }
       }
     }, 16);
+
+    canvas.addEventListener('click', e => {
+      addPointsOnClick(e.clientX, e.clientY);
+    });
 
     window.addEventListener('resize', resize);
     resize();
