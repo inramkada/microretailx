@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XSHADOWS OPS by microretailX</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #0d1117;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+    }
+    h1 {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 1.5rem;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>XSHADOWS OPS by <strong>microretailX</strong></h1>
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 3;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const loader = new GLTFLoader();
+    loader.load('gat.glb', gltf => {
+      const model = gltf.scene;
+      model.scale.set(1, 1, 1);
+      scene.add(model);
+
+      document.addEventListener('mousemove', (event) => {
+        const x = (event.clientX / window.innerWidth) * 2 - 1;
+        const y = -(event.clientY / window.innerHeight) * 2 + 1;
+        model.rotation.y = x;
+        model.rotation.x = y;
+      });
+    });
+
+    // Partículas
+    const particles = new THREE.Geometry();
+    const pMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.01
+    });
+
+    for (let p = 0; p < 5000; p++) {
+      const pX = (Math.random() - 0.5) * 10;
+      const pY = (Math.random() - 0.5) * 10;
+      const pZ = (Math.random() - 0.5) * 10;
+      const particle = new THREE.Vector3(pX, pY, pZ);
+      particles.vertices.push(particle);
+    }
+
+    const particleSystem = new THREE.Points(particles, pMaterial);
+    scene.add(particleSystem);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+      particleSystem.rotation.y += 0.0008;
+      renderer.render(scene, camera);
+    };
+    animate();
+  </script>
+</body>
+</html>
