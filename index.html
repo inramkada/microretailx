@@ -1,18 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>microretailX</title>
+  <title>XSHADOW OPS</title>
   <style>
     body { margin: 0; overflow: hidden; background-color: #0d1117; }
     canvas { display: block; }
+    .loading {
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   </style>
 </head>
 <body>
+  <div class="loading" id="loadingText">Cargando microretailX…</div>
+
   <script type="module">
-    import * as THREE from './three.module.min.js';
-    import { GLTFLoader } from './GLTFLoader.js';
+    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0d1117);
@@ -33,11 +43,13 @@
       './viulenza.glb',
       function (gltf) {
         scene.add(gltf.scene);
+        document.getElementById('loadingText').style.display = 'none';
         animate();
       },
       undefined,
       function (error) {
         console.error('Error al cargar el modelo:', error);
+        document.getElementById('loadingText').innerText = 'Error al cargar el modelo 😢';
       }
     );
 
