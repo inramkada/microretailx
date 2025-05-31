@@ -2,13 +2,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>microretailX 3D</title>
+  <meta charset="UTF-8" />
+  <title>microretailX - 3D Face</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      background: #0d1117;
       overflow: hidden;
-      background-color: #0d1117;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
     }
     .title {
       position: absolute;
@@ -16,8 +19,6 @@
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 1.8rem;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
       white-space: nowrap;
       z-index: 10;
     }
@@ -31,61 +32,98 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
   <script>
     let scene = new THREE.Scene();
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    let renderer = new THREE.WebGLRenderer({antialias: true});
+    let camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+    let renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Gris X
-    let material = new THREE.LineBasicMaterial({ color: 0x999999 });
-    let points = [];
-    for (let i = -5; i <= 5; i += 1) {
-      points.push(new THREE.Vector3(i, i, 0));
-      points.push(new THREE.Vector3(i, -i, 0));
-    }
-    let geometry = new THREE.BufferGeometry().setFromPoints(points);
-    let line = new THREE.LineSegments(geometry, material);
-    scene.add(line);
+    // Luz ambiental
+    let ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
 
-    // Partículas para explosión
-    let particleGeometry = new THREE.BufferGeometry();
-    let particleCount = 200;
-    let positions = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 2;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 2;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
-    }
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    let particleMaterial = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.05 });
-    let particles = new THREE.Points(particleGeometry, particleMaterial);
-    particles.visible = false;
-    scene.add(particles);
+    // X inicial
+    const xMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa, linewidth: 3 });
+    const xGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-4, -4, 0),
+      new THREE.Vector3(4, 4, 0),
+      new THREE.Vector3(-4, 4, 0),
+      new THREE.Vector3(4, -4, 0)
+    ]);
+    const xShape = new THREE.LineSegments(xGeo, xMaterial);
+    scene.add(xShape);
 
-    camera.position.z = 10;
-    let clicked = false;
+    // Partículas del rostro
+    const facePoints = [];
+    const faceMaterial = new THREE.PointsMaterial({ size: 0.08, color: 0x00ffff });
+    const faceGeometry = new THREE.BufferGeometry();
+    const faceData = [];
+
+    // Patrón de rostro angular tipo máscara
+    const faceCoords = [
+      [-1, 1, 0], [0, 1.2, 0], [1, 1, 0],
+      [-1.3, 0.3, 0], [-0.5, 0.5, 0], [0, 0.4, 0], [0.5, 0.5, 0], [1.3, 0.3, 0],
+      [-0.8, -0.5, 0], [-0.2, -0.3, 0], [0.2, -0.3, 0], [0.8, -0.5, 0],
+      [-0.5, -1, 0], [0.5, -1, 0], [0, -1.2, 0]
+    ];
+
+    for (let i = 0; i < faceCoords.length; i++) {
+      facePoints.push(0, 0, 0); // Todos se inician en el centro
+      faceData.push({ target: new THREE.Vector3(...faceCoords[i]), active: false });
+    }
+
+    faceGeometry.setAttribute('position', new THREE.Float32BufferAttribute(facePoints, 3));
+    const faceMesh = new THREE.Points(faceGeometry, faceMaterial);
+    scene.add(faceMesh);
+
+    camera.position.z = 7;
+    let exploded = false;
+    let step = 0;
 
     function animate() {
       requestAnimationFrame(animate);
-      if (clicked) {
-        particles.rotation.x += 0.002;
-        particles.rotation.y += 0.002;
+      if (exploded && step < faceData.length) {
+        faceData[step].active = true;
+        step++;
       }
+
+      let pos = faceGeometry.attributes.position;
+      for (let i = 0; i < faceData.length; i++) {
+        if (faceData[i].active) {
+          let target = faceData[i].target;
+          pos.setXYZ(i,
+            THREE.MathUtils.lerp(pos.getX(i), target.x, 0.1),
+            THREE.MathUtils.lerp(pos.getY(i), target.y, 0.1),
+            THREE.MathUtils.lerp(pos.getZ(i), target.z, 0.1)
+          );
+        }
+      }
+      pos.needsUpdate = true;
+
+      faceMesh.rotation.y += (mouse.x - 0.5) * 0.01;
+      faceMesh.rotation.x += (mouse.y - 0.5) * 0.01;
+
       renderer.render(scene, camera);
     }
+
     animate();
 
+    const mouse = { x: 0.5, y: 0.5 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX / window.innerWidth;
+      mouse.y = e.clientY / window.innerHeight;
+    });
+
     window.addEventListener('click', () => {
-      line.visible = false;
-      particles.visible = true;
-      clicked = true;
+      scene.remove(xShape);
+      exploded = true;
     });
 
     window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
 </body>
 </html>
+
