@@ -1,87 +1,131 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS by microretailX</title>
+  <title>microretailX</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       overflow: hidden;
       background-color: #0d1117;
       font-family: 'Segoe UI', sans-serif;
       color: white;
+      cursor: crosshair;
     }
-    h1 {
+
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background-color: #0d1117;
+      z-index: 0;
+    }
+
+    .overlay-text {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      font-size: 1.5rem;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 1;
+      animation: fadeIn 2s ease-out forwards;
+      opacity: 0;
     }
-    canvas {
-      display: block;
+
+    .overlay-text h1 {
+      font-size: 3.5rem;
+      color: #d0d0d0;
+      margin: 0;
+      letter-spacing: 1px;
+    }
+
+    .overlay-text p {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+      color: #888;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>XSHADOWS OPS by <strong>microretailX</strong></h1>
-  <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
-    import { GLTFLoader } from 'https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 3;
+  <div id="particles-js"></div>
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+  <div class="overlay-text">
+    <h1><strong>microretailX</strong></h1>
+    <p>XSHADOWS OPS</p>
+  </div>
 
-    const loader = new GLTFLoader();
-    loader.load('gat.glb', gltf => {
-      const model = gltf.scene;
-      model.scale.set(1, 1, 1);
-      scene.add(model);
+  <!-- Particles.js -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
-      document.addEventListener('mousemove', (event) => {
-        const x = (event.clientX / window.innerWidth) * 2 - 1;
-        const y = -(event.clientY / window.innerHeight) * 2 + 1;
-        model.rotation.y = x;
-        model.rotation.x = y;
-      });
+  <script>
+    particlesJS("particles-js", {
+      particles: {
+        number: {
+          value: 80,
+          density: { enable: true, value_area: 800 }
+        },
+        color: { value: "#bbbbbb" },
+        shape: {
+          type: "circle",
+          stroke: { width: 0, color: "#000000" },
+          polygon: { nb_sides: 5 }
+        },
+        opacity: {
+          value: 0.6,
+          random: false,
+          anim: { enable: false }
+        },
+        size: {
+          value: 3,
+          random: true,
+          anim: { enable: false }
+        },
+        line_linked: {
+          enable: true,
+          distance: 130,
+          color: "#999999",
+          opacity: 0.4,
+          width: 1
+        },
+        move: {
+          enable: true,
+          speed: 2,
+          direction: "none",
+          random: false,
+          straight: false,
+          out_mode: "out",
+          bounce: false,
+          attract: { enable: false }
+        }
+      },
+      interactivity: {
+        detect_on: "canvas",
+        events: {
+          onhover: { enable: true, mode: "repulse" },
+          onclick: { enable: false },
+          resize: true
+        },
+        modes: {
+          repulse: {
+            distance: 150,
+            duration: 0.4
+          }
+        }
+      },
+      retina_detect: true
     });
-
-    // Partículas
-    const particles = new THREE.Geometry();
-    const pMaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 0.01
-    });
-
-    for (let p = 0; p < 5000; p++) {
-      const pX = (Math.random() - 0.5) * 10;
-      const pY = (Math.random() - 0.5) * 10;
-      const pZ = (Math.random() - 0.5) * 10;
-      const particle = new THREE.Vector3(pX, pY, pZ);
-      particles.vertices.push(particle);
-    }
-
-    const particleSystem = new THREE.Points(particles, pMaterial);
-    scene.add(particleSystem);
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-      particleSystem.rotation.y += 0.0008;
-      renderer.render(scene, camera);
-    };
-    animate();
   </script>
+
 </body>
 </html>
