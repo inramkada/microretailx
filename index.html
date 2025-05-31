@@ -52,11 +52,11 @@
     let clickCount = 0;
     let showCat = false;
 
+    // Geometría angular del gato (inspiración zorro Metamask)
     const catShape = [
-      [0, -80], [20, -75], [-20, -75], [40, -60], [-40, -60], [60, -30], [-60, -30],
-      [70, 0], [-70, 0], [60, 30], [-60, 30], [40, 60], [-40, 60], [0, 80],
-      [0, -40], [20, -40], [-20, -40], [0, 0], [20, 20], [-20, 20], [0, 40],
-      [10, -10], [-10, -10], [15, 15], [-15, 15]
+      [-60, -60], [0, -80], [60, -60], [45, -30], [30, 0],
+      [60, 30], [30, 60], [0, 40], [-30, 60], [-60, 30],
+      [-30, 0], [-45, -30], [0, -30], [20, -10], [-20, -10], [0, 10]
     ];
 
     const mouse = { x: width / 2, y: height / 2 };
@@ -95,11 +95,15 @@
     function prepareCatTargets() {
       catPoints.length = 0;
       for (let [cx, cy] of catShape) {
-        catPoints.push({
-          x: width / 2 + cx * 2,
-          y: height / 2 + cy * 2,
-          occupied: false
-        });
+        for (let i = 0; i < 5; i++) {
+          let offsetX = (Math.random() - 0.5) * 8;
+          let offsetY = (Math.random() - 0.5) * 8;
+          catPoints.push({
+            x: width / 2 + (cx * 2 + offsetX),
+            y: height / 2 + (cy * 2 + offsetY),
+            occupied: false
+          });
+        }
       }
     }
 
@@ -169,13 +173,13 @@
       if (!dissolveX) {
         dissolveX = true;
       } else {
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < 30; i++) {
           const x = mouse.x + (Math.random() - 0.5) * 80;
           const y = mouse.y + (Math.random() - 0.5) * 80;
           particles.push(createParticle(x, y, randomColor()));
         }
       }
-      if (clickCount === 10 && !showCat) {
+      if (clickCount >= 10 && !showCat) {
         showCat = true;
         prepareCatTargets();
         absorbToCat();
