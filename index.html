@@ -3,6 +3,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; font-src *;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>microretailX</title>
   <style>
@@ -50,29 +51,59 @@
 
     let points = [];
     let mouse = { x: 0, y: 0 };
+    let cursorMoved = false;
 
-    // Gato estilo low poly (simplificado)
+    // Forma inicial: X
+    const xShape = [];
+    const spacing = 40;
+    const range = 200;
+
+    for (let i = -range; i <= range; i += spacing) {
+      xShape.push([i, i]);
+      xShape.push([i, -i]);
+    }
+
+    // Forma objetivo: GATO (simplificado tipo Metamask low poly)
     const catShape = [
       [0, -80], [40, -60], [60, -20], [40, 0], [60, 20], [40, 60],
       [0, 80], [-40, 60], [-60, 20], [-40, 0], [-60, -20], [-40, -60],
       [0, -40], [20, -40], [-20, -40], [0, 0], [20, 20], [-20, 20], [0, 40]
     ];
 
+    const specialIndices = new Set(); // índices que formarán el gato
+
     function lerp(a, b, t) {
       return a + (b - a) * t;
     }
 
     function initPoints() {
-      points = catShape.map(([x, y]) => {
-        return {
+      points = [];
+
+      // puntos normales (X)
+      for (let [x, y] of xShape) {
+        points.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          tx: width / 2 + x,
+          ty: height / 2 + y,
+          color: "#00ffcc",
+          isGato: false
+        });
+      }
+
+      // puntos especiales (forman el gato)
+      for (let i = 0; i < catShape.length; i++) {
+        const [x, y] = catShape[i];
+        points.push({
           x: Math.random() * width,
           y: Math.random() * height,
           tx: width / 2 + x * 2,
           ty: height / 2 + y * 2,
-          vx: 0,
-          vy: 0
-        };
-      });
+          color: "#ff6ec7", // fucsia suave para el gato
+          isGato: true
+        });
+        specialIndices.add(points.length - 1);
+      }
     }
 
     function draw() {
@@ -81,20 +112,33 @@
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
 
-        // Movimiento hacia la posición del gato ajustada con el cursor
-        p.x = lerp(p.x, p.tx + mouse.x * 30, 0.05);
-        p.y = lerp(p.y, p.ty + mouse.y * 30, 0.05);
+        // Si el cursor se ha movido, los puntos "gato" persiguen el cursor, los demás se dispersan
+        let tx = p.tx;
+        let ty = p.ty;
 
-        // Dibuja punto
+        if (cursorMoved) {
+          if (p.isGato) {
+            tx = width / 2 + (p.tx - width / 2) + mouse.x * 80;
+            ty = height / 2 + (p.ty - height / 2) + mouse.y * 80;
+          } else {
+            tx = p.x + (Math.random() - 0.5) * 10;
+            ty = p.y + (Math.random() - 0.5) * 10;
+          }
+        }
+
+        p.x = lerp(p.x, tx, 0.08);
+        p.y = lerp(p.y, ty, 0.08);
+
+        // Dibujo punto
         ctx.beginPath();
         ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = "#00ffcc";
-        ctx.shadowColor = "#00ffcc";
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
         ctx.shadowBlur = 8;
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Conexiones entre puntos cercanos
+        // Conexiones
         for (let j = i + 1; j < points.length; j++) {
           const q = points[j];
           const dx = p.x - q.x;
@@ -123,6 +167,7 @@
     window.addEventListener('mousemove', e => {
       mouse.x = (e.clientX - width / 2) / width;
       mouse.y = (e.clientY - height / 2) / height;
+      cursorMoved = true;
     });
 
     window.addEventListener('resize', resize);
