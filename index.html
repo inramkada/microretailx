@@ -2,43 +2,59 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>microretailX</title>
+  <meta charset="UTF-8">
+  <title>Zorro 3D estilo MetaMask</title>
   <style>
-    body { margin: 0; }
+    body { margin: 0; overflow: hidden; background: #000; }
     canvas { display: block; }
   </style>
 </head>
 <body>
   <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
-    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js';
+    import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js';
 
-    let scene = new THREE.Scene();
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    let renderer = new THREE.WebGLRenderer({ antialias: true });
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1.5, 3);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444);
-    light.position.set(0, 20, 0);
+    const light = new THREE.HemisphereLight(0xffffff, 0x222222, 1);
     scene.add(light);
 
     const loader = new GLTFLoader();
-    loader.load('https://raw.githubusercontent.com/MetaMask/animation/main/fox.glb', function (gltf) {
-      scene.add(gltf.scene);
-      animate();
-    }, undefined, function (error) {
-      console.error(error);
-    });
+    loader.load(
+      'https://raw.githubusercontent.com/MetaMask/animation/main/fox.glb',
+      gltf => {
+        const model = gltf.scene;
+        model.scale.set(1.5, 1.5, 1.5);
+        scene.add(model);
+        animate();
+      },
+      undefined,
+      error => {
+        console.error('Error cargando el modelo:', error);
+      }
+    );
 
-    camera.position.z = 5;
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
     function animate() {
       requestAnimationFrame(animate);
+      controls.update();
       renderer.render(scene, camera);
     }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
   </script>
 </body>
 </html>
-
