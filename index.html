@@ -3,27 +3,46 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Zorro 3D estilo MetaMask</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src https://raw.githubusercontent.com;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XSHADOWS OPS</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #000; }
+    body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; }
+    #title {
+      position: absolute;
+      bottom: 40px;
+      width: 100%;
+      text-align: center;
+      color: white;
+      font-size: 1.5rem;
+    }
     canvas { display: block; }
   </style>
 </head>
 <body>
+  <div id="title">XSHADOWS OPS by <strong>microretailX</strong></div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./three.module.min.js",
+        "three/addons/": "./jsm/"
+      }
+    }
+  </script>
   <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
-    import { GLTFLoader } from 'https://unpkg.com/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.set(0, 1.5, 3);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x222222, 1);
+    const light = new THREE.HemisphereLight(0xffffff, 0x000000, 1.5);
     scene.add(light);
 
     const loader = new GLTFLoader();
@@ -32,13 +51,12 @@
       gltf => {
         const model = gltf.scene;
         model.scale.set(1.5, 1.5, 1.5);
+        model.rotation.y = Math.PI;
         scene.add(model);
         animate();
       },
       undefined,
-      error => {
-        console.error('Error cargando el modelo:', error);
-      }
+      error => console.error('Error al cargar GLB:', error)
     );
 
     const controls = new OrbitControls(camera, renderer.domElement);
