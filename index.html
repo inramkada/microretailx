@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XS OPS</title>
+  <title>XSHADOWS OPS</title>
   <style>
     html, body { margin: 0; padding: 0; background: #000; overflow: hidden; transition: background-color 0.3s ease; }
     canvas { display: block; }
@@ -59,23 +59,15 @@
     const dispersedPositions = [];
     const dispersionSpeeds = [];
 
-    // NUEVA X DIMENSIONAL
-    const xDiagonalPositions = [];
-    const X_NODES = 16;
-    for (let i = 0; i < X_NODES; i++) {
-      const t = i / (X_NODES - 1);
-      const offset = 40;
-      xDiagonalPositions.push(new THREE.Vector3(
-        -offset + t * 2 * offset,
-        -offset + t * 2 * offset,
-        0
-      ));
-      xDiagonalPositions.push(new THREE.Vector3(
-        -offset + t * 2 * offset,
-        offset - t * 2 * offset,
-        0
-      ));
-    }
+    // X 3D NODOS CAÓTICOS
+    const X_ACTIVE_NODES = 24;
+    const xRandomPositions = Array.from({ length: X_ACTIVE_NODES }, () =>
+      new THREE.Vector3(
+        (Math.random() - 0.5) * 50,
+        (Math.random() - 0.5) * 50,
+        (Math.random() - 0.5) * 20
+      )
+    );
 
     for (let x = 0; x < GRID; x++) {
       for (let y = 0; y < GRID; y++) {
@@ -127,12 +119,15 @@
       flash.style.animation = xMode ? 'flashRed 0.6s infinite' : 'none';
     });
 
-    function updateLines(current, threshold) {
+    function updateLines(current, indices = null, threshold = 60) {
       lineGroup.clear();
-      for (let i = 0; i < current.length; i++) {
-        for (let j = i + 1; j < current.length; j++) {
-          if (current[i].distanceTo(current[j]) < threshold) {
-            const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
+      const source = indices || current.map((_, i) => i);
+      for (let i = 0; i < source.length; i++) {
+        for (let j = i + 1; j < source.length; j++) {
+          const a = source[i];
+          const b = source[j];
+          if (current[a].distanceTo(current[b]) < threshold) {
+            const geo = new THREE.BufferGeometry().setFromPoints([current[a], current[b]]);
             const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.15 });
             lineGroup.add(new THREE.Line(geo, mat));
           }
@@ -172,17 +167,19 @@
       }
 
       if (xMode && isMoving) {
-        for (let i = 0; i < xDiagonalPositions.length && i < NODES; i++) {
-          basePositions[i].lerp(xDiagonalPositions[i], 0.1);
+        const activeIndices = [];
+        for (let i = 0; i < xRandomPositions.length && i < NODES; i++) {
+          basePositions[i].lerp(xRandomPositions[i], 0.1);
           positions[i * 3] = basePositions[i].x;
           positions[i * 3 + 1] = basePositions[i].y;
           positions[i * 3 + 2] = basePositions[i].z;
+          activeIndices.push(i);
         }
-        updateLines(basePositions.slice(0, xDiagonalPositions.length), 60);
+        updateLines(basePositions, activeIndices, 50);
       } else if (!isMoving) {
-        updateLines(currentPositions, 20);
+        updateLines(currentPositions, null, 20);
       } else {
-        updateLines(currentPositions, 16);
+        updateLines(currentPositions, null, 16);
       }
 
       geometry.attributes.position.needsUpdate = true;
