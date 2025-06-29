@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS – TesseractX</title>
+  <title>XS OPS</title>
   <style>
     html, body { margin: 0; padding: 0; background: #000; overflow: hidden; transition: background-color 0.3s ease; }
     canvas { display: block; }
@@ -35,7 +35,7 @@
   </style>
 </head>
 <body>
-  <div class="title">XSHADOWS_OPS<br><strong>TesseractX Mode</strong></div>
+  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="flash" id="flash"></div>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
@@ -127,14 +127,12 @@
       flash.style.animation = xMode ? 'flashRed 0.6s infinite' : 'none';
     });
 
-    function updateLines(current, activeIndices) {
+    function updateLines(current, threshold) {
       lineGroup.clear();
-      for (let i = 0; i < activeIndices.length; i++) {
-        for (let j = i + 1; j < activeIndices.length; j++) {
-          const a = activeIndices[i];
-          const b = activeIndices[j];
-          if (current[a].distanceTo(current[b]) < 60) {
-            const geo = new THREE.BufferGeometry().setFromPoints([current[a], current[b]]);
+      for (let i = 0; i < current.length; i++) {
+        for (let j = i + 1; j < current.length; j++) {
+          if (current[i].distanceTo(current[j]) < threshold) {
+            const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
             const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.15 });
             lineGroup.add(new THREE.Line(geo, mat));
           }
@@ -148,7 +146,6 @@
       const isMoving = (now - lastMove) < 3000;
 
       const currentPositions = [];
-      let activeIndices = [];
 
       for (let i = 0; i < NODES; i++) {
         const dispersed = dispersedPositions[i];
@@ -162,8 +159,8 @@
         }
 
         let target = dispersed;
-        if (isMoving) {
-          target = xMode ? new THREE.Vector3(0, 0, 0) : tesseractPositions[i];
+        if (isMoving && !xMode) {
+          target = tesseractPositions[i];
         }
 
         basePositions[i].lerp(target, 0.05);
@@ -172,23 +169,23 @@
         positions[i * 3] = basePositions[i].x;
         positions[i * 3 + 1] = basePositions[i].y;
         positions[i * 3 + 2] = basePositions[i].z;
-
-        if (!xMode) activeIndices.push(i);
       }
 
-      // Sustituimos nodos por X cuando toca
       if (xMode && isMoving) {
         for (let i = 0; i < xDiagonalPositions.length && i < NODES; i++) {
           basePositions[i].lerp(xDiagonalPositions[i], 0.1);
           positions[i * 3] = basePositions[i].x;
           positions[i * 3 + 1] = basePositions[i].y;
           positions[i * 3 + 2] = basePositions[i].z;
-          activeIndices.push(i);
         }
+        updateLines(basePositions.slice(0, xDiagonalPositions.length), 60);
+      } else if (!isMoving) {
+        updateLines(currentPositions, 20);
+      } else {
+        updateLines(currentPositions, 16);
       }
 
       geometry.attributes.position.needsUpdate = true;
-      updateLines(basePositions, activeIndices);
 
       points.rotation.x += (targetRotation.x - points.rotation.x) * 0.05;
       points.rotation.y += (targetRotation.y - points.rotation.y) * 0.05;
