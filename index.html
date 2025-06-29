@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOWS OPS – HYPERLINKED TESSERACT EXTENDED</title>
   <style>
     html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
     canvas { display: block; }
@@ -25,23 +25,25 @@
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.z = 40;
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 80;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // 16 puntos del tesseract
+    // Creamos 256 vértices distribuidos en 4D (teseracto extendido)
+    const VERTEX_COUNT = 256;
     const baseVertices4D = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < VERTEX_COUNT; i++) {
       baseVertices4D.push([
-        (i & 1) ? 1 : -1,
-        (i & 2) ? 1 : -1,
-        (i & 4) ? 1 : -1,
-        (i & 8) ? 1 : -1
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2
       ]);
     }
+
     let vertices4D = baseVertices4D.map(v => [...v]);
 
     function rotate4D(v, i, j, angle) {
@@ -54,12 +56,12 @@
 
     function project4DTo3D(v4) {
       const scale = 2 / (4 - v4[3]);
-      return new THREE.Vector3(v4[0]*scale*6, v4[1]*scale*6, v4[2]*scale*6);
+      return new THREE.Vector3(v4[0]*scale*20, v4[1]*scale*20, v4[2]*scale*20);
     }
 
-    const pointMat = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.4 });
+    const pointMat = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.35 });
     const geom = new THREE.BufferGeometry();
-    const positions = new Float32Array(16 * 3);
+    const positions = new Float32Array(VERTEX_COUNT * 3);
     geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     const points = new THREE.Points(geom, pointMat);
     scene.add(points);
@@ -83,9 +85,9 @@
       for (let i = 0; i < projected.length; i++) {
         for (let j = i + 1; j < projected.length; j++) {
           const dist = projected[i].distanceTo(projected[j]);
-          if (dist < 10) {
+          if (dist < 10) { // más conexiones que antes
             const geo = new THREE.BufferGeometry().setFromPoints([projected[i], projected[j]]);
-            const mat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.15 });
+            const mat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.07 });
             lineGroup.add(new THREE.Line(geo, mat));
           }
         }
@@ -99,15 +101,14 @@
 
       const projected = [];
 
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < VERTEX_COUNT; i++) {
         const v = vertices4D[i];
-        rotate4D(v, 0, 3, 0.01);
-        rotate4D(v, 1, 2, 0.013);
+        rotate4D(v, 0, 3, 0.008);
+        rotate4D(v, 1, 2, 0.01);
 
-        // Reconectar si mueves el ratón, dispersar si no
         for (let j = 0; j < 4; j++) {
           const base = baseVertices4D[i][j];
-          v[j] += isMoving ? (base - v[j]) * 0.05 : (Math.random() - 0.5) * 0.1;
+          v[j] += isMoving ? (base - v[j]) * 0.04 : (Math.random() - 0.5) * 0.02;
         }
 
         const p = project4DTo3D(v);
@@ -120,7 +121,6 @@
       geom.attributes.position.needsUpdate = true;
       updateLines(projected);
 
-      // Movimiento
       points.rotation.x += (targetRot.x - points.rotation.x) * 0.05;
       points.rotation.y += (targetRot.y - points.rotation.y) * 0.05;
       lineGroup.rotation.copy(points.rotation);
