@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tesseract 4D – XSHADOWS OPS</title>
+  <title>XSHADOWS OPS</title>
   <style>
     html, body { margin: 0; padding: 0; background: #0d1117; overflow: hidden; }
     canvas { display: block; }
@@ -20,7 +20,7 @@
   </style>
 </head>
 <body>
-  <div class="title">XSHADOWS OPS<br><strong>TESSERACT 4D</strong></div>
+  <div class="title">XSHADOWS OPS<br><strong>by microretailX</strong></div>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
 
@@ -32,10 +32,10 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // 16 vértices del tesseract (hipercubo 4D)
-    const vertices4D = [];
+    // Tesseract 4D → puntos base
+    const baseVertices4D = [];
     for (let i = 0; i < 16; i++) {
-      vertices4D.push([
+      baseVertices4D.push([
         (i & 1) ? 1 : -1,
         (i & 2) ? 1 : -1,
         (i & 4) ? 1 : -1,
@@ -43,7 +43,10 @@
       ]);
     }
 
-    // Función para rotar en un plano de 4D (ej: XY, XW, etc.)
+    // Clones que se animan
+    let vertices4D = baseVertices4D.map(v => [...v]);
+
+    // Función para rotar en 4D
     function rotate4D(v, i, j, angle) {
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
@@ -52,67 +55,95 @@
       v[i] = temp;
     }
 
-    // Proyectar de 4D a 3D
-    function project4Dto3D(v4) {
-      const w = 2 / (4 - v4[3]); // perspectiva 4D→3D
-      return new THREE.Vector3(v4[0] * w * 5, v4[1] * w * 5, v4[2] * w * 5);
+    // Proyección 4D a 3D
+    function project(v4) {
+      const scale = 2 / (4 - v4[3]);
+      return new THREE.Vector3(v4[0]*scale*6, v4[1]*scale*6, v4[2]*scale*6);
     }
 
-    // Geometría de puntos
-    const material = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.4 });
-    const geometry = new THREE.BufferGeometry();
-    const projectedVerts = vertices4D.map(project4Dto3D);
-    geometry.setFromPoints(projectedVerts);
-    const points = new THREE.Points(geometry, material);
+    // Puntos
+    const pointMat = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.5 });
+    const pointsGeom = new THREE.BufferGeometry();
+    const pos = new Float32Array(16 * 3);
+    pointsGeom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const points = new THREE.Points(pointsGeom, pointMat);
     scene.add(points);
 
-    // Geometría de líneas (conectamos vértices con 1 bit de diferencia)
+    // Líneas entre vértices conectados
     const lineGroup = new THREE.Group();
-    for (let i = 0; i < 16; i++) {
-      for (let j = i + 1; j < 16; j++) {
-        const diff = vertices4D[i].reduce((acc, val, k) => acc + (val !== vertices4D[j][k] ? 1 : 0), 0);
-        if (diff === 1) {
-          const lineGeom = new THREE.BufferGeometry().setFromPoints([
-            projectedVerts[i].clone(),
-            projectedVerts[j].clone()
-          ]);
-          const lineMat = new THREE.LineBasicMaterial({ color: 0x3399ff, transparent: true, opacity: 0.5 });
-          const line = new THREE.Line(lineGeom, lineMat);
-          lineGroup.add(line);
-        }
-      }
-    }
     scene.add(lineGroup);
 
-    // Animación
-    function animate() {
-      requestAnimationFrame(animate);
-
-      for (let v of vertices4D) {
-        rotate4D(v, 0, 3, 0.01); // XW
-        rotate4D(v, 1, 2, 0.015); // YZ
-      }
-
-      const updatedVerts = vertices4D.map(project4Dto3D);
-      geometry.setFromPoints(updatedVerts);
-
-      // Actualiza las líneas
-      let k = 0;
+    function updateLines(projected) {
+      lineGroup.clear();
       for (let i = 0; i < 16; i++) {
         for (let j = i + 1; j < 16; j++) {
-          const diff = vertices4D[i].reduce((acc, val, d) => acc + (val !== vertices4D[j][d] ? 1 : 0), 0);
-          if (diff === 1) {
-            const line = lineGroup.children[k++];
-            line.geometry.setFromPoints([
-              updatedVerts[i].clone(),
-              updatedVerts[j].clone()
-            ]);
+          const d = vertices4D[i].reduce((acc, val, k) => acc + (val !== vertices4D[j][k] ? 1 : 0), 0);
+          if (d === 1) {
+            const geom = new THREE.BufferGeometry().setFromPoints([projected[i], projected[j]]);
+            const mat = new THREE.LineBasicMaterial({ color: 0x3399ff, transparent: true, opacity: 0.4 });
+            const line = new THREE.Line(geom, mat);
+            lineGroup.add(line);
           }
         }
       }
+    }
+
+    // Rotación por cursor
+    let targetRot = new THREE.Vector2();
+    window.addEventListener('mousemove', e => {
+      targetRot.x = (e.clientY / window.innerHeight - 0.5) * Math.PI;
+      targetRot.y = (e.clientX / window.innerWidth - 0.5) * Math.PI;
+      lastMove = Date.now();
+    });
+
+    // Dispersión / Reconexión
+    let isMoving = false;
+    let lastMove = Date.now();
+    const dispersion = 0.2;
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const t = Date.now() * 0.001;
+      if (Date.now() - lastMove > 250) isMoving = false;
+      else isMoving = true;
+
+      const projected = [];
+
+      for (let i = 0; i < 16; i++) {
+        const v = vertices4D[i];
+
+        // Animar rotación
+        rotate4D(v, 0, 3, 0.01);
+        rotate4D(v, 1, 2, 0.013);
+
+        // Aplicar reconexión o dispersión
+        for (let j = 0; j < 4; j++) {
+          const base = baseVertices4D[i][j];
+          if (isMoving) {
+            v[j] += (base - v[j]) * 0.05;
+          } else {
+            v[j] += (Math.random() - 0.5) * dispersion;
+          }
+        }
+
+        projected.push(project(v));
+        pos[i * 3 + 0] = projected[i].x;
+        pos[i * 3 + 1] = projected[i].y;
+        pos[i * 3 + 2] = projected[i].z;
+      }
+
+      pointsGeom.attributes.position.needsUpdate = true;
+      updateLines(projected);
+
+      // Rotar grupos
+      points.rotation.x += (targetRot.x - points.rotation.x) * 0.05;
+      points.rotation.y += (targetRot.y - points.rotation.y) * 0.05;
+      lineGroup.rotation.copy(points.rotation);
 
       renderer.render(scene, camera);
     }
+
     animate();
   </script>
 </body>
