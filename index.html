@@ -27,28 +27,6 @@
       pointer-events: none;
       text-align: center;
     }
-    .sphere-message {
-      position: absolute;
-      top: 45%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Courier New', monospace;
-      font-size: clamp(20px, 3vw, 50px);
-      color: #00f0ff;
-      z-index: 20;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-      text-shadow: 0 0 20px rgba(0,255,255,0.5);
-    }
-    .sphere-message.active {
-      opacity: 1;
-      animation: pulseText 1s infinite alternate;
-    }
-    @keyframes pulseText {
-      from { transform: translate(-50%, -50%) scale(1); }
-      to   { transform: translate(-50%, -50%) scale(1.05); }
-    }
     .flash {
       position: fixed;
       width: 100%; height: 100%;
@@ -68,9 +46,7 @@
 </head>
 <body>
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
-  <div class="sphere-message" id="sphereMessage">SPHERE MODE ACTIVADO</div>
   <div class="flash" id="flash"></div>
-  <audio id="sphereSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_a302ce368a.mp3?filename=cyber-activation-116176.mp3"></audio>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
 
@@ -88,6 +64,12 @@
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
     const basePositions = [];
     const tesseractPositions = [];
@@ -119,7 +101,11 @@
             (Math.random() - 0.5) * 0.5
           ));
 
-          const isX = (x === y && y === z) || (x === y && z === GRID - 1 - x);
+          // Estructura X mejor definida en diagonal
+          const isX = (
+            (x === y && y === z) ||
+            (x === y && z === GRID - 1 - x)
+          );
           xActiveFlags.push(isX);
           xPositions.push(isX ? pos.clone() : new THREE.Vector3(0, 0, 0));
         }
@@ -134,14 +120,7 @@
     scene.add(points);
 
     const lineGroup = new THREE.Group();
-    const extraParticles = new THREE.Group();
-    const blockchainGroup = new THREE.Group();
     scene.add(lineGroup);
-    scene.add(extraParticles);
-    scene.add(blockchainGroup);
-
-    const extraNodes = [];
-    let blockchainCreated = false;
 
     let targetRotation = new THREE.Vector2();
     let lastMove = Date.now();
@@ -161,7 +140,9 @@
     let lastTap = 0;
     window.addEventListener('touchend', e => {
       const now = new Date().getTime();
-      if (now - lastTap < 300) toggleSphere();
+      if (now - lastTap < 300) {
+        toggleSphere();
+      }
       lastTap = now;
     });
 
@@ -174,69 +155,20 @@
 
     function toggleSphere() {
       sphereMode = !sphereMode;
-      const msg = document.getElementById("sphereMessage");
-      const sound = document.getElementById("sphereSound");
       if (sphereMode) {
-        msg.classList.add("active");
-        sound.currentTime = 0;
-        sound.play();
-        material.color.set("#00f0ff");
-        document.body.style.backgroundColor = "#000010";
         for (let i = 0; i < NODES; i++) {
           const angle1 = Math.acos(2 * (i + 1) / NODES - 1);
           const angle2 = Math.sqrt(NODES * Math.PI) * angle1;
           const r = 30;
-          basePositions[i].set(
-            r * Math.sin(angle1) * Math.cos(angle2),
-            r * Math.sin(angle1) * Math.sin(angle2),
-            r * Math.cos(angle1)
-          );
+          const x = r * Math.sin(angle1) * Math.cos(angle2);
+          const y = r * Math.sin(angle1) * Math.sin(angle2);
+          const z = r * Math.cos(angle1);
+          basePositions[i].set(x, y, z);
         }
       } else {
-        msg.classList.remove("active");
-        material.color.set(nodeColor);
-        document.body.style.backgroundColor = "#000000";
         for (let i = 0; i < NODES; i++) {
           basePositions[i].copy(tesseractPositions[i]);
         }
-      }
-    }
-
-    function createBlockchainSwarm() {
-      if (extraNodes.length === 0) {
-        for (let i = 0; i < 100; i++) {
-          const geo = new THREE.SphereGeometry(0.4, 6, 6);
-          const mat = new THREE.MeshBasicMaterial({ color: 0x33ffcc, transparent: true, opacity: 0.2 });
-          const p = new THREE.Mesh(geo, mat);
-          p.position.set(
-            (Math.random() - 0.5) * DISPERSION_SCALE * 2,
-            (Math.random() - 0.5) * DISPERSION_SCALE * 2,
-            (Math.random() - 0.5) * DISPERSION_SCALE * 2
-          );
-          extraParticles.add(p);
-          extraNodes.push(p);
-        }
-      }
-
-      if (!blockchainCreated) {
-        const blockCount = 10;
-        for (let i = 0; i < blockCount; i++) {
-          const cube = new THREE.Mesh(
-            new THREE.BoxGeometry(4, 4, 4),
-            new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.4 })
-          );
-          cube.position.set(i * 6 - blockCount * 3, 0, 0);
-          blockchainGroup.add(cube);
-
-          if (i > 0) {
-            const prev = blockchainGroup.children[i - 1].position;
-            const curr = cube.position;
-            const geo = new THREE.BufferGeometry().setFromPoints([prev, curr]);
-            const mat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.2 });
-            blockchainGroup.add(new THREE.Line(geo, mat));
-          }
-        }
-        blockchainCreated = true;
       }
     }
 
@@ -291,20 +223,6 @@
       points.rotation.x += (targetRotation.x - points.rotation.x) * 0.05;
       points.rotation.y += (targetRotation.y - points.rotation.y) * 0.05;
       lineGroup.rotation.copy(points.rotation);
-
-      if (!isMoving) {
-        createBlockchainSwarm();
-        extraNodes.forEach(p => {
-          p.position.x += (Math.random() - 0.5) * 0.2;
-          p.position.y += (Math.random() - 0.5) * 0.2;
-          p.position.z += (Math.random() - 0.5) * 0.2;
-        });
-      } else {
-        extraNodes.forEach(p => extraParticles.remove(p));
-        extraNodes.length = 0;
-        blockchainGroup.clear();
-        blockchainCreated = false;
-      }
 
       renderer.render(scene, camera);
     }
