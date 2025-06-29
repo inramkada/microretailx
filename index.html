@@ -6,13 +6,11 @@
   <title>XSHADOWS OPS</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      overflow: hidden;
-      transition: background-color 0.3s ease;
+      margin: 0; padding: 0;
+      background: #000; overflow: hidden;
     }
     canvas { display: block; }
+
     .title {
       position: absolute;
       top: 50%; left: 50%;
@@ -22,27 +20,60 @@
       font-size: 1.2rem;
       z-index: 10;
       pointer-events: none;
+      text-align: center;
     }
+
     .flash {
       position: fixed;
       width: 100%; height: 100%;
       top: 0; left: 0;
-      background: rgba(255, 0, 0, 0.6);
+      background: rgba(255, 0, 0, 0.7);
       pointer-events: none;
       opacity: 0;
-      z-index: 5;
-      animation: none;
+      z-index: 9;
     }
+
+    .flash-active {
+      animation: flashRed 0.5s ease-in-out;
+    }
+
     @keyframes flashRed {
-      0%   { opacity: 0.9; }
-      50%  { opacity: 0.5; }
+      0%   { opacity: 0.8; }
+      50%  { opacity: 0.3; }
       100% { opacity: 0; }
+    }
+
+    .viulenza {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      font-family: monospace;
+      color: #ff0033;
+      text-shadow: 0 0 20px red;
+      opacity: 0;
+      animation: none;
+      z-index: 11;
+      pointer-events: none;
+    }
+
+    .viulenza-show {
+      animation: viulenzaOn 2s ease-out;
+    }
+
+    @keyframes viulenzaOn {
+      0%   { opacity: 0; transform: scale(0.8) translate(-50%, -50%); }
+      20%  { opacity: 1; transform: scale(1.1) translate(-50%, -50%); }
+      100% { opacity: 0; transform: scale(1.5) translate(-50%, -50%); }
     }
   </style>
 </head>
 <body>
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="flash" id="flash"></div>
+  <div class="viulenza" id="viulenza">VIULENZA ON</div>
+
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
 
@@ -55,7 +86,7 @@
     document.body.appendChild(renderer.domElement);
 
     const GRID = 4;
-    const NODES = GRID * GRID * GRID;
+    const NODES = GRID ** 3;
     const DISPERSION_SCALE = 80;
     const nodeColor = new THREE.Color(0x00ffff);
     const xColor = new THREE.Color(0xff0000);
@@ -63,21 +94,19 @@
     const basePositions = [];
     const tesseractPositions = [];
     const dispersedPositions = [];
-    const dispersionSpeeds = [];
     const xPositions = [];
     const xActiveFlags = [];
+    const dispersionSpeeds = [];
 
-    const cubeSize = 24;
-
-    let counter = 0;
+    const size = 24;
+    let idx = 0;
     for (let x = 0; x < GRID; x++) {
       for (let y = 0; y < GRID; y++) {
         for (let z = 0; z < GRID; z++) {
-          const px = (x - 1.5) * cubeSize / 2;
-          const py = (y - 1.5) * cubeSize / 2;
-          const pz = (z - 1.5) * cubeSize / 2;
+          const px = (x - 1.5) * size / 2;
+          const py = (y - 1.5) * size / 2;
+          const pz = (z - 1.5) * size / 2;
 
-          const idx = counter++;
           tesseractPositions.push(new THREE.Vector3(px, py, pz));
           basePositions.push(new THREE.Vector3(px, py, pz));
           dispersedPositions.push(new THREE.Vector3(
@@ -91,14 +120,10 @@
             (Math.random() - 0.5) * 0.5
           ));
 
-          // Diagonales principales del cubo = forman una X en 3D
           const isX = (x === y && y === z) || (x + y + z === 3);
           xActiveFlags.push(isX);
-          if (isX) {
-            xPositions.push(new THREE.Vector3(px, py, pz));
-          } else {
-            xPositions.push(new THREE.Vector3(0, 0, 0));
-          }
+          xPositions.push(isX ? new THREE.Vector3(px, py, pz) : new THREE.Vector3(0, 0, 0));
+          idx++;
         }
       }
     }
@@ -113,10 +138,12 @@
     const lineGroup = new THREE.Group();
     scene.add(lineGroup);
 
+    const flash = document.getElementById("flash");
+    const viulenzaText = document.getElementById("viulenza");
+
     let targetRotation = new THREE.Vector2();
     let lastMove = Date.now();
     let xMode = false;
-    const flash = document.getElementById("flash");
 
     window.addEventListener('mousemove', e => {
       targetRotation.x = (e.clientY / window.innerHeight - 0.5) * Math.PI;
@@ -127,20 +154,27 @@
     window.addEventListener('click', () => {
       xMode = !xMode;
       material.color.set(xMode ? xColor : nodeColor);
-      document.body.style.backgroundColor = xMode ? '#330000' : '#000000';
 
-      flash.style.animation = 'none';
+      // Flash efecto
+      flash.classList.remove('flash-active');
       void flash.offsetWidth;
-      flash.style.animation = 'flashRed 0.5s ease-out';
+      flash.classList.add('flash-active');
+
+      // Texto viulenza
+      if (xMode) {
+        viulenzaText.classList.remove('viulenza-show');
+        void viulenzaText.offsetWidth;
+        viulenzaText.classList.add('viulenza-show');
+      }
     });
 
     function updateLines(current) {
       lineGroup.clear();
       for (let i = 0; i < NODES; i++) {
         for (let j = i + 1; j < NODES; j++) {
-          const activeX = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
-          const threshold = xMode ? 28 : 16;
-          if (activeX && current[i].distanceTo(current[j]) < threshold) {
+          const active = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
+          const threshold = xMode ? 26 : 16;
+          if (active && current[i].distanceTo(current[j]) < threshold) {
             const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
             const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
             lineGroup.add(new THREE.Line(geo, mat));
@@ -169,7 +203,6 @@
         const target = isMoving
           ? (xMode ? xPositions[i] : tesseractPositions[i])
           : dispersed;
-
         const current = basePositions[i];
         current.lerp(target, 0.05);
         currentPositions.push(current);
