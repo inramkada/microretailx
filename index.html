@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>XSHADOWS OPS</title>
   <style>
-    html, body { margin: 0; padding: 0; background: #000; overflow: hidden; transition: background-color 0.3s ease; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      overflow: hidden;
+      transition: background-color 0.3s ease;
+    }
     canvas { display: block; }
     .title {
       position: absolute;
@@ -21,16 +27,16 @@
       position: fixed;
       width: 100%; height: 100%;
       top: 0; left: 0;
-      background: rgba(255, 0, 0, 0.1);
+      background: rgba(255, 0, 0, 0.6);
       pointer-events: none;
       opacity: 0;
       z-index: 5;
       animation: none;
     }
     @keyframes flashRed {
-      0%   { opacity: 0.1; }
+      0%   { opacity: 0.8; }
       50%  { opacity: 0.4; }
-      100% { opacity: 0.1; }
+      100% { opacity: 0; }
     }
   </style>
 </head>
@@ -83,9 +89,9 @@
           xActiveFlags.push(active);
           if (active) {
             xPositions.push(new THREE.Vector3(
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z)
+              (x - 1.5) * 12 + (Math.random() - 0.5) * 4,
+              (y - 1.5) * 12 + (Math.random() - 0.5) * 4,
+              (z - 1.5) * 12 + (Math.random() - 0.5) * 4
             ));
           } else {
             xPositions.push(new THREE.Vector3(0, 0, 0));
@@ -107,7 +113,7 @@
     let targetRotation = new THREE.Vector2();
     let lastMove = Date.now();
     let xMode = false;
-    let flash = document.getElementById("flash");
+    const flash = document.getElementById("flash");
 
     window.addEventListener('mousemove', e => {
       targetRotation.x = (e.clientY / window.innerHeight - 0.5) * Math.PI;
@@ -119,7 +125,11 @@
       xMode = !xMode;
       material.color.set(xMode ? xColor : nodeColor);
       document.body.style.backgroundColor = xMode ? '#330000' : '#000000';
-      flash.style.animation = xMode ? 'flashRed 0.6s infinite' : 'none';
+
+      // Flash visual puntual
+      flash.style.animation = 'none';
+      void flash.offsetWidth;
+      flash.style.animation = 'flashRed 0.4s ease-out';
     });
 
     function updateLines(current) {
@@ -127,10 +137,12 @@
       for (let i = 0; i < NODES; i++) {
         for (let j = i + 1; j < NODES; j++) {
           const activeX = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
-          const threshold = xMode ? 20 : 16;
+          const threshold = xMode ? 26 : 16;
           if (activeX && current[i].distanceTo(current[j]) < threshold) {
             const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
-            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
+            const mat = new THREE.LineBasicMaterial({
+              color: material.color, transparent: true, opacity: 0.1
+            });
             lineGroup.add(new THREE.Line(geo, mat));
           }
         }
@@ -141,7 +153,6 @@
       requestAnimationFrame(animate);
       const now = Date.now();
       const isMoving = (now - lastMove) < 3000;
-
       const currentPositions = [];
 
       for (let i = 0; i < NODES; i++) {
@@ -159,7 +170,6 @@
           ? (xMode ? xPositions[i] : tesseractPositions[i])
           : dispersed;
         const current = basePositions[i];
-
         current.lerp(target, 0.05);
         currentPositions.push(current);
 
