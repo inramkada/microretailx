@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOWS OPS – TesseractX</title>
   <style>
     html, body { margin: 0; padding: 0; background: #000; overflow: hidden; transition: background-color 0.3s ease; }
     canvas { display: block; }
@@ -35,7 +35,7 @@
   </style>
 </head>
 <body>
-  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
+  <div class="title">XSHADOWS_OPS<br><strong>TesseractX Mode</strong></div>
   <div class="flash" id="flash"></div>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
@@ -59,7 +59,6 @@
     const dispersedPositions = [];
     const dispersionSpeeds = [];
 
-    // X 3D NODOS CAÓTICOS
     const X_ACTIVE_NODES = 24;
     const xRandomPositions = Array.from({ length: X_ACTIVE_NODES }, () =>
       new THREE.Vector3(
@@ -143,19 +142,20 @@
       const currentPositions = [];
 
       for (let i = 0; i < NODES; i++) {
-        const dispersed = dispersedPositions[i];
-        dispersed.add(dispersionSpeeds[i]);
-        if (dispersed.length() > DISPERSION_SCALE) {
-          dispersedPositions[i] = new THREE.Vector3(
-            (Math.random() - 0.5) * DISPERSION_SCALE,
-            (Math.random() - 0.5) * DISPERSION_SCALE,
-            (Math.random() - 0.5) * DISPERSION_SCALE
-          );
-        }
-
-        let target = dispersed;
-        if (isMoving && !xMode) {
+        let target = dispersedPositions[i];
+        if (xMode && isMoving && i < X_ACTIVE_NODES) {
+          target = xRandomPositions[i];
+        } else if (isMoving && !xMode) {
           target = tesseractPositions[i];
+        } else {
+          dispersedPositions[i].add(dispersionSpeeds[i]);
+          if (dispersedPositions[i].length() > DISPERSION_SCALE) {
+            dispersedPositions[i] = new THREE.Vector3(
+              (Math.random() - 0.5) * DISPERSION_SCALE,
+              (Math.random() - 0.5) * DISPERSION_SCALE,
+              (Math.random() - 0.5) * DISPERSION_SCALE
+            );
+          }
         }
 
         basePositions[i].lerp(target, 0.05);
@@ -167,15 +167,8 @@
       }
 
       if (xMode && isMoving) {
-        const activeIndices = [];
-        for (let i = 0; i < xRandomPositions.length && i < NODES; i++) {
-          basePositions[i].lerp(xRandomPositions[i], 0.1);
-          positions[i * 3] = basePositions[i].x;
-          positions[i * 3 + 1] = basePositions[i].y;
-          positions[i * 3 + 2] = basePositions[i].z;
-          activeIndices.push(i);
-        }
-        updateLines(basePositions, activeIndices, 50);
+        const indices = Array.from({ length: X_ACTIVE_NODES }, (_, i) => i);
+        updateLines(basePositions, indices, 50);
       } else if (!isMoving) {
         updateLines(currentPositions, null, 20);
       } else {
