@@ -37,6 +37,13 @@
       z-index: 5;
       animation: none;
     }
+    @keyframes flashRed {
+      0%   { opacity: 0.1; }
+      50%  { opacity: 0.4; }
+      100% { opacity: 0.1; }
+    }
+    
+    /* Footer links style */
     .footer-links {
       position: absolute;
       bottom: 10px;
@@ -48,18 +55,15 @@
       text-align: center;
       z-index: 20;
     }
+
     .footer-links a {
       color: white;
       margin: 0 15px;
       text-decoration: none;
     }
+
     .footer-links a:hover {
       text-decoration: underline;
-    }
-    @keyframes flashRed {
-      0%   { opacity: 0.1; }
-      50%  { opacity: 0.4; }
-      100% { opacity: 0.1; }
     }
   </style>
 </head>
@@ -67,7 +71,7 @@
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="flash" id="flash"></div>
 
-  <!-- Enlaces a Términos y Cookies -->
+  <!-- Enlaces a Términos y Cookies en el pie de página -->
   <div class="footer-links">
     <a href="terminos.html">Términos y Condiciones</a> | 
     <a href="cookies.html">Política de Cookies</a>
