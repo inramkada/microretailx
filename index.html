@@ -26,51 +26,46 @@
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 100;
+    camera.position.z = 80;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // CONFIG
-    const GRID = 4;
-    const NODES = GRID * GRID * GRID;
-    const DISPERSION_SCALE = 80;
+    const NODES = 36;
     const nodeColor = new THREE.Color(0x00ffff);
-    const xColor = new THREE.Color(0xff00ff);
+    const xColor = new THREE.Color(0xff0000); // rojo al formar X
+    const dispersionScale = 100;
 
     const basePositions = [];
-    const tesseractPositions = [];
-    const dispersedPositions = [];
+    const cubePositions = [];
     const xPositions = [];
+    const dispersedPositions = [];
 
-    // Creamos nodos en una cuadrícula 4x4x4 (sin w)
-    for (let x = 0; x < GRID; x++) {
-      for (let y = 0; y < GRID; y++) {
-        for (let z = 0; z < GRID; z++) {
-          const px = (x - GRID / 2 + 0.5) * 10;
-          const py = (y - GRID / 2 + 0.5) * 10;
-          const pz = (z - GRID / 2 + 0.5) * 10;
-          tesseractPositions.push(new THREE.Vector3(px, py, pz));
-          basePositions.push(new THREE.Vector3(px, py, pz));
-          dispersedPositions.push(new THREE.Vector3(
-            (Math.random() - 0.5) * DISPERSION_SCALE,
-            (Math.random() - 0.5) * DISPERSION_SCALE,
-            (Math.random() - 0.5) * DISPERSION_SCALE
-          ));
-          xPositions.push(new THREE.Vector3(
-            (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
-            (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
-            (Math.random() > 0.5 ? 1 : -1) * (x + y + z)
-          ));
-        }
-      }
+    // Generar nodos en una cuadrícula ligera
+    for (let i = 0; i < NODES; i++) {
+      const theta = (i / NODES) * Math.PI * 2;
+      const x = Math.sin(theta) * 10;
+      const y = Math.cos(theta) * 10;
+      const z = (i % 6 - 3) * 3;
+      cubePositions.push(new THREE.Vector3(x, y, z));
+      basePositions.push(new THREE.Vector3(x, y, z));
+      dispersedPositions.push(new THREE.Vector3(
+        (Math.random() - 0.5) * dispersionScale,
+        (Math.random() - 0.5) * dispersionScale,
+        (Math.random() - 0.5) * dispersionScale
+      ));
+      xPositions.push(new THREE.Vector3(
+        (Math.random() > 0.5 ? 1 : -1) * i * 0.8,
+        (Math.random() > 0.5 ? 1 : -1) * i * 0.8,
+        (Math.random() > 0.5 ? 1 : -1) * i * 0.8
+      ));
     }
 
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(NODES * 3);
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ color: nodeColor, size: 0.8 });
+    const material = new THREE.PointsMaterial({ color: nodeColor, size: 0.9 });
     const points = new THREE.Points(geometry, material);
     scene.add(points);
 
@@ -96,7 +91,8 @@
       lineGroup.clear();
       for (let i = 0; i < NODES; i++) {
         for (let j = i + 1; j < NODES; j++) {
-          if (current[i].distanceTo(current[j]) < 16) {
+          const dist = current[i].distanceTo(current[j]);
+          if (dist < 15) {
             const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
             const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
             lineGroup.add(new THREE.Line(geo, mat));
@@ -114,11 +110,11 @@
 
       for (let i = 0; i < NODES; i++) {
         const target = isMoving
-          ? (xMode ? xPositions[i] : tesseractPositions[i])
+          ? (xMode ? xPositions[i] : cubePositions[i])
           : dispersedPositions[i];
         const current = basePositions[i];
 
-        current.lerp(target, 0.05);
+        current.lerp(target, 0.07);
         currentPositions.push(current);
 
         positions[i * 3] = current.x;
