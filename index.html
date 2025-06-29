@@ -34,8 +34,8 @@
       animation: none;
     }
     @keyframes flashRed {
-      0%   { opacity: 0.8; }
-      50%  { opacity: 0.4; }
+      0%   { opacity: 0.9; }
+      50%  { opacity: 0.5; }
       100% { opacity: 0; }
     }
   </style>
@@ -63,16 +63,21 @@
     const basePositions = [];
     const tesseractPositions = [];
     const dispersedPositions = [];
+    const dispersionSpeeds = [];
     const xPositions = [];
     const xActiveFlags = [];
-    const dispersionSpeeds = [];
 
+    const cubeSize = 24;
+
+    let counter = 0;
     for (let x = 0; x < GRID; x++) {
       for (let y = 0; y < GRID; y++) {
         for (let z = 0; z < GRID; z++) {
-          const px = (x - GRID / 2 + 0.5) * 10;
-          const py = (y - GRID / 2 + 0.5) * 10;
-          const pz = (z - GRID / 2 + 0.5) * 10;
+          const px = (x - 1.5) * cubeSize / 2;
+          const py = (y - 1.5) * cubeSize / 2;
+          const pz = (z - 1.5) * cubeSize / 2;
+
+          const idx = counter++;
           tesseractPositions.push(new THREE.Vector3(px, py, pz));
           basePositions.push(new THREE.Vector3(px, py, pz));
           dispersedPositions.push(new THREE.Vector3(
@@ -85,14 +90,12 @@
             (Math.random() - 0.5) * 0.5,
             (Math.random() - 0.5) * 0.5
           ));
-          const active = (x + y + z) % 5 === 0;
-          xActiveFlags.push(active);
-          if (active) {
-            xPositions.push(new THREE.Vector3(
-              (x - 1.5) * 12 + (Math.random() - 0.5) * 4,
-              (y - 1.5) * 12 + (Math.random() - 0.5) * 4,
-              (z - 1.5) * 12 + (Math.random() - 0.5) * 4
-            ));
+
+          // Diagonales principales del cubo = forman una X en 3D
+          const isX = (x === y && y === z) || (x + y + z === 3);
+          xActiveFlags.push(isX);
+          if (isX) {
+            xPositions.push(new THREE.Vector3(px, py, pz));
           } else {
             xPositions.push(new THREE.Vector3(0, 0, 0));
           }
@@ -126,10 +129,9 @@
       material.color.set(xMode ? xColor : nodeColor);
       document.body.style.backgroundColor = xMode ? '#330000' : '#000000';
 
-      // Flash visual puntual
       flash.style.animation = 'none';
       void flash.offsetWidth;
-      flash.style.animation = 'flashRed 0.4s ease-out';
+      flash.style.animation = 'flashRed 0.5s ease-out';
     });
 
     function updateLines(current) {
@@ -137,12 +139,10 @@
       for (let i = 0; i < NODES; i++) {
         for (let j = i + 1; j < NODES; j++) {
           const activeX = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
-          const threshold = xMode ? 26 : 16;
+          const threshold = xMode ? 28 : 16;
           if (activeX && current[i].distanceTo(current[j]) < threshold) {
             const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
-            const mat = new THREE.LineBasicMaterial({
-              color: material.color, transparent: true, opacity: 0.1
-            });
+            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
             lineGroup.add(new THREE.Line(geo, mat));
           }
         }
@@ -169,6 +169,7 @@
         const target = isMoving
           ? (xMode ? xPositions[i] : tesseractPositions[i])
           : dispersed;
+
         const current = basePositions[i];
         current.lerp(target, 0.05);
         currentPositions.push(current);
