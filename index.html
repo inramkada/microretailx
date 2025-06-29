@@ -97,4 +97,163 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    const basePositions
+    const basePositions = [];
+    const tesseractPositions = [];
+    const dispersedPositions = [];
+    const xPositions = [];
+    const xActiveFlags = [];
+    const dispersionSpeeds = [];
+
+    const offset = GRID / 2 - 0.5;
+
+    for (let x = 0; x < GRID; x++) {
+      for (let y = 0; y < GRID; y++) {
+        for (let z = 0; z < GRID; z++) {
+          const i = x * GRID * GRID + y * GRID + z;
+          const px = (x - offset) * 10;
+          const py = (y - offset) * 10;
+          const pz = (z - offset) * 10;
+          const pos = new THREE.Vector3(px, py, pz);
+          tesseractPositions.push(pos.clone());
+          basePositions.push(pos.clone());
+          dispersedPositions.push(new THREE.Vector3(
+            (Math.random() - 0.5) * DISPERSION_SCALE,
+            (Math.random() - 0.5) * DISPERSION_SCALE,
+            (Math.random() - 0.5) * DISPERSION_SCALE
+          ));
+          dispersionSpeeds.push(new THREE.Vector3(
+            (Math.random() - 0.5) * 0.5,
+            (Math.random() - 0.5) * 0.5,
+            (Math.random() - 0.5) * 0.5
+          ));
+
+          // Estructura X mejor definida en diagonal
+          const isX = (
+            (x === y && y === z) ||
+            (x === y && z === GRID - 1 - x)
+          );
+          xActiveFlags.push(isX);
+          xPositions.push(isX ? pos.clone() : new THREE.Vector3(0, 0, 0));
+        }
+      }
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(NODES * 3);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({ color: nodeColor, size: 0.8 });
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    const lineGroup = new THREE.Group();
+    scene.add(lineGroup);
+
+    let targetRotation = new THREE.Vector2();
+    let lastMove = Date.now();
+    let xMode = false;
+    let sphereMode = false;
+    const flash = document.getElementById("flash");
+
+    window.addEventListener('mousemove', e => {
+      targetRotation.x = (e.clientY / window.innerHeight - 0.5) * Math.PI;
+      targetRotation.y = (e.clientX / window.innerWidth - 0.5) * Math.PI;
+      lastMove = Date.now();
+    });
+
+    window.addEventListener('click', toggleX);
+    window.addEventListener('touchstart', toggleX);
+
+    let lastTap = 0;
+    window.addEventListener('touchend', e => {
+      const now = new Date().getTime();
+      if (now - lastTap < 300) {
+        toggleSphere();
+      }
+      lastTap = now;
+    });
+
+    function toggleX() {
+      xMode = !xMode;
+      material.color.set(xMode ? xColor : nodeColor);
+      document.body.style.backgroundColor = xMode ? '#330000' : '#000000';
+      flash.style.animation = xMode ? 'flashRed 0.6s infinite' : 'none';
+    }
+
+    function toggleSphere() {
+      sphereMode = !sphereMode;
+      if (sphereMode) {
+        for (let i = 0; i < NODES; i++) {
+          const angle1 = Math.acos(2 * (i + 1) / NODES - 1);
+          const angle2 = Math.sqrt(NODES * Math.PI) * angle1;
+          const r = 30;
+          const x = r * Math.sin(angle1) * Math.cos(angle2);
+          const y = r * Math.sin(angle1) * Math.sin(angle2);
+          const z = r * Math.cos(angle1);
+          basePositions[i].set(x, y, z);
+        }
+      } else {
+        for (let i = 0; i < NODES; i++) {
+          basePositions[i].copy(tesseractPositions[i]);
+        }
+      }
+    }
+
+    function updateLines(current) {
+      lineGroup.clear();
+      for (let i = 0; i < NODES; i++) {
+        for (let j = i + 1; j < NODES; j++) {
+          const activeX = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
+          const threshold = xMode ? 25 : 16;
+          if (activeX && current[i].distanceTo(current[j]) < threshold) {
+            const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
+            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.12 });
+            lineGroup.add(new THREE.Line(geo, mat));
+          }
+        }
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const now = Date.now();
+      const isMoving = (now - lastMove) < 3000;
+
+      const currentPositions = [];
+
+      for (let i = 0; i < NODES; i++) {
+        const dispersed = dispersedPositions[i];
+        dispersed.add(dispersionSpeeds[i]);
+        if (dispersed.length() > DISPERSION_SCALE) {
+          dispersedPositions[i] = new THREE.Vector3(
+            (Math.random() - 0.5) * DISPERSION_SCALE,
+            (Math.random() - 0.5) * DISPERSION_SCALE,
+            (Math.random() - 0.5) * DISPERSION_SCALE
+          );
+        }
+
+        const target = isMoving
+          ? (xMode ? xPositions[i] : basePositions[i])
+          : dispersed;
+        const current = basePositions[i];
+        current.lerp(target, 0.05);
+        currentPositions.push(current);
+
+        positions[i * 3] = current.x;
+        positions[i * 3 + 1] = current.y;
+        positions[i * 3 + 2] = current.z;
+      }
+
+      geometry.attributes.position.needsUpdate = true;
+      updateLines(currentPositions);
+
+      points.rotation.x += (targetRotation.x - points.rotation.x) * 0.05;
+      points.rotation.y += (targetRotation.y - points.rotation.y) * 0.05;
+      lineGroup.rotation.copy(points.rotation);
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
