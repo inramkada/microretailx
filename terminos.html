@@ -69,13 +69,19 @@
     }
 
     footer {
+      width: 100%;
       text-align: center;
       padding: 20px;
       background-color: #000;
       color: white;
       margin-top: 40px;
       border-radius: 5px;
-      width: 100%;
+      position: absolute;
+      bottom: 0;
+    }
+
+    footer p {
+      margin: 0;
     }
 
     footer a {
@@ -118,7 +124,7 @@
       text-decoration: underline;
     }
 
-    /* Particles background - Nodos interconectados */
+    /* Particles background - Nodos interconectados tipo blockchain */
     .particles-container {
       position: fixed;
       top: 0;
@@ -135,10 +141,11 @@
       height: 10px;
       background-color: rgba(0, 255, 255, 0.8); /* Cyan particles */
       border-radius: 50%;
+      opacity: 0;
       animation: moveParticles 2s linear infinite;
     }
 
-    /* Particles movement */
+    /* Particles movement and repulsion effect */
     @keyframes moveParticles {
       0% {
         opacity: 1;
@@ -150,7 +157,7 @@
       }
     }
 
-    /* Line connecting particles */
+    /* Connecting lines between particles */
     .line {
       position: absolute;
       width: 2px;
