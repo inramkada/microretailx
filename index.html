@@ -35,7 +35,7 @@
   </style>
 </head>
 <body>
-  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
+  <div class="title">XSHADOWS OPS<br><strong>microretailX</strong></div>
   <div class="flash" id="flash"></div>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
@@ -58,6 +58,7 @@
     const tesseractPositions = [];
     const dispersedPositions = [];
     const xPositions = [];
+    const xActiveFlags = [];
     const dispersionSpeeds = [];
 
     for (let x = 0; x < GRID; x++) {
@@ -78,7 +79,9 @@
             (Math.random() - 0.5) * 0.5,
             (Math.random() - 0.5) * 0.5
           ));
-          if ((x + y + z) % 5 === 0) {
+          const active = (x + y + z) % 5 === 0;
+          xActiveFlags.push(active);
+          if (active) {
             xPositions.push(new THREE.Vector3(
               (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
               (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
@@ -123,7 +126,9 @@
       lineGroup.clear();
       for (let i = 0; i < NODES; i++) {
         for (let j = i + 1; j < NODES; j++) {
-          if (current[i].distanceTo(current[j]) < 16) {
+          const activeX = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
+          const threshold = xMode ? 20 : 16;
+          if (activeX && current[i].distanceTo(current[j]) < threshold) {
             const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
             const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
             lineGroup.add(new THREE.Line(geo, mat));
