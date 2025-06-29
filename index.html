@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOWS OPS – TesseractX</title>
   <style>
     html, body { margin: 0; padding: 0; background: #000; overflow: hidden; transition: background-color 0.3s ease; }
     canvas { display: block; }
@@ -35,7 +35,7 @@
   </style>
 </head>
 <body>
-  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
+  <div class="title">XSHADOWS_OPS<br><strong>TesseractX Mode</strong></div>
   <div class="flash" id="flash"></div>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
@@ -57,9 +57,25 @@
     const basePositions = [];
     const tesseractPositions = [];
     const dispersedPositions = [];
-    const xPositions = [];
-    const xActiveFlags = [];
     const dispersionSpeeds = [];
+
+    // NUEVA X DIMENSIONAL
+    const xDiagonalPositions = [];
+    const X_NODES = 16;
+    for (let i = 0; i < X_NODES; i++) {
+      const t = i / (X_NODES - 1);
+      const offset = 40;
+      xDiagonalPositions.push(new THREE.Vector3(
+        -offset + t * 2 * offset,
+        -offset + t * 2 * offset,
+        0
+      ));
+      xDiagonalPositions.push(new THREE.Vector3(
+        -offset + t * 2 * offset,
+        offset - t * 2 * offset,
+        0
+      ));
+    }
 
     for (let x = 0; x < GRID; x++) {
       for (let y = 0; y < GRID; y++) {
@@ -79,17 +95,6 @@
             (Math.random() - 0.5) * 0.5,
             (Math.random() - 0.5) * 0.5
           ));
-          const active = (x + y + z) % 5 === 0;
-          xActiveFlags.push(active);
-          if (active) {
-            xPositions.push(new THREE.Vector3(
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z)
-            ));
-          } else {
-            xPositions.push(new THREE.Vector3(0, 0, 0));
-          }
         }
       }
     }
@@ -122,15 +127,15 @@
       flash.style.animation = xMode ? 'flashRed 0.6s infinite' : 'none';
     });
 
-    function updateLines(current) {
+    function updateLines(current, activeIndices) {
       lineGroup.clear();
-      for (let i = 0; i < NODES; i++) {
-        for (let j = i + 1; j < NODES; j++) {
-          const activeX = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
-          const threshold = xMode ? 20 : 16;
-          if (activeX && current[i].distanceTo(current[j]) < threshold) {
-            const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
-            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
+      for (let i = 0; i < activeIndices.length; i++) {
+        for (let j = i + 1; j < activeIndices.length; j++) {
+          const a = activeIndices[i];
+          const b = activeIndices[j];
+          if (current[a].distanceTo(current[b]) < 60) {
+            const geo = new THREE.BufferGeometry().setFromPoints([current[a], current[b]]);
+            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.15 });
             lineGroup.add(new THREE.Line(geo, mat));
           }
         }
@@ -143,6 +148,7 @@
       const isMoving = (now - lastMove) < 3000;
 
       const currentPositions = [];
+      let activeIndices = [];
 
       for (let i = 0; i < NODES; i++) {
         const dispersed = dispersedPositions[i];
@@ -155,21 +161,34 @@
           );
         }
 
-        const target = isMoving
-          ? (xMode ? xPositions[i] : tesseractPositions[i])
-          : dispersed;
-        const current = basePositions[i];
+        let target = dispersed;
+        if (isMoving) {
+          target = xMode ? new THREE.Vector3(0, 0, 0) : tesseractPositions[i];
+        }
 
-        current.lerp(target, 0.05);
-        currentPositions.push(current);
+        basePositions[i].lerp(target, 0.05);
+        currentPositions.push(basePositions[i]);
 
-        positions[i * 3] = current.x;
-        positions[i * 3 + 1] = current.y;
-        positions[i * 3 + 2] = current.z;
+        positions[i * 3] = basePositions[i].x;
+        positions[i * 3 + 1] = basePositions[i].y;
+        positions[i * 3 + 2] = basePositions[i].z;
+
+        if (!xMode) activeIndices.push(i);
+      }
+
+      // Sustituimos nodos por X cuando toca
+      if (xMode && isMoving) {
+        for (let i = 0; i < xDiagonalPositions.length && i < NODES; i++) {
+          basePositions[i].lerp(xDiagonalPositions[i], 0.1);
+          positions[i * 3] = basePositions[i].x;
+          positions[i * 3 + 1] = basePositions[i].y;
+          positions[i * 3 + 2] = basePositions[i].z;
+          activeIndices.push(i);
+        }
       }
 
       geometry.attributes.position.needsUpdate = true;
-      updateLines(currentPositions);
+      updateLines(basePositions, activeIndices);
 
       points.rotation.x += (targetRotation.x - points.rotation.x) * 0.05;
       points.rotation.y += (targetRotation.y - points.rotation.y) * 0.05;
