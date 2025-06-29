@@ -1,183 +1,146 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>XSHADOWS OPS</title>
   <style>
     html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
     canvas { display: block; }
-    .flash {
-      position: fixed;
-      width: 100%; height: 100%;
-      top: 0; left: 0;
-      background: rgba(255, 0, 0, 0.1);
+    .title {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-family: monospace;
+      font-size: 1.2rem;
+      z-index: 10;
       pointer-events: none;
-      opacity: 0;
-      z-index: 5;
-      animation: none;
-    }
-    @keyframes flashRed {
-      0%   { opacity: 0.1; }
-      50%  { opacity: 0.4; }
-      100% { opacity: 0.1; }
     }
   </style>
 </head>
 <body>
-  <div class="flash" id="flash"></div>
+  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 60;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    camera.position.z = 100;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Generate round texture
-    const size = 64;
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    ctx.beginPath();
-    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    const texture = new THREE.CanvasTexture(canvas);
+    // CONFIG
+    const GRID = 4;
+    const NODES = GRID * GRID * GRID;
+    const DISPERSION_SCALE = 80;
+    const nodeColor = new THREE.Color(0x00ffff);
+    const xColor = new THREE.Color(0xff00ff);
 
-    const pointMat = new THREE.PointsMaterial({ map: texture, transparent: true, size: 1.5, depthWrite: false });
-    const positions = new Float32Array(16 * 3);
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const points = new THREE.Points(geometry, pointMat);
-    scene.add(points);
+    const basePositions = [];
+    const tesseractPositions = [];
+    const dispersedPositions = [];
+    const xPositions = [];
 
-    const lines = new THREE.Group();
-    scene.add(lines);
-
-    const tesseract4D = [];
-    for (let i = 0; i < 16; i++) {
-      tesseract4D.push([
-        (i & 1) ? 1 : -1,
-        (i & 2) ? 1 : -1,
-        (i & 4) ? 1 : -1,
-        (i & 8) ? 1 : -1
-      ]);
-    }
-    let current4D = tesseract4D.map(v => [...v]);
-    const basePos = tesseract4D.map(v => project(v));
-
-    function rotate4D(v, i, j, angle) {
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      const temp = v[i] * cos - v[j] * sin;
-      v[j] = v[i] * sin + v[j] * cos;
-      v[i] = temp;
-    }
-
-    function project(v) {
-      const w = 2 / (4 - v[3]);
-      return new THREE.Vector3(v[0]*w*10, v[1]*w*10, v[2]*w*10);
-    }
-
-    function updateEdges(projected) {
-      lines.clear();
-      for (let i = 0; i < 16; i++) {
-        for (let j = i + 1; j < 16; j++) {
-          const diff = tesseract4D[i].reduce((acc, val, k) => acc + (val !== tesseract4D[j][k] ? 1 : 0), 0);
-          if (diff === 1) {
-            const geo = new THREE.BufferGeometry().setFromPoints([projected[i], projected[j]]);
-            const mat = new THREE.LineBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.15 });
-            lines.add(new THREE.Line(geo, mat));
+    // Creamos nodos en una cuadrícula 4x4x4 (sin w)
+    for (let x = 0; x < GRID; x++) {
+      for (let y = 0; y < GRID; y++) {
+        for (let z = 0; z < GRID; z++) {
+          const px = (x - GRID / 2 + 0.5) * 10;
+          const py = (y - GRID / 2 + 0.5) * 10;
+          const pz = (z - GRID / 2 + 0.5) * 10;
+          tesseractPositions.push(new THREE.Vector3(px, py, pz));
+          basePositions.push(new THREE.Vector3(px, py, pz));
+          dispersedPositions.push(new THREE.Vector3(
+            (Math.random() - 0.5) * DISPERSION_SCALE,
+            (Math.random() - 0.5) * DISPERSION_SCALE,
+            (Math.random() - 0.5) * DISPERSION_SCALE
+          ));
+          // Solo unos pocos nodos para la X
+          if ((x + y + z) % 5 === 0) {
+            xPositions.push(new THREE.Vector3(
+              (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
+              (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
+              (Math.random() > 0.5 ? 1 : -1) * (x + y + z)
+            ));
+          } else {
+            xPositions.push(new THREE.Vector3(0, 0, 0));
           }
         }
       }
     }
 
-    const dispersed = tesseract4D.map(() => new THREE.Vector3(
-      (Math.random() - 0.5) * 100,
-      (Math.random() - 0.5) * 100,
-      (Math.random() - 0.5) * 100
-    ));
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(NODES * 3);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({ color: nodeColor, size: 0.8 });
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
 
-    const xForm = tesseract4D.map((_, i) => new THREE.Vector3(
-      (Math.random() > 0.5 ? 1 : -1) * (i + 1) * 1.5,
-      (Math.random() > 0.5 ? 1 : -1) * (i + 1) * 1.5,
-      (Math.random() - 0.5) * 5
-    ));
+    const lineGroup = new THREE.Group();
+    scene.add(lineGroup);
 
-    const flash = document.getElementById('flash');
-    let targetPositions = basePos.map(p => p.clone());
-    let phase = 'tesseract';
+    let targetRotation = new THREE.Vector2();
     let lastMove = Date.now();
-    let explosionTime = 0;
+    let xMode = false;
 
     window.addEventListener('mousemove', e => {
+      targetRotation.x = (e.clientY / window.innerHeight - 0.5) * Math.PI;
+      targetRotation.y = (e.clientX / window.innerWidth - 0.5) * Math.PI;
       lastMove = Date.now();
     });
 
     window.addEventListener('click', () => {
-      phase = 'exploding';
-      flash.style.animation = 'flashRed 0.4s infinite';
-      explosionTime = Date.now();
+      xMode = !xMode;
+      material.color.set(xMode ? xColor : nodeColor);
     });
+
+    function updateLines(current) {
+      lineGroup.clear();
+      for (let i = 0; i < NODES; i++) {
+        for (let j = i + 1; j < NODES; j++) {
+          if (current[i].distanceTo(current[j]) < 16) {
+            const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
+            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
+            lineGroup.add(new THREE.Line(geo, mat));
+          }
+        }
+      }
+    }
 
     function animate() {
       requestAnimationFrame(animate);
       const now = Date.now();
-      const inactivity = now - lastMove;
+      const isMoving = (now - lastMove) < 200;
 
-      if (phase === 'tesseract') {
-        targetPositions = basePos.map(p => p.clone());
-        if (inactivity > 3000) {
-          targetPositions = dispersed.map(p => p.clone());
-          phase = 'dispersed';
-        }
-      }
+      const currentPositions = [];
 
-      if (phase === 'dispersed' && inactivity < 3000) {
-        phase = 'tesseract';
-        targetPositions = basePos.map(p => p.clone());
-      }
+      for (let i = 0; i < NODES; i++) {
+        const target = isMoving
+          ? (xMode ? xPositions[i] : tesseractPositions[i])
+          : dispersedPositions[i];
+        const current = basePositions[i];
 
-      if (phase === 'exploding') {
-        const t = (now - explosionTime) / 800;
-        if (t < 1) {
-          targetPositions = basePos.map(p => p.clone().multiplyScalar(1 + t * 3));
-        } else {
-          targetPositions = xForm.map(p => p.clone());
-          phase = 'x';
-        }
-      }
+        current.lerp(target, 0.05);
+        currentPositions.push(current);
 
-      if (phase === 'x' && inactivity < 2000) {
-        targetPositions = basePos.map(p => p.clone());
-        flash.style.animation = 'none';
-        phase = 'tesseract';
-      }
-
-      const projected = [];
-      for (let i = 0; i < 16; i++) {
-        const v = current4D[i];
-        rotate4D(v, 0, 3, 0.004);
-        rotate4D(v, 1, 2, 0.005);
-        const projected3D = new THREE.Vector3(
-          positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]
-        ).lerp(targetPositions[i], 0.1);
-
-        positions[i * 3] = projected3D.x;
-        positions[i * 3 + 1] = projected3D.y;
-        positions[i * 3 + 2] = projected3D.z;
-        projected.push(projected3D);
+        positions[i * 3] = current.x;
+        positions[i * 3 + 1] = current.y;
+        positions[i * 3 + 2] = current.z;
       }
 
       geometry.attributes.position.needsUpdate = true;
-      updateEdges(projected);
+      updateLines(currentPositions);
+
+      points.rotation.x += (targetRotation.x - points.rotation.x) * 0.05;
+      points.rotation.y += (targetRotation.y - points.rotation.y) * 0.05;
+      lineGroup.rotation.copy(points.rotation);
+
       renderer.render(scene, camera);
     }
+
     animate();
   </script>
 </body>
