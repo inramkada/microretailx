@@ -42,6 +42,7 @@
       padding: 30px;
       border-radius: 8px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      color: black; /* Change text to black inside the white box */
     }
 
     h1, h2 {
@@ -101,29 +102,6 @@
       z-index: 20;
     }
 
-    /* Footer links style */
-    .footer-links {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #333;
-      font-family: "Times New Roman", serif;
-      font-size: 14px;
-      text-align: center;
-      z-index: 20;
-    }
-
-    .footer-links a {
-      color: #007bff;
-      margin: 0 15px;
-      text-decoration: none;
-    }
-
-    .footer-links a:hover {
-      text-decoration: underline;
-    }
-
     /* Particles background - Nodos interconectados tipo blockchain */
     .particles-container {
       position: fixed;
@@ -141,7 +119,6 @@
       height: 10px;
       background-color: rgba(0, 255, 255, 0.8); /* Cyan particles */
       border-radius: 50%;
-      opacity: 0;
       animation: moveParticles 2s linear infinite;
     }
 
