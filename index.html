@@ -58,6 +58,7 @@
     const tesseractPositions = [];
     const dispersedPositions = [];
     const xPositions = [];
+    const dispersionSpeeds = [];
 
     for (let x = 0; x < GRID; x++) {
       for (let y = 0; y < GRID; y++) {
@@ -71,6 +72,11 @@
             (Math.random() - 0.5) * DISPERSION_SCALE,
             (Math.random() - 0.5) * DISPERSION_SCALE,
             (Math.random() - 0.5) * DISPERSION_SCALE
+          ));
+          dispersionSpeeds.push(new THREE.Vector3(
+            (Math.random() - 0.5) * 0.5,
+            (Math.random() - 0.5) * 0.5,
+            (Math.random() - 0.5) * 0.5
           ));
           if ((x + y + z) % 5 === 0) {
             xPositions.push(new THREE.Vector3(
@@ -115,14 +121,12 @@
 
     function updateLines(current) {
       lineGroup.clear();
-      if (!xMode) {
-        for (let i = 0; i < NODES; i++) {
-          for (let j = i + 1; j < NODES; j++) {
-            if (current[i].distanceTo(current[j]) < 16) {
-              const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
-              const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
-              lineGroup.add(new THREE.Line(geo, mat));
-            }
+      for (let i = 0; i < NODES; i++) {
+        for (let j = i + 1; j < NODES; j++) {
+          if (current[i].distanceTo(current[j]) < 16) {
+            const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
+            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
+            lineGroup.add(new THREE.Line(geo, mat));
           }
         }
       }
@@ -136,9 +140,19 @@
       const currentPositions = [];
 
       for (let i = 0; i < NODES; i++) {
+        const dispersed = dispersedPositions[i];
+        dispersed.add(dispersionSpeeds[i]);
+        if (dispersed.length() > DISPERSION_SCALE) {
+          dispersedPositions[i] = new THREE.Vector3(
+            (Math.random() - 0.5) * DISPERSION_SCALE,
+            (Math.random() - 0.5) * DISPERSION_SCALE,
+            (Math.random() - 0.5) * DISPERSION_SCALE
+          );
+        }
+
         const target = isMoving
           ? (xMode ? xPositions[i] : tesseractPositions[i])
-          : dispersedPositions[i];
+          : dispersed;
         const current = basePositions[i];
 
         current.lerp(target, 0.05);
