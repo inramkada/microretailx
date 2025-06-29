@@ -22,9 +22,9 @@
     html, body {
       margin: 0;
       padding: 0;
-      background-color: #f9f9f9;
+      background-color: #000; /* Black background */
       font-family: "Times New Roman", serif;
-      color: #333;
+      color: #fff;
       line-height: 1.6;
       height: 100%;
       display: flex;
@@ -32,12 +32,13 @@
       align-items: center; /* Center content horizontally */
       justify-content: flex-start;
       text-align: center; /* Center text content */
+      overflow: hidden;
     }
 
     .container {
       width: 80%;
       margin: 40px auto;
-      background-color: white;
+      background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent white background */
       padding: 30px;
       border-radius: 8px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -117,7 +118,7 @@
       text-decoration: underline;
     }
 
-    /* Particles background */
+    /* Particles background - Nodos interconectados */
     .particles-container {
       position: fixed;
       top: 0;
@@ -130,17 +131,32 @@
 
     .particle {
       position: absolute;
-      width: 8px;
-      height: 8px;
-      background-color: rgba(0, 0, 255, 0.8);
+      width: 10px;
+      height: 10px;
+      background-color: rgba(0, 255, 255, 0.8); /* Cyan particles */
       border-radius: 50%;
-      opacity: 0;
       animation: moveParticles 2s linear infinite;
     }
 
+    /* Particles movement */
     @keyframes moveParticles {
-      0% { opacity: 1; transform: translate(0, 0); }
-      100% { opacity: 0; transform: translate(200px, 200px); }
+      0% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(200px, 200px);
+      }
+    }
+
+    /* Line connecting particles */
+    .line {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background-color: rgba(0, 255, 255, 0.5);
+      border-radius: 50%;
     }
 
   </style>
