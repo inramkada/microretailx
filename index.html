@@ -22,7 +22,7 @@
       transform: translate(-50%, -50%);
       color: white;
       font-family: monospace;
-      font-size: 4vw;
+      font-size: clamp(18px, 2.5vw, 40px);
       z-index: 10;
       pointer-events: none;
       text-align: center;
@@ -65,7 +65,6 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // RESIZE ADAPTATION
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -102,8 +101,11 @@
             (Math.random() - 0.5) * 0.5
           ));
 
-          // Estructura de X (solo nodos donde x == y == z o x+y+z == constante)
-          const isX = (x === y && y === z) || (x + y + z === GRID * 2);
+          // Estructura X mejor definida en diagonal
+          const isX = (
+            (x === y && y === z) ||
+            (x === y && z === GRID - 1 - x)
+          );
           xActiveFlags.push(isX);
           xPositions.push(isX ? pos.clone() : new THREE.Vector3(0, 0, 0));
         }
@@ -123,6 +125,7 @@
     let targetRotation = new THREE.Vector2();
     let lastMove = Date.now();
     let xMode = false;
+    let sphereMode = false;
     const flash = document.getElementById("flash");
 
     window.addEventListener('mousemove', e => {
@@ -131,14 +134,42 @@
       lastMove = Date.now();
     });
 
-    window.addEventListener('touchstart', toggleX);
     window.addEventListener('click', toggleX);
+    window.addEventListener('touchstart', toggleX);
+
+    let lastTap = 0;
+    window.addEventListener('touchend', e => {
+      const now = new Date().getTime();
+      if (now - lastTap < 300) {
+        toggleSphere();
+      }
+      lastTap = now;
+    });
 
     function toggleX() {
       xMode = !xMode;
       material.color.set(xMode ? xColor : nodeColor);
       document.body.style.backgroundColor = xMode ? '#330000' : '#000000';
       flash.style.animation = xMode ? 'flashRed 0.6s infinite' : 'none';
+    }
+
+    function toggleSphere() {
+      sphereMode = !sphereMode;
+      if (sphereMode) {
+        for (let i = 0; i < NODES; i++) {
+          const angle1 = Math.acos(2 * (i + 1) / NODES - 1);
+          const angle2 = Math.sqrt(NODES * Math.PI) * angle1;
+          const r = 30;
+          const x = r * Math.sin(angle1) * Math.cos(angle2);
+          const y = r * Math.sin(angle1) * Math.sin(angle2);
+          const z = r * Math.cos(angle1);
+          basePositions[i].set(x, y, z);
+        }
+      } else {
+        for (let i = 0; i < NODES; i++) {
+          basePositions[i].copy(tesseractPositions[i]);
+        }
+      }
     }
 
     function updateLines(current) {
@@ -175,7 +206,7 @@
         }
 
         const target = isMoving
-          ? (xMode ? xPositions[i] : tesseractPositions[i])
+          ? (xMode ? xPositions[i] : basePositions[i])
           : dispersed;
         const current = basePositions[i];
         current.lerp(target, 0.05);
