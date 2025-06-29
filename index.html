@@ -3,19 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOWS OPS – Mobile Ready</title>
   <style>
-    html, body { margin: 0; padding: 0; background: #000; overflow: hidden; transition: background-color 0.3s ease; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+      transition: background-color 0.3s ease;
+    }
     canvas { display: block; }
     .title {
       position: absolute;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
       color: white;
       font-family: monospace;
-      font-size: 1.2rem;
+      font-size: 4vw;
       z-index: 10;
       pointer-events: none;
+      text-align: center;
     }
     .flash {
       position: fixed;
@@ -40,6 +50,13 @@
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
 
+    const isMobile = /iPhone|Android|iPad/i.test(navigator.userAgent);
+    const GRID = isMobile ? 3 : 4;
+    const NODES = GRID * GRID * GRID;
+    const DISPERSION_SCALE = 80;
+    const nodeColor = new THREE.Color(0x00ffff);
+    const xColor = new THREE.Color(0xff0000);
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 100;
@@ -48,11 +65,12 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const GRID = 4;
-    const NODES = GRID * GRID * GRID;
-    const DISPERSION_SCALE = 80;
-    const nodeColor = new THREE.Color(0x00ffff);
-    const xColor = new THREE.Color(0xff0000);
+    // RESIZE ADAPTATION
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
     const basePositions = [];
     const tesseractPositions = [];
@@ -61,14 +79,18 @@
     const xActiveFlags = [];
     const dispersionSpeeds = [];
 
+    const offset = GRID / 2 - 0.5;
+
     for (let x = 0; x < GRID; x++) {
       for (let y = 0; y < GRID; y++) {
         for (let z = 0; z < GRID; z++) {
-          const px = (x - GRID / 2 + 0.5) * 10;
-          const py = (y - GRID / 2 + 0.5) * 10;
-          const pz = (z - GRID / 2 + 0.5) * 10;
-          tesseractPositions.push(new THREE.Vector3(px, py, pz));
-          basePositions.push(new THREE.Vector3(px, py, pz));
+          const i = x * GRID * GRID + y * GRID + z;
+          const px = (x - offset) * 10;
+          const py = (y - offset) * 10;
+          const pz = (z - offset) * 10;
+          const pos = new THREE.Vector3(px, py, pz);
+          tesseractPositions.push(pos.clone());
+          basePositions.push(pos.clone());
           dispersedPositions.push(new THREE.Vector3(
             (Math.random() - 0.5) * DISPERSION_SCALE,
             (Math.random() - 0.5) * DISPERSION_SCALE,
@@ -79,17 +101,11 @@
             (Math.random() - 0.5) * 0.5,
             (Math.random() - 0.5) * 0.5
           ));
-          const active = (x + y + z) % 5 === 0;
-          xActiveFlags.push(active);
-          if (active) {
-            xPositions.push(new THREE.Vector3(
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z),
-              (Math.random() > 0.5 ? 1 : -1) * (x + y + z)
-            ));
-          } else {
-            xPositions.push(new THREE.Vector3(0, 0, 0));
-          }
+
+          // Estructura de X (solo nodos donde x == y == z o x+y+z == constante)
+          const isX = (x === y && y === z) || (x + y + z === GRID * 2);
+          xActiveFlags.push(isX);
+          xPositions.push(isX ? pos.clone() : new THREE.Vector3(0, 0, 0));
         }
       }
     }
@@ -107,7 +123,7 @@
     let targetRotation = new THREE.Vector2();
     let lastMove = Date.now();
     let xMode = false;
-    let flash = document.getElementById("flash");
+    const flash = document.getElementById("flash");
 
     window.addEventListener('mousemove', e => {
       targetRotation.x = (e.clientY / window.innerHeight - 0.5) * Math.PI;
@@ -115,22 +131,25 @@
       lastMove = Date.now();
     });
 
-    window.addEventListener('click', () => {
+    window.addEventListener('touchstart', toggleX);
+    window.addEventListener('click', toggleX);
+
+    function toggleX() {
       xMode = !xMode;
       material.color.set(xMode ? xColor : nodeColor);
       document.body.style.backgroundColor = xMode ? '#330000' : '#000000';
       flash.style.animation = xMode ? 'flashRed 0.6s infinite' : 'none';
-    });
+    }
 
     function updateLines(current) {
       lineGroup.clear();
       for (let i = 0; i < NODES; i++) {
         for (let j = i + 1; j < NODES; j++) {
           const activeX = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
-          const threshold = xMode ? 20 : 16;
+          const threshold = xMode ? 25 : 16;
           if (activeX && current[i].distanceTo(current[j]) < threshold) {
             const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
-            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
+            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.12 });
             lineGroup.add(new THREE.Line(geo, mat));
           }
         }
@@ -159,7 +178,6 @@
           ? (xMode ? xPositions[i] : tesseractPositions[i])
           : dispersed;
         const current = basePositions[i];
-
         current.lerp(target, 0.05);
         currentPositions.push(current);
 
