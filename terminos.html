@@ -1,126 +1,159 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Términos y Condiciones - XSHADOWS OPS</title>
+  <title>XSHADOWS OPS - Terms and Conditions</title>
+
+  <!-- Google Translate Widget -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,es,fr,de,it,pt,zh-CN,ja',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   <style>
     /* General body and page styles */
-    body {
-      font-family: "Times New Roman", serif;
-      background-color: #f9f9f9;
-      color: #333;
+    html, body {
       margin: 0;
       padding: 0;
-      line-height: 1.6;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #f4f4f4;
+      font-family: "Times New Roman", serif;
+      transition: background-color 0.3s ease;
     }
 
-    /* Container for the content */
-    .container {
-      width: 80%;
-      margin: 40px auto;
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+    canvas { display: block; }
 
-    /* Titles and headings */
-    h1, h2 {
+    .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       color: #2c3e50;
+      font-size: clamp(18px, 2.5vw, 40px);
+      z-index: 10;
       text-align: center;
-      font-size: 36px;
-      margin-bottom: 10px;
     }
 
-    h2 {
-      margin-top: 30px;
-      font-size: 28px;
+    .flash {
+      position: fixed;
+      width: 100%; height: 100%;
+      top: 0; left: 0;
+      background: rgba(255, 0, 0, 0.1);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 5;
+      animation: none;
     }
 
-    /* Paragraph and list styles */
-    p {
-      font-size: 18px;
-      margin-bottom: 15px;
+    /* Styling for Google Translate dropdown */
+    #google_translate_element {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 20;
     }
 
-    ul {
-      list-style-type: disc;
-      margin-left: 40px;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 20px;
-      background-color: #2c3e50;
-      color: white;
-      margin-top: 40px;
+    /* Footer links style */
+    .footer-links {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #333;
+      font-family: "Times New Roman", serif;
       font-size: 14px;
-      border-radius: 5px;
+      text-align: center;
+      z-index: 20;
     }
 
-    footer a {
-      color: #ecf0f1;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Links */
-    a {
+    .footer-links a {
       color: #007bff;
+      margin: 0 15px;
       text-decoration: none;
     }
 
-    a:hover {
+    .footer-links a:hover {
       text-decoration: underline;
     }
-
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Términos y Condiciones</h1>
+  <!-- Google Translate dropdown -->
+  <div id="google_translate_element"></div>
 
-  <p>Bienvenido a <strong>XSHADOWS OPS</strong>, el servicio proporcionado por <strong>MicroRetailX LLC</strong>. Al acceder, utilizar o navegar por este sitio web, usted acepta estos Términos y Condiciones de uso. Si no está de acuerdo con alguno de estos términos, le pedimos que no utilice el sitio web.</p>
+  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
+  <div class="flash" id="flash"></div>
 
-  <h2>1. Aceptación de los Términos</h2>
-  <p>Al acceder a este sitio web, usted acepta estar sujeto a estos Términos y Condiciones, así como a nuestras <a href="politica-privacidad.html">Política de Privacidad</a> y <a href="politica-cookies.html">Política de Cookies</a>.</p>
+  <div class="container">
+    <h1>Terms and Conditions</h1>
 
-  <h2>2. Modificación de los Términos</h2>
-  <p>**MicroRetailX LLC** se reserva el derecho de modificar, actualizar o cambiar estos Términos en cualquier momento. Cualquier cambio será publicado en esta página. Le recomendamos revisar periódicamente estos términos.</p>
+    <p>These **Terms and Conditions of Use** ("Terms") govern the access and use of the **XSHADOWS OPS** platform ("the System", "we", "our", or "the Company"), owned and operated by **MicroRetailX LLC**, a company duly incorporated and registered at **1209 Orange Street, Wilmington, Delaware 19801, United States**. By accessing and utilizing this website, the system, and any associated services, you agree to be bound by these Terms. If you do not agree to these Terms, you must immediately cease using the services of **XSHADOWS OPS**.</p>
 
-  <h2>3. Propiedad Intelectual</h2>
-  <p>Todo el contenido de este sitio web (textos, imágenes, gráficos, logotipos, etc.) es propiedad de **MicroRetailX LLC** o sus licenciantes y está protegido por derechos de autor y leyes de propiedad intelectual.</p>
+    <h2>1. Acceptance of Terms</h2>
+    <p>By accessing or using **XSHADOWS OPS**, you acknowledge that you have read, understood, and agree to these **Terms and Conditions**. If you do not agree to any of the provisions herein, you must immediately refrain from using this system and its associated services. These Terms apply to all users of the system, including site visitors, subscribers, and registered users.</p>
 
-  <h2>4. Uso Aceptable del Sitio</h2>
-  <p>El uso de este sitio web debe ser para fines legales y conforme con las leyes aplicables. Queda prohibido:</p>
-  <ul>
-    <li>El uso del sitio web para actividades ilegales.</li>
-    <li>La transmisión de virus u otros materiales maliciosos.</li>
-    <li>El uso del sitio de manera que interfiera con su funcionamiento.</li>
-  </ul>
+    <h2>2. System Description and Current Status</h2>
+    <p>**XSHADOWS OPS** is an **advanced artificial intelligence** system that mimics the capabilities of high-level forensic and audit tools, similar to those used by professionals in law enforcement, intelligence agencies, and the financial sector. Specifically, it draws parallels with systems such as **i2 Analyst's Notebook**, which is employed for investigative analysis, data correlation, and audit trail assessments.</p>
+    <p>This system is currently in a **development phase** and is actively undergoing updates and improvements. As such, the functionality, accessibility, and overall service may be subject to significant changes, interruptions, or limitations. By utilizing **XSHADOWS OPS**, you understand and accept that the platform is an evolving technology, and its use may involve certain risks, including the possibility of incomplete functionality, system errors, and unscheduled downtimes.</p>
+    <p><strong>MicroRetailX LLC</strong> makes no warranties regarding the accuracy, reliability, or completeness of the data produced or processed by **XSHADOWS OPS**.</p>
 
-  <h2>5. Limitación de Responsabilidad</h2>
-  <p>El sitio web y sus servicios se proporcionan "tal cual", sin garantías de ningún tipo. **MicroRetailX LLC** no será responsable por daños indirectos, incidentales, especiales, punitivos o consecuentes derivados del uso del sitio web.</p>
+    <h2>3. Modifications to the Terms</h2>
+    <p>**MicroRetailX LLC** reserves the right, at its sole discretion, to modify, update, or revise these **Terms and Conditions** at any time without prior notice. Any modifications will be posted on this page and will be effective immediately upon publication. We strongly advise that you review these Terms periodically to stay informed of any changes. Your continued use of **XSHADOWS OPS** after the posting of any such modifications constitutes your acceptance of the updated Terms.</p>
 
-  <h2>6. Privacidad y Protección de Datos</h2>
-  <p>El tratamiento de datos personales se rige por nuestra <a href="politica-privacidad.html">Política de Privacidad</a>, que explica cómo recopilamos, utilizamos y protegemos la información personal de nuestros usuarios.</p>
+    <h2>4. Intellectual Property and License</h2>
+    <p>All intellectual property rights related to the **XSHADOWS OPS** system—including but not limited to copyrights, patents, trademarks, trade secrets, source code, data analytics models, and proprietary algorithms—are the exclusive property of **MicroRetailX LLC** or its licensors.</p>
+    <p>By accessing **XSHADOWS OPS**, you are granted a limited, non-exclusive, non-transferable, revocable, and non-sublicensable license to use the system solely for lawful personal or commercial purposes in accordance with these Terms. This license does not grant you any ownership or proprietary rights in the system or its underlying technologies. Any attempt to reverse-engineer, decompile, or otherwise bypass the security features of the system is strictly prohibited and may result in legal action.</p>
 
-  <h2>7. Ley Aplicable</h2>
-  <p>Estos Términos se regirán e interpretarán conforme a las leyes del Estado de Delaware, EE.UU. Cualquier disputa derivada de estos términos será resuelta en los tribunales de la ciudad de Wilmington, Delaware.</p>
+    <h2>5. Use of the System and Restrictions</h2>
+    <p>The use of **XSHADOWS OPS** is strictly limited to those who accept these Terms and comply with applicable laws. The system is designed to process and analyze large datasets for lawful and authorized purposes. Unauthorized use of **XSHADOWS OPS** for any illicit, fraudulent, or unauthorized activities is prohibited and may result in immediate suspension or termination of access.</p>
+    <ul>
+      <li><strong>Illegal activities</strong>, including, but not limited to, cybercrimes, data theft, or financial fraud.</li>
+      <li><strong>Attempting to interfere with the proper functioning</strong> of the system, including unauthorized access or the transmission of harmful data, malware, or other malicious code.</li>
+      <li><strong>Reproducing, redistributing, or modifying</strong> the system or any part thereof, without the express written consent of **MicroRetailX LLC**.</li>
+    </ul>
 
-  <h2>8. Contacto</h2>
-  <p>Si tiene alguna pregunta sobre estos Términos y Condiciones, por favor, póngase en contacto con nosotros a través de <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>.</p>
+    <h2>6. Limitation of Liability</h2>
+    <p>In no event shall **MicroRetailX LLC** be liable for any direct, indirect, incidental, special, punitive, or consequential damages arising from the use or inability to use **XSHADOWS OPS**, including, but not limited to, loss of data, revenue, profits, business interruptions, or any other commercial damages or losses, even if **MicroRetailX LLC** has been advised of the possibility of such damages.</p>
+    <p>By using the system, you acknowledge that **MicroRetailX LLC** is not liable for any risks or losses arising from the use of a system that is still under development.</p>
 
-  <footer>
-    <p>&copy; 2025 XSHADOWS OPS - Todos los derechos reservados. <br><a href="index.html">Volver al inicio</a></p>
-  </footer>
-</div>
+    <h2>7. Privacy and Data Protection</h2>
+    <p>The collection, use, and storage of your personal data are governed by our <a href="privacy-policy.html">Privacy Policy</a>, which outlines the practices for data protection in compliance with applicable international data protection laws, including the <strong>General Data Protection Regulation (GDPR)</strong> and other relevant privacy laws. By using **XSHADOWS OPS**, you consent to the collection and processing of your data in accordance with our Privacy Policy.</p>
+
+    <h2>8. Cookies and Tracking Technologies</h2>
+    <p>**XSHADOWS OPS** utilizes cookies and third-party tracking technologies (such as **Google Analytics**) to enhance the user experience and gather insights into system performance and traffic patterns. By using this system, you consent to the use of cookies in accordance with our <a href="cookie-policy.html">Cookie Policy</a>. You may manage your cookie preferences through your browser settings.</p>
+
+    <h2>9. Multijurisdictional Legal Framework</h2>
+    <p>Given that **MicroRetailX LLC** operates across multiple international jurisdictions, these Terms and Conditions are governed by a **multijurisdictional legal framework**. Disputes arising from the use of **XSHADOWS OPS** or these Terms will be governed by the laws of the State of Delaware, United States, without regard to its conflict of laws provisions.</p>
+    <p>Additionally, **MicroRetailX LLC** commits to complying with all applicable international laws and regulations governing the use of artificial intelligence, data protection, and privacy rights in the jurisdictions where it operates.</p>
+
+    <h2>10. Modification of the Service</h2>
+    <p>**MicroRetailX LLC** reserves the right to modify, suspend, or discontinue the **XSHADOWS OPS** system, in whole or in part, at any time, and for any reason, without prior notice. **MicroRetailX LLC** shall not be held liable for any such changes, interruptions, or discontinuations of the system or service.</p>
+
+    <h2>11. Contact Information</h2>
+    <p>For any inquiries or questions related to these Terms and Conditions or any legal matters concerning the use of the site and the **XSHADOWS OPS** system, please contact **MicroRetailX LLC** at the following email address:  
+    <a href="mailto:legal@microretailx.com">legal@microretailx.com</a></p>
+
+    <h2>12. Governing Law and Jurisdiction</h2>
+    <p>These Terms and Conditions shall be governed by and construed in accordance with the laws of the State of Delaware, United States, excluding any conflict of law principles. Any dispute arising out of these Terms shall be resolved exclusively in the courts of Wilmington, Delaware, United States, and you submit to the jurisdiction of such courts.</p>
+
+    <h2>13. Disclaimer of Warranty</h2>
+    <p>You acknowledge that the service provided by **XSHADOWS OPS** is under development, and **MicroRetailX LLC** makes no representations or warranties that the system will be error-free, uninterrupted, or defect-free. The use of the system is at your own risk.</p>
+
+    <footer>
+      <p>&copy; 2025 **MicroRetailX LLC** - All Rights Reserved.</p>
+      <p><a href="index.html">Back to Home</a></p>
+    </footer>
+  </div>
 
 </body>
 </html>
