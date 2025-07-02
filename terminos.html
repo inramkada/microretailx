@@ -75,27 +75,6 @@
       text-decoration: underline;
     }
 
-    .accept-btn {
-      margin-top: 1rem;
-      padding: 10px 20px;
-      background: #3498db;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .accept-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-
-    label {
-      display: block;
-      margin-top: 1.5rem;
-      font-size: 1rem;
-    }
-
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
@@ -127,24 +106,13 @@
   <h1>TERMS AND CONDITIONS OF USE</h1>
   <p>Last Updated: 01/07/2025</p>
 
-  <!-- Terms content omitted for brevity -->
-
-  <label>
-    <input type="checkbox" id="acceptTerms" />
-    I agree to the <a href="#terms" style="color: #3498db;">Terms and Conditions</a>
-  </label>
-  <button id="acceptBtn" class="accept-btn" disabled>Accept Terms</button>
+  <!-- Aquí debe ir el contenido completo de los términos que tenías antes -->
 </main>
 
 <footer>
-  <p>&copy; 2025 <strong>MICRORETAILX LLC</strong> - All Rights Reserved.</p>
-  <p><a href="index.html">Back to Home</a></p>
+  <p style="text-align: center; font-size: 0.75rem; color: #fff;">&copy; 2025 <strong>MICRORETAILX LLC</strong> - All Rights Reserved.</p>
+  <p style="text-align: center; font-size: 0.75rem;"><a href="index.html">Back to Home</a></p>
 </footer>
 
-<script>
-  document.getElementById("acceptTerms").addEventListener("change", function () {
-    document.getElementById("acceptBtn").disabled = !this.checked;
-  });
-</script>
 </body>
 </html>
