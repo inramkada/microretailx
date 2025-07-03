@@ -3,218 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOWS - Red Viva</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background: #000;
+      background: black;
       overflow: hidden;
     }
     canvas {
       display: block;
     }
-    .flash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(255, 0, 0, 0.5);
-      pointer-events: none;
-      opacity: 0;
-      z-index: 5;
-      animation: none;
-    }
-    @keyframes flashRed {
-      0%   { opacity: 0.5; }
-      50%  { opacity: 0.9; }
-      100% { opacity: 0; }
-    }
-    .title {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-family: monospace;
-      font-size: clamp(18px, 2.5vw, 40px);
-      z-index: 10;
-      pointer-events: none;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
-  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
-  <div class="flash" id="flash"></div>
-  <canvas id="canvas"></canvas>
+<canvas id="canvas"></canvas>
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const flash = document.getElementById('flash');
+  const mouse = { x: -1000, y: -1000 };
+  window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
 
-    let width, height;
-    const particles = [];
-    let redDot = null;
-    let redDotActive = true;
-    let nodeColor = 'white';
+  window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
 
-    const mouse = { x: -1000, y: -1000 };
+  const particles = [];
+  const NUM_PARTICLES = 150;
+  const SPEED = 0.3;
 
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
+  function inXZone(x, y) {
+    const margin = 40;
+    const d1 = Math.abs(y - (x * height / width));
+    const d2 = Math.abs(y - (height - x * height / width));
+    return (d1 < margin || d2 < margin);
+  }
 
-    window.addEventListener('resize', resize);
-    resize();
+  function createParticle() {
+    let x, y;
+    do {
+      x = Math.random() * width;
+      y = Math.random() * height;
+    } while (inXZone(x, y)); // evita zona X
 
-    window.addEventListener('mousemove', (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
+    return {
+      x,
+      y,
+      vx: (Math.random() - 0.5) * SPEED,
+      vy: (Math.random() - 0.5) * SPEED,
+      radius: 2
+    };
+  }
 
-    window.addEventListener('click', () => {
-      for (let i = 0; i < 100; i++) {
-        particles.push(createParticle(Math.random() * width, Math.random() * height));
-      }
-    });
+  for (let i = 0; i < NUM_PARTICLES; i++) {
+    particles.push(createParticle());
+  }
 
-    function createParticle(x, y) {
-      const baseSpeed = 0.4;
-      return {
-        x,
-        y,
-        vx: (Math.random() - 0.5) * baseSpeed || 0.1,
-        vy: (Math.random() - 0.5) * baseSpeed || 0.1,
-        radius: 2
-      };
-    }
+  function animate() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, width, height);
 
-    for (let i = 0; i < 150; i++) {
-      particles.push(createParticle(Math.random() * width, Math.random() * height));
-    }
-
-    function spawnRedDot() {
-      redDot = {
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 5,
-        vy: (Math.random() - 0.5) * 5,
-        radius: 4
-      };
-      redDotActive = true;
-    }
-
-    spawnRedDot();
-
-    function triggerFlashAndClone() {
-      flash.style.animation = 'flashRed 0.6s ease';
-      flash.style.opacity = 1;
-      nodeColor = nodeColor === 'white' ? '#00ffcc' : 'white';
-
-      for (let i = 0; i < 30; i++) {
-        const p = createParticle(Math.random() * width, Math.random() * height);
-        particles.push(p);
-      }
-
-      setTimeout(() => {
-        flash.style.animation = 'none';
-        flash.style.opacity = 0;
-      }, 600);
-    }
-
-    function repelFromX(p) {
-      const margin = 25;
-      const d1 = Math.abs(p.y - (height - p.x * height / width));
-      const d2 = Math.abs(p.y - (p.x * height / width));
-      if (d1 < margin || d2 < margin) {
-        const dx = p.x - width / 2;
-        const dy = p.y - height / 2;
-        const d = Math.sqrt(dx * dx + dy * dy) || 1;
-        const force = 2 * (margin - Math.min(d1, d2)) / margin;
-        p.vx += (dx / d) * force * 0.05;
-        p.vy += (dy / d) * force * 0.05;
-      }
-    }
-
-    function animate() {
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, width, height);
-
-      for (let i = 0; i < particles.length; i++) {
-        const p1 = particles[i];
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      for (let p of particles) {
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
+    // conexiones
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 50) {
-          const force = (50 - dist) * 0.008;
-          p.vx += dx / dist * force;
-          p.vy += dy / dist * force;
-        }
-
-        repelFromX(p);
-
-        p.x += p.vx;
-        p.y += p.vy;
-
-        p.vx *= 0.96;
-        p.vy *= 0.96;
-
-        if (p.x < 0 || p.x > width) p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
-
-        ctx.fillStyle = nodeColor;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      if (redDotActive && redDot) {
-        redDot.x += redDot.vx;
-        redDot.y += redDot.vy;
-
-        if (redDot.x < 0 || redDot.x > width) redDot.vx *= -1;
-        if (redDot.y < 0 || redDot.y > height) redDot.vy *= -1;
-
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.arc(redDot.x, redDot.y, redDot.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        const dx = redDot.x - mouse.x;
-        const dy = redDot.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < redDot.radius + 6) {
-          redDotActive = false;
-          triggerFlashAndClone();
-          setTimeout(spawnRedDot, 5000);
+        if (dist < 100) {
+          ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
         }
       }
-
-      requestAnimationFrame(animate);
     }
 
-    animate();
-  </script>
+    // movimiento
+    for (const p of particles) {
+      // repulsión del cursor
+      const dx = p.x - mouse.x;
+      const dy = p.y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 80) {
+        const force = (80 - dist) * 0.005;
+        p.vx += dx / dist * force;
+        p.vy += dy / dist * force;
+      }
+
+      // repulsión de la zona X (en cualquier dirección)
+      if (inXZone(p.x, p.y)) {
+        const angle = Math.random() * 2 * Math.PI;
+        const force = 0.5;
+        p.vx += Math.cos(angle) * force;
+        p.vy += Math.sin(angle) * force;
+      }
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.98;
+      p.vy *= 0.98;
+
+      // rebote en bordes
+      if (p.x < 0 || p.x > width) p.vx *= -1;
+      if (p.y < 0 || p.y > height) p.vy *= -1;
+
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+</script>
 </body>
 </html>
