@@ -80,13 +80,12 @@
       return {
         x,
         y,
-        vx: (Math.random() - 0.5) * 1.5,
-        vy: (Math.random() - 0.5) * 1.5,
+        vx: (Math.random() - 0.5) * 0.8,  // velocidad inicial más lenta
+        vy: (Math.random() - 0.5) * 0.8,
         radius: 2
       };
     }
 
-    // Inicial: red expandida
     for (let i = 0; i < 150; i++) {
       particles.push(createParticle(Math.random() * width, Math.random() * height));
     }
@@ -95,8 +94,8 @@
       redDot = {
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 2.5, // velocidad rápida
-        vy: (Math.random() - 0.5) * 2.5,
+        vx: (Math.random() - 0.5) * 5,  // muy rápido
+        vy: (Math.random() - 0.5) * 5,
         radius: 4
       };
       redDotActive = true;
@@ -158,11 +157,12 @@
       }
 
       for (let p of particles) {
+        // rebote sutil del ratón
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 60) {
-          const force = (60 - dist) * 0.01;
+        if (dist < 50) {
+          const force = (50 - dist) * 0.01;
           p.vx += dx / dist * force;
           p.vy += dy / dist * force;
         }
@@ -171,6 +171,10 @@
 
         p.x += p.vx;
         p.y += p.vy;
+
+        // fricción general
+        p.vx *= 0.97;
+        p.vy *= 0.97;
 
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
@@ -181,10 +185,11 @@
         ctx.fill();
       }
 
-      // punto rojo (rápido y escurridizo)
+      // redDot
       if (redDotActive && redDot) {
         redDot.x += redDot.vx;
         redDot.y += redDot.vy;
+
         if (redDot.x < 0 || redDot.x > width) redDot.vx *= -1;
         if (redDot.y < 0 || redDot.y > height) redDot.vy *= -1;
 
@@ -197,7 +202,7 @@
         const dy = redDot.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < redDot.radius + 4) {
+        if (dist < redDot.radius + 6) {
           redDotActive = false;
           triggerFlashAndClone();
           setTimeout(spawnRedDot, 5000);
