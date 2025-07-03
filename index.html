@@ -1,263 +1,132 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background: #000;
-      transition: background-color 0.3s ease;
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 100;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+const tesseractSize = 4;
+const DISPERSION_SCALE = 80;
+const MAX_CLICKS = 10;
+let clickCount = 0;
+
+const nodes = [];
+const velocities = [];
+const positions = new Float32Array(10000 * 3); // soporte hasta 10000 nodos
+
+const geometry = new THREE.BufferGeometry();
+geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+const material = new THREE.PointsMaterial({ color: 0x00ffff, size: 1.2 });
+const points = new THREE.Points(geometry, material);
+scene.add(points);
+
+const lineGroup = new THREE.Group();
+scene.add(lineGroup);
+
+// Inicializar tesseracto
+const offset = tesseractSize / 2 - 0.5;
+for (let x = 0; x < tesseractSize; x++) {
+  for (let y = 0; y < tesseractSize; y++) {
+    for (let z = 0; z < tesseractSize; z++) {
+      const pos = new THREE.Vector3(
+        (x - offset) * 10,
+        (y - offset) * 10,
+        (z - offset) * 10
+      );
+      nodes.push(pos);
+      velocities.push(new THREE.Vector3());
     }
-    canvas { display: block; }
-    .title {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-family: monospace;
-      font-size: clamp(18px, 2.5vw, 40px);
-      z-index: 10;
-      pointer-events: none;
-      text-align: center;
+  }
+}
+
+// Control de ratón
+const mouse = new THREE.Vector2();
+let repel = false;
+
+window.addEventListener('mousemove', (e) => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+window.addEventListener('click', () => {
+  if (clickCount < MAX_CLICKS) {
+    for (let i = 0; i < 5; i++) {
+      const newNode = new THREE.Vector3(
+        (Math.random() - 0.5) * DISPERSION_SCALE,
+        (Math.random() - 0.5) * DISPERSION_SCALE,
+        (Math.random() - 0.5) * DISPERSION_SCALE
+      );
+      nodes.push(newNode);
+      velocities.push(new THREE.Vector3());
     }
-    .flash {
-      position: fixed;
-      width: 100%; height: 100%;
-      top: 0; left: 0;
-      background: rgba(255, 0, 0, 0.1);
-      pointer-events: none;
-      opacity: 0;
-      z-index: 5;
-      animation: none;
+    clickCount++;
+    if (clickCount >= MAX_CLICKS) repel = true;
+  }
+});
+
+// Raycaster para repulsión
+const raycaster = new THREE.Raycaster();
+const cursor = new THREE.Vector2();
+
+function updateLines() {
+  lineGroup.clear();
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dist = nodes[i].distanceTo(nodes[j]);
+      if (dist < 20) {
+        const geo = new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]);
+        const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.1 });
+        lineGroup.add(new THREE.Line(geo, mat));
+      }
     }
-    @keyframes flashRed {
-      0%   { opacity: 0.1; }
-      50%  { opacity: 0.4; }
-      100% { opacity: 0.1; }
-    }
-    
-    /* Footer links style */
-    .footer-links {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-family: monospace;
-      font-size: 14px;
-      text-align: center;
-      z-index: 20;
-    }
+  }
+}
 
-    .footer-links a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-    }
+function animate() {
+  requestAnimationFrame(animate);
 
-    .footer-links a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
-  <div class="flash" id="flash"></div>
+  // Cámara
+  raycaster.setFromCamera(mouse, camera);
+  const repelPoint = raycaster.ray.origin;
 
-  <!-- Enlaces a Términos y Cookies en el pie de página -->
-  <div class="footer-links">
-    <a href="terminos.html">T & C</a> | 
-    <a href="cookies.html">Política de Cookies</a>
-  </div>
+  for (let i = 0; i < nodes.length; i++) {
+    let node = nodes[i];
+    let vel = velocities[i];
 
-  <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js';
-
-    const isMobile = /iPhone|Android|iPad/i.test(navigator.userAgent);
-    const GRID = isMobile ? 3 : 4;
-    const NODES = GRID * GRID * GRID;
-    const DISPERSION_SCALE = 80;
-    const nodeColor = new THREE.Color(0x00ffff);
-    const xColor = new THREE.Color(0xff0000);
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 100;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    const basePositions = [];
-    const tesseractPositions = [];
-    const dispersedPositions = [];
-    const xPositions = [];
-    const xActiveFlags = [];
-    const dispersionSpeeds = [];
-
-    const offset = GRID / 2 - 0.5;
-
-    for (let x = 0; x < GRID; x++) {
-      for (let y = 0; y < GRID; y++) {
-        for (let z = 0; z < GRID; z++) {
-          const i = x * GRID * GRID + y * GRID + z;
-          const px = (x - offset) * 10;
-          const py = (y - offset) * 10;
-          const pz = (z - offset) * 10;
-          const pos = new THREE.Vector3(px, py, pz);
-          tesseractPositions.push(pos.clone());
-          basePositions.push(pos.clone());
-          dispersedPositions.push(new THREE.Vector3(
-            (Math.random() - 0.5) * DISPERSION_SCALE,
-            (Math.random() - 0.5) * DISPERSION_SCALE,
-            (Math.random() - 0.5) * DISPERSION_SCALE
-          ));
-          dispersionSpeeds.push(new THREE.Vector3(
-            (Math.random() - 0.5) * 0.5,
-            (Math.random() - 0.5) * 0.5,
-            (Math.random() - 0.5) * 0.5
-          ));
-
-          // Estructura X mejor definida en diagonal
-          const isX = (
-            (x === y && y === z) ||
-            (x === y && z === GRID - 1 - x)
-          );
-          xActiveFlags.push(isX);
-          xPositions.push(isX ? pos.clone() : new THREE.Vector3(0, 0, 0));
-        }
+    // Repulsión tras máximo clics
+    if (repel) {
+      const distance = node.distanceTo(repelPoint);
+      if (distance < 20) {
+        const dir = node.clone().sub(repelPoint).normalize();
+        vel.add(dir.multiplyScalar(0.4));
       }
     }
 
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(NODES * 3);
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ color: nodeColor, size: 0.8 });
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
+    // Movimiento suave
+    node.add(vel);
+    vel.multiplyScalar(clickCount >= MAX_CLICKS ? 0.85 : 0.92);
 
-    const lineGroup = new THREE.Group();
-    scene.add(lineGroup);
+    // Posiciones al buffer
+    positions[i * 3] = node.x;
+    positions[i * 3 + 1] = node.y;
+    positions[i * 3 + 2] = node.z;
+  }
 
-    let targetRotation = new THREE.Vector2();
-    let lastMove = Date.now();
-    let xMode = false;
-    let sphereMode = false;
-    const flash = document.getElementById("flash");
+  geometry.setDrawRange(0, nodes.length);
+  geometry.attributes.position.needsUpdate = true;
 
-    window.addEventListener('mousemove', e => {
-      targetRotation.x = (e.clientY / window.innerHeight - 0.5) * Math.PI;
-      targetRotation.y = (e.clientX / window.innerWidth - 0.5) * Math.PI;
-      lastMove = Date.now();
-    });
+  updateLines();
+  renderer.render(scene, camera);
+}
 
-    window.addEventListener('click', toggleX);
-    window.addEventListener('touchstart', toggleX);
-
-    let lastTap = 0;
-    window.addEventListener('touchend', e => {
-      const now = new Date().getTime();
-      if (now - lastTap < 300) {
-        toggleSphere();
-      }
-      lastTap = now;
-    });
-
-    function toggleX() {
-      xMode = !xMode;
-      material.color.set(xMode ? xColor : nodeColor);
-      document.body.style.backgroundColor = xMode ? '#330000' : '#000000';
-      flash.style.animation = xMode ? 'flashRed 0.6s infinite' : 'none';
-    }
-
-    function toggleSphere() {
-      sphereMode = !sphereMode;
-      if (sphereMode) {
-        for (let i = 0; i < NODES; i++) {
-          const angle1 = Math.acos(2 * (i + 1) / NODES - 1);
-          const angle2 = Math.sqrt(NODES * Math.PI) * angle1;
-          const r = 30;
-          const x = r * Math.sin(angle1) * Math.cos(angle2);
-          const y = r * Math.sin(angle1) * Math.sin(angle2);
-          const z = r * Math.cos(angle1);
-          basePositions[i].set(x, y, z);
-        }
-      } else {
-        for (let i = 0; i < NODES; i++) {
-          basePositions[i].copy(tesseractPositions[i]);
-        }
-      }
-    }
-
-    function updateLines(current) {
-      lineGroup.clear();
-      for (let i = 0; i < NODES; i++) {
-        for (let j = i + 1; j < NODES; j++) {
-          const activeX = !xMode || (xActiveFlags[i] && xActiveFlags[j]);
-          const threshold = xMode ? 25 : 16;
-          if (activeX && current[i].distanceTo(current[j]) < threshold) {
-            const geo = new THREE.BufferGeometry().setFromPoints([current[i], current[j]]);
-            const mat = new THREE.LineBasicMaterial({ color: material.color, transparent: true, opacity: 0.12 });
-            lineGroup.add(new THREE.Line(geo, mat));
-          }
-        }
-      }
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-      const now = Date.now();
-      const isMoving = (now - lastMove) < 3000;
-
-      const currentPositions = [];
-
-      for (let i = 0; i < NODES; i++) {
-        const dispersed = dispersedPositions[i];
-        dispersed.add(dispersionSpeeds[i]);
-        if (dispersed.length() > DISPERSION_SCALE) {
-          dispersedPositions[i] = new THREE.Vector3(
-            (Math.random() - 0.5) * DISPERSION_SCALE,
-            (Math.random() - 0.5) * DISPERSION_SCALE,
-            (Math.random() - 0.5) * DISPERSION_SCALE
-          );
-        }
-
-        const target = isMoving
-          ? (xMode ? xPositions[i] : basePositions[i])
-          : dispersed;
-        const current = basePositions[i];
-        current.lerp(target, 0.05);
-        currentPositions.push(current);
-
-        positions[i * 3] = current.x;
-        positions[i * 3 + 1] = current.y;
-        positions[i * 3 + 2] = current.z;
-      }
-
-      geometry.attributes.position.needsUpdate = true;
-      updateLines(currentPositions);
-
-      points.rotation.x += (targetRotation.x - points.rotation.x) * 0.05;
-      points.rotation.y += (targetRotation.y - points.rotation.y) * 0.05;
-      lineGroup.rotation.copy(points.rotation);
-
-      renderer.render(scene, camera);
-    }
-
-    animate();
-  </script>
-</body>
-</html>
+animate();
