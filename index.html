@@ -76,6 +76,12 @@
       mouse.y = e.clientY;
     });
 
+    window.addEventListener('click', () => {
+      for (let i = 0; i < 100; i++) {
+        particles.push(createParticle(Math.random() * width, Math.random() * height));
+      }
+    });
+
     function createParticle(x, y) {
       const baseSpeed = 0.4;
       return {
@@ -109,7 +115,6 @@
       flash.style.opacity = 1;
       nodeColor = nodeColor === 'white' ? '#00ffcc' : 'white';
 
-      // Crear 30 nuevos nodos con velocidad viva
       for (let i = 0; i < 30; i++) {
         const p = createParticle(Math.random() * width, Math.random() * height);
         particles.push(p);
@@ -157,7 +162,6 @@
       }
 
       for (let p of particles) {
-        // repulsión del ratón
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
