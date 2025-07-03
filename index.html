@@ -77,11 +77,12 @@
     });
 
     function createParticle(x, y) {
+      const baseSpeed = 0.4;
       return {
         x,
         y,
-        vx: (Math.random() - 0.5) * 0.8,  // velocidad inicial más lenta
-        vy: (Math.random() - 0.5) * 0.8,
+        vx: (Math.random() - 0.5) * baseSpeed || 0.1,
+        vy: (Math.random() - 0.5) * baseSpeed || 0.1,
         radius: 2
       };
     }
@@ -94,7 +95,7 @@
       redDot = {
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 5,  // muy rápido
+        vx: (Math.random() - 0.5) * 5,
         vy: (Math.random() - 0.5) * 5,
         radius: 4
       };
@@ -106,12 +107,12 @@
     function triggerFlashAndClone() {
       flash.style.animation = 'flashRed 0.6s ease';
       flash.style.opacity = 1;
-
       nodeColor = nodeColor === 'white' ? '#00ffcc' : 'white';
 
-      // Crear 20 nuevos nodos
-      for (let i = 0; i < 20; i++) {
-        particles.push(createParticle(Math.random() * width, Math.random() * height));
+      // Crear 30 nuevos nodos con velocidad viva
+      for (let i = 0; i < 30; i++) {
+        const p = createParticle(Math.random() * width, Math.random() * height);
+        particles.push(p);
       }
 
       setTimeout(() => {
@@ -138,7 +139,6 @@
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, width, height);
 
-      // conexiones
       for (let i = 0; i < particles.length; i++) {
         const p1 = particles[i];
         for (let j = i + 1; j < particles.length; j++) {
@@ -157,12 +157,12 @@
       }
 
       for (let p of particles) {
-        // rebote sutil del ratón
+        // repulsión del ratón
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 50) {
-          const force = (50 - dist) * 0.01;
+          const force = (50 - dist) * 0.008;
           p.vx += dx / dist * force;
           p.vy += dy / dist * force;
         }
@@ -172,9 +172,8 @@
         p.x += p.vx;
         p.y += p.vy;
 
-        // fricción general
-        p.vx *= 0.97;
-        p.vy *= 0.97;
+        p.vx *= 0.96;
+        p.vy *= 0.96;
 
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
@@ -185,7 +184,6 @@
         ctx.fill();
       }
 
-      // redDot
       if (redDotActive && redDot) {
         redDot.x += redDot.vx;
         redDot.y += redDot.vy;
