@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS - Red Viva</title>
+  <title>XSHADOWS - Living Network</title>
   <style>
     html, body {
       margin: 0;
@@ -26,117 +26,163 @@
       pointer-events: none;
       text-align: center;
     }
+    .footer-links {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-family: monospace;
+      font-size: 14px;
+      z-index: 20;
+      text-align: center;
+    }
+    .footer-links a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
-<script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  let width = canvas.width = window.innerWidth;
-  let height = canvas.height = window.innerHeight;
 
-  const mouse = { x: -1000, y: -1000 };
-  window.addEventListener('mousemove', e => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-  });
+  <div class="footer-links">
+    <a href="terms.html" target="_blank">Terms & Conditions</a> |
+    <a href="cookies.html" target="_blank">Cookie Policy</a>
+  </div>
 
-  window.addEventListener('resize', () => {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-  });
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
-  const particles = [];
-  const NUM_PARTICLES = 300;
-  const SPEED = 0.3;
+    const mouse = { x: -1000, y: -1000 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
 
-  function inXZone(x, y) {
-    const margin = 40;
-    const d1 = Math.abs(y - (x * height / width));
-    const d2 = Math.abs(y - (height - x * height / width));
-    return (d1 < margin || d2 < margin);
-  }
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
 
-  function createParticle() {
-    let x, y;
-    do {
-      x = Math.random() * width;
-      y = Math.random() * height;
-    } while (inXZone(x, y)); // evita zona X
+    const particles = [];
+    const NUM_PARTICLES = 2000;
+    const SPEED = 0.5;
 
-    return {
-      x,
-      y,
-      vx: (Math.random() - 0.5) * SPEED,
-      vy: (Math.random() - 0.5) * SPEED,
-      radius: 2
-    };
-  }
+    function inXZone(x, y) {
+      const margin = 40;
+      const d1 = Math.abs(y - (x * height / width));
+      const d2 = Math.abs(y - (height - x * height / width));
+      return (d1 < margin || d2 < margin);
+    }
 
-  for (let i = 0; i < NUM_PARTICLES; i++) {
-    particles.push(createParticle());
-  }
+    function createParticle() {
+      let x, y;
+      do {
+        x = Math.random() * width;
+        y = Math.random() * height;
+      } while (inXZone(x, y));
 
-  function animate() {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, width, height);
+      const ox = x, oy = y;
+      return {
+        x, y, ox, oy,
+        vx: (Math.random() - 0.5) * SPEED,
+        vy: (Math.random() - 0.5) * SPEED,
+        radius: 1.5
+      };
+    }
 
-    // conexiones
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 100) {
-          ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
+    for (let i = 0; i < NUM_PARTICLES; i++) {
+      particles.push(createParticle());
+    }
+
+    function animate() {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, width, height);
+
+      // conexiones
+      for (let i = 0; i < particles.length; i++) {
+        let connections = 0;
+        for (let j = i + 1; j < particles.length && connections < 10; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+            connections++;
+          }
+
+          if (dist > 0 && dist < 40) {
+            const force = (40 - dist) * 0.005;
+            const ax = dx / dist * force;
+            const ay = dy / dist * force;
+            particles[i].vx += ax;
+            particles[i].vy += ay;
+            particles[j].vx -= ax;
+            particles[j].vy -= ay;
+          }
         }
       }
-    }
 
-    // movimiento
-    for (const p of particles) {
-      // repulsión del cursor
-      const dx = p.x - mouse.x;
-      const dy = p.y - mouse.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 80) {
-        const force = (80 - dist) * 0.005;
-        p.vx += dx / dist * force;
-        p.vy += dy / dist * force;
+      for (const p of particles) {
+        // repulsión del cursor
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          const force = (100 - dist) * 0.007;
+          p.vx += dx / dist * force;
+          p.vy += dy / dist * force;
+        }
+
+        // repulsión zona X
+        if (inXZone(p.x, p.y)) {
+          const angle = Math.random() * 2 * Math.PI;
+          const force = 0.6;
+          p.vx += Math.cos(angle) * force;
+          p.vy += Math.sin(angle) * force;
+        }
+
+        // memoria (volver a posición original)
+        const backX = (p.ox - p.x) * 0.002;
+        const backY = (p.oy - p.y) * 0.002;
+        p.vx += backX;
+        p.vy += backY;
+
+        // movimiento tipo bacteria
+        p.vx += (Math.random() - 0.5) * 0.05;
+        p.vy += (Math.random() - 0.5) * 0.05;
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.97;
+        p.vy *= 0.97;
+
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      // repulsión de la zona X (en cualquier dirección)
-      if (inXZone(p.x, p.y)) {
-        const angle = Math.random() * 2 * Math.PI;
-        const force = 0.5;
-        p.vx += Math.cos(angle) * force;
-        p.vy += Math.sin(angle) * force;
-      }
-
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vx *= 0.98;
-      p.vy *= 0.98;
-
-      if (p.x < 0 || p.x > width) p.vx *= -1;
-      if (p.y < 0 || p.y > height) p.vy *= -1;
-
-      ctx.fillStyle = "white";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fill();
+      requestAnimationFrame(animate);
     }
 
-    requestAnimationFrame(animate);
-  }
-
-  animate();
-</script>
+    animate();
+  </script>
 </body>
 </html>
