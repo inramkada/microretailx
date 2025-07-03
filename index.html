@@ -31,9 +31,22 @@
       50%  { opacity: 0.9; }
       100% { opacity: 0; }
     }
+    .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-family: monospace;
+      font-size: clamp(18px, 2.5vw, 40px);
+      z-index: 10;
+      pointer-events: none;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="flash" id="flash"></div>
   <canvas id="canvas"></canvas>
 
@@ -82,8 +95,8 @@
       redDot = {
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
+        vx: (Math.random() - 0.5) * 2.5, // velocidad rápida
+        vy: (Math.random() - 0.5) * 2.5,
         radius: 4
       };
       redDotActive = true;
@@ -91,10 +104,17 @@
 
     spawnRedDot();
 
-    function triggerFlash() {
+    function triggerFlashAndClone() {
       flash.style.animation = 'flashRed 0.6s ease';
       flash.style.opacity = 1;
-      nodeColor = nodeColor === 'white' ? '#00ffff' : 'white';
+
+      nodeColor = nodeColor === 'white' ? '#00ffcc' : 'white';
+
+      // Crear 20 nuevos nodos
+      for (let i = 0; i < 20; i++) {
+        particles.push(createParticle(Math.random() * width, Math.random() * height));
+      }
+
       setTimeout(() => {
         flash.style.animation = 'none';
         flash.style.opacity = 0;
@@ -103,8 +123,8 @@
 
     function repelFromX(p) {
       const margin = 25;
-      const d1 = Math.abs(p.y - (height - p.x * height / width)); // ↘
-      const d2 = Math.abs(p.y - (p.x * height / width)); // ↙
+      const d1 = Math.abs(p.y - (height - p.x * height / width));
+      const d2 = Math.abs(p.y - (p.x * height / width));
       if (d1 < margin || d2 < margin) {
         const dx = p.x - width / 2;
         const dy = p.y - height / 2;
@@ -138,7 +158,6 @@
       }
 
       for (let p of particles) {
-        // repulsión del ratón
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -148,10 +167,8 @@
           p.vy += dy / dist * force;
         }
 
-        // repulsión de la X
         repelFromX(p);
 
-        // movimiento
         p.x += p.vx;
         p.y += p.vy;
 
@@ -164,7 +181,7 @@
         ctx.fill();
       }
 
-      // red dot
+      // punto rojo (rápido y escurridizo)
       if (redDotActive && redDot) {
         redDot.x += redDot.vx;
         redDot.y += redDot.vy;
@@ -176,14 +193,14 @@
         ctx.arc(redDot.x, redDot.y, redDot.radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // detección de colisión con cursor
         const dx = redDot.x - mouse.x;
         const dy = redDot.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
+
         if (dist < redDot.radius + 4) {
           redDotActive = false;
-          triggerFlash();
-          setTimeout(() => spawnRedDot(), 5000);
+          triggerFlashAndClone();
+          setTimeout(spawnRedDot, 5000);
         }
       }
 
