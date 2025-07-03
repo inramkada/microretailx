@@ -14,10 +14,23 @@
     canvas {
       display: block;
     }
+    .title {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-family: monospace;
+      font-size: clamp(18px, 2.5vw, 40px);
+      z-index: 10;
+      pointer-events: none;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
+  <canvas id="canvas"></canvas>
+  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
 <script>
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
@@ -36,7 +49,7 @@
   });
 
   const particles = [];
-  const NUM_PARTICLES = 150;
+  const NUM_PARTICLES = 300;
   const SPEED = 0.3;
 
   function inXZone(x, y) {
@@ -111,7 +124,6 @@
       p.vx *= 0.98;
       p.vy *= 0.98;
 
-      // rebote en bordes
       if (p.x < 0 || p.x > width) p.vx *= -1;
       if (p.y < 0 || p.y > height) p.vy *= -1;
 
