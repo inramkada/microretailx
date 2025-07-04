@@ -100,7 +100,8 @@
         baseColor: "white",
         color: "white",
         clicked: false,
-        clickTime: 0
+        clickTime: 0,
+        inX: false
       };
     }
 
@@ -108,35 +109,19 @@
       particles.push(createParticle());
     }
 
-    // Flash efecto
-    let flashOpacity = 0;
-
-    canvas.addEventListener('click', (e) => {
-      const clickX = e.clientX;
-      const clickY = e.clientY;
-      flashOpacity = 0.5;
-
-      particles.forEach(p => {
-        const dx = p.x - clickX;
-        const dy = p.y - clickY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 120) {
-          p.color = "red";
-          p.clicked = true;
-          p.clickTime = performance.now();
-        }
-      });
-    });
-
     function animate() {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
-      if (flashOpacity > 0) {
-        ctx.fillStyle = `rgba(255, 0, 0, ${flashOpacity})`;
-        ctx.fillRect(0, 0, width, height);
-        flashOpacity *= 0.9;
-      }
+      // remarcar la X
+      ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(width, height);
+      ctx.moveTo(width, 0);
+      ctx.lineTo(0, height);
+      ctx.stroke();
 
       // conexiones
       for (let i = 0; i < particles.length; i++) {
@@ -153,23 +138,12 @@
             ctx.stroke();
             connections++;
           }
-
-          if (dist > 0 && dist < 40) {
-            const force = (40 - dist) * 0.005;
-            const ax = dx / dist * force;
-            const ay = dy / dist * force;
-            particles[i].vx += ax;
-            particles[i].vy += ay;
-            particles[j].vx -= ax;
-            particles[j].vy -= ay;
-          }
         }
       }
 
       const now = performance.now();
 
       for (const p of particles) {
-        // repulsión del cursor
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -179,21 +153,22 @@
           p.vy += dy / dist * force;
         }
 
-        // repulsión zona X
-        if (inXZone(p.x, p.y)) {
+        const wasInX = p.inX;
+        p.inX = inXZone(p.x, p.y);
+
+        if (p.inX) {
+          // movimiento rápido + vibración
           const angle = Math.random() * 2 * Math.PI;
-          const force = 0.6;
+          const force = 0.8;
           p.vx += Math.cos(angle) * force;
           p.vy += Math.sin(angle) * force;
+          p.radius = 3 + Math.sin(now * 0.02) * 1;
           p.color = "#ff00ff";
-        } else if (!p.clicked) {
+        } else {
+          if (wasInX) {
+            p.radius = 1.5;
+          }
           p.color = p.baseColor;
-        }
-
-        // efecto clic
-        if (p.clicked && now - p.clickTime > 600) {
-          p.color = p.baseColor;
-          p.clicked = false;
         }
 
         // memoria
@@ -202,7 +177,7 @@
         p.vx += backX;
         p.vy += backY;
 
-        // movimiento tipo bacteria
+        // movimiento bacteriano
         p.vx += (Math.random() - 0.5) * 0.05;
         p.vy += (Math.random() - 0.5) * 0.05;
 
