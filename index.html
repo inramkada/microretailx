@@ -16,12 +16,12 @@
     }
     .title {
       position: absolute;
-      top: 10px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
       color: white;
       font-family: monospace;
-      font-size: 16px;
+      font-size: clamp(18px, 2.5vw, 40px);
       z-index: 10;
       pointer-events: none;
       text-align: center;
@@ -49,7 +49,8 @@
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <div class="title">i2 ANALYST + YOLOv8 ACTIVATED</div>
+  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
+
   <div class="footer-links">
     <a href="terms.html" target="_blank">Terms & Conditions</a> |
     <a href="cookies.html" target="_blank">Cookie Policy</a>
@@ -73,7 +74,7 @@
     });
 
     const particles = [];
-    const NUM_PARTICLES = 34;
+    const NUM_PARTICLES = 2000;
     const SPEED = 0.5;
 
     function inXZone(x, y) {
@@ -116,7 +117,7 @@
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
-      // marcar la X visual
+      // remarcar la X
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -147,6 +148,7 @@
       const now = performance.now();
 
       for (const p of particles) {
+        // repulsión del cursor
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -183,7 +185,7 @@
           }
 
           ctx.font = "12px monospace";
-          ctx.fillStyle = "#ffffff";  // Blanco puro
+          ctx.fillStyle = "#ffffff"; // <--- AQUÍ EL CAMBIO
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
 
@@ -196,6 +198,7 @@
           p.color = p.baseColor;
         }
 
+        // memoria y movimiento
         const backX = (p.ox - p.x) * 0.002;
         const backY = (p.oy - p.y) * 0.002;
         p.vx += backX;
