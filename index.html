@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>XSHADOWS - Living Network</title>
+  <link rel="icon" href="favicon_xops_alert.ico" type="image/x-icon">
   <style>
     html, body {
       margin: 0;
@@ -180,16 +181,17 @@
           p.radius = 3.5 + Math.sin(t * 0.05 + p.x + p.y) * 1.5;
           p.color = "#ff00ff";
 
-          // cambia código hex dinámicamente
           if (Math.random() < 0.4) {
             p.hexCode = randomHex();
           }
 
-          // muestra el texto "viulenza" y hex
-          ctx.font = "12px monospace";
-          ctx.fillStyle = "#ff00ff";
-          ctx.fillText("viulenza", p.x + 10, p.y - 8);
-          ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
+          // texto alerta
+          const flashColor = Math.floor(t / 200) % 2 === 0 ? "#ff0000" : "#ffffff";
+          ctx.font = "bold 12px monospace";
+          ctx.fillStyle = flashColor;
+          ctx.fillText("▲ i2 analyst", p.x + 12, p.y - 12);
+          ctx.fillText("viulenza", p.x + 12, p.y + 2);
+          ctx.fillText(p.hexCode, p.x + 12, p.y + 16);
 
         } else {
           if (wasInX) {
