@@ -1,170 +1,175 @@
-<script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let width = canvas.width = window.innerWidth;
-let height = canvas.height = window.innerHeight;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XSHADOWS - Viulenza Mode</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
 
-const mouse = { x: -1000, y: -1000 };
-window.addEventListener('mousemove', e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-});
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
-window.addEventListener('resize', () => {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-});
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
 
-const particles = [];
-const NUM_PARTICLES = 2000;
-const SPEED = 0.5;
+    const mouse = { x: -9999, y: -9999 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
 
-function inXZone(x, y) {
-  const margin = 40;
-  const d1 = Math.abs(y - (x * height / width));
-  const d2 = Math.abs(y - (height - x * height / width));
-  return (d1 < margin || d2 < margin);
-}
+    const particles = [];
+    const NUM_PARTICLES = 1000;
+    const SPEED = 0.5;
 
-function randomHex() {
-  return "#" + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
-}
+    function inXZone(x, y) {
+      const margin = 40;
+      const diag1 = Math.abs(y - x * (height / width));
+      const diag2 = Math.abs(y - (height - x * (height / width)));
+      return diag1 < margin || diag2 < margin;
+    }
 
-function createParticle() {
-  let x, y;
-  do {
-    x = Math.random() * width;
-    y = Math.random() * height;
-  } while (inXZone(x, y));
+    function randomHex() {
+      return "#" + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
+    }
 
-  const ox = x, oy = y;
-  return {
-    x, y, ox, oy,
-    vx: (Math.random() - 0.5) * SPEED,
-    vy: (Math.random() - 0.5) * SPEED,
-    radius: 1.5,
-    baseColor: "white",
-    color: "white",
-    inX: false,
-    hasLaunched: false,
-    hexCode: randomHex()
-  };
-}
+    function createParticle() {
+      let x = Math.random() * width;
+      let y = Math.random() * height;
+      return {
+        x, y,
+        ox: x, oy: y,
+        vx: (Math.random() - 0.5) * SPEED,
+        vy: (Math.random() - 0.5) * SPEED,
+        radius: 1.5,
+        baseColor: "white",
+        color: "white",
+        inX: false,
+        hasLaunched: false,
+        hexCode: randomHex()
+      };
+    }
 
-for (let i = 0; i < NUM_PARTICLES; i++) {
-  particles.push(createParticle());
-}
+    for (let i = 0; i < NUM_PARTICLES; i++) {
+      particles.push(createParticle());
+    }
 
-function animate() {
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, width, height);
+    function animate() {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, width, height);
 
-  // remarcar la X
-  ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(width, height);
-  ctx.moveTo(width, 0);
-  ctx.lineTo(0, height);
-  ctx.stroke();
+      // Dibuja X
+      ctx.strokeStyle = "rgba(255,0,0,0.05)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(width, height);
+      ctx.moveTo(width, 0);
+      ctx.lineTo(0, height);
+      ctx.stroke();
 
-  // conexiones
-  for (let i = 0; i < particles.length; i++) {
-    let connections = 0;
-    for (let j = i + 1; j < particles.length && connections < 10; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 100) {
-        ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        // Calcular si está en la X
+        const wasInX = p.inX;
+        p.inX = inXZone(p.x, p.y);
+
+        // Movimiento vibrante si está en la X
+        if (p.inX) {
+          if (!wasInX && !p.hasLaunched) {
+            // Se lanza al lado opuesto
+            const targetX = width - p.x;
+            const targetY = height - p.y;
+            const dx = targetX - p.x;
+            const dy = targetY - p.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const speed = 6;
+            p.vx += (dx / dist) * speed;
+            p.vy += (dy / dist) * speed;
+            p.hasLaunched = true;
+          }
+
+          // Vibración
+          p.vx += (Math.random() - 0.5) * 0.8;
+          p.vy += (Math.random() - 0.5) * 0.8;
+          p.radius = 3.5 + Math.sin(performance.now() * 0.01 + p.x + p.y) * 1.5;
+          p.color = "#ff00ff";
+
+          // Cambia el hex rápidamente
+          if (Math.random() < 0.4) {
+            p.hexCode = randomHex();
+          }
+
+          // Texto "viulenza" y hex
+          ctx.font = "12px monospace";
+          ctx.fillStyle = "#ff00ff";
+          ctx.fillText("viulenza", p.x + 10, p.y - 8);
+          ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
+
+        } else {
+          if (wasInX) {
+            p.radius = 1.5;
+            p.color = p.baseColor;
+            p.hasLaunched = false;
+          }
+        }
+
+        // Repulsión del cursor
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          const force = (100 - dist) * 0.007;
+          p.vx += dx / dist * force;
+          p.vy += dy / dist * force;
+        }
+
+        // Fuerza hacia posición original
+        p.vx += (p.ox - p.x) * 0.002;
+        p.vy += (p.oy - p.y) * 0.002;
+
+        // Movimiento orgánico
+        p.vx += (Math.random() - 0.5) * 0.05;
+        p.vy += (Math.random() - 0.5) * 0.05;
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.97;
+        p.vy *= 0.97;
+
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        // Dibuja el nodo
+        ctx.fillStyle = p.color;
         ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.stroke();
-        connections++;
-      }
-    }
-  }
-
-  const now = performance.now();
-
-  for (const p of particles) {
-    // repulsión del cursor
-    const dx = p.x - mouse.x;
-    const dy = p.y - mouse.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < 100) {
-      const force = (100 - dist) * 0.007;
-      p.vx += dx / dist * force;
-      p.vy += dy / dist * force;
-    }
-
-    const wasInX = p.inX;
-    p.inX = inXZone(p.x, p.y);
-
-    if (p.inX && !wasInX && !p.hasLaunched) {
-      const targetX = width - p.x;
-      const targetY = height - p.y;
-      const dx = targetX - p.x;
-      const dy = targetY - p.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const speed = 6;
-      p.vx += (dx / dist) * speed;
-      p.vy += (dy / dist) * speed;
-      p.hasLaunched = true;
-    }
-
-    if (p.inX) {
-      const t = now;
-      p.vx += Math.sin(t * 0.1 + p.x) * 0.4;
-      p.vy += Math.cos(t * 0.1 + p.y) * 0.4;
-      p.radius = 3.5 + Math.sin(t * 0.05 + p.x + p.y) * 1.5;
-      p.color = "#ff00ff";
-
-      // cambiar hex dinámicamente
-      if (Math.random() < 0.5) {
-        p.hexCode = randomHex();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      // dibujar texto de viulenza + hex
-      ctx.font = "12px monospace";
-      ctx.fillStyle = "#ff00ff";
-      ctx.fillText("viulenza", p.x + 8, p.y - 6);
-      ctx.fillText(p.hexCode, p.x + 8, p.y + 6);
-    } else {
-      if (wasInX) {
-        p.radius = 1.5;
-        p.hasLaunched = false;
-        p.hexCode = randomHex();
-      }
-      p.color = p.baseColor;
+      requestAnimationFrame(animate);
     }
 
-    // memoria y movimiento
-    const backX = (p.ox - p.x) * 0.002;
-    const backY = (p.oy - p.y) * 0.002;
-    p.vx += backX;
-    p.vy += backY;
-    p.vx += (Math.random() - 0.5) * 0.05;
-    p.vy += (Math.random() - 0.5) * 0.05;
-
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vx *= 0.97;
-    p.vy *= 0.97;
-
-    if (p.x < 0 || p.x > width) p.vx *= -1;
-    if (p.y < 0 || p.y > height) p.vy *= -1;
-
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  requestAnimationFrame(animate);
-}
-
-animate();
-</script>
+    animate();
+  </script>
+</body>
+</html>
