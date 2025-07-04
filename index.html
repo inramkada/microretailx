@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS</title>
+  <title>XSHADOWS - Living Network</title>
   <style>
     html, body {
       margin: 0;
@@ -50,7 +50,6 @@
 <body>
   <canvas id="canvas"></canvas>
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
-
   <div class="footer-links">
     <a href="terms.html" target="_blank">Terms & Conditions</a> |
     <a href="cookies.html" target="_blank">Cookie Policy</a>
@@ -94,7 +93,6 @@
         x = Math.random() * width;
         y = Math.random() * height;
       } while (inXZone(x, y));
-
       const ox = x, oy = y;
       return {
         x, y, ox, oy,
@@ -145,10 +143,9 @@
         }
       }
 
+      let countInX = 0;
       const now = performance.now();
-
       for (const p of particles) {
-        // repulsión del cursor
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -160,6 +157,8 @@
 
         const wasInX = p.inX;
         p.inX = inXZone(p.x, p.y);
+
+        if (p.inX) countInX++;
 
         if (p.inX && !wasInX && !p.hasLaunched) {
           const targetX = width - p.x;
@@ -180,15 +179,12 @@
           p.radius = 3.5 + Math.sin(t * 0.05 + p.x + p.y) * 1.5;
           p.color = "#ff00ff";
 
-          if (Math.random() < 0.4) {
-            p.hexCode = randomHex();
-          }
+          if (Math.random() < 0.4) p.hexCode = randomHex();
 
           ctx.font = "12px monospace";
-          ctx.fillStyle = "#ffffff"; // <--- AQUÍ EL CAMBIO
+          ctx.fillStyle = "#ff00ff";
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
-
         } else {
           if (wasInX) {
             p.radius = 1.5;
@@ -198,7 +194,6 @@
           p.color = p.baseColor;
         }
 
-        // memoria y movimiento
         const backX = (p.ox - p.x) * 0.002;
         const backY = (p.oy - p.y) * 0.002;
         p.vx += backX;
@@ -219,6 +214,26 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
+      }
+
+      // Activación especial visual
+      if (countInX >= 34) {
+        ctx.fillStyle = "rgba(255,0,0,0.1)";
+        ctx.fillRect(0, 0, width, height);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        const cx = width / 2, cy = height / 2, s = 100;
+        ctx.moveTo(cx, cy - s);
+        ctx.lineTo(cx - s * Math.sin(Math.PI / 3), cy + s / 2);
+        ctx.lineTo(cx + s * Math.sin(Math.PI / 3), cy + s / 2);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.font = "bold 22px monospace";
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", cx, cy + s + 30);
       }
 
       requestAnimationFrame(animate);
