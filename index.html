@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOWS - Living Network</title>
   <style>
     html, body {
       margin: 0;
@@ -16,12 +16,12 @@
     }
     .title {
       position: absolute;
-      top: 50%;
+      top: 10px;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
       color: white;
       font-family: monospace;
-      font-size: clamp(18px, 2.5vw, 40px);
+      font-size: 16px;
       z-index: 10;
       pointer-events: none;
       text-align: center;
@@ -49,7 +49,7 @@
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
+  <div class="title">i2 ANALYST + YOLOv8 ACTIVATED</div>
   <div class="footer-links">
     <a href="terms.html" target="_blank">Terms & Conditions</a> |
     <a href="cookies.html" target="_blank">Cookie Policy</a>
@@ -73,7 +73,7 @@
     });
 
     const particles = [];
-    const NUM_PARTICLES = 2000;
+    const NUM_PARTICLES = 34;
     const SPEED = 0.5;
 
     function inXZone(x, y) {
@@ -116,7 +116,7 @@
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
-      // remarcar la X
+      // marcar la X visual
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -145,10 +145,8 @@
       }
 
       const now = performance.now();
-      let countInX = 0;
 
       for (const p of particles) {
-        // repulsión del cursor
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -160,7 +158,6 @@
 
         const wasInX = p.inX;
         p.inX = inXZone(p.x, p.y);
-        if (p.inX) countInX++;
 
         if (p.inX && !wasInX && !p.hasLaunched) {
           const targetX = width - p.x;
@@ -186,7 +183,7 @@
           }
 
           ctx.font = "12px monospace";
-          ctx.fillStyle = "#ff00ff";
+          ctx.fillStyle = "#ffffff";  // Blanco puro
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
 
@@ -219,29 +216,6 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
-      }
-
-      // Efecto visual tipo i2 Analyst
-      if (countInX >= 50) {
-        ctx.fillStyle = "rgba(255,0,0,0.1)";
-        ctx.fillRect(0, 0, width, height);
-
-        ctx.strokeStyle = "rgba(255, 100, 100, 0.7)";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const size = 100;
-        ctx.moveTo(centerX, centerY - size);
-        ctx.lineTo(centerX - size * Math.sin(Math.PI / 3), centerY + size / 2);
-        ctx.lineTo(centerX + size * Math.sin(Math.PI / 3), centerY + size / 2);
-        ctx.closePath();
-        ctx.stroke();
-
-        ctx.font = "bold 22px monospace";
-        ctx.fillStyle = "rgba(255, 80, 80, 0.9)";
-        ctx.textAlign = "center";
-        ctx.fillText("PATTERN DETECTED", centerX, centerY + size + 30);
       }
 
       requestAnimationFrame(animate);
