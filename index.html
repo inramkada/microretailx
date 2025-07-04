@@ -135,7 +135,7 @@
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
-            ctx.strokeStyle = rgba(0,255,255,${1 - dist / 100});
+            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -146,9 +146,9 @@
       }
 
       const now = performance.now();
+      let countInX = 0;
 
       for (const p of particles) {
-        // repulsión del cursor
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -160,6 +160,8 @@
 
         const wasInX = p.inX;
         p.inX = inXZone(p.x, p.y);
+
+        if (p.inX) countInX++;
 
         if (p.inX && !wasInX && !p.hasLaunched) {
           const targetX = width - p.x;
@@ -180,12 +182,10 @@
           p.radius = 3.5 + Math.sin(t * 0.05 + p.x + p.y) * 1.5;
           p.color = "#ff00ff";
 
-          // cambia código hex dinámicamente
           if (Math.random() < 0.4) {
             p.hexCode = randomHex();
           }
 
-          // muestra el texto "viulenza" y hex
           ctx.font = "12px monospace";
           ctx.fillStyle = "#ff00ff";
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
@@ -200,13 +200,11 @@
           p.color = p.baseColor;
         }
 
-        // memoria
         const backX = (p.ox - p.x) * 0.002;
         const backY = (p.oy - p.y) * 0.002;
         p.vx += backX;
         p.vy += backY;
 
-        // movimiento orgánico
         p.vx += (Math.random() - 0.5) * 0.05;
         p.vy += (Math.random() - 0.5) * 0.05;
 
@@ -222,6 +220,12 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
+      }
+
+      // flash cuando 50 están en X
+      if (countInX >= 50) {
+        ctx.fillStyle = "rgba(255,0,0,0.2)";
+        ctx.fillRect(0, 0, width, height);
       }
 
       requestAnimationFrame(animate);
