@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>XSHADOWS - Living Network</title>
-  <link rel="icon" href="favicon_xops_alert.ico" type="image/x-icon">
   <style>
     html, body {
       margin: 0;
@@ -78,6 +77,9 @@
     const NUM_PARTICLES = 2000;
     const SPEED = 0.5;
 
+    let flashActive = false;
+    let flashStart = 0;
+
     function inXZone(x, y) {
       const margin = 40;
       const d1 = Math.abs(y - (x * height / width));
@@ -114,11 +116,28 @@
       particles.push(createParticle());
     }
 
+    function drawAlertTriangle() {
+      ctx.save();
+      ctx.translate(width / 2, height / 2);
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+      ctx.beginPath();
+      ctx.moveTo(0, -80);
+      ctx.lineTo(70, 60);
+      ctx.lineTo(-70, 60);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = "bold 22px monospace";
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      ctx.textAlign = "center";
+      ctx.fillText("ALERT", 0, 8);
+      ctx.restore();
+    }
+
     function animate() {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
-      // remarcar la X
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -128,7 +147,6 @@
       ctx.lineTo(0, height);
       ctx.stroke();
 
-      // conexiones
       for (let i = 0; i < particles.length; i++) {
         let connections = 0;
         for (let j = i + 1; j < particles.length && connections < 10; j++) {
@@ -146,10 +164,10 @@
         }
       }
 
+      let inXCount = 0;
       const now = performance.now();
 
       for (const p of particles) {
-        // repulsión del cursor
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -161,6 +179,7 @@
 
         const wasInX = p.inX;
         p.inX = inXZone(p.x, p.y);
+        if (p.inX) inXCount++;
 
         if (p.inX && !wasInX && !p.hasLaunched) {
           const targetX = width - p.x;
@@ -181,17 +200,12 @@
           p.radius = 3.5 + Math.sin(t * 0.05 + p.x + p.y) * 1.5;
           p.color = "#ff00ff";
 
-          if (Math.random() < 0.4) {
-            p.hexCode = randomHex();
-          }
+          if (Math.random() < 0.4) p.hexCode = randomHex();
 
-          // texto alerta
-          const flashColor = Math.floor(t / 200) % 2 === 0 ? "#ff0000" : "#ffffff";
-          ctx.font = "bold 12px monospace";
-          ctx.fillStyle = flashColor;
-          ctx.fillText("▲ i2 analyst", p.x + 12, p.y - 12);
-          ctx.fillText("viulenza", p.x + 12, p.y + 2);
-          ctx.fillText(p.hexCode, p.x + 12, p.y + 16);
+          ctx.font = "12px monospace";
+          ctx.fillStyle = "#ff00ff";
+          ctx.fillText("viulenza", p.x + 10, p.y - 8);
+          ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
 
         } else {
           if (wasInX) {
@@ -202,13 +216,11 @@
           p.color = p.baseColor;
         }
 
-        // memoria
         const backX = (p.ox - p.x) * 0.002;
         const backY = (p.oy - p.y) * 0.002;
         p.vx += backX;
         p.vy += backY;
 
-        // movimiento orgánico
         p.vx += (Math.random() - 0.5) * 0.05;
         p.vy += (Math.random() - 0.5) * 0.05;
 
@@ -224,6 +236,23 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
+      }
+
+      if (inXCount > 50 && !flashActive) {
+        flashActive = true;
+        flashStart = now;
+      }
+
+      if (flashActive) {
+        const elapsed = now - flashStart;
+        const alpha = 1 - elapsed / 2000;
+        if (alpha > 0) {
+          ctx.fillStyle = `rgba(255, 0, 0, ${alpha * 0.5})`;
+          ctx.fillRect(0, 0, width, height);
+          drawAlertTriangle();
+        } else {
+          flashActive = false;
+        }
       }
 
       requestAnimationFrame(animate);
