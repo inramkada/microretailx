@@ -86,8 +86,12 @@
     }
 
     function createParticle() {
-      let x = Math.random() * width;
-      let y = Math.random() * height;
+      let x, y;
+      do {
+        x = Math.random() * width;
+        y = Math.random() * height;
+      } while (inXZone(x, y));
+
       return {
         x, y, ox: x, oy: y,
         vx: (Math.random() - 0.5) * SPEED,
@@ -97,15 +101,19 @@
         color: "white",
         infected: false,
         infectionTime: 0,
-        explosionDelay: 0
+        isAlive: true
       };
     }
 
+    for (let i = 0; i < NUM_PARTICLES; i++) {
+      particles.push(createParticle());
+    }
+
     function createExplosion(x, y) {
-      const count = 8 + Math.floor(Math.random() * 5);
+      const count = 10 + Math.floor(Math.random() * 5);
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 1.5;
+        const speed = Math.random() * 2;
         explosions.push({
           x, y,
           vx: Math.cos(angle) * speed,
@@ -117,42 +125,45 @@
       }
     }
 
-    for (let i = 0; i < NUM_PARTICLES; i++) {
-      particles.push(createParticle());
-    }
-
     function animate() {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
-      const now = performance.now();
-
       // conexiones
       for (let i = 0; i < particles.length; i++) {
-        let p1 = particles[i];
+        if (!particles[i].isAlive) continue;
         let connections = 0;
         for (let j = i + 1; j < particles.length && connections < 8; j++) {
-          let p2 = particles[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
+          if (!particles[j].isAlive) continue;
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
             ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
             ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
             ctx.stroke();
             connections++;
+          }
+
+          if (dist > 0 && dist < 40) {
+            const force = (40 - dist) * 0.005;
+            const ax = dx / dist * force;
+            const ay = dy / dist * force;
+            particles[i].vx += ax;
+            particles[i].vy += ay;
+            particles[j].vx -= ax;
+            particles[j].vy -= ay;
           }
         }
       }
 
-      for (const p of particles) {
-        // movimiento bacteriano
-        p.vx += (Math.random() - 0.5) * 0.05;
-        p.vy += (Math.random() - 0.5) * 0.05;
+      const now = performance.now();
 
-        // repulsión del cursor
+      for (const p of particles) {
+        if (!p.isAlive) continue;
+
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -162,40 +173,55 @@
           p.vy += dy / dist * force;
         }
 
-        // memoria
-        const backX = (p.ox - p.x) * 0.002;
-        const backY = (p.oy - p.y) * 0.002;
-        p.vx += backX;
-        p.vy += backY;
-
-        // infección
         if (inXZone(p.x, p.y) && !p.infected) {
           p.infected = true;
           p.infectionTime = now;
-          p.explosionDelay = 2000 + Math.random() * 1000; // entre 2-3s
           p.color = "#ff0077";
         }
 
         if (p.infected) {
           const elapsed = now - p.infectionTime;
+
+          // Diana
           ctx.save();
           ctx.translate(p.x, p.y);
           ctx.strokeStyle = "red";
-          ctx.lineWidth = 1;
+          ctx.lineWidth = 1.2;
           ctx.beginPath();
           ctx.arc(0, 0, 5 + Math.sin(elapsed * 0.01) * 2, 0, 2 * Math.PI);
           ctx.stroke();
           ctx.restore();
 
-          if (elapsed > p.explosionDelay) {
-            p.infected = false;
-            p.color = p.baseColor;
+          if (elapsed > 10000) {
+            p.isAlive = false;
             createExplosion(p.x, p.y);
-            particles.push(createParticle());
+
+            for (let i = 0; i < 5; i++) {
+              particles.push({
+                x: p.x,
+                y: p.y,
+                ox: p.x,
+                oy: p.y,
+                vx: (Math.random() - 0.5) * SPEED,
+                vy: (Math.random() - 0.5) * SPEED,
+                radius: 1.5,
+                baseColor: "white",
+                color: "white",
+                infected: false,
+                infectionTime: 0,
+                isAlive: true
+              });
+            }
           }
         }
 
-        // aplicar velocidad
+        // comportamiento general
+        const backX = (p.ox - p.x) * 0.002;
+        const backY = (p.oy - p.y) * 0.002;
+        p.vx += backX;
+        p.vy += backY;
+        p.vx += (Math.random() - 0.5) * 0.05;
+        p.vy += (Math.random() - 0.5) * 0.05;
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.97;
@@ -204,6 +230,7 @@
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
+        // forma especial infectados
         if (p.infected) {
           ctx.fillStyle = p.color;
           ctx.fillRect(p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
@@ -215,5 +242,25 @@
         }
       }
 
-      // explosiones visuales
-      for (let i = explosions.length - 1; i >= 0; i--
+      // Explosiones
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        const e = explosions[i];
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+        ctx.fill();
+        e.x += e.vx;
+        e.y += e.vy;
+        e.vx *= 0.95;
+        e.vy *= 0.95;
+        e.life--;
+        if (e.life <= 0) explosions.splice(i, 1);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
