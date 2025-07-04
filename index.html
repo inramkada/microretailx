@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOW OPS</title>
   <style>
     html, body {
       margin: 0;
@@ -54,6 +54,7 @@
     <a href="terms.html" target="_blank">Terms & Conditions</a> |
     <a href="cookies.html" target="_blank">Cookie Policy</a>
   </div>
+
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -74,12 +75,12 @@
     const particles = [];
     const NUM_PARTICLES = 2000;
     const SPEED = 0.5;
+    const xZoneMargin = 40;
 
     function inXZone(x, y) {
-      const margin = 40;
       const d1 = Math.abs(y - (x * height / width));
       const d2 = Math.abs(y - (height - x * height / width));
-      return (d1 < margin || d2 < margin);
+      return (d1 < xZoneMargin || d2 < xZoneMargin);
     }
 
     function randomHex() {
@@ -111,18 +112,38 @@
       particles.push(createParticle());
     }
 
-    function drawTriangleAlert() {
-      ctx.fillStyle = "white";
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        let connections = 0;
+        for (let j = i + 1; j < particles.length && connections < 10; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+            connections++;
+          }
+        }
+      }
+    }
+
+    function drawTriangleOverlay() {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
       ctx.beginPath();
-      ctx.moveTo(width / 2, height / 2 - 80);
-      ctx.lineTo(width / 2 - 60, height / 2 + 40);
-      ctx.lineTo(width / 2 + 60, height / 2 + 40);
+      ctx.moveTo(width / 2, height * 0.2);
+      ctx.lineTo(width * 0.3, height * 0.8);
+      ctx.lineTo(width * 0.7, height * 0.8);
       ctx.closePath();
       ctx.fill();
 
-      ctx.font = "16px monospace";
+      ctx.font = "bold 20px monospace";
       ctx.fillStyle = "white";
-      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2 - 140, height / 2 + 80);
+      ctx.textAlign = "center";
+      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, height * 0.5);
     }
 
     function animate() {
@@ -138,7 +159,10 @@
       ctx.lineTo(0, height);
       ctx.stroke();
 
-      let nodesInX = 0;
+      drawConnections();
+
+      const now = performance.now();
+      let inXCount = 0;
 
       for (const p of particles) {
         const dx = p.x - mouse.x;
@@ -152,29 +176,30 @@
 
         const wasInX = p.inX;
         p.inX = inXZone(p.x, p.y);
+        if (p.inX) inXCount++;
 
         if (p.inX && !wasInX && !p.hasLaunched) {
-          const tx = width - p.x;
-          const ty = height - p.y;
-          const dd = Math.sqrt(tx * tx + ty * ty) || 1;
-          const speed = 6;
-          p.vx += (tx / dd) * speed;
-          p.vy += (ty / dd) * speed;
+          const dx = (width - p.x);
+          const dy = (height - p.y);
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          p.vx += (dx / dist) * 6;
+          p.vy += (dy / dist) * 6;
           p.hasLaunched = true;
         }
 
         if (p.inX) {
-          nodesInX++;
-          const t = performance.now();
-          p.vx += Math.sin(t * 0.1 + p.x) * 0.4;
-          p.vy += Math.cos(t * 0.1 + p.y) * 0.4;
-          p.radius = 3.5 + Math.sin(t * 0.05 + p.x + p.y) * 1.5;
-          p.color = "#ffffff";
+          p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
+          p.vy += Math.cos(now * 0.1 + p.y) * 0.4;
+          p.radius = 3.5 + Math.sin(now * 0.05 + p.x + p.y) * 1.5;
+          p.color = "white";
+
           if (Math.random() < 0.4) p.hexCode = randomHex();
+
           ctx.font = "12px monospace";
           ctx.fillStyle = "white";
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
+
         } else {
           if (wasInX) {
             p.radius = 1.5;
@@ -206,7 +231,9 @@
         ctx.fill();
       }
 
-      if (nodesInX >= 25) drawTriangleAlert();
+      if (inXCount >= 25) {
+        drawTriangleOverlay();
+      }
 
       requestAnimationFrame(animate);
     }
