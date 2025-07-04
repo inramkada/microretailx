@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOWS OPS</title>
+  <title>XSHADOWS - Living Network</title>
   <style>
     html, body {
       margin: 0;
@@ -77,9 +77,6 @@
     const NUM_PARTICLES = 2000;
     const SPEED = 0.5;
 
-    let flashActive = false;
-    let flashStart = 0;
-
     function inXZone(x, y) {
       const margin = 40;
       const d1 = Math.abs(y - (x * height / width));
@@ -116,28 +113,11 @@
       particles.push(createParticle());
     }
 
-    function drawAlertTriangle() {
-      ctx.save();
-      ctx.translate(width / 2, height / 2);
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
-      ctx.beginPath();
-      ctx.moveTo(0, -80);
-      ctx.lineTo(70, 60);
-      ctx.lineTo(-70, 60);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.font = "bold 22px monospace";
-      ctx.fillStyle = "rgba(255,255,255,0.8)";
-      ctx.textAlign = "center";
-      ctx.fillText("ALERT", 0, 8);
-      ctx.restore();
-    }
-
     function animate() {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
+      // remarcar la X
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -147,6 +127,7 @@
       ctx.lineTo(0, height);
       ctx.stroke();
 
+      // conexiones
       for (let i = 0; i < particles.length; i++) {
         let connections = 0;
         for (let j = i + 1; j < particles.length && connections < 10; j++) {
@@ -154,7 +135,7 @@
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
-            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
+            ctx.strokeStyle = rgba(0,255,255,${1 - dist / 100});
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -164,10 +145,10 @@
         }
       }
 
-      let inXCount = 0;
       const now = performance.now();
 
       for (const p of particles) {
+        // repulsión del cursor
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -179,7 +160,6 @@
 
         const wasInX = p.inX;
         p.inX = inXZone(p.x, p.y);
-        if (p.inX) inXCount++;
 
         if (p.inX && !wasInX && !p.hasLaunched) {
           const targetX = width - p.x;
@@ -200,8 +180,12 @@
           p.radius = 3.5 + Math.sin(t * 0.05 + p.x + p.y) * 1.5;
           p.color = "#ff00ff";
 
-          if (Math.random() < 0.4) p.hexCode = randomHex();
+          // cambia código hex dinámicamente
+          if (Math.random() < 0.4) {
+            p.hexCode = randomHex();
+          }
 
+          // muestra el texto "viulenza" y hex
           ctx.font = "12px monospace";
           ctx.fillStyle = "#ff00ff";
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
@@ -216,11 +200,13 @@
           p.color = p.baseColor;
         }
 
+        // memoria
         const backX = (p.ox - p.x) * 0.002;
         const backY = (p.oy - p.y) * 0.002;
         p.vx += backX;
         p.vy += backY;
 
+        // movimiento orgánico
         p.vx += (Math.random() - 0.5) * 0.05;
         p.vy += (Math.random() - 0.5) * 0.05;
 
@@ -236,23 +222,6 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
-      }
-
-      if (inXCount > 50 && !flashActive) {
-        flashActive = true;
-        flashStart = now;
-      }
-
-      if (flashActive) {
-        const elapsed = now - flashStart;
-        const alpha = 1 - elapsed / 2000;
-        if (alpha > 0) {
-          ctx.fillStyle = `rgba(255, 0, 0, ${alpha * 0.5})`;
-          ctx.fillRect(0, 0, width, height);
-          drawAlertTriangle();
-        } else {
-          flashActive = false;
-        }
       }
 
       requestAnimationFrame(animate);
