@@ -54,7 +54,6 @@
     <a href="terms.html" target="_blank">Terms & Conditions</a> |
     <a href="cookies.html" target="_blank">Cookie Policy</a>
   </div>
-
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -93,6 +92,7 @@
         x = Math.random() * width;
         y = Math.random() * height;
       } while (inXZone(x, y));
+
       const ox = x, oy = y;
       return {
         x, y, ox, oy,
@@ -111,11 +111,24 @@
       particles.push(createParticle());
     }
 
+    function drawTriangleAlert() {
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      ctx.moveTo(width / 2, height / 2 - 80);
+      ctx.lineTo(width / 2 - 60, height / 2 + 40);
+      ctx.lineTo(width / 2 + 60, height / 2 + 40);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = "16px monospace";
+      ctx.fillStyle = "white";
+      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2 - 140, height / 2 + 80);
+    }
+
     function animate() {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
-      // remarcar la X
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -125,26 +138,8 @@
       ctx.lineTo(0, height);
       ctx.stroke();
 
-      // conexiones
-      for (let i = 0; i < particles.length; i++) {
-        let connections = 0;
-        for (let j = i + 1; j < particles.length && connections < 10; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-            connections++;
-          }
-        }
-      }
+      let nodesInX = 0;
 
-      let countInX = 0;
-      const now = performance.now();
       for (const p of particles) {
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
@@ -158,31 +153,26 @@
         const wasInX = p.inX;
         p.inX = inXZone(p.x, p.y);
 
-        if (p.inX) countInX++;
-
         if (p.inX && !wasInX && !p.hasLaunched) {
-          const targetX = width - p.x;
-          const targetY = height - p.y;
-          const dx = targetX - p.x;
-          const dy = targetY - p.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const tx = width - p.x;
+          const ty = height - p.y;
+          const dd = Math.sqrt(tx * tx + ty * ty) || 1;
           const speed = 6;
-          p.vx += (dx / dist) * speed;
-          p.vy += (dy / dist) * speed;
+          p.vx += (tx / dd) * speed;
+          p.vy += (ty / dd) * speed;
           p.hasLaunched = true;
         }
 
         if (p.inX) {
-          const t = now;
+          nodesInX++;
+          const t = performance.now();
           p.vx += Math.sin(t * 0.1 + p.x) * 0.4;
           p.vy += Math.cos(t * 0.1 + p.y) * 0.4;
           p.radius = 3.5 + Math.sin(t * 0.05 + p.x + p.y) * 1.5;
-          p.color = "#ff00ff";
-
+          p.color = "#ffffff";
           if (Math.random() < 0.4) p.hexCode = randomHex();
-
           ctx.font = "12px monospace";
-          ctx.fillStyle = "#ff00ff";
+          ctx.fillStyle = "white";
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
         } else {
@@ -216,25 +206,7 @@
         ctx.fill();
       }
 
-      // Activación especial visual
-      if (countInX >= 34) {
-        ctx.fillStyle = "rgba(255,0,0,0.1)";
-        ctx.fillRect(0, 0, width, height);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        const cx = width / 2, cy = height / 2, s = 100;
-        ctx.moveTo(cx, cy - s);
-        ctx.lineTo(cx - s * Math.sin(Math.PI / 3), cy + s / 2);
-        ctx.lineTo(cx + s * Math.sin(Math.PI / 3), cy + s / 2);
-        ctx.closePath();
-        ctx.stroke();
-
-        ctx.font = "bold 22px monospace";
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", cx, cy + s + 30);
-      }
+      if (nodesInX >= 25) drawTriangleAlert();
 
       requestAnimationFrame(animate);
     }
