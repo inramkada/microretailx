@@ -96,7 +96,11 @@
         x, y, ox, oy,
         vx: (Math.random() - 0.5) * SPEED,
         vy: (Math.random() - 0.5) * SPEED,
-        radius: 1.5
+        radius: 1.5,
+        baseColor: "white",
+        color: "white",
+        clicked: false,
+        clickTime: 0
       };
     }
 
@@ -104,9 +108,35 @@
       particles.push(createParticle());
     }
 
+    // Flash efecto
+    let flashOpacity = 0;
+
+    canvas.addEventListener('click', (e) => {
+      const clickX = e.clientX;
+      const clickY = e.clientY;
+      flashOpacity = 0.5;
+
+      particles.forEach(p => {
+        const dx = p.x - clickX;
+        const dy = p.y - clickY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          p.color = "red";
+          p.clicked = true;
+          p.clickTime = performance.now();
+        }
+      });
+    });
+
     function animate() {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
+
+      if (flashOpacity > 0) {
+        ctx.fillStyle = `rgba(255, 0, 0, ${flashOpacity})`;
+        ctx.fillRect(0, 0, width, height);
+        flashOpacity *= 0.9;
+      }
 
       // conexiones
       for (let i = 0; i < particles.length; i++) {
@@ -136,6 +166,8 @@
         }
       }
 
+      const now = performance.now();
+
       for (const p of particles) {
         // repulsión del cursor
         const dx = p.x - mouse.x;
@@ -153,9 +185,18 @@
           const force = 0.6;
           p.vx += Math.cos(angle) * force;
           p.vy += Math.sin(angle) * force;
+          p.color = "#ff00ff";
+        } else if (!p.clicked) {
+          p.color = p.baseColor;
         }
 
-        // memoria (volver a posición original)
+        // efecto clic
+        if (p.clicked && now - p.clickTime > 600) {
+          p.color = p.baseColor;
+          p.clicked = false;
+        }
+
+        // memoria
         const backX = (p.ox - p.x) * 0.002;
         const backY = (p.oy - p.y) * 0.002;
         p.vx += backX;
@@ -173,7 +214,7 @@
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
-        ctx.fillStyle = "white";
+        ctx.fillStyle = p.color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
