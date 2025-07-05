@@ -47,46 +47,52 @@
     }
     .biohazard {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 150px;
-      color: rgba(255, 0, 0, 0.3);
-      z-index: 15;
-      pointer-events: none;
-      font-family: monospace;
-    }
-    .biohazard-text {
-      position: absolute;
-      top: 65%;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      color: white;
-      font-family: monospace;
-      font-size: 20px;
-      z-index: 16;
-      pointer-events: none;
-      text-align: center;
+      width: 60px;
+      height: 60px;
+      opacity: 0.8;
+      z-index: 99;
+      animation: pulse 1s infinite;
+      display: none;
+    }
+    body.viulenza .biohazard {
+      display: block;
+    }
+    body.viulenza {
+      animation: shake 0.15s infinite;
+    }
+    @keyframes shake {
+      0% { transform: translate(1px, 1px); }
+      25% { transform: translate(-1px, 1px); }
+      50% { transform: translate(-1px, -1px); }
+      75% { transform: translate(1px, -1px); }
+      100% { transform: translate(1px, 1px); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+      50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
     }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Biohazard_symbol.svg" class="biohazard" alt="biohazard" />
+  <audio id="glitchSound" src="glitch.mp3" preload="auto"></audio>
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="footer-links">
     <a href="terms.html" target="_blank">Terms & Conditions</a> |
     <a href="cookies.html" target="_blank">Cookie Policy</a>
   </div>
-  <div class="biohazard" id="biohazardSymbol" style="display: none;">☣️</div>
-  <div class="biohazard-text" id="biohazardText" style="display: none;">i2 ANALYST + YOLOv8 ACTIVATED</div>
-
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const biohazardSymbol = document.getElementById('biohazardSymbol');
-    const biohazardText = document.getElementById('biohazardText');
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
+
+    const glitchSound = document.getElementById("glitchSound");
+    let viulenzaActive = false;
 
     const mouse = { x: -1000, y: -1000 };
     window.addEventListener('mousemove', e => {
@@ -120,10 +126,9 @@
         x = Math.random() * width;
         y = Math.random() * height;
       } while (inXZone(x, y));
-
-      const ox = x, oy = y;
       return {
-        x, y, ox, oy,
+        x, y,
+        ox: x, oy: y,
         vx: (Math.random() - 0.5) * SPEED,
         vy: (Math.random() - 0.5) * SPEED,
         radius: 1.5,
@@ -158,8 +163,34 @@
       }
     }
 
+    function drawTriangleOverlay(now) {
+      const pulse = Math.sin(now * 0.01) * 10;
+      const baseY = height * 0.2;
+      const bottomY = height * 0.8;
+      const opacity = 0.05 + Math.random() * 0.2;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(width / 2, baseY + pulse);
+      ctx.lineTo(width * 0.3 - pulse, bottomY - pulse);
+      ctx.lineTo(width * 0.7 + pulse, bottomY - pulse);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.font = "bold 20px monospace";
+      ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+      ctx.textAlign = "center";
+      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, bottomY + 30);
+    }
+
     function animate() {
-      ctx.fillStyle = "black";
+      const now = performance.now();
+      let inXCount = 0;
+      for (const p of particles) {
+        p.inX = inXZone(p.x, p.y);
+        if (p.inX) inXCount++;
+      }
+
+      ctx.fillStyle = inXCount >= 20 ? `rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05})` : "black";
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
@@ -173,9 +204,6 @@
 
       drawConnections();
 
-      const now = performance.now();
-      let inXCount = 0;
-
       for (const p of particles) {
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
@@ -187,53 +215,42 @@
         }
 
         const wasInX = p.inX;
-        p.inX = inXZone(p.x, p.y);
-        if (p.inX) inXCount++;
-
-        if (p.inX && !wasInX && !p.hasLaunched) {
-          const dx = (width - p.x);
-          const dy = (height - p.y);
+        if (p.inX && !p.hasLaunched) {
+          const dx = width - p.x;
+          const dy = height - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
           p.vx += (dx / dist) * 6;
           p.vy += (dy / dist) * 6;
           p.hasLaunched = true;
         }
 
+        p.color = (p.inX && inXCount >= 20) ? "red" : p.baseColor;
+
         if (p.inX) {
           p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
           p.vy += Math.cos(now * 0.1 + p.y) * 0.4;
           p.radius = 3.5 + Math.sin(now * 0.05 + p.x + p.y) * 1.5;
-          p.color = "white";
-
           if (Math.random() < 0.4) p.hexCode = randomHex();
-
           ctx.font = "12px monospace";
           ctx.fillStyle = "white";
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
-
         } else {
           if (wasInX) {
             p.radius = 1.5;
             p.hasLaunched = false;
             p.hexCode = randomHex();
           }
-          p.color = p.baseColor;
         }
 
-        const backX = (p.ox - p.x) * 0.002;
-        const backY = (p.oy - p.y) * 0.002;
-        p.vx += backX;
-        p.vy += backY;
-
+        p.vx += (p.ox - p.x) * 0.002;
+        p.vy += (p.oy - p.y) * 0.002;
         p.vx += (Math.random() - 0.5) * 0.05;
         p.vy += (Math.random() - 0.5) * 0.05;
-
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.97;
         p.vy *= 0.97;
-
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
@@ -244,11 +261,16 @@
       }
 
       if (inXCount >= 20) {
-        biohazardSymbol.style.display = 'block';
-        biohazardText.style.display = 'block';
+        drawTriangleOverlay(now);
+        document.body.classList.add("viulenza");
+        if (!viulenzaActive) {
+          glitchSound.currentTime = 0;
+          glitchSound.play();
+          viulenzaActive = true;
+        }
       } else {
-        biohazardSymbol.style.display = 'none';
-        biohazardText.style.display = 'none';
+        document.body.classList.remove("viulenza");
+        viulenzaActive = false;
       }
 
       requestAnimationFrame(animate);
