@@ -133,22 +133,34 @@
 
     function drawTriangleOverlay() {
       const opacity = 0.05 + Math.random() * 0.2;
-      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(width / 2, height * 0.2);
       ctx.lineTo(width * 0.3, height * 0.8);
       ctx.lineTo(width * 0.7, height * 0.8);
       ctx.closePath();
-      ctx.fill();
+      ctx.stroke();
 
       ctx.font = "bold 20px monospace";
       ctx.fillStyle = `rgba(255,255,255,${opacity})`;
       ctx.textAlign = "center";
-      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, height * 0.5);
+      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, height * 0.82);
     }
 
     function animate() {
-      ctx.fillStyle = "black";
+      let inXCount = 0;
+
+      // Si está en modo viulenza, parpadeo rojo
+      if (particles.some(p => p.inX)) {
+        const flash = inXCount >= 20 ? (Math.random() * 0.2 + 0.05) : 0;
+        ctx.fillStyle = inXCount >= 20
+          ? `rgba(255, 0, 0, ${flash})`
+          : "black";
+      } else {
+        ctx.fillStyle = "black";
+      }
+
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
@@ -163,7 +175,6 @@
       drawConnections();
 
       const now = performance.now();
-      let inXCount = 0;
 
       for (const p of particles) {
         const dx = p.x - mouse.x;
