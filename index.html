@@ -197,14 +197,6 @@
         ctx.fillText("⟁", x, y);
       }
 
-      const scale = 1 + Math.sin(now * 0.01) * 0.2;
-      ctx.font = `bold ${24 * scale}px monospace`;
-      ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
-      ctx.shadowColor = "white";
-      ctx.shadowBlur = 8;
-      ctx.textAlign = "center";
-      ctx.fillText("𝕏", 0, 10);
-
       ctx.restore();
 
       ctx.font = "bold 22px monospace";
