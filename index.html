@@ -152,7 +152,7 @@
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
-            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
+            ctx.strokeStyle = rgba(0,255,255,${1 - dist / 100});
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -163,37 +163,31 @@
       }
     }
 
-    function drawTriangleOverlay() {
-      const pulse = Math.sin(performance.now() * 0.01) * 10;
+    function drawTriangleOverlay(now) {
+      const pulse = Math.sin(now * 0.01) * 10;
       const baseY = height * 0.18;
       const bottomY = height * 0.82;
-      const centerX = width / 2;
-      const centerY = (baseY + bottomY) / 2;
 
       ctx.save();
-      ctx.translate(centerX, centerY);
-      // ctx.rotate(angle); // Eliminado para que no rote
-
-      ctx.beginPath();
-      ctx.moveTo(0, baseY - centerY + pulse);
-      ctx.lineTo(width * 0.28 - centerX - pulse, bottomY - centerY - pulse);
-      ctx.lineTo(width * 0.72 - centerX + pulse, bottomY - centerY - pulse);
-      ctx.closePath();
-
-      ctx.strokeStyle = `rgba(255, 0, 0, 0.4)`;
+      ctx.strokeStyle = rgba(255, 0, 0, 0.7);
       ctx.lineWidth = 3.5;
       ctx.shadowColor = "red";
       ctx.shadowBlur = 12;
-      ctx.stroke();
-      ctx.restore();
 
-      // Texto fijo
-      ctx.font = "bold 24px monospace";
-      ctx.fillStyle = "rgba(255, 0, 0, 0.7)";
+      ctx.beginPath();
+      ctx.moveTo(width / 2, baseY + pulse);
+      ctx.lineTo(width * 0.28 - pulse, bottomY - pulse);
+      ctx.lineTo(width * 0.72 + pulse, bottomY - pulse);
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.font = "bold 28px monospace";
+      ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
       ctx.shadowColor = "red";
-      ctx.shadowBlur = 8;
+      ctx.shadowBlur = 10;
       ctx.textAlign = "center";
       ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, bottomY + 50);
+      ctx.restore();
     }
 
     function animate() {
@@ -204,7 +198,7 @@
         if (p.inX) inXCount++;
       }
 
-      ctx.fillStyle = inXCount >= 20 ? `rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05})` : "black";
+      ctx.fillStyle = inXCount >= 20 ? rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05}) : "black";
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
@@ -275,7 +269,7 @@
       }
 
       if (inXCount >= 20) {
-        drawTriangleOverlay();
+        drawTriangleOverlay(now);
         document.body.classList.add("viulenza");
         if (!viulenzaActive) {
           glitchSound.currentTime = 0;
