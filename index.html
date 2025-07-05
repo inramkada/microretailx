@@ -56,41 +56,12 @@
       100% { transform: translate(1px, 1px); }
     }
     .glitch {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(255, 0, 0, 0.1),
-        rgba(255, 0, 0, 0.1) 2px,
-        transparent 2px,
-        transparent 4px
-      );
-      pointer-events: none;
-      z-index: 999;
-      display: none;
-    }
-    .glitch-text {
-      position: absolute;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: monospace;
-      font-size: 30px;
-      color: red;
-      background: black;
-      padding: 5px 15px;
-      z-index: 1000;
-      display: none;
+      background-color: red !important;
     }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <div id="glitch" class="glitch"></div>
-  <div id="glitchText" class="glitch-text">ACCESS GRANTED</div>
   <audio id="glitchSound" src="glitch.mp3" preload="auto"></audio>
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="footer-links">
@@ -104,11 +75,8 @@
     let height = canvas.height = window.innerHeight;
 
     const glitchSound = document.getElementById("glitchSound");
-    const glitchOverlay = document.getElementById("glitch");
-    const glitchText = document.getElementById("glitchText");
-
     let viulenzaActive = false;
-    let glitchTimer = 0;
+    let lastGlitch = 0;
 
     const mouse = { x: -1000, y: -1000 };
     window.addEventListener('mousemove', e => {
@@ -160,19 +128,46 @@
       particles.push(createParticle());
     }
 
-    function glitchBurst() {
-      glitchOverlay.style.display = 'block';
-      glitchText.style.display = 'block';
-      setTimeout(() => {
-        glitchOverlay.style.display = 'none';
-        glitchText.style.display = 'none';
-      }, 300);
-      glitchSound.currentTime = 0;
-      glitchSound.play();
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        let connections = 0;
+        for (let j = i + 1; j < particles.length && connections < 10; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+            connections++;
+          }
+        }
+      }
     }
 
-    function animate() {
-      const now = performance.now();
+    function drawTriangleOverlay(now) {
+      const pulse = Math.sin(now * 0.01) * 10;
+      const baseY = height * 0.2;
+      const bottomY = height * 0.8;
+      const opacity = 0.05 + Math.random() * 0.2;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(width / 2, baseY + pulse);
+      ctx.lineTo(width * 0.3 - pulse, bottomY - pulse);
+      ctx.lineTo(width * 0.7 + pulse, bottomY - pulse);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.font = "bold 20px monospace";
+      ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+      ctx.textAlign = "center";
+      ctx.fillText("i2 ACTIVATED", width / 2, bottomY + 30);
+    }
+
+    function animate(timestamp) {
+      const now = timestamp;
       let inXCount = 0;
       for (const p of particles) {
         p.inX = inXZone(p.x, p.y);
@@ -190,6 +185,8 @@
       ctx.moveTo(width, 0);
       ctx.lineTo(0, height);
       ctx.stroke();
+
+      drawConnections();
 
       for (const p of particles) {
         const dx = p.x - mouse.x;
@@ -251,12 +248,16 @@
         drawTriangleOverlay(now);
         document.body.classList.add("viulenza");
         if (!viulenzaActive) {
+          glitchSound.currentTime = 0;
+          glitchSound.play();
           viulenzaActive = true;
-          glitchBurst();
-          glitchTimer = now;
-        } else if (now - glitchTimer > 3000) {
-          glitchBurst();
-          glitchTimer = now;
+        }
+        if (now - lastGlitch > 3000) {
+          glitchSound.currentTime = 0;
+          glitchSound.play();
+          document.body.classList.add("glitch");
+          setTimeout(() => document.body.classList.remove("glitch"), 100);
+          lastGlitch = now;
         }
       } else {
         document.body.classList.remove("viulenza");
@@ -266,26 +267,7 @@
       requestAnimationFrame(animate);
     }
 
-    function drawTriangleOverlay(now) {
-      const pulse = Math.sin(now * 0.01) * 10;
-      const baseY = height * 0.2;
-      const bottomY = height * 0.8;
-      const opacity = 0.05 + Math.random() * 0.2;
-      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(width / 2, baseY + pulse);
-      ctx.lineTo(width * 0.3 - pulse, bottomY - pulse);
-      ctx.lineTo(width * 0.7 + pulse, bottomY - pulse);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.font = "bold 20px monospace";
-      ctx.fillStyle = `rgba(255,255,255,${opacity})`;
-      ctx.textAlign = "center";
-      ctx.fillText("i2 ACTIVATED", width / 2, bottomY + 30);
-    }
-
-    animate();
+    requestAnimationFrame(animate);
   </script>
 </body>
 </html>
