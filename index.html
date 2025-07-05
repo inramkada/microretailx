@@ -45,27 +45,9 @@
     .footer-links a:hover {
       text-decoration: underline;
     }
-    .biohazard {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 60px;
-      opacity: 0.8;
-      z-index: 99;
-      animation: pulse 1s infinite;
-      display: none;
-    }
-
-    body.viulenza .biohazard {
-      display: block;
-    }
-
     body.viulenza {
       animation: shake 0.15s infinite;
     }
-
     @keyframes shake {
       0% { transform: translate(1px, 1px); }
       25% { transform: translate(-1px, 1px); }
@@ -73,24 +55,16 @@
       75% { transform: translate(1px, -1px); }
       100% { transform: translate(1px, 1px); }
     }
-
-    @keyframes pulse {
-      0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
-      50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
-    }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Biohazard_symbol.svg" class="biohazard" alt="biohazard" />
   <audio id="glitchSound" src="glitch.mp3" preload="auto"></audio>
-
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="footer-links">
     <a href="terms.html" target="_blank">Terms & Conditions</a> |
     <a href="cookies.html" target="_blank">Cookie Policy</a>
   </div>
-
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -132,10 +106,9 @@
         x = Math.random() * width;
         y = Math.random() * height;
       } while (inXZone(x, y));
-
-      const ox = x, oy = y;
       return {
-        x, y, ox, oy,
+        x, y,
+        ox: x, oy: y,
         vx: (Math.random() - 0.5) * SPEED,
         vy: (Math.random() - 0.5) * SPEED,
         radius: 1.5,
@@ -174,7 +147,6 @@
       const pulse = Math.sin(now * 0.01) * 10;
       const baseY = height * 0.2;
       const bottomY = height * 0.8;
-
       const opacity = 0.05 + Math.random() * 0.2;
       ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
       ctx.lineWidth = 1.5;
@@ -184,7 +156,6 @@
       ctx.lineTo(width * 0.7 + pulse, bottomY - pulse);
       ctx.closePath();
       ctx.stroke();
-
       ctx.font = "bold 20px monospace";
       ctx.fillStyle = `rgba(255,255,255,${opacity})`;
       ctx.textAlign = "center";
@@ -194,14 +165,12 @@
     function animate() {
       const now = performance.now();
       let inXCount = 0;
-
       for (const p of particles) {
         p.inX = inXZone(p.x, p.y);
         if (p.inX) inXCount++;
       }
 
-      const flash = Math.random() * 0.2 + 0.05;
-      ctx.fillStyle = inXCount >= 30 ? `rgba(255, 0, 0, ${flash})` : "black";
+      ctx.fillStyle = inXCount >= 20 ? `rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05})` : "black";
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
@@ -225,44 +194,43 @@
           p.vy += dy / dist * force;
         }
 
+        const wasInX = p.inX;
         if (p.inX && !p.hasLaunched) {
-          const dx = (width - p.x);
-          const dy = (height - p.y);
+          const dx = width - p.x;
+          const dy = height - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
           p.vx += (dx / dist) * 6;
           p.vy += (dy / dist) * 6;
           p.hasLaunched = true;
         }
 
-        p.color = p.inX && inXCount >= 30 ? "red" : p.baseColor;
+        p.color = (p.inX && inXCount >= 20) ? "red" : p.baseColor;
 
         if (p.inX) {
-          const now = performance.now();
           p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
           p.vy += Math.cos(now * 0.1 + p.y) * 0.4;
           p.radius = 3.5 + Math.sin(now * 0.05 + p.x + p.y) * 1.5;
           if (Math.random() < 0.4) p.hexCode = randomHex();
-
           ctx.font = "12px monospace";
           ctx.fillStyle = "white";
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
         } else {
-          p.radius = 1.5;
-          p.hasLaunched = false;
+          if (wasInX) {
+            p.radius = 1.5;
+            p.hasLaunched = false;
+            p.hexCode = randomHex();
+          }
         }
 
-        const backX = (p.ox - p.x) * 0.002;
-        const backY = (p.oy - p.y) * 0.002;
-        p.vx += backX;
-        p.vy += backY;
+        p.vx += (p.ox - p.x) * 0.002;
+        p.vy += (p.oy - p.y) * 0.002;
         p.vx += (Math.random() - 0.5) * 0.05;
         p.vy += (Math.random() - 0.5) * 0.05;
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.97;
         p.vy *= 0.97;
-
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
@@ -272,7 +240,7 @@
         ctx.fill();
       }
 
-      if (inXCount >= 30) {
+      if (inXCount >= 20) {
         drawTriangleOverlay(now);
         document.body.classList.add("viulenza");
         if (!viulenzaActive) {
