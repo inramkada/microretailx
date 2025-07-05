@@ -45,6 +45,22 @@
     .footer-links a:hover {
       text-decoration: underline;
     }
+    .biohazard {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 60px;
+      opacity: 0.8;
+      z-index: 99;
+      animation: pulse 1s infinite;
+      display: none;
+    }
+
+    body.viulenza .biohazard {
+      display: block;
+    }
 
     body.viulenza {
       animation: shake 0.15s infinite;
@@ -57,10 +73,18 @@
       75% { transform: translate(1px, -1px); }
       100% { transform: translate(1px, 1px); }
     }
+
+    @keyframes pulse {
+      0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+      50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+    }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Biohazard_symbol.svg" class="biohazard" alt="biohazard" />
+  <audio id="glitchSound" src="glitch.mp3" preload="auto"></audio>
+
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="footer-links">
     <a href="terms.html" target="_blank">Terms & Conditions</a> |
@@ -72,6 +96,9 @@
     const ctx = canvas.getContext('2d');
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
+
+    const glitchSound = document.getElementById("glitchSound");
+    let viulenzaActive = false;
 
     const mouse = { x: -1000, y: -1000 };
     window.addEventListener('mousemove', e => {
@@ -144,7 +171,7 @@
     }
 
     function drawTriangleOverlay(now) {
-      const pulse = Math.sin(now * 0.01) * 10; // pulso alienígena
+      const pulse = Math.sin(now * 0.01) * 10;
       const baseY = height * 0.2;
       const bottomY = height * 0.8;
 
@@ -168,11 +195,13 @@
       const now = performance.now();
       let inXCount = 0;
 
-      // Fondo rojo intermitente
-      const flash = (Math.random() * 0.2 + 0.05);
-      ctx.fillStyle = inXCount >= 20
-        ? `rgba(255, 0, 0, ${flash})`
-        : "black";
+      for (const p of particles) {
+        p.inX = inXZone(p.x, p.y);
+        if (p.inX) inXCount++;
+      }
+
+      const flash = Math.random() * 0.2 + 0.05;
+      ctx.fillStyle = inXCount >= 30 ? `rgba(255, 0, 0, ${flash})` : "black";
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
@@ -196,11 +225,7 @@
           p.vy += dy / dist * force;
         }
 
-        const wasInX = p.inX;
-        p.inX = inXZone(p.x, p.y);
-        if (p.inX) inXCount++;
-
-        if (p.inX && !wasInX && !p.hasLaunched) {
+        if (p.inX && !p.hasLaunched) {
           const dx = (width - p.x);
           const dy = (height - p.y);
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -209,36 +234,30 @@
           p.hasLaunched = true;
         }
 
+        p.color = p.inX && inXCount >= 30 ? "red" : p.baseColor;
+
         if (p.inX) {
+          const now = performance.now();
           p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
           p.vy += Math.cos(now * 0.1 + p.y) * 0.4;
           p.radius = 3.5 + Math.sin(now * 0.05 + p.x + p.y) * 1.5;
-          p.color = "white";
-
           if (Math.random() < 0.4) p.hexCode = randomHex();
 
           ctx.font = "12px monospace";
           ctx.fillStyle = "white";
           ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
-
         } else {
-          if (wasInX) {
-            p.radius = 1.5;
-            p.hasLaunched = false;
-            p.hexCode = randomHex();
-          }
-          p.color = p.baseColor;
+          p.radius = 1.5;
+          p.hasLaunched = false;
         }
 
         const backX = (p.ox - p.x) * 0.002;
         const backY = (p.oy - p.y) * 0.002;
         p.vx += backX;
         p.vy += backY;
-
         p.vx += (Math.random() - 0.5) * 0.05;
         p.vy += (Math.random() - 0.5) * 0.05;
-
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.97;
@@ -253,12 +272,17 @@
         ctx.fill();
       }
 
-      // Activación modo viulenza
-      if (inXCount >= 20) {
+      if (inXCount >= 30) {
         drawTriangleOverlay(now);
         document.body.classList.add("viulenza");
+        if (!viulenzaActive) {
+          glitchSound.currentTime = 0;
+          glitchSound.play();
+          viulenzaActive = true;
+        }
       } else {
         document.body.classList.remove("viulenza");
+        viulenzaActive = false;
       }
 
       requestAnimationFrame(animate);
