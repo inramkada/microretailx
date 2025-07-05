@@ -48,6 +48,9 @@
     body.viulenza {
       animation: shake 0.15s infinite;
     }
+    body.glitch {
+      filter: contrast(200%) brightness(150%) hue-rotate(45deg);
+    }
     @keyframes shake {
       0% { transform: translate(1px, 1px); }
       25% { transform: translate(-1px, 1px); }
@@ -73,6 +76,7 @@
 
     const glitchSound = document.getElementById("glitchSound");
     let viulenzaActive = false;
+    let lastGlitch = 0;
 
     const mouse = { x: -1000, y: -1000 };
     window.addEventListener('mousemove', e => {
@@ -162,12 +166,30 @@
       ctx.fillText("i2 ACTIVATED", width / 2, bottomY + 30);
     }
 
-    function animate() {
-      const now = performance.now();
+    function animate(now) {
       let inXCount = 0;
       for (const p of particles) {
         p.inX = inXZone(p.x, p.y);
         if (p.inX) inXCount++;
+      }
+
+      if (inXCount >= 20) {
+        if (!viulenzaActive) {
+          glitchSound.currentTime = 0;
+          glitchSound.play();
+          viulenzaActive = true;
+        }
+        if (now - lastGlitch > 3000) {
+          document.body.classList.add("glitch");
+          glitchSound.currentTime = 0;
+          glitchSound.play();
+          lastGlitch = now;
+          setTimeout(() => document.body.classList.remove("glitch"), 150);
+        }
+        document.body.classList.add("viulenza");
+      } else {
+        document.body.classList.remove("viulenza");
+        viulenzaActive = false;
       }
 
       ctx.fillStyle = inXCount >= 20 ? `rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05})` : "black";
@@ -240,18 +262,7 @@
         ctx.fill();
       }
 
-      if (inXCount >= 20) {
-        drawTriangleOverlay(now);
-        document.body.classList.add("viulenza");
-        if (!viulenzaActive) {
-          glitchSound.currentTime = 0;
-          glitchSound.play();
-          viulenzaActive = true;
-        }
-      } else {
-        document.body.classList.remove("viulenza");
-        viulenzaActive = false;
-      }
+      if (inXCount >= 20) drawTriangleOverlay(now);
 
       requestAnimationFrame(animate);
     }
