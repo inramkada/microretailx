@@ -165,21 +165,29 @@
 
     function drawTriangleOverlay(now) {
       const pulse = Math.sin(now * 0.01) * 10;
-      const baseY = height * 0.2;
-      const bottomY = height * 0.8;
-      const opacity = 0.05 + Math.random() * 0.2;
-      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-      ctx.lineWidth = 1.5;
+      const baseY = height * 0.18;
+      const bottomY = height * 0.82;
+
+      ctx.save();
+      ctx.strokeStyle = `rgba(255, 0, 0, 0.7)`;
+      ctx.lineWidth = 3.5;
+      ctx.shadowColor = "red";
+      ctx.shadowBlur = 12;
+
       ctx.beginPath();
       ctx.moveTo(width / 2, baseY + pulse);
-      ctx.lineTo(width * 0.3 - pulse, bottomY - pulse);
-      ctx.lineTo(width * 0.7 + pulse, bottomY - pulse);
+      ctx.lineTo(width * 0.28 - pulse, bottomY - pulse);
+      ctx.lineTo(width * 0.72 + pulse, bottomY - pulse);
       ctx.closePath();
       ctx.stroke();
-      ctx.font = "bold 20px monospace";
-      ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+
+      ctx.font = "bold 28px monospace";
+      ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
+      ctx.shadowColor = "red";
+      ctx.shadowBlur = 10;
       ctx.textAlign = "center";
-      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, bottomY + 30);
+      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, bottomY + 50);
+      ctx.restore();
     }
 
     function animate() {
