@@ -167,44 +167,27 @@
       const pulse = Math.sin(now * 0.01) * 10;
       const baseY = height * 0.18;
       const bottomY = height * 0.82;
-      const centerX = width / 2;
-      const centerY = (baseY + bottomY) / 2;
-      const angle = now * 0.0005;
 
       ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(angle);
+      ctx.strokeStyle = `rgba(255, 0, 0, 0.7)`;
+      ctx.lineWidth = 3.5;
+      ctx.shadowColor = "red";
+      ctx.shadowBlur = 12;
 
       ctx.beginPath();
-      ctx.moveTo(0, baseY - centerY + pulse);
-      ctx.lineTo(width * 0.28 - centerX - pulse, bottomY - centerY - pulse);
-      ctx.lineTo(width * 0.72 - centerX + pulse, bottomY - centerY - pulse);
+      ctx.moveTo(width / 2, baseY + pulse);
+      ctx.lineTo(width * 0.28 - pulse, bottomY - pulse);
+      ctx.lineTo(width * 0.72 + pulse, bottomY - pulse);
       ctx.closePath();
-
-      ctx.strokeStyle = `rgba(255, 0, 0, 0.4)`;
-      ctx.lineWidth = 3;
-      ctx.shadowColor = "red";
-      ctx.shadowBlur = 6;
       ctx.stroke();
 
-      for (let i = 0; i < 3; i++) {
-        const radius = 30 + Math.sin(now * 0.002 + i) * 5;
-        const a = angle + i * Math.PI * 2 / 3;
-        const x = Math.cos(a) * radius;
-        const y = Math.sin(a) * radius;
-        ctx.fillStyle = `rgba(255,255,255,0.2)`;
-        ctx.font = "bold 12px monospace";
-        ctx.fillText("⟁", x, y);
-      }
-
-      ctx.restore();
-
-      ctx.font = "bold 22px monospace";
-      ctx.fillStyle = "rgba(255, 0, 0, 0.6)";
+      ctx.font = "bold 28px monospace";
+      ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
       ctx.shadowColor = "red";
-      ctx.shadowBlur = 6;
+      ctx.shadowBlur = 10;
       ctx.textAlign = "center";
       ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, bottomY + 50);
+      ctx.restore();
     }
 
     function animate() {
