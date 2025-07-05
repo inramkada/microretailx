@@ -55,9 +55,6 @@
       75% { transform: translate(1px, -1px); }
       100% { transform: translate(1px, 1px); }
     }
-    .glitch {
-      background-color: red !important;
-    }
   </style>
 </head>
 <body>
@@ -76,7 +73,6 @@
 
     const glitchSound = document.getElementById("glitchSound");
     let viulenzaActive = false;
-    let lastGlitch = 0;
 
     const mouse = { x: -1000, y: -1000 };
     window.addEventListener('mousemove', e => {
@@ -136,7 +132,7 @@
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
-            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
+            ctx.strokeStyle = rgba(0,255,255,${1 - dist / 100});
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -152,7 +148,7 @@
       const baseY = height * 0.2;
       const bottomY = height * 0.8;
       const opacity = 0.05 + Math.random() * 0.2;
-      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.strokeStyle = rgba(255, 255, 255, ${opacity});
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(width / 2, baseY + pulse);
@@ -161,20 +157,20 @@
       ctx.closePath();
       ctx.stroke();
       ctx.font = "bold 20px monospace";
-      ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+      ctx.fillStyle = rgba(255,255,255,${opacity});
       ctx.textAlign = "center";
       ctx.fillText("i2 ACTIVATED", width / 2, bottomY + 30);
     }
 
-    function animate(timestamp) {
-      const now = timestamp;
+    function animate() {
+      const now = performance.now();
       let inXCount = 0;
       for (const p of particles) {
         p.inX = inXZone(p.x, p.y);
         if (p.inX) inXCount++;
       }
 
-      ctx.fillStyle = inXCount >= 20 ? `rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05})` : "black";
+      ctx.fillStyle = inXCount >= 20 ? rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05}) : "black";
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
@@ -252,13 +248,6 @@
           glitchSound.play();
           viulenzaActive = true;
         }
-        if (now - lastGlitch > 3000) {
-          glitchSound.currentTime = 0;
-          glitchSound.play();
-          document.body.classList.add("glitch");
-          setTimeout(() => document.body.classList.remove("glitch"), 100);
-          lastGlitch = now;
-        }
       } else {
         document.body.classList.remove("viulenza");
         viulenzaActive = false;
@@ -267,7 +256,7 @@
       requestAnimationFrame(animate);
     }
 
-    requestAnimationFrame(animate);
+    animate();
   </script>
 </body>
 </html>
