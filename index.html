@@ -45,6 +45,18 @@
     .footer-links a:hover {
       text-decoration: underline;
     }
+
+    body.viulenza {
+      animation: shake 0.15s infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px); }
+      25% { transform: translate(-1px, 1px); }
+      50% { transform: translate(-1px, -1px); }
+      75% { transform: translate(1px, -1px); }
+      100% { transform: translate(1px, 1px); }
+    }
   </style>
 </head>
 <body>
@@ -131,36 +143,36 @@
       }
     }
 
-    function drawTriangleOverlay() {
+    function drawTriangleOverlay(now) {
+      const pulse = Math.sin(now * 0.01) * 10; // pulso alienígena
+      const baseY = height * 0.2;
+      const bottomY = height * 0.8;
+
       const opacity = 0.05 + Math.random() * 0.2;
       ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(width / 2, height * 0.2);
-      ctx.lineTo(width * 0.3, height * 0.8);
-      ctx.lineTo(width * 0.7, height * 0.8);
+      ctx.moveTo(width / 2, baseY + pulse);
+      ctx.lineTo(width * 0.3 - pulse, bottomY - pulse);
+      ctx.lineTo(width * 0.7 + pulse, bottomY - pulse);
       ctx.closePath();
       ctx.stroke();
 
       ctx.font = "bold 20px monospace";
       ctx.fillStyle = `rgba(255,255,255,${opacity})`;
       ctx.textAlign = "center";
-      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, height * 0.82);
+      ctx.fillText("i2 ANALYST + YOLOv8 ACTIVATED", width / 2, bottomY + 30);
     }
 
     function animate() {
+      const now = performance.now();
       let inXCount = 0;
 
-      // Si está en modo viulenza, parpadeo rojo
-      if (particles.some(p => p.inX)) {
-        const flash = inXCount >= 20 ? (Math.random() * 0.2 + 0.05) : 0;
-        ctx.fillStyle = inXCount >= 20
-          ? `rgba(255, 0, 0, ${flash})`
-          : "black";
-      } else {
-        ctx.fillStyle = "black";
-      }
-
+      // Fondo rojo intermitente
+      const flash = (Math.random() * 0.2 + 0.05);
+      ctx.fillStyle = inXCount >= 20
+        ? `rgba(255, 0, 0, ${flash})`
+        : "black";
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
@@ -173,8 +185,6 @@
       ctx.stroke();
 
       drawConnections();
-
-      const now = performance.now();
 
       for (const p of particles) {
         const dx = p.x - mouse.x;
@@ -243,8 +253,12 @@
         ctx.fill();
       }
 
+      // Activación modo viulenza
       if (inXCount >= 20) {
-        drawTriangleOverlay();
+        drawTriangleOverlay(now);
+        document.body.classList.add("viulenza");
+      } else {
+        document.body.classList.remove("viulenza");
       }
 
       requestAnimationFrame(animate);
