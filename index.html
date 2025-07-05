@@ -48,6 +48,9 @@
     body.viulenza {
       animation: shake 0.15s infinite;
     }
+    body.glitch-flash canvas {
+      filter: contrast(400%) brightness(200%) invert(1);
+    }
     @keyframes shake {
       0% { transform: translate(1px, 1px); }
       25% { transform: translate(-1px, 1px); }
@@ -73,6 +76,7 @@
 
     const glitchSound = document.getElementById("glitchSound");
     let viulenzaActive = false;
+    let lastGlitchTime = 0;
 
     const mouse = { x: -1000, y: -1000 };
     window.addEventListener('mousemove', e => {
@@ -132,7 +136,7 @@
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100) {
-            ctx.strokeStyle = rgba(0,255,255,${1 - dist / 100});
+            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -148,7 +152,7 @@
       const baseY = height * 0.2;
       const bottomY = height * 0.8;
       const opacity = 0.05 + Math.random() * 0.2;
-      ctx.strokeStyle = rgba(255, 255, 255, ${opacity});
+      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(width / 2, baseY + pulse);
@@ -157,9 +161,16 @@
       ctx.closePath();
       ctx.stroke();
       ctx.font = "bold 20px monospace";
-      ctx.fillStyle = rgba(255,255,255,${opacity});
+      ctx.fillStyle = `rgba(255,255,255,${opacity})`;
       ctx.textAlign = "center";
       ctx.fillText("i2 ACTIVATED", width / 2, bottomY + 30);
+    }
+
+    function triggerGlitchFlash() {
+      document.body.classList.add("glitch-flash");
+      setTimeout(() => document.body.classList.remove("glitch-flash"), 150);
+      glitchSound.currentTime = 0;
+      glitchSound.play();
     }
 
     function animate() {
@@ -170,7 +181,7 @@
         if (p.inX) inXCount++;
       }
 
-      ctx.fillStyle = inXCount >= 20 ? rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05}) : "black";
+      ctx.fillStyle = inXCount >= 20 ? `rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05})` : "black";
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
@@ -243,10 +254,15 @@
       if (inXCount >= 20) {
         drawTriangleOverlay(now);
         document.body.classList.add("viulenza");
+
         if (!viulenzaActive) {
           glitchSound.currentTime = 0;
           glitchSound.play();
           viulenzaActive = true;
+          lastGlitchTime = now;
+        } else if (now - lastGlitchTime > 3000) {
+          triggerGlitchFlash();
+          lastGlitchTime = now;
         }
       } else {
         document.body.classList.remove("viulenza");
