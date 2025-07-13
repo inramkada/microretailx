@@ -90,10 +90,23 @@
       height = canvas.height = window.innerHeight;
     });
 
-    const particles = [];
-    const NUM_PARTICLES = 2000;
+    function isMobile() {
+      return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    }
+
+    const MOBILE_MODE = isMobile();
+    const NUM_PARTICLES = MOBILE_MODE ? 400 : 2000;
+    const MAX_CONNECTIONS = MOBILE_MODE ? 4 : 10;
     const SPEED = 0.5;
     const xZoneMargin = 40;
+
+    if (MOBILE_MODE) {
+      console.log("🧪 Modo móvil activado: 400 nodos, 4 conexiones máximas por nodo");
+    } else {
+      console.log("🧬 Modo escritorio activado: 2000 nodos, 10 conexiones máximas por nodo");
+    }
+
+    const particles = [];
 
     function inXZone(x, y) {
       const d1 = Math.abs(y - (x * height / width));
@@ -132,7 +145,7 @@
     function drawConnections() {
       for (let i = 0; i < particles.length; i++) {
         let connections = 0;
-        for (let j = i + 1; j < particles.length && connections < 10; j++) {
+        for (let j = i + 1; j < particles.length && connections < MAX_CONNECTIONS; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
