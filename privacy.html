@@ -46,10 +46,31 @@
       padding: 8px;
       text-align: left;
     }
+    .back-home {
+      display: inline-block;
+      margin-top: 1rem;
+      color: #fff;
+      background-color: #e67e22;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    #google_translate_element {
+      text-align: right;
+      margin-bottom: 1rem;
+    }
   </style>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
   <div class="container">
+    <div id="google_translate_element"></div>
+
     <h1>Privacy Policy</h1>
     <p><strong>Effective Date:</strong> 01 July 2025</p>
 
@@ -138,6 +159,7 @@
   </div>
 
   <footer>
+    <a class="back-home" href="/">← Return to Homepage</a>
     <p>&copy; 2025 MICRORETAILX LLC – All rights reserved.</p>
     <p>Privacy Policy | Version 1.0 | Issued: 01/07/2025</p>
   </footer>
