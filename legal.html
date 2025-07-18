@@ -36,7 +36,25 @@
       background-color: #000;
       color: #fff;
     }
+    .back-home {
+      display: inline-block;
+      margin-top: 1rem;
+      color: #fff;
+      background-color: #c0392b;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    #google_translate_element {
+      margin-top: 2rem;
+    }
   </style>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
   <div class="container">
@@ -51,8 +69,8 @@
     <p>The commercial platform operating under the name “XSHADOWS OPS” is legally owned and operated by MICRORETAILX LLC. All associated intellectual property, including code, architecture, and AI models, is exclusively held by the Company.</p>
 
     <h2>3. Legal Representative</h2>
-<p>All legal obligations and representations of MICRORETAILX LLC are managed through its designated Legal Department.</p>
-<p><strong>Contact:</strong> <a href="mailto:legal@microretailx.com">legal@microretailx.com</a></p>
+    <p>All legal obligations and representations of MICRORETAILX LLC are managed through its designated Legal Department.</p>
+    <p><strong>Contact:</strong> <a href="mailto:legal@microretailx.com">legal@microretailx.com</a></p>
 
     <h2>4. Hosting & Infrastructure</h2>
     <p>The System is hosted in secure, ISO/IEC 27001-certified environments operated by Amazon Web Services (AWS) and is geographically distributed for performance and compliance reasons. Hosting jurisdictions may include the EU, United States, and other jurisdictions under adequate protection standards.</p>
@@ -82,6 +100,9 @@
 
     <h2>10. Publication and Validity</h2>
     <p>This Legal Notice is issued in accordance with EU and US transparency requirements and remains in force until superseded by an updated version. Last reviewed: 01 July 2025.</p>
+
+    <div id="google_translate_element"></div>
+    <a class="back-home" href="/">← Return to Homepage</a>
   </div>
 
   <footer>
