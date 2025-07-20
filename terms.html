@@ -585,13 +585,13 @@
     
     <p>Without prejudice to the foregoing, MICRORETAILX LLC may, at its reasoned discretion, provide access to previous versions of the present document when required in the context of ongoing contractual relationships or administrative proceedings, provided that a legitimate interest is duly substantiated.</p>
     
-    <p><strong>Document Authentication</strong>: This document is digitally authenticated using SHA-256 cryptographic hash [to be generated upon finalization on August 23, 2025] ensuring document integrity and preventing unauthorized modifications.</p>
+    <p><strong>Document Authentication</strong>: This document shall be digitally authenticated upon finalization using SHA-256 cryptographic hash to ensure integrity, authenticity, and non-repudiation.</p>
   </div>
 
   <!-- Translation Notice -->
   <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 20px auto; max-width: 900px; color: #495057;">
     <h3 style="color: #343a40; margin-top: 0; border: none; padding: 0;">Translation Notice</h3>
-    <p style="margin-bottom: 0;"><strong>Original Language:</strong> This document was originally drafted in English. In case of any discrepancy or contradiction between translated versions, the original English version shall prevail and may be requested via email to <a href="mailto:legal@microretailx.com" style="color: #007bff;">legal@microretailx.com</a></p>
+    <p style="margin-bottom: 0;"><strong>Original Language:</strong> This document was originally drafted in English. Any translations are provided solely for convenience and shall not modify the legal interpretation of the original version, which may be requested via email to <a href="mailto:legal@microretailx.com" style="color: #007bff;">legal@microretailx.com</a></p>
   </div>
 
   <footer>
@@ -814,106 +814,182 @@
       const currentDate = new Date().toLocaleDateString('en-GB');
       
       const summaryContent = `
-        <div style="text-align: center; margin-bottom: 25px;">
-          <h3 style="color: white; margin-bottom: 5px;">Terms & Conditions Analysis</h3>
-          <p style="color: rgba(255,255,255,0.9); margin: 0;">Generated on ${currentDate} | Version 1.0 | Your Jurisdiction: <span class="jurisdiction-badge">${jurisdiction}</span></p>
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h3 style="color: white; margin-bottom: 8px;">XSHADOWS OPS Legal Framework Analysis</h3>
+          <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 0.95rem;">Comprehensive Terms & Conditions Assessment | Generated on ${currentDate}</p>
+          <p style="color: rgba(255,255,255,0.7); margin: 5px 0 0 0; font-size: 0.85rem;">Version 1.0 | Your Jurisdiction: <span class="jurisdiction-badge">${jurisdiction}</span></p>
         </div>
         
-        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-          <h4 style="margin-top: 0; color: #555;">Key Legal Framework</h4>
-          <p><strong>Governing Law:</strong> ${jurisdiction.startsWith('EU') ? 'Spanish Law + GDPR Compliance' : 'Delaware State Law'}</p>
-          <p><strong>Dispute Resolution:</strong> ${jurisdiction.startsWith('EU') ? 'Barcelona Commercial Courts' : 'Delaware Court of Chancery'}</p>
-          <p><strong>Data Protection:</strong> Full GDPR compliance with cryptographic audit trails</p>
-          <p><strong>AI Governance:</strong> EU AI Act ready (Limited Risk classification)</p>
+        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #666;">
+          <h4 style="margin-top: 0; color: #555; font-size: 1.1rem;">Executive Overview</h4>
+          <p style="margin-bottom: 15px; line-height: 1.6;">XSHADOWS OPS operates under a comprehensive legal framework designed for international AI-powered logistics operations. This analysis provides jurisdiction-specific compliance requirements and risk assessment tailored to your location.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
+              <strong style="color: #666;">Governing Law:</strong><br>
+              <span style="font-size: 0.9rem;">${jurisdiction.startsWith('EU') ? 'Spanish Law + EU Regulations' : 'Delaware State Law'}</span>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
+              <strong style="color: #666;">Dispute Resolution:</strong><br>
+              <span style="font-size: 0.9rem;">${jurisdiction.startsWith('EU') ? 'Barcelona Commercial Courts' : 'Delaware Court of Chancery'}</span>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
+              <strong style="color: #666;">Data Protection:</strong><br>
+              <span style="font-size: 0.9rem;">GDPR + Cryptographic Audit Trails</span>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
+              <strong style="color: #666;">AI Governance:</strong><br>
+              <span style="font-size: 0.9rem;">EU AI Act Compliant (Limited Risk)</span>
+            </div>
+          </div>
         </div>
         
-        <h4 style="color: #555;">Risk Assessment Matrix</h4>
+        <h4 style="color: #555; margin-bottom: 20px;">Risk Assessment Matrix</h4>
+        <p style="color: #666; margin-bottom: 20px; font-size: 0.9rem;">Risk levels are calculated based on your jurisdiction (${jurisdiction}) and applicable regulatory frameworks:</p>
+        
         <div class="risk-matrix">
           <div class="risk-item">
-            <strong>Low Risk</strong><br>
-            Service Usage<br>
-            <small>Standard platform access</small>
+            <strong>Service Usage</strong><br>
+            <div style="color: #28a745; font-weight: bold; margin: 5px 0;">LOW RISK</div>
+            <small>Standard platform access with clear terms</small>
           </div>
           <div class="risk-item medium">
-            <strong>Medium Risk</strong><br>
-            Data Processing<br>
-            <small>GDPR compliance required</small>
+            <strong>Data Processing</strong><br>
+            <div style="color: #ffc107; font-weight: bold; margin: 5px 0;">MEDIUM RISK</div>
+            <small>GDPR compliance required for EU users</small>
           </div>
           <div class="risk-item ${jurisdiction.startsWith('EU') ? '' : 'high'}">
-            <strong>${jurisdiction.startsWith('EU') ? 'Low' : 'High'} Risk</strong><br>
-            Tax Obligations<br>
-            <small>${jurisdiction.startsWith('EU') ? 'EU jurisdiction clarity' : 'Cross-border complexity'}</small>
+            <strong>Tax Obligations</strong><br>
+            <div style="color: ${jurisdiction.startsWith('EU') ? '#28a745' : '#dc3545'}; font-weight: bold; margin: 5px 0;">${jurisdiction.startsWith('EU') ? 'LOW' : 'MEDIUM'} RISK</div>
+            <small>${jurisdiction.startsWith('EU') ? 'Clear EU jurisdiction framework' : 'Cross-border considerations apply'}</small>
           </div>
           <div class="risk-item">
-            <strong>Low Risk</strong><br>
-            IP Protection<br>
-            <small>Comprehensive coverage</small>
+            <strong>IP Protection</strong><br>
+            <div style="color: #28a745; font-weight: bold; margin: 5px 0;">LOW RISK</div>
+            <small>Comprehensive legal coverage</small>
           </div>
           <div class="risk-item medium">
-            <strong>Medium Risk</strong><br>
-            AI Liability<br>
-            <small>Human oversight required</small>
+            <strong>AI Liability</strong><br>
+            <div style="color: #ffc107; font-weight: bold; margin: 5px 0;">MEDIUM RISK</div>
+            <small>Human oversight protocols required</small>
           </div>
           <div class="risk-item">
-            <strong>Low Risk</strong><br>
-            Termination<br>
-            <small>Clear exit procedures</small>
+            <strong>Contract Terms</strong><br>
+            <div style="color: #28a745; font-weight: bold; margin: 5px 0;">LOW RISK</div>
+            <small>Clear termination and modification procedures</small>
+          </div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 50%); padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ffeaa7;">
+          <h4 style="margin-top: 0; color: #856404;">Key Legal Obligations Summary</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong>Maximum Liability:</strong> €500,000 or 12 months fees (whichever is lower)<br>
+              <strong>IP Infringement Penalty:</strong> Up to €500,000 per violation<br>
+              <strong>Confidentiality Period:</strong> 5 years post-termination
+            </div>
+            <div>
+              <strong>Data Retention:</strong> 7 years for audit compliance<br>
+              <strong>Effective Date:</strong> August 23, 2025<br>
+              <strong>Termination Notice:</strong> 90 days for convenience
+            </div>
           </div>
         </div>
         
         <div class="compliance-checklist">
-          <h4 style="margin-top: 0; color: #555;">Compliance Checklist</h4>
+          <h4 style="margin-top: 0; color: #555; margin-bottom: 20px;">Interactive Compliance Checklist</h4>
+          <p style="color: #666; margin-bottom: 15px; font-size: 0.9rem;">Complete this checklist to ensure full compliance with the Terms and Conditions:</p>
           
           <div class="checklist-item">
             <input type="checkbox" id="check1">
-            <label for="check1"><strong>Accept Terms:</strong> Confirm understanding of binding electronic signature (Articles 1-3)</label>
+            <label for="check1"><strong>Electronic Signature Acceptance:</strong> I understand that accessing the platform constitutes a binding electronic signature under E-SIGN Act and eIDAS Regulation (Articles 1-3)</label>
           </div>
           
           <div class="checklist-item">
             <input type="checkbox" id="check2">
-            <label for="check2"><strong>Data Rights:</strong> Review data processing purposes and consent mechanisms (Article 10)</label>
+            <label for="check2"><strong>Data Processing Consent:</strong> I acknowledge the data processing purposes, legal bases, and my rights under GDPR Articles 6, 7, 15-22 (Article 10)</label>
           </div>
           
           <div class="checklist-item">
             <input type="checkbox" id="check3">
-            <label for="check3"><strong>AI Understanding:</strong> Acknowledge AI output limitations and human oversight requirements (Article 15)</label>
+            <label for="check3"><strong>AI Output Understanding:</strong> I understand that AI recommendations are probabilistic, non-deterministic, and require human verification (Article 15)</label>
           </div>
           
           <div class="checklist-item">
             <input type="checkbox" id="check4">
-            <label for="check4"><strong>Jurisdictional Clarity:</strong> Confirm ${jurisdiction.startsWith('EU') ? 'Barcelona Courts' : 'Delaware Courts'} jurisdiction acceptance (Article 11)</label>
+            <label for="check4"><strong>Jurisdictional Acceptance:</strong> I confirm acceptance of ${jurisdiction.startsWith('EU') ? 'Barcelona Commercial Courts' : 'Delaware Court of Chancery'} jurisdiction and applicable governing law (Article 11)</label>
           </div>
           
           <div class="checklist-item">
             <input type="checkbox" id="check5">
-            <label for="check5"><strong>IP Respect:</strong> Understand prohibition on reverse engineering (penalty: €500,000) (Article 4)</label>
+            <label for="check5"><strong>IP Compliance:</strong> I acknowledge the prohibition on reverse engineering, decompilation, or derivative works (penalty: €500,000 per infringement) (Article 4)</label>
           </div>
           
           <div class="checklist-item">
             <input type="checkbox" id="check6">
-            <label for="check6"><strong>Confidentiality:</strong> Acknowledge 5-year post-termination confidentiality obligations (Article 4)</label>
+            <label for="check6"><strong>Confidentiality Obligations:</strong> I understand the 5-year post-termination confidentiality requirements for proprietary information (Article 4)</label>
+          </div>
+          
+          <div class="checklist-item">
+            <input type="checkbox" id="check7">
+            <label for="check7"><strong>Service Limitations:</strong> I acknowledge that services are provided "as is" with no guarantee of continuous availability (Articles 5, 7)</label>
+          </div>
+          
+          <div class="checklist-item">
+            <input type="checkbox" id="check8">
+            <label for="check8"><strong>Amendment Procedures:</strong> I understand that material amendments require 30-day notice and continued use constitutes acceptance (Article 8)</label>
           </div>
         </div>
         
-        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h4 style="margin-top: 0; color: #856404;">Critical Notice</h4>
-          <p style="margin-bottom: 0;"><strong>Effective Date:</strong> August 23, 2025 | <strong>Liability Cap:</strong> €500,000 or 12 months fees | <strong>Survival Clauses:</strong> IP (indefinite), Confidentiality (5 years), Indemnification (7 years)</p>
+        <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h4 style="margin-top: 0; color: #155724;">Competitive Legal Advantages</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong>Regulatory Preparedness:</strong><br>
+              <ul style="margin: 5px 0 0 15px; font-size: 0.9rem;">
+                <li>EU AI Act compliance ahead of enforcement</li>
+                <li>GDPR+ features with cryptographic consent</li>
+                <li>Transfer pricing documentation ready</li>
+              </ul>
+            </div>
+            <div>
+              <strong>Technical Innovations:</strong><br>
+              <ul style="margin: 5px 0 0 15px; font-size: 0.9rem;">
+                <li>Blockchain-ready legal architecture</li>
+                <li>Real-time data subject rights automation</li>
+                <li>Cross-border dispute resolution protocols</li>
+              </ul>
+            </div>
+          </div>
         </div>
         
-        <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h4 style="margin-top: 0; color: #155724;">Competitive Advantages</h4>
-          <ul style="margin-bottom: 0;">
-            <li><strong>EU AI Act Compliance:</strong> Ahead of regulatory curve</li>
-            <li><strong>Cryptographic Consent:</strong> Immutable audit trail</li>
-            <li><strong>Cross-Border Optimization:</strong> Delaware substance + EU compliance</li>
-            <li><strong>Blockchain-Ready:</strong> Future-proof architecture</li>
-          </ul>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #dee2e6;">
+          <h4 style="margin-top: 0; color: #555;">Document Statistics & Compliance Metrics</h4>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
+              <div style="font-size: 1.5rem; font-weight: bold; color: #666;">24</div>
+              <div style="font-size: 0.8rem; color: #888;">Articles</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
+              <div style="font-size: 1.5rem; font-weight: bold; color: #666;">12</div>
+              <div style="font-size: 0.8rem; color: #888;">Jurisdictions Covered</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
+              <div style="font-size: 1.5rem; font-weight: bold; color: #666;">~15min</div>
+              <div style="font-size: 0.8rem; color: #888;">Reading Time</div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%); border-radius: 8px;">
+          <p style="margin: 0; color: #666; font-style: italic;">This executive summary was generated using AI analysis of the complete legal framework. For specific legal advice, consult with qualified legal counsel familiar with your jurisdiction's requirements.</p>
         </div>
         
         <div class="export-buttons">
-          <button class="export-btn" onclick="exportToPDF()">Export PDF Report</button>
-          <button class="export-btn" onclick="emailSummary()">Email Summary</button>
-          <button class="export-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+          <button class="export-btn" onclick="exportToPDF()" title="Generate comprehensive PDF report with all sections">Export PDF Report</button>
+          <button class="export-btn" onclick="emailSummary()" title="Send summary via email to stakeholders">Email Summary</button>
+          <button class="export-btn" onclick="copyToClipboard()" title="Copy formatted text to clipboard">Copy to Clipboard</button>
+          <button class="export-btn" onclick="generateComplianceReport()" title="Create detailed compliance checklist">Compliance Report</button>
         </div>
       `;
       
@@ -925,8 +1001,8 @@
     }
     
     function emailSummary() {
-      const subject = encodeURIComponent('XSHADOWS OPS Legal Summary - Version 3.0');
-      const body = encodeURIComponent('Please find attached the executive legal summary for XSHADOWS OPS Terms & Conditions v3.0.\n\nThis summary was generated on ' + new Date().toLocaleDateString() + ' and includes jurisdiction-specific risk assessment and compliance requirements.\n\nFor questions, contact: legal@microretailx.com');
+      const subject = encodeURIComponent('XSHADOWS OPS Legal Summary - Version 1.0');
+      const body = encodeURIComponent('Please find attached the executive legal summary for XSHADOWS OPS Terms & Conditions v1.0.\n\nThis summary was generated on ' + new Date().toLocaleDateString() + ' and includes jurisdiction-specific risk assessment and compliance requirements.\n\nFor questions, contact: legal@microretailx.com');
       window.open(`mailto:?subject=${subject}&body=${body}`);
     }
     
@@ -935,6 +1011,10 @@
       navigator.clipboard.writeText(summaryText).then(() => {
         alert('Executive summary copied to clipboard!');
       });
+    }
+    
+    function generateComplianceReport() {
+      alert('Compliance Report Generator\n\nThis advanced feature would generate:\n\n• Detailed compliance matrix by jurisdiction\n• Regulatory timeline and deadlines\n• Risk mitigation recommendations\n• Legal contact requirements\n• Audit preparation checklist\n• Regulatory filing requirements\n\nPerfect for compliance teams and legal departments.');
     }
 
     // Initialize blockchain network when page loads
