@@ -1,10 +1,12 @@
-<!DOCTYPE html>
+}
+  
+  // Dismiss notification function<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="robots" content="noindex, nofollow">
-  <title>XSHADOWS OPS - Terms and Conditions</title>
+  <title>XSHADOWS OPS - Terms and Conditions | Enterprise Legal Framework</title>
   
   <!-- Google Translate -->
   <script type="text/javascript">
@@ -341,7 +343,7 @@
 
   <section class="legal-header">
     <h1>Terms and Conditions of Use</h1>
-    <p><strong>Version:</strong> 1.0 | <strong>Effective Date:</strong> August 23, 2025</p>
+    <p><strong>Version:</strong> 1.1-beta | <strong>Effective Date:</strong> August 23, 2025</p>
     <p><strong>Change Log:</strong></p>
     <ul>
       <li>August 23, 2025 – Initial publication with comprehensive legal framework for international operations</li>
@@ -683,10 +685,11 @@
 </div>
 
 <footer>
-  <button class="action-btn" onclick="goBack()">← Go Back</button>
-  <button class="action-btn" onclick="openSummary()" title="Generate executive summary with risk analysis">Legal Summary</button>
+  <button class="action-btn" onclick="goBack()" aria-label="Navigate back to previous page">← Go Back</button>
+  <button class="action-btn" onclick="openSummary()" title="Generate executive summary with risk analysis" aria-label="Open legal summary modal">Legal Summary</button>
+  <button class="action-btn" onclick="exportToPDF()" title="Export Terms and Conditions to PDF" aria-label="Export document as PDF">📄 Export PDF</button>
   <p>&copy; 2025 MICRORETAILX LLC — All rights reserved.</p>
-  <p>Version 1.0 — Effective: August 23, 2025 | Initial Publication</p>
+  <p>Version 1.1-beta — Effective: August 23, 2025 | Initial Publication</p>
   <p style="font-size: 11px; color: #888; margin-top: 10px;">
     Document approved by legal counsel | Cross-border compliance framework | Enterprise legal architecture
   </p>
@@ -968,7 +971,7 @@
               
               <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #28a745;">
                 <div style="font-size: 12px; margin-bottom: 3px; color: rgba(255,255,255,0.9);">
-                  <strong>Version 1.0</strong> | Effective: August 23, 2025
+                  <strong>Version 1.1-beta</strong> | Effective: August 23, 2025
                 </div>
                 <div style="font-size: 11px; color: rgba(255,255,255,0.8);">
                   Comprehensive international compliance framework
@@ -1102,7 +1105,7 @@
         
         // Mark as seen for future visits
         try {
-          localStorage.setItem('xshadows_version_notification', 'seen_v1.0');
+          localStorage.setItem('xshadows_version_notification', 'seen_v1.1-beta');
         } catch(e) {
           // Ignore localStorage errors
         }
@@ -1111,7 +1114,34 @@
     }
   });
   
-  // Dismiss notification function
+  // PDF Export function
+  function exportToPDF() {
+    const element = document.querySelector('.container');
+    const opt = {
+      margin: 0.5,
+      filename: 'XSHADOWS_OPS_Terms_v1.1-beta.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Generating...';
+    btn.disabled = true;
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }).catch(() => {
+      btn.innerHTML = '❌ Error';
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }, 2000);
+    });
+  }
   function dismissNotification() {
     const notification = document.getElementById('versionNotification');
     if (notification) {
