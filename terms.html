@@ -8,19 +8,19 @@
   
   <!-- Google Translate -->
   <script type="text/javascript">
-    function googleTranslateElementInit() {
+    function initTranslate() {
       new google.translate.TranslateElement({
         pageLanguage: 'en',
         autoDisplay: true,
-        includedLanguages: '', // all langs
+        includedLanguages: '',
         layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
       }, 'google_translate_element');
     }
   </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=initTranslate" async></script>
   
-  <!-- PDF Generation Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- PDF Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
   
   <style>
     body {
@@ -32,8 +32,8 @@
       overflow-x: hidden;
     }
     
-    /* Interactive Blockchain Network Canvas */
-    #blockchain-canvas {
+    /* Background animation */
+    #bg-canvas {
       position: fixed;
       top: 0;
       left: 0;
@@ -43,18 +43,18 @@
       pointer-events: none;
     }
     
-    /* Performance optimizations for mobile */
     @media (max-width: 768px) {
-      #blockchain-canvas {
-        opacity: 0.7; /* reduce visual complexity on mobile */
+      #bg-canvas {
+        opacity: 0.5;
       }
     }
     
     @media (prefers-reduced-motion: reduce) {
-      #blockchain-canvas {
-        display: none; /* respect user preferences for reduced motion */
+      #bg-canvas {
+        display: none;
       }
     }
+    
     .container {
       max-width: 900px;
       margin: auto;
@@ -62,21 +62,38 @@
       background-color: #fff;
       color: #000;
     }
+    
     h1, h2 {
       color: #2c3e50;
       border-left: 4px solid #3498db;
       padding-left: 10px;
     }
-    p, ul, li, table {
+    
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 2rem;
       margin-bottom: 1rem;
     }
+    
+    p, ul, li, table {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    
     table {
       border-collapse: collapse;
       width: 100%;
+      margin: 1.5rem 0;
     }
+    
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 12px;
       text-align: left;
       vertical-align: top;
     }
@@ -94,18 +111,36 @@
     tr:hover {
       background-color: #f5f5f5;
     }
+    
+    .highlight-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #666;
+    }
+    
+    .important-notice {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 50%);
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border: 1px solid #ffeaa7;
+    }
+    
     footer {
       text-align: center;
       padding: 1rem;
       background-color: #000;
       color: #fff;
     }
+    
     a {
       color: #3498db;
     }
     
-    /* Translator Styles */
-    .translate-container {
+    /* Translator widget */
+    .translate-widget {
       position: fixed;
       top: 20px;
       right: 20px;
@@ -117,11 +152,10 @@
       border: 1px solid #ddd;
     }
     
-    .translate-container #google_translate_element {
+    .translate-widget #google_translate_element {
       font-size: 12px;
     }
     
-    /* Hide Google Translate banner */
     .goog-te-banner-frame.skiptranslate {
       display: none !important;
     }
@@ -130,8 +164,8 @@
       top: 0px !important;
     }
     
-    /* Back Button */
-    .back-button {
+    /* Buttons */
+    .action-btn {
       background: #555;
       color: #ccc;
       padding: 8px 16px;
@@ -142,16 +176,15 @@
       font-size: 12px;
       margin: 10px;
       transition: all 0.3s ease;
-      opacity: 0.7;
+      opacity: 0.8;
     }
     
-    .back-button:hover {
+    .action-btn:hover {
       background: #666;
       color: #fff;
       opacity: 1;
     }
     
-    /* Scroll to top button */
     .scroll-top {
       position: fixed;
       bottom: 20px;
@@ -174,36 +207,7 @@
       transform: translateY(-2px);
     }
     
-    /* Print styles */
-    @media print {
-      .translate-container, .back-button, .scroll-top {
-        display: none !important;
-      }
-    }
-    
-    /* Executive Summary Generator Styles */
-    .summary-generator {
-      background: linear-gradient(135deg, #555 0%, #666 100%);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-family: Georgia, serif;
-      font-size: 12px;
-      transition: all 0.3s ease;
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
-      opacity: 0.7;
-      margin: 10px;
-    }
-    
-    .summary-generator:hover {
-      opacity: 1;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-      background: linear-gradient(135deg, #666 0%, #777 100%);
-    }
-    
+    /* Summary modal */
     .summary-modal {
       position: fixed;
       top: 0;
@@ -221,7 +225,7 @@
       background: white;
       border-radius: 12px;
       padding: 0;
-      max-width: 900px;
+      max-width: 850px;
       max-height: 90vh;
       overflow-y: auto;
       position: relative;
@@ -255,79 +259,14 @@
       padding: 5px;
     }
     
-    .risk-matrix {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin: 20px 0;
+    @media print {
+      .translate-widget, .action-btn, .scroll-top {
+        display: none !important;
+      }
     }
     
-    .risk-item {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #28a745;
-      text-align: center;
-    }
-    
-    .risk-item.medium {
-      border-left-color: #ffc107;
-    }
-    
-    .risk-item.high {
-      border-left-color: #dc3545;
-    }
-    
-    .compliance-checklist {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
-    
-    .checklist-item {
-      display: flex;
-      align-items: center;
-      margin: 10px 0;
-      padding: 8px;
-      background: white;
-      border-radius: 5px;
-    }
-    
-    .checklist-item input[type="checkbox"] {
-      margin-right: 10px;
-      transform: scale(1.2);
-    }
-    
-    .export-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 25px;
-      padding-top: 20px;
-      border-top: 1px solid #dee2e6;
-    }
-    
-    .export-btn {
-      background: linear-gradient(135deg, #555 0%, #666 100%);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: Georgia, serif;
-      transition: all 0.3s ease;
-    }
-    
-    .export-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      background: linear-gradient(135deg, #666 0%, #777 100%);
-    }
-    
-    /* Mobile responsive */
     @media (max-width: 768px) {
-      .translate-container {
+      .translate-widget {
         position: relative;
         top: 0;
         right: 0;
@@ -339,12 +278,6 @@
         padding: 1rem;
       }
       
-      .summary-generator {
-        padding: 10px 14px;
-        font-size: 11px;
-        margin: 8px;
-      }
-      
       .summary-content {
         max-width: 95%;
         margin: 10px;
@@ -353,117 +286,74 @@
       .summary-body {
         padding: 20px;
       }
-      
-      .risk-matrix {
-        grid-template-columns: 1fr;
-      }
-      
-      .export-buttons {
-        flex-direction: column;
-      }
     }
   </style>
 </head>
 <body>
 
-<!-- Interactive Blockchain Network Background -->
-<canvas id="blockchain-canvas"></canvas>
+<canvas id="bg-canvas"></canvas>
 
-<!-- Executive Summary Generator Button -->
-<!-- Now located in footer next to Go Back button -->
-
-<!-- Executive Summary Modal -->
+<!-- Summary Modal -->
 <div class="summary-modal" id="summaryModal">
   <div class="summary-content">
     <div class="summary-header">
-      <h2 style="margin: 0; font-size: 1.5rem;">XSHADOWS OPS - Executive Legal Summary</h2>
-      <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.9rem;">AI-Generated Risk Assessment & Compliance Overview</p>
-      <button class="close-modal" onclick="closeSummaryModal()">×</button>
+      <h2 style="margin: 0; font-size: 1.5rem;">Executive Summary - Legal Framework</h2>
+      <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.9rem;">Terms and Conditions Analysis</p>
+      <button class="close-modal" onclick="closeSummary()">×</button>
     </div>
     <div class="summary-body" id="summaryBody">
-      <!-- Content will be generated dynamically -->
+      <!-- dynamically generated content -->
     </div>
   </div>
 </div>
 
-<!-- Google Translate Widget -->
-<div class="translate-container">
+<!-- Google Translate -->
+<div class="translate-widget">
   <div id="google_translate_element"></div>
 </div>
 
-<!-- Scroll to Top Button -->
 <button class="scroll-top" onclick="scrollToTop()" title="Go to top">↑</button>
 
 <div class="container">
 
-  <section class="legal-architecture">
-      <h1>Terms and Conditions of Use</h1>
-  <p><strong>Version:</strong> 1.0 | <strong>Effective Date:</strong> 23/08/2025</p>
-  <p><strong>Change Log:</strong></p>
-  <ul>
-    <li>23/08/2025 – Initial publication of Terms and Conditions with enterprise legal architecture, EU AI Act compliance, and cross-border operational framework</li>
-  </ul>
+  <section class="legal-header">
+    <h1>Terms and Conditions of Use</h1>
+    <p><strong>Version:</strong> 1.0 | <strong>Effective Date:</strong> August 23, 2025</p>
+    <p><strong>Change Log:</strong></p>
+    <ul>
+      <li>August 23, 2025 – Initial publication with comprehensive legal framework for international operations</li>
+    </ul>
 
-    <h2>PREAMBLE AND STATEMENT OF PURPOSE</h2>
+    <h2>Legal Framework and Scope</h2>
     <p>
-      This legal instrument constitutes a comprehensive regulatory framework governing access, utilization, and commercial exploitation of the technological platform denominated <strong>XSHADOWS OPS</strong>, developed and operated by MICRORETAILX LLC (hereinafter, "the Company").
+      This document establishes the conditions governing access and use of the <strong>XSHADOWS OPS</strong> 
+      technology platform, developed and operated by MICRORETAILX LLC.
     </p>
-    <p>
-      <strong>WHEREAS</strong> the transnational nature of digital operations demands normative design ensuring legal certainty across multiple jurisdictions; <strong>WHEREAS</strong> the incorporation of artificial intelligence systems presents unprecedented regulatory challenges requiring anticipatory governance frameworks; <strong>WHEREAS</strong> personal data protection constitutes a fundamental right recognized under Article 8 of the Charter of Fundamental Rights of the European Union;
-    </p>
-    <p>
-      The Company hereby establishes this contractual regime under the principles of <strong>transparency</strong>, <strong>proportionality</strong>, and <strong>proactive accountability</strong>.
-    </p>
-
-    <h2>Statement of Legal Architecture</h2>
-    <p>
-      This document has been structured following legal drafting standards typically applied in complex international digital infrastructure projects. Its composition reflects a forward-thinking legal structure tailored to environments characterized by regulatory volatility, transnational exposure, and technological complexity.
-    </p>
-
-    <h3>Multijurisdictional Alignment</h3>
-    <p>
-      The Terms integrate a practical compliance framework encompassing the <strong>EU General Data Protection Regulation (GDPR)</strong>, the <strong>California Consumer Privacy Act (CCPA)</strong>, and internationally recognized ethical principles for artificial intelligence, including the <em>OECD AI Principles</em> and the <em>UNESCO Recommendation on the Ethics of AI</em>. This approach is designed to ensure operational resilience across both civil law and common law jurisdictions, while allowing for reasonable adaptations as regulatory frameworks develop.
-    </p>
-
-    <h3>Strategic Jurisdictional Anchoring</h3>
-    <p>
-      Dispute resolution mechanisms are anchored in the <strong>Courts of Barcelona</strong> and the <strong>State of Delaware</strong>, reflecting a deliberate selection of jurisdictions renowned for legal certainty and enforceability in commercial and technology-driven disputes. The governing law provisions are drafted to mitigate forum shopping and procedural inefficiencies.
-    </p>
-
-    <h3>Cross-Border Tax and Economic Substance Framework</h3>
-    <p>
-      To ensure operational clarity and regulatory compliance across jurisdictions upon commencement of operations, the Company declares: <strong>Primary Business Operations</strong> - All core business functions, including strategic decision-making, risk management, and technology development, will be conducted exclusively from the Company's registered offices in Delaware, United States. <strong>Service Delivery Model</strong> - All Platform services will be designed, managed, and delivered from United States infrastructure, with EU data processing conducted solely for compliance purposes under adequate jurisdiction frameworks. <strong>Substance Establishment</strong> - The Company is establishing comprehensive economic substance in Delaware prior to operational launch, including personnel deployment, asset utilization, and operational decision-making processes.
-    </p>
-
-    <h3>AI Governance and Liability Shielding</h3>
-    <p>
-      A clear distinction is established between <strong>AI-generated outputs</strong> and human decision-making responsibilities. The allocation of liability in relation to algorithmic interpretation is mapped via a dedicated <strong>Responsibility Matrix</strong>, serving as an internal risk mitigation tool and an external demonstration of due diligence. The Company acknowledges the evolving nature of AI regulation and may adapt these provisions as industry standards develop, particularly regarding Regulation (EU) 2024/1689 (EU AI Act) with current systems anticipated to be classified as <strong>"Limited Risk"</strong> under Article 50.
-    </p>
-
-    <h3>Cybersecurity and Operational Continuity</h3>
-    <p>
-      The Terms embed forward-looking provisions addressing cybersecurity threats, unauthorized third-party integrations, and force majeure events related to digital continuity. The Company maintains <strong>ISO 27001:2013</strong> certified information security management system and <strong>SOC 2 Type II</strong> compliance for security, availability, and confidentiality.
-    </p>
-
-    <h3>Traceability and Change Control</h3>
-    <p>
-      Version control and change tracking protocols are codified to facilitate auditability and provide historical clarity. This approach aligns with institutional investor requirements and the expectations of supervisory authorities in highly regulated sectors.
-    </p>
-
-    <p>
-      <em>This legal construct is intended not merely to ensure compliance, but to function as a defensive legal perimeter—capable of withstanding litigation, regulatory inspection, and investor due diligence across multiple jurisdictions and operational regimes.</em>
-    </p>
-
-   <p><strong>— Structured to meet the demands of cross-border compliance, regulatory scrutiny, and institutional-grade governance.</strong></p>
-
-  </section>
-
-    <h2>0. Definitions and Interpretation</h2>
-    <p>For the purposes of these Terms and Conditions, the following definitions shall apply:</p>
     
-    <!-- Legal Framework Visualization -->
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #666;">
-      <h4 style="margin-top: 0; color: #555;">Legal Framework Overview</h4>
+    <div class="important-notice">
+      <h4 style="margin-top: 0; color: #856404;">Important Considerations</h4>
+      <p style="margin-bottom: 0;">This service is designed for international commercial operations. 
+      Given the cross-border nature of digital operations, we have developed a regulatory framework 
+      that ensures legal certainty across multiple jurisdictions, complying with principles of 
+      <strong>transparency</strong>, <strong>proportionality</strong>, and <strong>proactive accountability</strong>.</p>
+    </div>
+
+    <h3>Jurisdictions and Regulatory Framework</h3>
+    <p>
+      Our legal framework integrates compliance with European data protection regulations (GDPR), 
+      California privacy laws (CCPA), and internationally recognized principles for artificial intelligence. 
+      This approach ensures operational resilience in both civil law and common law jurisdictions.
+    </p>
+
+    <h3>Dispute Resolution</h3>
+    <p>
+      Dispute resolution mechanisms are established in the <strong>Courts of Barcelona</strong> 
+      and the <strong>State of Delaware</strong>, jurisdictions selected for their recognized legal certainty 
+      and enforceability in commercial and technology disputes.
+    </p>
+
+    <div class="highlight-box">
+      <h4 style="margin-top: 0; color: #555;">Legal Process Diagram</h4>
       <div style="text-align: center; font-family: monospace; font-size: 12px; line-height: 1.8;">
         User → Accepts Terms → Platform Access → AI Output → Human Review → Final Decision<br>
         ↓<br>
@@ -471,700 +361,422 @@
         ↓<br>
         [Dispute] → [Negotiation] → [Mediation] → [Arbitration] → [Resolution]
       </div>
-      <p style="font-size: 0.9rem; color: #666; margin-bottom: 0; font-style: italic;">This simplified flow represents the key legal pathways through our platform. Each step is governed by specific articles detailed below.</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 0; font-style: italic;">
+        This flow represents key legal pathways through our platform. Each step is governed by specific articles detailed below.
+      </p>
     </div>
 
-    <ul>
-      <li><strong>"Platform" or "System"</strong>: Comprehensive technological infrastructure comprising proprietary software architecture, artificial intelligence modules, APIs, database systems, cloud computing services, and real-time analytics engines known as XSHADOWS OPS.</li>
-      <li><strong>"Qualified User"</strong>: Natural person of legal age with full juridical capacity, or legal entity duly incorporated under its national law, accessing the System for commercial, professional, or enterprise purposes.</li>
-      <li><strong>"Data Processing"</strong>: As defined in Article 4(2) of Regulation (EU) 2016/679, any operation performed on personal data, including collection, recording, organization, storage, adaptation, retrieval, consultation, use, disclosure, or destruction.</li>
-      <li><strong>"Algorithmic Output"</strong>: Any recommendation, prediction, or decision-support information generated through machine learning models or AI technologies. Such outputs are inherently probabilistic and shall not be construed as deterministic instructions.</li>
-      <li><strong>"Cross-Border Data Transfer"</strong>: Any transmission of personal data from the European Economic Area to third countries, subject to Chapter V GDPR adequacy requirements.</li>
-      <li><strong>"Economic Substance"</strong>: The genuine business activities, decision-making processes, and value-creating functions undertaken by the Company in its jurisdiction of incorporation, evidenced by personnel, assets, premises, and operational control.</li>
-      <li><strong>"Permanent Establishment"</strong>: A fixed place of business through which enterprise business is carried on, as defined under applicable double taxation treaties and domestic tax legislation.</li>
-      <li><strong>"Force Majeure Event"</strong>: Any act, event, or circumstance beyond the reasonable control of either Party, including but not limited to natural disasters, acts of war, cyberattacks, regulatory changes, or global pandemics.</li>
-    </ul>
-    <p>In case of ambiguity, the English version of these Terms shall prevail. Headings are for convenience only and shall not affect interpretation.</p>
+  </section>
 
-    <h2>1. Acceptance of Terms</h2>
-    <p>By accessing, installing, or utilizing the System in any manner, the User represents and warrants that they possess full legal capacity to enter into binding contractual obligations and confirms full, informed, and irrevocable acceptance of these Terms and Conditions, including all future amendments. This acceptance constitutes a legally binding electronic signature under the Electronic Signatures in Global and National Commerce Act (E-SIGN Act) and eIDAS Regulation (EU 910/2014) for EU-based Users. If you do not agree, you must immediately cease use of the System.</p>
-
-    <h2>2. System Description</h2>
-    <p>XSHADOWS OPS is a proprietary digital system under development by MICRORETAILX LLC, designed to integrate AI-powered decision-support engines, supply chain analytics, and risk-adjusted forecasting tools. Upon operational launch, it will serve enterprise-grade environments handling international logistics, trade documentation, compliance automation, and market intelligence workflows. The System will operate as a high-availability SaaS platform with continuous monitoring and role-based access control.</p>
-
-    <h2>3. Intellectual Property</h2>
-    <p>All components of the System constitute proprietary intellectual property protected under US Copyright Act (17 USC §101 et seq.), Patent Act (35 USC), EU Copyright Directive (2001/29/EC), and international treaties including the Berne Convention and TRIPS Agreement. All intellectual and industrial property rights associated with the System—including source code, models, data structures, algorithms, and visual content—are the exclusive property of MICRORETAILX LLC. Any unauthorized copying, reverse engineering, or derivative use is not permitted and may result in legal action and fines of up to €500,000 per infringement under EU Enforcement Directive 2004/48/EC.</p>
-    <p><em>Note: The parties may modify this clause regarding derivative works through bilateral agreement executed digitally, provided such modification does not materially compromise the Company's core intellectual property rights.</em></p>
-
-    <h2>4. Confidentiality</h2>
-    <p>All Users agree to maintain strict confidentiality regarding any non-public or proprietary information related to the System. This obligation survives termination of access for 5 years post-termination and is enforceable through litigation. Breach of confidentiality may result in immediate suspension and legal recourse, including injunctive relief.</p>
-
-    <h2>5. Limitation of Liability</h2>
-    <p>The System is provided "as is" without warranty of any kind. Company's aggregate liability is limited to: Direct damages (lesser of €500,000 or 12 months of fees paid), Indirect damages (excluded except for willful misconduct), Data breach (statutory minimums under applicable data protection law), IP infringement (full indemnification with reasonable defense costs). MICRORETAILX LLC shall not be liable for indirect, incidental, special, consequential, or punitive damages arising from use or inability to use the System, except where prohibited by applicable law.</p>
-    <p>For AI-related decisions, liability shall be assessed applying the principle of proportionality of damage, considering the probabilistic nature of algorithmic outputs, the degree of human oversight exercised, and the user's reliance on such outputs in their specific business context, consistent with emerging European jurisprudential standards on algorithmic accountability.</p>
-
-    <h2>6. Legal Compliance and Multijurisdictional Framework</h2>
-    <p>MICRORETAILX LLC operates under a comprehensive compliance matrix integrating: EU General Data Protection Regulation (EU 2016/679, hereinafter "GDPR"), ePrivacy Directive (2002/58/EC), Digital Services Act (EU 2022/2065), California Consumer Privacy Act (hereinafter "CCPA"), Virginia Consumer Data Protection Act (hereinafter "VCDPA"), ISO 27001:2013, SOC 2 Type II, and NIST Cybersecurity Framework v1.1. All AI systems adhere to OECD AI Principles, IEEE Standards for Ethical Design, and UNESCO Recommendation on the Ethics of Artificial Intelligence.</p>
-    <p>Users within Spain agree to submit to the jurisdiction of the Courts of Barcelona. All other Users accept the jurisdiction of the State of Delaware, United States. In the event of conflict, the more protective law for the User shall apply.</p>
-
-    <h2>7. Service Availability and Performance Standards</h2>
-    <p>MICRORETAILX LLC provides 99.9% monthly uptime guarantee with planned maintenance maximum 4 hours monthly (7-day notice) and emergency maintenance maximum 2 hours without prior notice. Performance standards include <200ms response time for 95th percentile. The Company reserves the right to modify, suspend, or terminate access to the System at any time for maintenance, upgrades, legal requirements, or force majeure events.</p>
-
-    <h2>8. Amendments and Change Control</h2>
-    <p>Material amendments require 30-day advance notice via registered electronic mail. Non-material amendments become effective immediately upon publication. All modifications are subject to internal change control protocols and version tracking. Each published version includes version number, effective date, summary of key changes, and legal validation. Historical versions are available upon request for minimum 5 years from retirement date.</p>
-
-    <h2>9. Registered Address and Corporate Information</h2>
-    <p>The Company maintains a registered legal presence at 1209 Orange Street, Wilmington, DE 19801, United States (Corporate Registry: Delaware | Entity ID: 7892456). This address is designated solely for service of process and legal registrations. All correspondence must be directed exclusively to:</p>
-    <p><a href="mailto:legal@microretailx.com">legal@microretailx.com</a></p>
-
-    <h2>10. Data Protection and User Rights</h2>
-    <p>MICRORETAILX LLC acts as Data Controller for Personal Data collected via the System with registered office serving as primary establishment under Article 4(16) GDPR. Data is processed lawfully under legal bases of contractual necessity (Article 6(1)(b)), legitimate interest (Article 6(1)(f)), legal obligation (Article 6(1)(c)), or explicit user consent (Article 6(1)(a)). All processing adheres to the GDPR (EU 2016/679), the CCPA, and other applicable privacy frameworks.</p>
-    <p><strong>User rights include:</strong></p>
-    <ul>
-      <li>Right of Access (Article 15): Automated data export within 72 hours</li>
-      <li>Right to Rectification (Article 16): Real-time correction capabilities</li>
-      <li>Right to Erasure (Article 17): Secure deletion with cryptographic verification</li>
-      <li>Right to restrict or object to processing</li>
-      <li>Right to Portability (Article 20): Structured data export in JSON/XML format</li>
-      <li>Right to withdraw consent at any time</li>
-    </ul>
-    <p>All consent collection is recorded via timestamped cryptographic ledger with immutable audit trail, retained for 7 years post-withdrawal. All requests must be submitted to the Data Protection Officer (hereinafter "DPO") via <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>. A response will be issued within 30 days in accordance with applicable regulations.</p>
-
-    <h2>11. Jurisdiction and Governing Law</h2>
-    <p>These Terms shall be governed by and interpreted in accordance with:</p>
-    <ul>
-      <li>The laws of the Kingdom of Spain for Users residing within the EU, with exclusive jurisdiction granted to the courts of Barcelona.</li>
-      <li>The laws of the State of Delaware, United States, for all other Users.</li>
-    </ul>
-    <p>Disputes shall be resolved through tiered escalation: Direct negotiation (30-day period), Mediation under International Chamber of Commerce (ICC, hereinafter "ICC") Mediation Rules, Arbitration under ICC Arbitration Rules (London seat), with expedited procedures for claims under €100,000. In circumstances where physical attendance is impracticable, virtual arbitration proceedings shall be conducted via secure platforms meeting ISO 27001 standards following ICC Guidelines on Virtual Hearings (2020).</p>
-
-    <h2>12. Force Majeure and Business Continuity</h2>
-    <p>MICRORETAILX LLC shall not be held liable for any delay or failure in performance resulting from causes beyond its reasonable control, including natural disasters, strikes, governmental actions, civil disturbances, or cybersecurity threats. Business continuity planning includes Recovery Time Objective (RTO) of 4 hours for critical systems, Recovery Point Objective (RPO) of 15 minutes maximum data loss, and disaster recovery sites in Ireland (Primary) and Singapore (Secondary).</p>
-
-    <h2>13. API and Third-Party Integrations</h2>
-    <p>Users are solely responsible for the configuration, security, and lawful use of third-party APIs or plugins integrated with the System. Licensed technology components include Apache Kafka (Apache License 2.0), TensorFlow (Apache License 2.0), PostgreSQL (PostgreSQL License), and Redis (BSD License). Any unauthorized access, data scraping, or circumvention of technical safeguards constitutes a material breach of these Terms and may result in immediate suspension and legal action.</p>
-
-    <h2>14. Usage Monitoring and Cybersecurity</h2>
-    <p>The Company reserves the right to monitor and log usage of the System, including IP addresses, session activity, access times, and user-agent metadata, for security, performance optimization, regulatory compliance, and fraud prevention purposes. All monitoring is conducted in compliance with GDPR, CCPA, and equivalent data protection standards. Security incident response protocol includes immediate containment within 1 hour, preliminary assessment within 4 hours, regulatory notification within 72 hours (GDPR Article 33), and forensic investigation completed within 30 days.</p>
-
-    <h2>15. AI-Based Decision Support and Ethical Use</h2>
-    <p>The System provides outputs generated through artificial intelligence and machine learning algorithms trained on diverse datasets. These outputs are probabilistic, non-deterministic, and should not be construed as binding or authoritative decisions. The Company provides high-level descriptions of AI model architectures, training data sources, performance metrics, and bias testing results, recognizing that AI technology continues to evolve and improve over time.</p>
-    <p>Users remain fully responsible for verifying all AI-based recommendations, especially in contexts involving international trade, customs declarations, regulatory filings, or compliance matters. We strongly recommend that users apply their professional judgment and seek additional verification when making critical business decisions.</p>
-    <p>The Company adheres to recognized ethical standards on AI usage, including the OECD AI Principles and the UNESCO Recommendation on the Ethics of Artificial Intelligence. Current AI systems are anticipated to be classified as "Limited Risk" under Article 50 of EU AI Act, though classifications may be updated as regulatory guidance develops.</p>
+  <h2>1. Definitions and Interpretation</h2>
+  <p>For the purposes of these Terms and Conditions, the following definitions shall apply:</p>
   
-    <h2>16. Assignment and Licensing</h2>
-    <p>The User may not assign, delegate, sublicense, or otherwise transfer any rights or obligations under these Terms without the prior written consent of MICRORETAILX LLC. Any attempted transfer in violation of this clause shall be null and void. The Company may assign its rights under these Terms without prior notice only in the context of a merger, acquisition, or restructuring, provided that such assignment does not result in a material degradation of User rights or Services. MICRORETAILX LLC shall provide reasonable notice of such assignment following execution.</p>
- 
-    <h2>17. Electronic Notice and Communication</h2>
-    <p>All notices, legal demands, and formal communications under these Terms shall be deemed valid and legally binding when delivered to:</p>
-    <p><a href="mailto:legal@microretailx.com">legal@microretailx.com</a></p>
-    <p>Unless legally required to use alternative means, this shall constitute the exclusive and binding communication channel for legal or contractual matters. Notices shall be considered received within official business hours of the recipient's jurisdiction, Monday through Friday, 9:00 to 18:00 (excluding public holidays). EU Representative (Article 27 GDPR): To be formally appointed prior to processing EU personal data - interim contact via legal@microretailx.com with designation "ATTN: EU Representative".</p>
-
-   <h2>18. External Documents and Legal References</h2>
-    <p>The following external documents shall be deemed incorporated by reference into these Terms upon their publication. Users shall be notified via the System dashboard or at the same URL:</p>
-    <ul>
-      <li><a href="#">Service Level Agreement (SLA, hereinafter "SLA")</a> – expected by Q3 2025</li>
-      <li><a href="#">Privacy Policy</a> – expected by Q3 2025</li>
-      <li><a href="#">Cookie Policy</a> – expected by Q3 2025</li>
-      <li><a href="#">Data Processing Addendum (DPA, hereinafter "DPA")</a> – available upon request or when user provides processing input</li>
-    </ul>
-    <p>Additional contractual appendices, including the current Data Sharing Agreement framework (last updated 15/07/2025), may be provided upon request for specific partnerships or enterprise integrations, as otherwise agreed between the parties.</p>
-    <p><strong>Documentary Hierarchy and Governing Law for Incorporated Documents</strong>: In the event of contradiction between this Agreement and subsidiary documentation (SLAs, Privacy Policies, Marketing Materials, Technical Specifications, User Guides), these Terms and Conditions shall prevail unless explicitly stated otherwise in a duly executed written amendment. All documents incorporated by reference shall be governed by the same law and jurisdiction provisions as these Terms, ensuring consistent legal interpretation across the entire contractual framework.</p>
-
-    <h2>19. Responsibility Matrix</h2>
-    <p>The following matrix outlines the assignment of accountability for common scenarios:</p>
-    <table>
-      <thead>
-        <tr><th>Event</th><th>Responsible Party</th><th>Remediation</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Internal data breach</td><td>MICRORETAILX LLC</td><td>Immediate notification, containment, and report to authorities</td></tr>
-        <tr><td>External API misuse</td><td>User</td><td>Suspension of access + indemnification if applicable</td></tr>
-        <tr><td>Misinterpretation of AI output</td><td>User</td><td>Use at own risk; Company not liable for decisions based solely on AI</td></tr>
-        <tr><td>AI model bias causing discriminatory outcomes</td><td>Company</td><td>Immediate model retraining + compensation</td></tr>
-        <tr><td>Third-party API integration failure</td><td>Shared liability</td><td>Proportional remediation based on fault</td></tr>
-        <tr><td>Cybersecurity breach of Company systems</td><td>Company</td><td>Notification + forensic investigation + credit monitoring</td></tr>
-      </tbody>
-    </table>
-
-    <h2>20. Interpretation and Language</h2>
-    <p>This Agreement is drafted in English. Any translations provided for convenience shall not alter the legal meaning of the original English text. In case of discrepancy between language versions, the English version shall prevail and control interpretation. These Terms may be translated into multiple languages for convenience. Clause headings are included for reference only and shall not affect interpretation.</p>
-
-    <h2>21. Severability</h2>
-    <p>If any provision of these Terms is held to be invalid, illegal, or unenforceable by a court of competent jurisdiction, such provision shall be modified or severed to the minimum extent necessary to make it valid and enforceable, and the remaining provisions shall remain in full force and effect.</p>
-
-    <h2>22. Entire Agreement and Survival</h2>
-    <p>These Terms, together with any policies or documents incorporated by reference, constitute the entire agreement between the User and MICRORETAILX LLC regarding use of the System, and supersede all prior and contemporaneous understandings, agreements, representations, and warranties, both written and oral.</p>
-    <p>The Parties may, by mutual agreement, modify the scope of certain obligations contained herein through a digitally executed amendment referencing this Agreement and signed by authorized representatives of both parties.</p>
-    <p><strong>Survival of Provisions</strong>: The following provisions shall survive termination: Intellectual Property Rights (indefinitely), Confidentiality obligations (5 years post-termination), Limitation of Liability (indefinitely for pre-termination claims), Indemnification obligations (7 years post-termination), AI Governance and liability allocation (3 years post-termination), Data retention and deletion obligations (until completion).</p>
-    <p>In the event of substantial disagreement regarding the interpretation of these Terms, the Parties agree to prioritize a construction that preserves the commercial equilibrium and original intent of the agreement, considering the evolving nature of digital business operations.</p>
-
-    <h2>23. Contact Information</h2>
-    <p>All inquiries, notifications, and legal matters must be addressed to:</p>
-    <p><strong>MICRORETAILX LLC – Legal Department</strong><br/>
-    Email: <a href="mailto:legal@microretailx.com">legal@microretailx.com</a><br/>
-    Address: 1209 Orange Street, Wilmington, DE 19801, USA<br/>
-    Corporate Registry: Delaware, United States | Entity ID: 7892456</p>
-
-    <h2>24. Change Control and Versioning</h2>
-    <p>All modifications to these Terms shall be subject to internal change control protocols and version tracking. Each published version will include:</p>
-    <ul>
-      <li>Version number</li>
-      <li>Effective date</li>
-      <li>Summary of key changes</li>
-      <li>Legal validation and stakeholder approval (where applicable)</li>
-    </ul>
-    <p>Historical versions of these Terms and Conditions shall be made available upon formal request for a minimum period of five (5) years from their date of replacement, thereby ensuring document traceability in accordance with principles of sound corporate governance.</p>
+  <ul>
+    <li><strong>"Platform" or "System"</strong>: Technology infrastructure comprising proprietary software architecture, 
+    artificial intelligence modules, APIs, database systems, cloud computing services, and real-time analytics engines known as XSHADOWS OPS.</li>
     
-    <p>This document has been drafted in accordance with technical criteria derived from comparative law and best contractual practices, with the objective of providing a robust, clear, and verifiable normative framework suitable for potential regulatory audits or inquiries by third parties with a legitimate interest, in compliance with applicable legislation across the jurisdictions in which the Company operates.</p>
+    <li><strong>"Qualified User"</strong>: Natural person of legal age with full legal capacity, 
+    or legal entity duly incorporated under its national law, accessing the System for commercial, professional, or enterprise purposes.</li>
     
-    <p>Without prejudice to the foregoing, MICRORETAILX LLC may, at its reasoned discretion, provide access to previous versions of the present document when required in the context of ongoing contractual relationships or administrative proceedings, provided that a legitimate interest is duly substantiated.</p>
+    <li><strong>"Data Processing"</strong>: Any operation performed on personal data, 
+    including collection, recording, organization, storage, consultation, use, disclosure, or destruction.</li>
     
-    <p><strong>Document Authentication</strong>: This document shall be digitally authenticated upon finalization using SHA-256 cryptographic hash to ensure integrity, authenticity, and non-repudiation.</p>
+    <li><strong>"Algorithmic Output"</strong>: Any recommendation, prediction, or decision-support information 
+    generated through machine learning models or AI technologies. Such outputs are inherently probabilistic 
+    and shall not be construed as deterministic instructions.</li>
     
-    <p><strong>Document Hash (SHA-256):</strong> <code style="background: #f1f1f1; padding: 2px 6px; border-radius: 3px; font-family: monospace;" id="documentHash">Calculating...</code></p>
-    
-    <p style="margin-top: 2rem; font-style: italic; color: #666;">We appreciate your trust in our platform and our commitment to transparency. Should you have any questions about these Terms or wish to access previous versions, please do not hesitate to contact us. We will be happy to assist you personally and ensure you have all the information you need.</p>
-    
-    <p style="text-align: center; margin-top: 1rem;">
-      <small style="color: #888;">Note: These Terms reflect real-world legal considerations developed through practical experience in cross-border digital operations. Questions? We're here to help.</small>
-    </p>
-    
-    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; font-size: 0.9rem; color: #666;">
-      <p style="margin: 0;"><strong>Legal Review & Approval:</strong> This document has been reviewed and approved by MICRORETAILX LLC's legal counsel on August 15, 2025. It incorporates lessons learned from similar international tech platform deployments and reflects current best practices in AI governance and cross-border compliance.</p>
-      <p style="margin: 5px 0 0 0; font-style: italic;">"In our experience, the biggest legal challenge for AI platforms isn't the technology itself, but ensuring human accountability remains clear throughout the decision chain." - Senior Legal Counsel, MICRORETAILX LLC</p>
-    </div>
+    <li><strong>"Force Majeure Event"</strong>: Any act, event, or circumstance beyond the reasonable control 
+    of either Party, including natural disasters, acts of war, cyberattacks, regulatory changes, or global pandemics.</li>
+  </ul>
+  
+  <p>In case of ambiguity, the English version of these Terms shall prevail. 
+  Headings are for convenience only and shall not affect interpretation.</p>
+
+  <h2>2. Acceptance of Terms</h2>
+  <p>By accessing, installing, or utilizing the System in any manner, the User represents and warrants 
+  that they possess full legal capacity to enter into binding contractual obligations and confirms complete, 
+  informed, and irrevocable acceptance of these Terms and Conditions. This acceptance constitutes a legally 
+  binding electronic signature. If you do not agree, you must immediately cease use of the System.</p>
+
+  <h2>3. System Description</h2>
+  <p>XSHADOWS OPS is a proprietary digital system under development by MICRORETAILX LLC, designed to integrate 
+  AI-powered decision-support engines, supply chain analytics, and risk-adjusted forecasting tools. 
+  Upon operational launch, it will serve enterprise-grade environments handling international logistics, 
+  trade documentation, compliance automation, and market intelligence workflows.</p>
+  
+  <p><em>Note: While the platform remains under active development, these terms pre-establish the governance 
+  and operational expectations upon launch.</em></p>
+
+  <h2>4. Intellectual Property</h2>
+  <p>All components of the System constitute proprietary intellectual property protected under applicable 
+  copyright, patent, and trademark laws. All intellectual and industrial property rights associated 
+  with the System are the exclusive property of MICRORETAILX LLC. Any unauthorized copying, reverse engineering, 
+  or derivative use is prohibited and may result in legal action.</p>
+  
+  <p><em>Note: The parties may modify this clause regarding derivative works through bilateral agreement 
+  executed digitally, provided such modification does not materially compromise the Company's core intellectual property rights.</em></p>
+
+  <h2>5. Confidentiality</h2>
+  <p>All Users agree to maintain strict confidentiality regarding any non-public or proprietary information 
+  related to the System. This obligation survives termination of access for 5 years post-termination 
+  and is enforceable through litigation. Breach may result in immediate suspension and legal recourse.</p>
+
+  <h2>6. Limitation of Liability</h2>
+  <p>The System is provided "as is" without warranty of any kind. To the maximum extent permitted by law, Company's total liability for any claims arising from or related to these Terms or the System shall not exceed the greater of (i) $1,000 or (ii) the total amount paid by User to Company in the twelve months preceding the claim.</p>
+  
+  <p>MICRORETAILX LLC shall not be liable for indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or business opportunities, regardless of the theory of liability and even if advised of the possibility of such damages.</p>
+  
+  <p>Some jurisdictions do not allow the exclusion or limitation of incidental or consequential damages, so the above limitations may not apply to you.</p>
+
+  <h2>7. Legal Compliance Framework</h2>
+  <p>MICRORETAILX LLC operates under applicable data protection and privacy laws, including but not limited to GDPR for EU users and CCPA for California residents. The Company implements industry-standard security measures and maintains documented policies for data handling, though specific compliance certifications may vary and are available upon request.</p>
+  
+  <p>All AI systems are designed in accordance with emerging industry standards and ethical guidelines, though the regulatory landscape continues to evolve.</p>
+
+  <h2>8. Service Availability and Termination</h2>
+  <p>MICRORETAILX LLC provides 99.9% monthly uptime guarantee with planned maintenance maximum 4 hours monthly 
+  (7-day notice) and emergency maintenance maximum 2 hours without prior notice.</p>
+  
+  <p><strong>Termination by Company:</strong> We may suspend or terminate your access to the System immediately, 
+  without prior notice, if:</p>
+  <ul>
+    <li>You breach any material provision of these Terms</li>
+    <li>Your account shows signs of unauthorized access or security compromise</li>
+    <li>Your usage pattern indicates potential fraud, abuse, or violation of applicable laws</li>
+    <li>You fail to pay applicable fees after 30-day notice (for paid services)</li>
+    <li>Legal or regulatory requirements mandate suspension</li>
+    <li>Your activities pose a security risk to other users or our infrastructure</li>
+  </ul>
+  
+  <p><strong>Appeal Process:</strong> Users who dispute a suspension or termination may submit an appeal 
+  to <a href="mailto:appeals@microretailx.com">appeals@microretailx.com</a> within 15 days of notification. 
+  Appeals must include supporting evidence and a detailed explanation. We will review appeals within 5 business days 
+  and provide a written response. During the appeal process, suspended accounts remain inaccessible.</p>
+  
+  <p><strong>Termination by User:</strong> You may terminate your account at any time by contacting our support team. 
+  Upon termination, your access will cease within 24 hours, though certain data retention obligations may apply.</p>
+  
+  <p><strong>Effect of Termination:</strong> Upon termination, all rights and licenses granted to you will cease immediately. 
+  Sections relating to intellectual property, confidentiality, limitation of liability, and dispute resolution shall survive termination.</p>
+
+  <h2>9. Account Security and User Obligations</h2>
+  <p>Users are responsible for maintaining the confidentiality of their account credentials and for all activities 
+  that occur under their account. You must immediately notify us of any unauthorized use of your account.</p>
+  
+  <p><strong>Prohibited Activities:</strong> Users may not:</p>
+  <ul>
+    <li>Attempt to gain unauthorized access to the System or other users' accounts</li>
+    <li>Use the System for illegal activities or to violate third-party rights</li>
+    <li>Distribute malware, spam, or engage in any form of network abuse</li>
+    <li>Attempt to reverse engineer, decompile, or extract source code</li>
+    <li>Resell, redistribute, or provide commercial access to the System without authorization</li>
+    <li>Use automated tools to scrape or harvest data beyond reasonable API limits</li>
+  </ul>
+  
+  <p><strong>Enforcement and Consequences:</strong> Violations of these obligations may result in:</p>
+  <ul>
+    <li><strong>Spam/Abuse:</strong> Immediate account suspension + reporting to relevant authorities and anti-spam organizations</li>
+    <li><strong>Unauthorized Access:</strong> Permanent account termination + law enforcement notification</li>
+    <li><strong>Malware Distribution:</strong> Immediate termination + coordination with cybersecurity agencies</li>
+    <li><strong>Commercial Violations:</strong> Account suspension + potential legal action for damages</li>
+    <li><strong>API Abuse:</strong> Rate limiting escalation + temporary to permanent API access revocation</li>
+    <li><strong>Data Scraping:</strong> IP blocking + cease and desist notification + potential litigation</li>
+  </ul>
+  
+  <p>We reserve the right to preserve and disclose account information when required by law or when we believe 
+  in good faith that preservation or disclosure is reasonably necessary to comply with legal obligations.</p>
+
+  <h2>10. Amendments and Change Control</h2>
+  <p>Material amendments require 30-day advance notice via registered electronic mail. 
+  Non-material amendments become effective immediately upon publication. All modifications are subject 
+  to internal change control protocols and version tracking.</p>
+
+  <h2>11. Registered Address and Corporate Information</h2>
+  <p>The Company maintains a registered legal presence at 1209 Orange Street, Wilmington, DE 19801, United States 
+  (Corporate Registry: Delaware | Entity ID: 7892456). All correspondence must be directed exclusively to:</p>
+  <p><a href="mailto:legal@microretailx.com">legal@microretailx.com</a></p>
+  
+  <p><em>Note: The Delaware address corresponds to our registered agent (The Corporation Trust Company). 
+  Operational and contact address is located in Abrera, Spain, as disclosed in contractual communications.</em></p>
+
+  <h2>12. Data Protection and User Rights</h2>
+  <p>MICRORETAILX LLC acts as Data Controller for Personal Data collected via the System. 
+  Data is processed lawfully under legal bases of contractual necessity, legitimate interest, 
+  legal obligation, or explicit user consent. All processing adheres to GDPR and other applicable privacy frameworks.</p>
+  
+  <p><strong>User rights include:</strong></p>
+  <ul>
+    <li>Right of Access: Automated data export within 72 hours</li>
+    <li>Right to Rectification: Real-time correction capabilities</li>
+    <li>Right to Erasure: Secure deletion with cryptographic verification</li>
+    <li>Right to restrict or object to processing</li>
+    <li>Right to Portability: Structured data export in JSON/XML format</li>
+    <li>Right to withdraw consent at any time</li>
+  </ul>
+  
+  <p>All requests must be submitted via <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>. 
+  A response will be issued within 30 days in accordance with applicable regulations.</p>
+
+  <h2>13. Jurisdiction and Governing Law</h2>
+  <p>These Terms shall be governed by and interpreted in accordance with the laws of the State of Delaware, United States, without regard to its conflict of laws principles.</p>
+  
+  <p>Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the state and federal courts located in Delaware. However, for disputes involving EU-based Users, jurisdiction may alternatively extend to the courts of Barcelona, Spain, in accordance with Recital 22 of Regulation (EU) 1215/2012.</p>
+  
+  <p>If you are located in the European Union, you may also have the right to file complaints with your local data protection authority regarding our processing of your personal data.</p>
+
+  <h2>14. Force Majeure and Business Continuity</h2>
+  <p>MICRORETAILX LLC shall not be held liable for any delay or failure in performance resulting from causes 
+  beyond its reasonable control, including but not limited to:</p>
+  
+  <ul>
+    <li>Natural disasters (earthquakes, floods, hurricanes, pandemics)</li>
+    <li>Acts of war, terrorism, or civil unrest</li>
+    <li>Large-scale cyberattacks or distributed denial-of-service attacks</li>
+    <li>Government actions, sanctions, or abrupt regulatory changes</li>
+    <li>Critical infrastructure failures (internet backbone, power grid)</li>
+    <li>Labor strikes or disputes affecting essential services</li>
+    <li>Supply chain disruptions affecting cloud service providers</li>
+  </ul>
+  
+  <p>Upon occurrence of a Force Majeure event, we will use commercially reasonable efforts to minimize 
+  service disruption and will provide notice to affected users within 72 hours when feasible.</p>
+  
+  <p><strong>Extended Force Majeure:</strong> If a Force Majeure event prevents the provision of the System 
+  for a continuous period exceeding 30 days, either party may terminate the agreement by providing written notice. 
+  In such cases, Users will receive a prorated refund for any prepaid fees covering the affected period, 
+  and both parties shall be released from further obligations under these Terms.</p>
+  
+  <p><strong>Business Continuity Plan:</strong> We maintain disaster recovery protocols with Recovery Time Objective (RTO) 
+  of 4 hours for critical systems and Recovery Point Objective (RPO) of 15 minutes maximum data loss under normal circumstances.</p>
+
+  <h2>15. AI-Based Decision Support and Limitations</h2>
+  <p>The System may provide outputs generated through artificial intelligence and machine learning algorithms. 
+  These outputs are for informational purposes only and should not be relied upon as the sole basis for business, 
+  legal, financial, or other decisions. Users are responsible for independently verifying any AI-generated recommendations.</p>
+  
+  <p>While we strive to minimize bias in our AI systems, we cannot guarantee that AI outputs will be free from 
+  bias or error. The Company makes no representations or warranties regarding the accuracy, completeness, 
+  or suitability of AI-generated content for any particular purpose.</p>
+  
+  <p>Current AI modules are designed in accordance with OECD principles and are expected to fall within "Limited Risk" 
+  under the forthcoming EU AI Act classifications, subject to final audit and registration.</p>
+
+  <h2>16. Assignment and Licensing</h2>
+  <p>The User may not assign, delegate, or transfer any rights under these Terms without prior written consent. 
+  The Company may assign its rights under these Terms in the context of a merger, acquisition, or restructuring.</p>
+
+  <h2>17. Electronic Notice and Communication</h2>
+  <p>All notices and formal communications under these Terms shall be deemed valid when delivered to:</p>
+  <p><a href="mailto:legal@microretailx.com">legal@microretailx.com</a></p>
+  
+  <p>This shall constitute the exclusive communication channel for legal or contractual matters. 
+  Notices shall be considered received within official business hours of the recipient's jurisdiction.</p>
+
+  <h2>18. External Documents</h2>
+  <p>These Terms incorporate by reference our <a href="https://www.microretailx.com/privacy" target="_blank" rel="noopener">Privacy Policy</a> and <a href="https://www.microretailx.com/cookies" target="_blank" rel="noopener">Cookie Policy</a>, which are available on our website. In the event of any conflict between these Terms and our Privacy Policy, the Privacy Policy shall control with respect to data protection matters.</p>
+  
+  <p>Enterprise customers may be subject to additional terms as set forth in a separate written agreement.</p>
+  
+  <p><em>Note: If any external links are temporarily unavailable, cached versions and policy summaries are available by contacting 
+  <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>. All incorporated policies are maintained with version control 
+  and historical access for compliance purposes.</em></p>
+
+  <h2>19. Responsibility Guidelines</h2>
+  <p>The following guidelines outline general expectations for common scenarios:</p>
+  <table>
+    <thead>
+      <tr><th>Scenario</th><th>User Responsibility</th><th>Company Responsibility</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Account security</td><td>Maintain secure passwords and access credentials</td><td>Implement reasonable security measures</td></tr>
+      <tr><td>AI-generated content</td><td>Review and verify before business use</td><td>Provide clear disclaimers about AI limitations</td></tr>
+      <tr><td>Third-party integrations</td><td>Ensure authorized use and compliance</td><td>Maintain secure API endpoints</td></tr>
+      <tr><td>Data accuracy</td><td>Provide accurate input data</td><td>Process data according to documented procedures</td></tr>
+      <tr><td>System availability</td><td>Plan for potential downtime</td><td>Make reasonable efforts to maintain service</td></tr>
+    </tbody>
+  </table>
+  
+  <p><em>Note: This table provides general guidance only and does not create additional legal obligations beyond those set forth in these Terms.</em></p>
+
+  <h2>20. Interpretation and Language</h2>
+  <p>This Agreement is drafted in English. Any translations provided for convenience shall not alter 
+  the legal meaning of the original English text. In case of discrepancy between language versions, 
+  the English version shall prevail and control interpretation.</p>
+
+  <h2>21. Severability</h2>
+  <p>If any provision of these Terms is held invalid by a court of competent jurisdiction, 
+  such provision shall be modified to the minimum extent necessary to make it valid, 
+  and the remaining provisions shall remain in full force and effect.</p>
+
+  <h2>22. Entire Agreement and Survival</h2>
+  <p>These Terms, together with any policies incorporated by reference, constitute the entire agreement 
+  between the User and MICRORETAILX LLC regarding use of the System, and supersede all prior 
+  understandings and agreements.</p>
+  
+  <p><strong>Survival of Provisions:</strong> The following provisions shall survive termination: 
+  Intellectual Property Rights (indefinitely), Confidentiality obligations (5 years), 
+  Limitation of Liability (indefinitely), Data retention obligations (until completion).</p>
+
+  <h2>23. Contact Information</h2>
+  <p>All inquiries and legal matters must be addressed to:</p>
+  <p><strong>MICRORETAILX LLC – Legal Department</strong><br/>
+  Email: <a href="mailto:legal@microretailx.com">legal@microretailx.com</a><br/>
+  Address: 1209 Orange Street, Wilmington, DE 19801, USA<br/>
+  Corporate Registry: Delaware | Entity ID: 7892456</p>
+
+  <h2>24. Change Control and Versioning</h2>
+  <p>All modifications to these Terms shall be subject to internal change control protocols. 
+  Each published version will include version number, effective date, summary of key changes, 
+  and legal validation where applicable.</p>
+  
+  <p>Historical versions shall be made available upon formal request for a minimum period 
+  of five years from their date of replacement.</p>
+
+  <h2>25. Pricing and Commercial Terms</h2>
+  <p>The pricing terms and service-level agreements are specified in the applicable commercial agreement, 
+  available upon registration or enterprise onboarding. Free tier limitations and enterprise pricing 
+  schedules are maintained separately from these Terms and may be updated with reasonable notice.</p>
+
+  <h2>26. Electronic Acceptance and Binding Effect</h2>
+  <p>By accessing and using the System, the User acknowledges and agrees to be bound by these Terms, 
+  which shall be deemed accepted through affirmative interaction (e.g., checkbox, account creation, 
+  API token request). For enterprise clients, additional written acceptance may be required via DocuSign 
+  or similar platforms.</p>
+  
+  <p>This electronic acceptance constitutes a valid and binding signature equivalent to a handwritten 
+  signature for all legal purposes.</p>
+  
+  <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; font-size: 0.9rem; color: #666;">
+    <p style="margin: 0;"><strong>Legal Review:</strong> Legal counsel review conducted in-house and benchmarked 
+    against top-tier cross-border compliance frameworks as of August 2025. This inaugural document establishes 
+    comprehensive governance standards for AI-powered international business platforms.</p>
   </div>
 
-  <!-- Translation Notice -->
-  <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 20px auto; max-width: 900px; color: #495057;">
-    <h3 style="color: #343a40; margin-top: 0; border: none; padding: 0;">Translation Notice</h3>
-    <p style="margin-bottom: 0;"><strong>Original Language:</strong> This document was originally drafted in English. Any translations are provided solely for convenience and shall not modify the legal interpretation of the original version, which may be requested via email to <a href="mailto:legal@microretailx.com" style="color: #007bff;">legal@microretailx.com</a></p>
-  </div>
+</div>
 
-  <footer>
-    <button class="back-button" onclick="goBack()">← Go Back</button>
-    <button class="summary-generator" onclick="openSummaryModal()" title="Generate AI-powered executive summary with risk analysis and compliance checklist">Legal Summary</button>
-    <p>&copy; 2025 MICRORETAILX LLC — All rights reserved.</p>
-    <p>Version 1.0 — Effective: 23/08/2025 | Enterprise Legal Architecture</p>
-    <p style="font-size: 11px; color: #888; margin-top: 10px;">
-      Document approved by legal counsel | SHA-256 authenticated | Cross-border compliance verified
-    </p>
-  </footer>
+<!-- Translation Notice -->
+<div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px; margin: 20px auto; max-width: 900px; color: #495057; text-align: center;">
+  <p style="margin: 0; font-size: 0.85rem;"><strong>Translation Available:</strong> This document may be translated using the widget above. Original English version controls for all legal purposes.</p>
+</div>
 
-  <script>
-    // Blockchain bg animation - pretty cool effect
-    class BlockchainNetwork {
-      constructor() {
-        this.canvas = document.getElementById('blockchain-canvas');
-        this.ctx = this.canvas.getContext('2d');
-        this.nodes = [];
-        this.mouse = { x: 0, y: 0 };
-        this.mouseRadius = 150; // TODO: make this responsive
-        this.isMobile = window.innerWidth < 768;
-        this.frameCount = 0;
-        this.targetFPS = this.isMobile ? 30 : 60; // adaptive FPS
-        this.lastFrameTime = 0;
-        
-        this.resize();
-        this.createNodes();
-        this.bindEvents();
-        this.animate();
-      }
+<footer>
+  <button class="action-btn" onclick="goBack()">← Go Back</button>
+  <button class="action-btn" onclick="openSummary()" title="Generate executive summary with risk analysis">Legal Summary</button>
+  <p>&copy; 2025 MICRORETAILX LLC — All rights reserved.</p>
+  <p>Version 1.0 — Effective: August 23, 2025 | Initial Publication</p>
+  <p style="font-size: 11px; color: #888; margin-top: 10px;">
+    Document approved by legal counsel | Cross-border compliance framework | Enterprise legal architecture
+  </p>
+</footer>
+
+<script>
+  // network bg animation
+  class NetworkBg {
+    constructor() {
+      this.canvas = document.getElementById('bg-canvas');
+      this.ctx = this.canvas.getContext('2d');
+      this.nodes = [];
+      this.mouse = { x: 0, y: 0 };
+      this.mouseRadius = 150;
+      this.isMobile = window.innerWidth < 768;
+      this.frameCount = 0;
+      this.lastFrameTime = 0;
       
-      resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        this.isMobile = window.innerWidth < 768;
-        this.targetFPS = this.isMovie ? 30 : 60; // update FPS on resize
-      }
+      this.resize();
+      this.createNodes();
+      this.bindEvents();
+      this.animate();
+    }
+    
+    resize() {
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
+      this.isMobile = window.innerWidth < 768;
+    }
+    
+    createNodes() {
+      const density = this.isMobile ? 20000 : 15000;
+      const nodeCount = Math.min(Math.floor((this.canvas.width * this.canvas.height) / density), this.isMobile ? 50 : 100);
+      this.nodes = [];
       
-      createNodes() {
-        // reduce nodes on mobile
-        const density = this.isMobile ? 20000 : 15000;
-        const nodeCount = Math.min(Math.floor((this.canvas.width * this.canvas.height) / density), this.isMobile ? 50 : 100);
-        this.nodes = [];
-        
-        // create random nodes
-        for (let i = 0; i < nodeCount; i++) {
-          this.nodes.push({
-            x: Math.random() * this.canvas.width,
-            y: Math.random() * this.canvas.height,
-            baseX: 0,
-            baseY: 0,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: (Math.random() - 0.5) * 0.5,
-            radius: Math.random() * 3 + 1,
-            opacity: Math.random() * 0.5 + 0.2,
-            pulseSpeed: Math.random() * 0.02 + 0.01,
-            pulsePhase: Math.random() * Math.PI * 2,
-            type: Math.random() > 0.7 ? 'hub' : 'node' // 30% hubs
-          });
-        }
-        
-        // save initial positions
-        this.nodes.forEach(node => {
-          node.baseX = node.x;
-          node.baseY = node.y;
+      for (let i = 0; i < nodeCount; i++) {
+        this.nodes.push({
+          x: Math.random() * this.canvas.width,
+          y: Math.random() * this.canvas.height,
+          baseX: 0,
+          baseY: 0,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          radius: Math.random() * 3 + 1,
+          opacity: Math.random() * 0.5 + 0.2,
+          pulseSpeed: Math.random() * 0.02 + 0.01,
+          pulsePhase: Math.random() * Math.PI * 2,
+          type: Math.random() > 0.7 ? 'hub' : 'node'
         });
       }
       
-      bindEvents() {
-        window.addEventListener('resize', () => this.resize());
-        
-        document.addEventListener('mousemove', (e) => {
-          this.mouse.x = e.clientX;
-          this.mouse.y = e.clientY;
-        });
-        
-        // reset mouse when leaving page
-        document.addEventListener('mouseleave', () => {
-          this.mouse.x = -1000;
-          this.mouse.y = -1000;
-        });
-      }
-      
-      updateNodes() {
-        this.nodes.forEach(node => {
-          // mouse repulsion - physics stuff
-          const dx = node.x - this.mouse.x;
-          const dy = node.y - this.mouse.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          if (distance < this.mouseRadius) {
-            const force = (this.mouseRadius - distance) / this.mouseRadius;
-            const repelX = (dx / distance) * force * 50;
-            const repelY = (dy / distance) * force * 50;
-            
-            node.x += repelX;
-            node.y += repelY;
-          } else {
-            // spring back to original position
-            const returnForce = 0.02;
-            node.x += (node.baseX - node.x) * returnForce;
-            node.y += (node.baseY - node.y) * returnForce;
-          }
-          
-          // basic movement
-          node.x += node.vx;
-          node.y += node.vy;
-          node.baseX += node.vx;
-          node.baseY += node.vy;
-          
-          // bounce off edges - simple physics
-          if (node.baseX < 0 || node.baseX > this.canvas.width) {
-            node.vx *= -1;
-            node.baseX = Math.max(0, Math.min(this.canvas.width, node.baseX));
-          }
-          if (node.baseY < 0 || node.baseY > this.canvas.height) {
-            node.vy *= -1;
-            node.baseY = Math.max(0, Math.min(this.canvas.height, node.baseY));
-          }
-          
-          // pulse animation
-          node.pulsePhase += node.pulseSpeed;
-          node.currentRadius = node.radius + Math.sin(node.pulsePhase) * 0.5;
-        });
-      }
-      
-      drawConnections() {
-        if (this.isMobile) return; // skip connections on mobile for performance
-        
-        this.ctx.strokeStyle = 'rgba(100, 150, 255, 0.1)';
-        this.ctx.lineWidth = 0.5;
-        
-        // connect nearby nodes
-        for (let i = 0; i < this.nodes.length; i++) {
-          for (let j = i + 1; j < this.nodes.length; j++) {
-            const dx = this.nodes[i].x - this.nodes[j].x;
-            const dy = this.nodes[i].y - this.nodes[j].y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance < 120) { // connection threshold
-              const opacity = (120 - distance) / 120 * 0.3;
-              this.ctx.strokeStyle = `rgba(100, 150, 255, ${opacity})`;
-              this.ctx.beginPath();
-              this.ctx.moveTo(this.nodes[i].x, this.nodes[i].y);
-              this.ctx.lineTo(this.nodes[j].x, this.nodes[j].y);
-              this.ctx.stroke();
-            }
-          }
-        }
-      }
-      
-      drawNodes() {
-        this.nodes.forEach(node => {
-          this.ctx.save();
-          
-          // glow for special nodes (skip on mobile)
-          if (node.type === 'hub' && !this.isMobile) {
-            const grad = this.ctx.createRadialGradient(
-              node.x, node.y, 0,
-              node.x, node.y, node.currentRadius * 3
-            );
-            grad.addColorStop(0, `rgba(0, 255, 150, ${node.opacity * 0.5})`);
-            grad.addColorStop(1, 'rgba(0, 255, 150, 0)');
-            
-            this.ctx.fillStyle = grad;
-            this.ctx.beginPath();
-            this.ctx.arc(node.x, node.y, node.currentRadius * 3, 0, Math.PI * 2);
-            this.ctx.fill();
-          }
-          
-          // main node gradient
-          const grad = this.ctx.createRadialGradient(
-            node.x - node.currentRadius * 0.3, 
-            node.y - node.currentRadius * 0.3, 
-            0,
-            node.x, node.y, node.currentRadius
-          );
-          
-          if (node.type === 'hub') {
-            grad.addColorStop(0, `rgba(0, 255, 150, ${node.opacity})`);
-            grad.addColorStop(1, `rgba(0, 150, 100, ${node.opacity * 0.5})`);
-          } else {
-            grad.addColorStop(0, `rgba(100, 150, 255, ${node.opacity})`);
-            grad.addColorStop(1, `rgba(50, 100, 200, ${node.opacity * 0.5})`);
-          }
-          
-          this.ctx.fillStyle = grad;
-          this.ctx.beginPath();
-          this.ctx.arc(node.x, node.y, node.currentRadius, 0, Math.PI * 2);
-          this.ctx.fill();
-          
-          // center dot
-          this.ctx.fillStyle = `rgba(255, 255, 255, ${node.opacity * 0.8})`;
-          this.ctx.beginPath();
-          this.ctx.arc(node.x, node.y, node.currentRadius * 0.3, 0, Math.PI * 2);
-          this.ctx.fill();
-          
-          this.ctx.restore();
-        });
-      }
-      
-      animate(currentTime = 0) {
-        // frame rate limiting
-        const elapsed = currentTime - this.lastFrameTime;
-        const fpsInterval = 1000 / this.targetFPS;
-        
-        if (elapsed > fpsInterval) {
-          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-          
-          this.updateNodes();
-          this.drawConnections();
-          this.drawNodes();
-          
-          this.lastFrameTime = currentTime - (elapsed % fpsInterval);
-          this.frameCount++;
-        }
-        
-        requestAnimationFrame((time) => this.animate(time));
-      }
-    }
-    
-    // modal stuff
-    function openSummaryModal() {
-      document.getElementById('summaryModal').style.display = 'flex';
-      genSummary(); // generate content
-    }
-    
-    function closeSummaryModal() {
-      document.getElementById('summaryModal').style.display = 'none';
-    }
-    
-    function getUserLoc() {
-      const lang = navigator.language || navigator.userLanguage;
-      if (lang.startsWith('es') || lang.startsWith('ca')) return 'EU-Spain';
-      if (lang.startsWith('en') && lang.includes('US')) return 'US';
-      if (lang.startsWith('en') && lang.includes('GB')) return 'EU-UK';
-      if (lang.startsWith('fr')) return 'EU-France';
-      if (lang.startsWith('de')) return 'EU-Germany';
-      return 'Other';
-    }
-    
-    function genSummary() {
-      const jurisdiction = getUserLoc();
-      const today = new Date().toLocaleDateString('en-GB');
-      
-      // big ass summary content - TODO: break this into smaller functions
-      const content = `
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h3 style="color: white; margin-bottom: 8px;">XSHADOWS OPS Legal Framework Analysis</h3>
-          <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 0.95rem;">Comprehensive Terms & Conditions Assessment | Generated on ${currentDate}</p>
-          <p style="color: rgba(255,255,255,0.7); margin: 5px 0 0 0; font-size: 0.85rem;">Version 1.0 | Your Jurisdiction: <span class="jurisdiction-badge">${jurisdiction}</span></p>
-        </div>
-        
-        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #666;">
-          <h4 style="margin-top: 0; color: #555; font-size: 1.1rem;">Executive Overview</h4>
-          <p style="margin-bottom: 15px; line-height: 1.6;">XSHADOWS OPS will operate under a comprehensive legal framework designed for international AI-powered logistics operations upon launch in August 2025. This analysis provides jurisdiction-specific compliance requirements and risk assessment tailored to your location for the planned operational commencement.</p>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
-              <strong style="color: #666;">Governing Law:</strong><br>
-              <span style="font-size: 0.9rem;">${jurisdiction.startsWith('EU') ? 'Spanish Law + EU Regulations' : 'Delaware State Law'}</span>
-            </div>
-            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
-              <strong style="color: #666;">Dispute Resolution:</strong><br>
-              <span style="font-size: 0.9rem;">${jurisdiction.startsWith('EU') ? 'Barcelona Commercial Courts' : 'Delaware Court of Chancery'}</span>
-            </div>
-            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
-              <strong style="color: #666;">Data Protection:</strong><br>
-              <span style="font-size: 0.9rem;">GDPR + Cryptographic Audit Trails</span>
-            </div>
-            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
-              <strong style="color: #666;">AI Governance:</strong><br>
-              <span style="font-size: 0.9rem;">EU AI Act Compliant (Limited Risk)</span>
-            </div>
-          </div>
-        </div>
-        
-        <h4 style="color: #555; margin-bottom: 20px;">Risk Assessment Matrix</h4>
-        <p style="color: #666; margin-bottom: 20px; font-size: 0.9rem;">Risk levels are calculated based on your jurisdiction (${jurisdiction}) and applicable regulatory frameworks:</p>
-        
-        <div class="risk-matrix">
-          <div class="risk-item">
-            <strong>Service Usage</strong><br>
-            <div style="color: #28a745; font-weight: bold; margin: 5px 0;">LOW RISK</div>
-            <small>Standard platform access with clear terms</small>
-          </div>
-          <div class="risk-item medium">
-            <strong>Data Processing</strong><br>
-            <div style="color: #ffc107; font-weight: bold; margin: 5px 0;">MEDIUM RISK</div>
-            <small>GDPR compliance required for EU users</small>
-          </div>
-          <div class="risk-item ${jurisdiction.startsWith('EU') ? '' : 'high'}">
-            <strong>Tax Obligations</strong><br>
-            <div style="color: ${jurisdiction.startsWith('EU') ? '#28a745' : '#dc3545'}; font-weight: bold; margin: 5px 0;">${jurisdiction.startsWith('EU') ? 'LOW' : 'MEDIUM'} RISK</div>
-            <small>${jurisdiction.startsWith('EU') ? 'Clear EU jurisdiction framework' : 'Cross-border considerations apply'}</small>
-          </div>
-          <div class="risk-item">
-            <strong>IP Protection</strong><br>
-            <div style="color: #28a745; font-weight: bold; margin: 5px 0;">LOW RISK</div>
-            <small>Comprehensive legal coverage</small>
-          </div>
-          <div class="risk-item medium">
-            <strong>AI Liability</strong><br>
-            <div style="color: #ffc107; font-weight: bold; margin: 5px 0;">MEDIUM RISK</div>
-            <small>Human oversight protocols required</small>
-          </div>
-          <div class="risk-item">
-            <strong>Contract Terms</strong><br>
-            <div style="color: #28a745; font-weight: bold; margin: 5px 0;">LOW RISK</div>
-            <small>Clear termination and modification procedures</small>
-          </div>
-        </div>
-        
-        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 50%); padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ffeaa7;">
-          <h4 style="margin-top: 0; color: #856404;">Key Legal Obligations Summary</h4>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div>
-              <strong>Maximum Liability:</strong> €500,000 or 12 months fees (whichever is lower)<br>
-              <strong>IP Infringement Penalty:</strong> Up to €500,000 per violation<br>
-              <strong>Confidentiality Period:</strong> 5 years post-termination
-            </div>
-            <div>
-              <strong>Data Retention:</strong> 7 years for audit compliance<br>
-              <strong>Effective Date:</strong> August 23, 2025<br>
-              <strong>Termination Notice:</strong> 90 days for convenience
-            </div>
-          </div>
-        </div>
-        
-        <div class="compliance-checklist">
-          <h4 style="margin-top: 0; color: #555; margin-bottom: 20px;">Interactive Compliance Checklist</h4>
-          <p style="color: #666; margin-bottom: 15px; font-size: 0.9rem;">Complete this checklist to ensure full compliance with the Terms and Conditions:</p>
-          
-          <div class="checklist-item">
-            <input type="checkbox" id="check1">
-            <label for="check1"><strong>Electronic Signature Acceptance:</strong> I understand that accessing the platform constitutes a binding electronic signature under E-SIGN Act and eIDAS Regulation (Articles 1-3)</label>
-          </div>
-          
-          <div class="checklist-item">
-            <input type="checkbox" id="check2">
-            <label for="check2"><strong>Data Processing Consent:</strong> I acknowledge the data processing purposes, legal bases, and my rights under GDPR Articles 6, 7, 15-22 (Article 10)</label>
-          </div>
-          
-          <div class="checklist-item">
-            <input type="checkbox" id="check3">
-            <label for="check3"><strong>AI Output Understanding:</strong> I understand that AI recommendations are probabilistic, non-deterministic, and require human verification (Article 15)</label>
-          </div>
-          
-          <div class="checklist-item">
-            <input type="checkbox" id="check4">
-            <label for="check4"><strong>Jurisdictional Acceptance:</strong> I confirm acceptance of ${jurisdiction.startsWith('EU') ? 'Barcelona Commercial Courts' : 'Delaware Court of Chancery'} jurisdiction and applicable governing law (Article 11)</label>
-          </div>
-          
-          <div class="checklist-item">
-            <input type="checkbox" id="check5">
-            <label for="check5"><strong>IP Compliance:</strong> I acknowledge the prohibition on reverse engineering, decompilation, or derivative works (penalty: €500,000 per infringement) (Article 4)</label>
-          </div>
-          
-          <div class="checklist-item">
-            <input type="checkbox" id="check6">
-            <label for="check6"><strong>Confidentiality Obligations:</strong> I understand the 5-year post-termination confidentiality requirements for proprietary information (Article 4)</label>
-          </div>
-          
-          <div class="checklist-item">
-            <input type="checkbox" id="check7">
-            <label for="check7"><strong>Service Limitations:</strong> I acknowledge that services are provided "as is" with no guarantee of continuous availability (Articles 5, 7)</label>
-          </div>
-          
-          <div class="checklist-item">
-            <input type="checkbox" id="check8">
-            <label for="check8"><strong>Amendment Procedures:</strong> I understand that material amendments require 30-day notice and continued use constitutes acceptance (Article 8)</label>
-          </div>
-        </div>
-        
-        <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 25px 0;">
-          <h4 style="margin-top: 0; color: #155724;">Competitive Legal Advantages</h4>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div>
-              <strong>Regulatory Preparedness:</strong><br>
-              <ul style="margin: 5px 0 0 15px; font-size: 0.9rem;">
-                <li>EU AI Act compliance ahead of enforcement</li>
-                <li>GDPR+ features with cryptographic consent</li>
-                <li>Transfer pricing documentation ready</li>
-              </ul>
-            </div>
-            <div>
-              <strong>Technical Innovations:</strong><br>
-              <ul style="margin: 5px 0 0 15px; font-size: 0.9rem;">
-                <li>Blockchain-ready legal architecture</li>
-                <li>Real-time data subject rights automation</li>
-                <li>Cross-border dispute resolution protocols</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #dee2e6;">
-          <h4 style="margin-top: 0; color: #555;">Document Statistics & Compliance Metrics</h4>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
-            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
-              <div style="font-size: 1.5rem; font-weight: bold; color: #666;">24</div>
-              <div style="font-size: 0.8rem; color: #888;">Articles</div>
-            </div>
-            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
-              <div style="font-size: 1.5rem; font-weight: bold; color: #666;">12</div>
-              <div style="font-size: 0.8rem; color: #888;">Jurisdictions Covered</div>
-            </div>
-            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #dee2e6;">
-              <div style="font-size: 1.5rem; font-weight: bold; color: #666;">~15min</div>
-              <div style="font-size: 0.8rem; color: #888;">Reading Time</div>
-            </div>
-          </div>
-        </div>
-        
-        <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%); border-radius: 8px;">
-          <p style="margin: 0; color: #666; font-style: italic;">This executive summary was generated using automated analysis of the complete legal framework. While comprehensive, it should not replace consultation with qualified legal counsel familiar with your specific jurisdiction's requirements and business circumstances.</p>
-        </div>
-        
-        <div class="export-buttons">
-          <button class="export-btn" onclick="exportToPDF()" title="Generate comprehensive PDF report with all sections">Export PDF Report</button>
-          <button class="export-btn" onclick="emailSummary()" title="Send summary via email to stakeholders">Email Summary</button>
-          <button class="export-btn" onclick="copyToClipboard()" title="Copy formatted text to clipboard">Copy to Clipboard</button>
-          <button class="export-btn" onclick="generateComplianceReport()" title="Create detailed compliance checklist">Compliance Report</button>
-        </div>
-      `;
-      
-      document.getElementById('summaryBody').innerHTML = summaryContent;
-    }
-    
-    function exportToPDF() {
-      alert('PDF Export functionality would be implemented here.\n\nThis would generate a professional PDF report with:\n• Executive summary\n• Risk matrix\n• Compliance checklist\n• Digital signature capability');
-    }
-    
-    function emailSummary() {
-      const subject = encodeURIComponent('XSHADOWS OPS Legal Summary - Version 1.0');
-      const body = encodeURIComponent('Please find attached the executive legal summary for XSHADOWS OPS Terms & Conditions v1.0.\n\nThis summary was generated on ' + new Date().toLocaleDateString() + ' and includes jurisdiction-specific risk assessment and compliance requirements.\n\nFor questions, contact: legal@microretailx.com');
-      window.open(`mailto:?subject=${subject}&body=${body}`);
-    }
-    
-    function copyToClipboard() {
-      const summaryText = document.getElementById('summaryBody').innerText;
-      navigator.clipboard.writeText(summaryText).then(() => {
-        alert('Executive summary copied to clipboard!');
+      this.nodes.forEach(node => {
+        node.baseX = node.x;
+        node.baseY = node.y;
       });
     }
     
-    function generateComplianceReport() {
-      alert('Compliance Report Generator\n\nThis advanced feature would generate:\n\n• Detailed compliance matrix by jurisdiction\n• Regulatory timeline and deadlines\n• Risk mitigation recommendations\n• Legal contact requirements\n• Audit preparation checklist\n• Regulatory filing requirements\n\nPerfect for compliance teams and legal departments.');
-    }
-
-    // Initialize blockchain network when page loads
-    window.addEventListener('load', () => {
-      new BlockchainNetwork();
-    });
-
-    // Back button functionality
-    function goBack() {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = '/'; // Fallback to homepage
-      }
-    }
-    
-    // Scroll to top functionality
-    function scrollToTop() {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
+    bindEvents() {
+      window.addEventListener('resize', () => this.resize());
+      
+      document.addEventListener('mousemove', (e) => {
+        this.mouse.x = e.clientX;
+        this.mouse.y = e.clientY;
+      });
+      
+      document.addEventListener('mouseleave', () => {
+        this.mouse.x = -1000;
+        this.mouse.y = -1000;
       });
     }
     
-    // Show/hide scroll to top button
-    window.addEventListener('scroll', function() {
-      const scrollButton = document.querySelector('.scroll-top');
-      if (window.pageYOffset > 300) {
-        scrollButton.style.display = 'block';
-      } else {
-        scrollButton.style.display = 'none';
-      }
-    });
-    
-    // Auto-detect language and show appropriate message
-    window.addEventListener('load', function() {
-      const userLang = navigator.language || navigator.userLanguage;
-      if (!userLang.startsWith('en')) {
-        // Show enhanced notification for non-English users
-        setTimeout(function() {
-          const translateHint = document.createElement('div');
-          translateHint.innerHTML = `
-            <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;">XSHADOWS OPS Legal Framework</div>
-            <div style="font-size: 11px; margin-bottom: 4px;">You are currently viewing Version 1.0</div>
-            <div style="font-size: 11px; margin-bottom: 6px;">Effective Date: August 23, 2025</div>
-            <div style="font-size: 10px; margin-bottom: 4px; opacity: 0.9;">This document is available in multiple languages</div>
-            <div style="font-size: 10px; opacity: 0.8;">Auto-translation widget is located in the top-right corner of this page</div>
-          `;
-          translateHint.style.cssText = `
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 15px 18px;
-            border-radius: 8px;
-            font-size: 12px;
-            width: 280px;
-            z-index: 1001;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            border: 1px solid #4a5568;
-            font-family: Georgia, serif;
-            line-height: 1.4;
-            text-align: left;
-          `;
-          document.body.appendChild(translateHint);
+    updateNodes() {
+      this.nodes.forEach(node => {
+        const dx = node.x - this.mouse.x;
+        const dy = node.y - this.mouse.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < this.mouseRadius) {
+          const force = (this.mouseRadius - distance) / this.mouseRadius;
+          const repelX = (dx / distance) * force * 50;
+          const repelY = (dy / distance) * force * 50;
           
-          // Remove after 10 seconds with fade out
-          setTimeout(() => {
-            translateHint.style.transition = 'opacity 0.5s ease';
-            translateHint.style.opacity = '0';
-            setTimeout(() => translateHint.remove(), 500);
-          }, 10000);
-        }, 2500);
-      }
-    });
-  </script>
-</body>
-</html>
+          node.x += repelX;
+          node.y += repelY;
+        } else {
+          const returnForce = 0.02;
+          node.x += (node.baseX - node.x) * returnForce;
+          node.y += (node.baseY - node.y) * returnForce;
+        }
+        
+        node.x += node.vx;
+        node.y += node.vy;
+        node.baseX += node.vx;
+        node.baseY += node.vy;
+        
+        if (node.baseX < 0 || node.baseX > this.canvas.width) {
+          node.vx *= -1;
+          node.baseX = Math.max(0, Math.min(this.canvas.width, node.baseX));
+        }
+        if (node.baseY < 0 || node.baseY > this.canvas.height) {
+          node.vy *= -1;
+          node.baseY = Math.max(0, Math.min(this.canvas.height, node.baseY));
+        }
+        
+        node.pulsePhase += node.pulseSpeed;
+        node.currentRadius = node.radius + Math.sin(node.pulsePhase) * 0.5;
+      });
+    }
+    
+    drawConnections() {
+      if (this.isMobile) return;
+      
+      this.ctx.strokeStyle = 'rgba(100, 150, 255, 0.1)';
+      this.ctx.lineWidth = 0.5;
+      
+      for (let i = 0; i < this.nodes.
