@@ -21,10 +21,51 @@
   <style>
     body {
       font-family: 'Georgia', serif;
-      background-color: #000;
+      background: #2c2c2c;
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.15) 0%, transparent 50%);
+      background-attachment: fixed;
       color: #fff;
       margin: 0;
       padding: 0;
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3Cpath d='M30 15a15 15 0 0 1 15 15 15 15 0 0 1-15 15 15 15 0 0 1-15-15 15 15 0 0 1 15-15zm0 2a13 13 0 0 0-13 13 13 13 0 0 0 13 13 13 13 0 0 0 13-13 13 13 0 0 0-13-13z'/%3E%3Cpath d='M10 30h5m35 0h5M30 10v5m0 35v5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+      opacity: 0.4;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    /* Blockchain-style nodes animation */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.05' stroke-width='1'%3E%3Cpath d='M20 20L80 80M80 20L20 80M50 10L50 90M10 50L90 50'/%3E%3Ccircle cx='20' cy='20' r='3' fill='%23ffffff' fill-opacity='0.08'/%3E%3Ccircle cx='80' cy='20' r='3' fill='%23ffffff' fill-opacity='0.08'/%3E%3Ccircle cx='20' cy='80' r='3' fill='%23ffffff' fill-opacity='0.08'/%3E%3Ccircle cx='80' cy='80' r='3' fill='%23ffffff' fill-opacity='0.08'/%3E%3Ccircle cx='50' cy='50' r='4' fill='%23ffffff' fill-opacity='0.1'/%3E%3C/g%3E%3C/svg%3E") repeat;
+      opacity: 0.3;
+      z-index: -1;
+      pointer-events: none;
+      animation: float 20s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      25% { transform: translateY(-10px) translateX(5px); }
+      50% { transform: translateY(0px) translateX(-5px); }
+      75% { transform: translateY(-5px) translateX(10px); }
     }
     .container {
       max-width: 900px;
@@ -49,6 +90,21 @@
       border: 1px solid #ccc;
       padding: 8px;
       text-align: left;
+      vertical-align: top;
+    }
+    
+    th {
+      background-color: #2c3e50;
+      color: white;
+      font-weight: bold;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    tr:hover {
+      background-color: #f5f5f5;
     }
     footer {
       text-align: center;
@@ -259,7 +315,7 @@
     <p>The System is provided "as is" without warranty of any kind. Company's aggregate liability is limited to: Direct damages (lesser of €500,000 or 12 months of fees paid), Indirect damages (excluded except for willful misconduct), Data breach (statutory minimums under applicable data protection law), IP infringement (full indemnification with reasonable defense costs). MICRORETAILX LLC shall not be liable for indirect, incidental, special, consequential, or punitive damages arising from use or inability to use the System, except where prohibited by applicable law.</p>
 
     <h2>6. Legal Compliance and Multijurisdictional Framework</h2>
-    <p>MICRORETAILX LLC operates under a comprehensive compliance matrix integrating: EU General Data Protection Regulation (EU 2016/679), ePrivacy Directive (2002/58/EC), Digital Services Act (EU 2022/2065), California Consumer Privacy Act (CCPA), Virginia Consumer Data Protection Act (VCDPA), ISO 27001:2013, SOC 2 Type II, and NIST Cybersecurity Framework v1.1. All AI systems adhere to OECD AI Principles, IEEE Standards for Ethical Design, and UNESCO Recommendation on the Ethics of Artificial Intelligence.</p>
+    <p>MICRORETAILX LLC operates under a comprehensive compliance matrix integrating: EU General Data Protection Regulation (EU 2016/679, hereinafter "GDPR"), ePrivacy Directive (2002/58/EC), Digital Services Act (EU 2022/2065), California Consumer Privacy Act (hereinafter "CCPA"), Virginia Consumer Data Protection Act (hereinafter "VCDPA"), ISO 27001:2013, SOC 2 Type II, and NIST Cybersecurity Framework v1.1. All AI systems adhere to OECD AI Principles, IEEE Standards for Ethical Design, and UNESCO Recommendation on the Ethics of Artificial Intelligence.</p>
     <p>Users within Spain agree to submit to the jurisdiction of the Courts of Barcelona. All other Users accept the jurisdiction of the State of Delaware, United States. In the event of conflict, the more protective law for the User shall apply.</p>
 
     <h2>7. Service Availability and Performance Standards</h2>
@@ -283,7 +339,7 @@
       <li>Right to Portability (Article 20): Structured data export in JSON/XML format</li>
       <li>Right to withdraw consent at any time</li>
     </ul>
-    <p>All consent collection is recorded via timestamped cryptographic ledger with immutable audit trail, retained for 7 years post-withdrawal. All requests must be submitted to the Data Protection Officer via <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>. A response will be issued within 30 days in accordance with applicable regulations.</p>
+    <p>All consent collection is recorded via timestamped cryptographic ledger with immutable audit trail, retained for 7 years post-withdrawal. All requests must be submitted to the Data Protection Officer (hereinafter "DPO") via <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>. A response will be issued within 30 days in accordance with applicable regulations.</p>
 
     <h2>11. Jurisdiction and Governing Law</h2>
     <p>These Terms shall be governed by and interpreted in accordance with:</p>
@@ -291,7 +347,7 @@
       <li>The laws of the Kingdom of Spain for Users residing within the EU, with exclusive jurisdiction granted to the courts of Barcelona.</li>
       <li>The laws of the State of Delaware, United States, for all other Users.</li>
     </ul>
-    <p>Disputes shall be resolved through tiered escalation: Direct negotiation (30-day period), Mediation under ICC Mediation Rules, Arbitration under ICC Arbitration Rules (London seat), with expedited procedures for claims under €100,000. In circumstances where physical attendance is impracticable, virtual arbitration proceedings shall be conducted via secure platforms meeting ISO 27001 standards following ICC Guidelines on Virtual Hearings (2020).</p>
+    <p>Disputes shall be resolved through tiered escalation: Direct negotiation (30-day period), Mediation under International Chamber of Commerce (ICC, hereinafter "ICC") Mediation Rules, Arbitration under ICC Arbitration Rules (London seat), with expedited procedures for claims under €100,000. In circumstances where physical attendance is impracticable, virtual arbitration proceedings shall be conducted via secure platforms meeting ISO 27001 standards following ICC Guidelines on Virtual Hearings (2020).</p>
 
     <h2>12. Force Majeure and Business Continuity</h2>
     <p>MICRORETAILX LLC shall not be held liable for any delay or failure in performance resulting from causes beyond its reasonable control, including natural disasters, strikes, governmental actions, civil disturbances, or cybersecurity threats. Business continuity planning includes Recovery Time Objective (RTO) of 4 hours for critical systems, Recovery Point Objective (RPO) of 15 minutes maximum data loss, and disaster recovery sites in Ireland (Primary) and Singapore (Secondary).</p>
@@ -318,10 +374,10 @@
    <h2>18. External Documents and Legal References</h2>
     <p>The following external documents shall be deemed incorporated by reference into these Terms upon their publication. Users shall be notified via the System dashboard or at the same URL:</p>
     <ul>
-      <li><a href="#">Service Level Agreement (SLA)</a> – expected by Q3 2025</li>
+      <li><a href="#">Service Level Agreement (SLA, hereinafter "SLA")</a> – expected by Q3 2025</li>
       <li><a href="#">Privacy Policy</a> – expected by Q3 2025</li>
       <li><a href="#">Cookie Policy</a> – expected by Q3 2025</li>
-      <li><a href="#">Data Processing Addendum (DPA)</a> – available upon request or when user provides processing input</li>
+      <li><a href="#">Data Processing Addendum (DPA, hereinafter "DPA")</a> – available upon request or when user provides processing input</li>
     </ul>
     <p><strong>Documentary Hierarchy</strong>: In the event of contradiction between this Agreement and subsidiary documentation (SLAs, Privacy Policies, Marketing Materials, Technical Specifications, User Guides), these Terms and Conditions shall prevail unless explicitly stated otherwise in a duly executed written amendment.</p>
 
@@ -366,7 +422,19 @@
       <li>Summary of key changes</li>
       <li>Legal validation and stakeholder approval (where applicable)</li>
     </ul>
-    <p>Historical versions of these Terms shall be available upon request for a minimum period of five (5) years from the date of their retirement. This document reflects enterprise-grade legal standards comparable to those employed by leading international law firms and has been structured to withstand regulatory scrutiny across multiple jurisdictions.</p>
+    <p>Historical versions of these Terms and Conditions shall be made available upon formal request for a minimum period of five (5) years from their date of replacement, thereby ensuring document traceability in accordance with principles of sound corporate governance.</p>
+    
+    <p>This document has been drafted in accordance with technical criteria derived from comparative law and best contractual practices, with the objective of providing a robust, clear, and verifiable normative framework suitable for potential regulatory audits or inquiries by third parties with a legitimate interest, in compliance with applicable legislation across the jurisdictions in which the Company operates.</p>
+    
+    <p>Without prejudice to the foregoing, MICRORETAILX LLC may, at its reasoned discretion, provide access to previous versions of the present document when required in the context of ongoing contractual relationships or administrative proceedings, provided that a legitimate interest is duly substantiated.</p>
+    
+    <p><strong>Document Authentication</strong>: This document is digitally authenticated using SHA-256 cryptographic hash [to be generated upon finalization] ensuring document integrity and preventing unauthorized modifications.</p>
+  </div>
+
+  <!-- Translation Notice -->
+  <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 20px auto; max-width: 900px; color: #495057;">
+    <h3 style="color: #343a40; margin-top: 0; border: none; padding: 0;">Translation Notice</h3>
+    <p style="margin-bottom: 0;"><strong>Original Language:</strong> This document was originally drafted in English. In case of any discrepancy or contradiction between translated versions, the original English version shall prevail and may be requested via email to <a href="mailto:legal@microretailx.com" style="color: #007bff;">legal@microretailx.com</a></p>
   </div>
 
   <footer>
