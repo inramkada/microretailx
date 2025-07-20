@@ -493,7 +493,7 @@
 
   <h2>11. Registered Address and Corporate Information</h2>
   <p>The Company maintains a registered legal presence at 1209 Orange Street, Wilmington, DE 19801, United States 
-  (Corporate Registry: Delaware | Entity ID: 7892456). All correspondence must be directed exclusively to:</p>
+  (Corporate Registry: Delaware | Entity ID: 2428374). All correspondence must be directed exclusively to:</p>
   <p><a href="mailto:legal@microretailx.com">legal@microretailx.com</a></p>
   
   <p><em>Note: The Delaware address corresponds to our registered agent (The Corporation Trust Company). 
@@ -622,7 +622,7 @@
   <p><strong>MICRORETAILX LLC – Legal Department</strong><br/>
   Email: <a href="mailto:legal@microretailx.com">legal@microretailx.com</a><br/>
   Address: 1209 Orange Street, Wilmington, DE 19801, USA<br/>
-  Corporate Registry: Delaware | Entity ID: 7892456</p>
+  Corporate Registry: Delaware, United States | Entity ID: 2428374</p>
 
   <h2>24. Change Control and Versioning</h2>
   <p>All modifications to these Terms shall be subject to internal change control protocols. 
@@ -773,10 +773,324 @@
       });
     }
     
-    drawConnections() {
-      if (this.isMobile) return;
+    drawNodes() {
+      this.nodes.forEach(node => {
+        this.ctx.save();
+        
+        if (node.type === 'hub' && !this.isMobile) {
+          const grad = this.ctx.createRadialGradient(
+            node.x, node.y, 0,
+            node.x, node.y, node.currentRadius * 3
+          );
+          grad.addColorStop(0, `rgba(0, 255, 150, ${node.opacity * 0.5})`);
+          grad.addColorStop(1, 'rgba(0, 255, 150, 0)');
+          
+          this.ctx.fillStyle = grad;
+          this.ctx.beginPath();
+          this.ctx.arc(node.x, node.y, node.currentRadius * 3, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+        
+        const grad = this.ctx.createRadialGradient(
+          node.x - node.currentRadius * 0.3, 
+          node.y - node.currentRadius * 0.3, 
+          0,
+          node.x, node.y, node.currentRadius
+        );
+        
+        if (node.type === 'hub') {
+          grad.addColorStop(0, `rgba(0, 255, 150, ${node.opacity})`);
+          grad.addColorStop(1, `rgba(0, 150, 100, ${node.opacity * 0.5})`);
+        } else {
+          grad.addColorStop(0, `rgba(100, 150, 255, ${node.opacity})`);
+          grad.addColorStop(1, `rgba(50, 100, 200, ${node.opacity * 0.5})`);
+        }
+        
+        this.ctx.fillStyle = grad;
+        this.ctx.beginPath();
+        this.ctx.arc(node.x, node.y, node.currentRadius, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        this.ctx.fillStyle = `rgba(255, 255, 255, ${node.opacity * 0.8})`;
+        this.ctx.beginPath();
+        this.ctx.arc(node.x, node.y, node.currentRadius * 0.3, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        this.ctx.restore();
+      });
+    }
+    
+    animate(currentTime = 0) {
+      const elapsed = currentTime - this.lastFrameTime;
+      const fpsInterval = 1000 / (this.isMobile ? 30 : 60);
       
-      this.ctx.strokeStyle = 'rgba(100, 150, 255, 0.1)';
-      this.ctx.lineWidth = 0.5;
+      if (elapsed > fpsInterval) {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.updateNodes();
+        this.drawConnections();
+        this.drawNodes();
+        
+        this.lastFrameTime = currentTime - (elapsed % fpsInterval);
+        this.frameCount++;
+      }
       
-      for (let i = 0; i < this.nodes.
+      requestAnimationFrame((time) => this.animate(time));
+    }
+  }
+  
+  // modal functions
+  function openSummary() {
+    document.getElementById('summaryModal').style.display = 'flex';
+    generateSummary();
+  }
+  
+  function closeSummary() {
+    document.getElementById('summaryModal').style.display = 'none';
+  }
+  
+  function generateSummary() {
+    const today = new Date().toLocaleDateString('en-GB');
+    const content = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h3 style="color: #333; margin-bottom: 8px;">XSHADOWS OPS Legal Framework Analysis</h3>
+        <p style="color: #666; margin: 0; font-size: 0.95rem;">Comprehensive Terms & Conditions Assessment | Generated on ${today}</p>
+      </div>
+      
+      <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+        <h4 style="margin-top: 0; color: #555; font-size: 1.1rem;">Executive Overview</h4>
+        <p>XSHADOWS OPS operates under a comprehensive legal framework designed for international AI-powered business operations. This analysis provides compliance requirements and risk assessment.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+          <div style="background: white; padding: 15px; border-radius: 6px;">
+            <strong>Governing Law:</strong><br>Delaware State Law + EU Carve-outs
+          </div>
+          <div style="background: white; padding: 15px; border-radius: 6px;">
+            <strong>Dispute Resolution:</strong><br>Delaware Courts + Barcelona Alternative
+          </div>
+          <div style="background: white; padding: 15px; border-radius: 6px;">
+            <strong>Data Protection:</strong><br>GDPR Compliant + User Rights
+          </div>
+          <div style="background: white; padding: 15px; border-radius: 6px;">
+            <strong>AI Governance:</strong><br>Limited Risk Classification Expected
+          </div>
+        </div>
+      </div>
+      
+      <h4 style="color: #555;">Key Legal Protections</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>Appeal Process:</strong> 15-day window for disputed suspensions</li>
+        <li><strong>Force Majeure Exit:</strong> Contract termination if disruption exceeds 30 days</li>
+        <li><strong>Liability Cap:</strong> Maximum $1,000 or 12 months of payments</li>
+        <li><strong>Data Rights:</strong> Full GDPR compliance with 72-hour response</li>
+        <li><strong>AI Transparency:</strong> Clear disclaimers and human oversight requirements</li>
+      </ul>
+      
+      <div style="background: #d4edda; padding: 15px; border-radius: 6px; margin: 20px 0;">
+        <h4 style="margin-top: 0; color: #155724;">Compliance Status</h4>
+        <p style="margin-bottom: 0;">✅ GDPR Ready | ✅ Cross-border Framework | ✅ AI Ethics Aligned | ✅ Enterprise Grade</p>
+      </div>
+      
+      <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0; border: 1px solid #ffeaa7;">
+        <h4 style="margin-top: 0; color: #856404;">Risk Assessment Summary</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+          <div style="text-align: center; padding: 10px; background: white; border-radius: 4px;">
+            <div style="color: #28a745; font-weight: bold;">LOW RISK</div>
+            <small>Service Usage</small>
+          </div>
+          <div style="text-align: center; padding: 10px; background: white; border-radius: 4px;">
+            <div style="color: #ffc107; font-weight: bold;">MEDIUM</div>
+            <small>Data Processing</small>
+          </div>
+          <div style="text-align: center; padding: 10px; background: white; border-radius: 4px;">
+            <div style="color: #28a745; font-weight: bold;">LOW RISK</div>
+            <small>IP Protection</small>
+          </div>
+          <div style="text-align: center; padding: 10px; background: white; border-radius: 4px;">
+            <div style="color: #ffc107; font-weight: bold;">MEDIUM</div>
+            <small>AI Liability</small>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%); border-radius: 8px;">
+        <p style="margin: 0; color: #666; font-style: italic;">This executive summary provides a high-level overview of the legal framework. For specific legal advice, consult with qualified counsel familiar with your jurisdiction and business requirements.</p>
+      </div>
+    `;
+    
+    document.getElementById('summaryBody').innerHTML = content;
+  }
+
+  // Initialize network background
+  window.addEventListener('load', () => {
+    new NetworkBg();
+    
+    // Auto-detect language and show elegant notification
+    const userLang = navigator.language || navigator.userLanguage;
+    const isNonEnglish = !userLang.startsWith('en');
+    
+    // Show notification for non-English users or first-time visitors
+    const hasSeenNotification = localStorage.getItem('xshadows_version_notification');
+    
+    if (isNonEnglish || !hasSeenNotification) {
+      setTimeout(function() {
+        const notification = document.createElement('div');
+        notification.innerHTML = `
+          <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <div style="width: 8px; height: 8px; background: #28a745; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite;"></div>
+                <div style="font-weight: bold; font-size: 14px; color: #fff;">XSHADOWS OPS Legal Framework</div>
+              </div>
+              
+              <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #28a745;">
+                <div style="font-size: 12px; margin-bottom: 3px; color: rgba(255,255,255,0.9);">
+                  <strong>Version 1.0</strong> | Effective: August 23, 2025
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.8);">
+                  Comprehensive international compliance framework
+                </div>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 4px; text-align: center;">
+                  <div style="font-size: 10px; color: rgba(255,255,255,0.7);">COVERAGE</div>
+                  <div style="font-size: 11px; font-weight: bold; color: #fff;">26 Sections</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.08); padding: 8px; border-radius: 4px; text-align: center;">
+                  <div style="font-size: 10px; color: rgba(255,255,255,0.7);">LANGUAGES</div>
+                  <div style="font-size: 11px; font-weight: bold; color: #fff;">Multi-lingual</div>
+                </div>
+              </div>
+              
+              ${isNonEnglish ? `
+              <div style="background: rgba(52, 152, 219, 0.2); padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #3498db;">
+                <div style="font-size: 11px; color: rgba(255,255,255,0.9); margin-bottom: 4px;">
+                  <strong>🌐 Translation Available</strong>
+                </div>
+                <div style="font-size: 10px; color: rgba(255,255,255,0.8);">
+                  Auto-translation widget located in top-right corner. Original English version controls for legal purposes.
+                </div>
+              </div>
+              ` : ''}
+              
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="font-size: 9px; color: rgba(255,255,255,0.6);">
+                  Legal counsel approved • Enterprise grade
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button onclick="openSummary(); dismissNotification();" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 8px; border-radius: 3px; font-size: 9px; cursor: pointer; transition: all 0.3s;">
+                    Quick Summary
+                  </button>
+                  <button onclick="dismissNotification();" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); padding: 4px 8px; border-radius: 3px; font-size: 9px; cursor: pointer; transition: all 0.3s;">
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <button onclick="dismissNotification();" style="background: none; border: none; color: rgba(255,255,255,0.6); font-size: 16px; cursor: pointer; margin-left: 10px; padding: 2px; transition: all 0.3s;" title="Close notification">
+              ×
+            </button>
+          </div>
+          
+          <style>
+            @keyframes pulse {
+              0% { opacity: 1; transform: scale(1); }
+              50% { opacity: 0.7; transform: scale(1.1); }
+              100% { opacity: 1; transform: scale(1); }
+            }
+            
+            @keyframes slideInRight {
+              from { transform: translateX(100%); opacity: 0; }
+              to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOutRight {
+              from { transform: translateX(0); opacity: 1; }
+              to { transform: translateX(100%); opacity: 0; }
+            }
+          </style>
+        `;
+        
+        notification.style.cssText = `
+          position: fixed;
+          top: 80px;
+          right: 20px;
+          background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+          color: white;
+          padding: 20px;
+          border-radius: 12px;
+          font-size: 12px;
+          width: 320px;
+          z-index: 1001;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          border: 1px solid rgba(255,255,255,0.1);
+          font-family: Georgia, serif;
+          line-height: 1.4;
+          animation: slideInRight 0.5s ease-out;
+          backdrop-filter: blur(10px);
+        `;
+        
+        notification.id = 'versionNotification';
+        document.body.appendChild(notification);
+        
+        // Auto-dismiss after 12 seconds with fade out
+        setTimeout(() => {
+          if (document.getElementById('versionNotification')) {
+            dismissNotification();
+          }
+        }, 12000);
+        
+        // Mark as seen for future visits
+        try {
+          localStorage.setItem('xshadows_version_notification', 'seen_v1.0');
+        } catch(e) {
+          // Ignore localStorage errors
+        }
+        
+      }, 2000); // Show after 2 seconds
+    }
+  });
+  
+  // Dismiss notification function
+  function dismissNotification() {
+    const notification = document.getElementById('versionNotification');
+    if (notification) {
+      notification.style.animation = 'slideOutRight 0.4s ease-in forwards';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 400);
+    }
+  }
+
+  // navigation functions
+  function goBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/';
+    }
+  }
+  
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+  
+  // show/hide scroll button
+  window.addEventListener('scroll', function() {
+    const scrollButton = document.querySelector('.scroll-top');
+    if (window.pageYOffset > 300) {
+      scrollButton.style.display = 'block';
+    } else {
+      scrollButton.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>
