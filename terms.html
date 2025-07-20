@@ -207,6 +207,28 @@
       transform: translateY(-2px);
     }
     
+    .scroll-bottom {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      font-size: 18px;
+      display: none;
+      z-index: 999;
+      transition: all 0.3s ease;
+    }
+    
+    .scroll-bottom:hover {
+      background: #34495e;
+      transform: translateY(2px);
+    }
+    
     /* Summary modal */
     .summary-modal {
       position: fixed;
@@ -260,7 +282,7 @@
     }
     
     @media print {
-      .translate-widget, .action-btn, .scroll-top {
+      .translate-widget, .action-btn, .scroll-top, .scroll-bottom {
         display: none !important;
       }
     }
@@ -313,6 +335,7 @@
 </div>
 
 <button class="scroll-top" onclick="scrollToTop()" title="Go to top">↑</button>
+<button class="scroll-bottom" onclick="scrollToBottom()" title="Go to bottom">↓</button>
 
 <div class="container">
 
@@ -976,7 +999,7 @@
               
               <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="font-size: 9px; color: rgba(255,255,255,0.6);">
-                  Legal counsel approved • Enterprise grade
+                  Legal counsel approved
                 </div>
                 <div style="display: flex; gap: 6px;">
                   <button onclick="openSummary(); dismissNotification();" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 8px; border-radius: 3px; font-size: 9px; cursor: pointer; transition: all 0.3s;">
@@ -1035,12 +1058,47 @@
         notification.id = 'versionNotification';
         document.body.appendChild(notification);
         
-        // Auto-dismiss after 12 seconds with fade out
-        setTimeout(() => {
-          if (document.getElementById('versionNotification')) {
-            dismissNotification();
+        // Auto-dismiss logic with hover pause
+        let autoCloseTimer;
+        let isHovered = false;
+        
+        const startAutoClose = () => {
+          autoCloseTimer = setTimeout(() => {
+            if (document.getElementById('versionNotification') && !isHovered) {
+              dismissNotification();
+            }
+          }, 12000);
+        };
+        
+        const pauseAutoClose = () => {
+          if (autoCloseTimer) {
+            clearTimeout(autoCloseTimer);
+            autoCloseTimer = null;
           }
-        }, 12000);
+        };
+        
+        // Hover event listeners
+        notification.addEventListener('mouseenter', () => {
+          isHovered = true;
+          pauseAutoClose();
+          notification.style.transform = 'scale(1.02)';
+          notification.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)';
+        });
+        
+        notification.addEventListener('mouseleave', () => {
+          isHovered = false;
+          notification.style.transform = 'scale(1)';
+          notification.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)';
+          // Restart auto-close with remaining time (3 seconds after hover)
+          autoCloseTimer = setTimeout(() => {
+            if (document.getElementById('versionNotification')) {
+              dismissNotification();
+            }
+          }, 3000);
+        });
+        
+        // Start initial auto-close timer
+        startAutoClose();
         
         // Mark as seen for future visits
         try {
@@ -1082,13 +1140,32 @@
     });
   }
   
-  // show/hide scroll button
+  function scrollToBottom() {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
+  }
+  
+  // show/hide scroll buttons
   window.addEventListener('scroll', function() {
-    const scrollButton = document.querySelector('.scroll-top');
-    if (window.pageYOffset > 300) {
-      scrollButton.style.display = 'block';
+    const scrollTopButton = document.querySelector('.scroll-top');
+    const scrollBottomButton = document.querySelector('.scroll-bottom');
+    const scrollPosition = window.pageYOffset;
+    const documentHeight = document.body.scrollHeight - window.innerHeight;
+    
+    // Show/hide scroll to top button
+    if (scrollPosition > 300) {
+      scrollTopButton.style.display = 'block';
     } else {
-      scrollButton.style.display = 'none';
+      scrollTopButton.style.display = 'none';
+    }
+    
+    // Show/hide scroll to bottom button (hide when near bottom)
+    if (scrollPosition < documentHeight - 300) {
+      scrollBottomButton.style.display = 'block';
+    } else {
+      scrollBottomButton.style.display = 'none';
     }
   });
 </script>
