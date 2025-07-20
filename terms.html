@@ -98,12 +98,18 @@
       padding: 12px;
       text-align: left;
       vertical-align: top;
+      color: #333;
     }
     
     th {
       background-color: #2c3e50;
       color: white;
       font-weight: bold;
+    }
+    
+    td {
+      background-color: white;
+      color: #333;
     }
     
     tr:nth-child(even) {
@@ -1114,33 +1120,55 @@
     }
   });
   
-  // PDF Export function
+  // PDF Export function - Fixed version
   function exportToPDF() {
-    const element = document.querySelector('.container');
-    const opt = {
-      margin: 0.5,
-      filename: 'XSHADOWS_OPS_Terms_v1.1-beta.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-    
-    // Show loading state
+    // Show simple loading state
     const btn = event.target;
     const originalText = btn.innerHTML;
-    btn.innerHTML = '⏳ Generating...';
+    btn.innerHTML = 'Generating PDF...';
     btn.disabled = true;
     
-    html2pdf().set(opt).from(element).save().then(() => {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-    }).catch(() => {
-      btn.innerHTML = '❌ Error';
+    // Use browser's built-in print to PDF (much more reliable)
+    setTimeout(() => {
+      // Create a new window with clean content
+      const printWindow = window.open('', '_blank');
+      const docContent = document.documentElement.outerHTML;
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>XSHADOWS OPS Terms and Conditions v1.1-beta</title>
+          <style>
+            body { margin: 0; padding: 20px; font-family: Georgia, serif; color: #000; background: white; }
+            .container { max-width: none; background: white; }
+            .translate-widget, .action-btn, .scroll-top, .scroll-bottom, #bg-canvas, .summary-modal { display: none !important; }
+            table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+            th, td { border: 1px solid #333; padding: 8px; color: #000; }
+            th { background-color: #f0f0f0; font-weight: bold; }
+            td { background-color: white; }
+            h1, h2 { color: #2c3e50; }
+            @page { margin: 0.5in; }
+          </style>
+        </head>
+        <body>
+          ${document.querySelector('.container').outerHTML}
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      
       setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+        
+        // Reset button
         btn.innerHTML = originalText;
         btn.disabled = false;
-      }, 2000);
-    });
+      }, 1000);
+      
+    }, 500);
   }
   function dismissNotification() {
     const notification = document.getElementById('versionNotification');
