@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOW OPS</title>
+  <title>XSHADOW OPS - Ojo de Fuego</title>
   <style>
     html, body {
       margin: 0;
@@ -26,30 +26,8 @@
       pointer-events: none;
       text-align: center;
     }
-    .footer-links {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-family: monospace;
-      font-size: 14px;
-      z-index: 20;
-      text-align: center;
-    }
-    .footer-links a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-    }
-    .footer-links a:hover {
-      text-decoration: underline;
-    }
     body.viulenza {
       animation: shake 0.15s infinite;
-    }
-    body.glitch-flash canvas {
-      filter: contrast(400%) brightness(200%) invert(1);
     }
     @keyframes shake {
       0% { transform: translate(1px, 1px); }
@@ -62,14 +40,7 @@
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <audio id="glitchSound" src="glitch.mp3" preload="auto"></audio>
-  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
-  <div class="footer-links">
-    <a href="terms.html" target="_blank">Terms & Conditions</a> |
-    <a href="privacy.html" target="_blank">Privacy Policy</a> |
-    <a href="cookies.html" target="_blank">Cookie Policy</a> |
-    <a href="legal.html" target="_blank">Legal Notice</a>
-  </div>
+  <div class="title">XSHADOW OPS<br><strong>by microretailX</strong></div>
 
   <script>
     const canvas = document.getElementById('canvas');
@@ -77,60 +48,43 @@
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
 
-    const glitchSound = document.getElementById("glitchSound");
-    let viulenzaActive = false;
-    let lastGlitchTime = 0;
-
-    const mouse = { x: -1000, y: -1000 };
-    window.addEventListener('mousemove', e => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
-
     window.addEventListener('resize', () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     });
 
-    function isMobile() {
-      return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
-    }
-
-    const MOBILE_MODE = isMobile();
-    const NUM_PARTICLES = MOBILE_MODE ? 400 : 2000;
-    const MAX_CONNECTIONS = MOBILE_MODE ? 4 : 10;
-    const SPEED = 0.5;
-    const xZoneMargin = 40;
-
+    const NUM_PARTICLES = 2000;
     const particles = [];
 
-    function inXZone(x, y) {
-      const d1 = Math.abs(y - (x * height / width));
-      const d2 = Math.abs(y - (height - x * height / width));
-      return (d1 < xZoneMargin || d2 < xZoneMargin);
+    // zona del ojo
+    function inIrisZone(x, y) {
+      const eyeX = width / 2;
+      const eyeY = height / 2;
+      const irisRadiusX = width * 0.20;
+      const irisRadiusY = height * 0.35;
+      const dx = (x - eyeX) / irisRadiusX;
+      const dy = (y - eyeY) / irisRadiusY;
+      return dx*dx + dy*dy <= 1;
     }
 
-    function randomHex() {
-      return "#" + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
+    function inPupilZone(x, y) {
+      const eyeX = width / 2;
+      const eyeY = height / 2;
+      const pupilRadiusX = width * 0.05;
+      const pupilRadiusY = height * 0.20;
+      const dx = (x - eyeX) / pupilRadiusX;
+      const dy = (y - eyeY) / pupilRadiusY;
+      return dx*dx + dy*dy <= 1;
     }
 
     function createParticle() {
-      let x, y;
-      do {
-        x = Math.random() * width;
-        y = Math.random() * height;
-      } while (inXZone(x, y));
       return {
-        x, y,
-        ox: x, oy: y,
-        vx: (Math.random() - 0.5) * SPEED,
-        vy: (Math.random() - 0.5) * SPEED,
-        radius: 1.5,
-        baseColor: "white",
-        color: "white",
-        inX: false,
-        hasLaunched: false,
-        hexCode: randomHex()
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: 1.5 + Math.random() * 1.5,
+        color: "white"
       };
     }
 
@@ -138,204 +92,38 @@
       particles.push(createParticle());
     }
 
-    function drawConnections() {
-      for (let i = 0; i < particles.length; i++) {
-        let connections = 0;
-        for (let j = i + 1; j < particles.length && connections < MAX_CONNECTIONS; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-            connections++;
-          }
-        }
-      }
-    }
-
-    function drawTriangleOverlay(now) {
-      const pulse = Math.sin(now * 0.01) * 10;
-      const baseY = height * 0.2;
-      const bottomY = height * 0.8;
-      const opacity = 0.05 + Math.random() * 0.2;
-      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(width / 2, baseY + pulse);
-      ctx.lineTo(width * 0.3 - pulse, bottomY - pulse);
-      ctx.lineTo(width * 0.7 + pulse, bottomY - pulse);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.font = "bold 20px monospace";
-      ctx.fillStyle = `rgba(255,255,255,${opacity})`;
-      ctx.textAlign = "center";
-      ctx.fillText("i2 ACTIVATED", width / 2, bottomY + 30);
-    }
-
-    // Ojo de Sauron 🔥
-    function drawEye(now) {
-      const eyeX = width / 2;
-      const eyeY = height / 2;
-      const eyeRadiusX = width * 0.18; // más pequeño
-      const eyeRadiusY = height * 0.28;
-
-      // gradiente ardiente
-      const gradient = ctx.createRadialGradient(eyeX, eyeY, 10, eyeX, eyeY, eyeRadiusY);
-      gradient.addColorStop(0, "rgba(255,220,100,1)");
-      gradient.addColorStop(0.3, "rgba(255,120,0,0.9)");
-      gradient.addColorStop(0.6, "rgba(180,30,0,0.8)");
-      gradient.addColorStop(1, "rgba(0,0,0,0.7)");
-
-      ctx.save();
-      ctx.translate(eyeX, eyeY);
-      ctx.beginPath();
-      ctx.ellipse(0, 0, eyeRadiusX, eyeRadiusY, 0, 0, Math.PI * 2);
-      ctx.fillStyle = gradient;
-      ctx.fill();
-      ctx.strokeStyle = "rgba(255,80,0,0.9)";
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      // pupila vertical animada
-      const pulse = Math.sin(now * 0.005) * 5;
-      ctx.beginPath();
-      ctx.moveTo(-20, -40 - pulse);
-      ctx.quadraticCurveTo(0, -20, 20, -40 - pulse);
-      ctx.lineTo(20, 40 + pulse);
-      ctx.quadraticCurveTo(0, 20, -20, 40 + pulse);
-      ctx.closePath();
-      ctx.fillStyle = "black";
-      ctx.fill();
-
-      // llamas alrededor
-      for (let i = 0; i < 40; i++) {
-        const angle = (i / 40) * Math.PI * 2;
-        const flameLength = 15 + Math.sin(now * 0.01 + i) * 10;
-        const x = Math.cos(angle) * (eyeRadiusX + 10);
-        const y = Math.sin(angle) * (eyeRadiusY + 10);
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x * 1.1, y * 1.1 - flameLength);
-        ctx.strokeStyle = `rgba(255, ${100 + Math.random() * 155}, 0, 0.6)`;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
-
-      // brillo interno
-      ctx.beginPath();
-      ctx.arc(0, 0, 12 + Math.sin(now * 0.01) * 4, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255,200,100,0.3)";
-      ctx.fill();
-
-      ctx.restore();
-    }
-
-    function triggerGlitchFlash() {
-      document.body.classList.add("glitch-flash");
-      setTimeout(() => document.body.classList.remove("glitch-flash"), 150);
-      glitchSound.currentTime = 0;
-      glitchSound.play();
-    }
-
     function animate() {
       const now = performance.now();
-      let inXCount = 0;
-      for (const p of particles) {
-        p.inX = inXZone(p.x, p.y);
-        if (p.inX) inXCount++;
-      }
 
-      ctx.fillStyle = inXCount >= 20 ? `rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05})` : "black";
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
       ctx.fillRect(0, 0, width, height);
 
-      ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(width, height);
-      ctx.moveTo(width, 0);
-      ctx.lineTo(0, height);
-      ctx.stroke();
-
-      drawConnections();
-
       for (const p of particles) {
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 100) {
-          const force = (100 - dist) * 0.007;
-          p.vx += dx / dist * force;
-          p.vy += dy / dist * force;
-        }
-
-        const wasInX = p.inX;
-        if (p.inX && !p.hasLaunched) {
-          const dx = width - p.x;
-          const dy = height - p.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          p.vx += (dx / dist) * 6;
-          p.vy += (dy / dist) * 6;
-          p.hasLaunched = true;
-        }
-
-        p.color = (p.inX && inXCount >= 20) ? "red" : p.baseColor;
-
-        if (p.inX) {
-          p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
-          p.vy += Math.cos(now * 0.1 + p.y) * 0.4;
-          p.radius = 3.5 + Math.sin(now * 0.05 + p.x + p.y) * 1.5;
-          if (Math.random() < 0.4) p.hexCode = randomHex();
-          ctx.font = "12px monospace";
-          ctx.fillStyle = "white";
-          ctx.fillText("viulenza", p.x + 10, p.y - 8);
-          ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
-        } else {
-          if (wasInX) {
-            p.radius = 1.5;
-            p.hasLaunched = false;
-            p.hexCode = randomHex();
-          }
-        }
-
-        p.vx += (p.ox - p.x) * 0.002;
-        p.vy += (p.oy - p.y) * 0.002;
-        p.vx += (Math.random() - 0.5) * 0.05;
-        p.vy += (Math.random() - 0.5) * 0.05;
+        // movimiento
         p.x += p.vx;
         p.y += p.vy;
-        p.vx *= 0.97;
-        p.vy *= 0.97;
+
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
+        // colorear según zona
+        if (inPupilZone(p.x, p.y)) {
+          p.color = "black"; // pupila
+          p.radius = 2;
+        } else if (inIrisZone(p.x, p.y)) {
+          const flicker = Math.floor(100 + Math.sin(now*0.01 + p.x*0.1)*155);
+          p.color = `rgb(255, ${flicker}, 0)`; // fuego
+          p.radius = 2 + Math.sin(now*0.01 + p.y*0.1);
+        } else {
+          p.color = "rgba(255,255,255,0.1)";
+          p.radius = 1;
+        }
+
+        // dibujar partícula
         ctx.fillStyle = p.color;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
         ctx.fill();
-      }
-
-      if (inXCount >= 20) {
-        drawTriangleOverlay(now);
-        drawEye(now); // 👁️ aquí el ojo ardiente
-        document.body.classList.add("viulenza");
-
-        if (!viulenzaActive) {
-          glitchSound.currentTime = 0;
-          glitchSound.play();
-          viulenzaActive = true;
-          lastGlitchTime = now;
-        } else if (now - lastGlitchTime > 3000) {
-          triggerGlitchFlash();
-          lastGlitchTime = now;
-        }
-      } else {
-        document.body.classList.remove("viulenza");
-        viulenzaActive = false;
       }
 
       requestAnimationFrame(animate);
