@@ -65,11 +65,11 @@
   <audio id="glitchSound" src="glitch.mp3" preload="auto"></audio>
   <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
   <div class="footer-links">
-  <a href="terms.html" target="_blank">Terms & Conditions</a> |
-  <a href="privacy.html" target="_blank">Privacy Policy</a> |
-  <a href="cookies.html" target="_blank">Cookie Policy</a> |
-  <a href="legal.html" target="_blank">Legal Notice</a>
-</div>
+    <a href="terms.html" target="_blank">Terms & Conditions</a> |
+    <a href="privacy.html" target="_blank">Privacy Policy</a> |
+    <a href="cookies.html" target="_blank">Cookie Policy</a> |
+    <a href="legal.html" target="_blank">Legal Notice</a>
+  </div>
 
   <script>
     const canvas = document.getElementById('canvas');
@@ -101,12 +101,6 @@
     const MAX_CONNECTIONS = MOBILE_MODE ? 4 : 10;
     const SPEED = 0.5;
     const xZoneMargin = 40;
-
-    if (MOBILE_MODE) {
-      console.log("🧪 Modo móvil activado: 400 nodos, 4 conexiones máximas por nodo");
-    } else {
-      console.log("🧬 Modo escritorio activado: 2000 nodos, 10 conexiones máximas por nodo");
-    }
 
     const particles = [];
 
@@ -180,6 +174,53 @@
       ctx.fillStyle = `rgba(255,255,255,${opacity})`;
       ctx.textAlign = "center";
       ctx.fillText("i2 ACTIVATED", width / 2, bottomY + 30);
+    }
+
+    function drawEye(now) {
+      const eyeX = width / 2;
+      const eyeY = height / 2;
+      const eyeRadiusX = width * 0.25;
+      const eyeRadiusY = height * 0.35;
+
+      // gradiente ardiente
+      const gradient = ctx.createRadialGradient(eyeX, eyeY, 20, eyeX, eyeY, eyeRadiusY);
+      gradient.addColorStop(0, "rgba(255,200,0,1)");
+      gradient.addColorStop(0.4, "rgba(255,80,0,0.9)");
+      gradient.addColorStop(0.8, "rgba(120,0,0,0.8)");
+      gradient.addColorStop(1, "rgba(0,0,0,0.6)");
+
+      // base del ojo
+      ctx.save();
+      ctx.translate(eyeX, eyeY);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, eyeRadiusX, eyeRadiusY, 0, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,100,0,0.9)";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      // pupila negra que sigue al ratón
+      const dx = mouse.x - eyeX;
+      const dy = mouse.y - eyeY;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const pupilMaxOffset = 50;
+
+      const pupilX = (dx / dist) * pupilMaxOffset;
+      const pupilY = (dy / dist) * pupilMaxOffset;
+
+      ctx.beginPath();
+      ctx.arc(pupilX, pupilY, 40, 0, Math.PI * 2);
+      ctx.fillStyle = "black";
+      ctx.fill();
+
+      // brillo blanco en la pupila
+      ctx.beginPath();
+      ctx.arc(pupilX - 12, pupilY - 12, 10, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.fill();
+
+      ctx.restore();
     }
 
     function triggerGlitchFlash() {
@@ -269,6 +310,7 @@
 
       if (inXCount >= 20) {
         drawTriangleOverlay(now);
+        drawEye(now); // 👁 ojo ardiente de Sauron
         document.body.classList.add("viulenza");
 
         if (!viulenzaActive) {
