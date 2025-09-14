@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XSHADOW OPS - Ojo de Fuego</title>
+  <title>XSHADOW OPS</title>
   <style>
     html, body {
       margin: 0;
@@ -40,7 +40,7 @@
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <div class="title">XSHADOW OPS<br><strong>by microretailX</strong></div>
+  <div class="title">XSHADOWS_OPS<br><strong>by microretailX</strong></div>
 
   <script>
     const canvas = document.getElementById('canvas');
@@ -48,20 +48,50 @@
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
 
+    const mouse = { x: width / 2, y: height / 2 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
     window.addEventListener('resize', () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     });
 
-    const NUM_PARTICLES = 2000;
+    const NUM_PARTICLES = 1200;
+    const MAX_CONNECTIONS = 8;
+    const SPEED = 0.5;
+
     const particles = [];
+
+    function randomHex() {
+      return "#" + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
+    }
+
+    function createParticle() {
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * SPEED,
+        vy: (Math.random() - 0.5) * SPEED,
+        radius: 1.5,
+        color: "white",
+        iris: false,
+        pupil: false
+      };
+    }
+
+    for (let i = 0; i < NUM_PARTICLES; i++) {
+      particles.push(createParticle());
+    }
 
     // zona del ojo
     function inIrisZone(x, y) {
       const eyeX = width / 2;
       const eyeY = height / 2;
-      const irisRadiusX = width * 0.20;
-      const irisRadiusY = height * 0.35;
+      const irisRadiusX = width * 0.12;
+      const irisRadiusY = height * 0.20;
       const dx = (x - eyeX) / irisRadiusX;
       const dy = (y - eyeY) / irisRadiusY;
       return dx*dx + dy*dy <= 1;
@@ -70,33 +100,47 @@
     function inPupilZone(x, y) {
       const eyeX = width / 2;
       const eyeY = height / 2;
-      const pupilRadiusX = width * 0.05;
-      const pupilRadiusY = height * 0.20;
-      const dx = (x - eyeX) / pupilRadiusX;
-      const dy = (y - eyeY) / pupilRadiusY;
-      return dx*dx + dy*dy <= 1;
+      const dx = mouse.x - eyeX;
+      const dy = mouse.y - eyeY;
+      const angle = Math.atan2(dy, dx);
+
+      // pupila vertical desplazada hacia el ratón
+      const pupilOffsetX = Math.cos(angle) * 20;
+      const pupilOffsetY = Math.sin(angle) * 20;
+
+      const pupilRadiusX = width * 0.025;
+      const pupilRadiusY = height * 0.10;
+
+      const px = (x - (eyeX + pupilOffsetX)) / pupilRadiusX;
+      const py = (y - (eyeY + pupilOffsetY)) / pupilRadiusY;
+      return px*px + py*py <= 1;
     }
 
-    function createParticle() {
-      return {
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        radius: 1.5 + Math.random() * 1.5,
-        color: "white"
-      };
-    }
-
-    for (let i = 0; i < NUM_PARTICLES; i++) {
-      particles.push(createParticle());
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        let connections = 0;
+        for (let j = i + 1; j < particles.length && connections < MAX_CONNECTIONS; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 80) {
+            ctx.strokeStyle = `rgba(255,100,0,${1 - dist / 80})`;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+            connections++;
+          }
+        }
+      }
     }
 
     function animate() {
       const now = performance.now();
-
       ctx.fillStyle = "rgba(0,0,0,0.3)";
       ctx.fillRect(0, 0, width, height);
+
+      drawConnections();
 
       for (const p of particles) {
         // movimiento
@@ -106,16 +150,16 @@
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
-        // colorear según zona
+        // zonas del ojo
         if (inPupilZone(p.x, p.y)) {
-          p.color = "black"; // pupila
-          p.radius = 2;
+          p.color = "black";
+          p.radius = 2.5;
         } else if (inIrisZone(p.x, p.y)) {
-          const flicker = Math.floor(100 + Math.sin(now*0.01 + p.x*0.1)*155);
+          const flicker = Math.floor(100 + Math.sin(now*0.01 + p.x*0.05)*155);
           p.color = `rgb(255, ${flicker}, 0)`; // fuego
           p.radius = 2 + Math.sin(now*0.01 + p.y*0.1);
         } else {
-          p.color = "rgba(255,255,255,0.1)";
+          p.color = "rgba(255,255,255,0.2)";
           p.radius = 1;
         }
 
