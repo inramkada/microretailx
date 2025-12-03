@@ -204,7 +204,7 @@
       position: absolute;
       top: 0;
       right: 100%;
-      margin-right: 10px;
+      margin-right: 14px;
       min-width: 220px;
       border-radius: 6px;
       overflow: hidden;
@@ -212,8 +212,9 @@
       opacity: 0;
       background: rgba(0, 8, 18, 0.95);
       border: 1px solid #00eaff77;
+      border-left: 2px solid rgba(0, 234, 255, 0.5);
       backdrop-filter: blur(12px);
-      box-shadow: 0 0 18px #00eaff66;
+      box-shadow: 0 0 22px #00eaff66;
       transition: max-height 0.3s ease, opacity 0.24s ease;
       padding: 8px 0;
     }
@@ -224,7 +225,7 @@
     }
 
     .submenu-group {
-      padding: 4px 14px 6px;
+      padding: 4px 18px 6px 16px;
     }
 
     .submenu-label {
@@ -291,7 +292,7 @@
       .menu-dropdown a { font-size: 13px; }
       .footer-links { font-size: 13px; }
       .copyright { font-size: 8px; }
-      .menu-dropdown-sub { min-width: 190px; }
+      .menu-dropdown-sub { min-width: 190px; margin-right: 10px; }
     }
   </style>
 </head>
@@ -302,6 +303,7 @@
   <div class="ui-layer top-bar">
     <div class="menu">
       <div class="menu-dot" id="menuToggle"></div>
+
       <div class="menu-dropdown" id="menuDropdown">
         <a href="#" class="locations-link" id="locationsLink">LOCATIONS</a>
         <a href="ae1.html">AE1</a>
@@ -313,27 +315,36 @@
       <div class="menu-dropdown-sub" id="locationsSubmenu">
         <div class="submenu-group">
           <div class="submenu-label">AFRICA</div>
-          <a class="submenu-link" href="morocco.html">MOROCCO</a>
+          <a class="submenu-link" href="#">PAIS 1</a>
         </div>
         <div class="submenu-group">
           <div class="submenu-label">AMERICA</div>
-          <a class="submenu-link" href="texas.html">TEXAS</a>
-          <a class="submenu-link" href="panama.html">PANAMA</a>
+          <a class="submenu-link" href="#">C1</a>
+          <a class="submenu-link" href="#">C2</a>
         </div>
         <div class="submenu-group">
           <div class="submenu-label">ASIA</div>
-          <a class="submenu-link" href="uae.html">UAE</a>
-          <a class="submenu-link" href="china.html">CHINA</a>
-          <a class="submenu-link" href="russia.html">RUSSIA</a>
+          <a class="submenu-link" href="#">C1</a>
+          <a class="submenu-link" href="#">C2</a>
+          <a class="submenu-link" href="#">C3</a>
         </div>
         <div class="submenu-group">
           <div class="submenu-label">AUSTRALIA</div>
-          <a class="submenu-link" href="australia.html">AUSTRALIA</a>
-          <a class="submenu-link" href="new-zealand.html">NEW ZEALAND</a>
+          <a class="submenu-link" href="#">C1</a>
+          <a class="submenu-link" href="#">C2</a>
         </div>
         <div class="submenu-group">
           <div class="submenu-label">EUROPE</div>
-          <a class="submenu-link" href="spain.html">SPAIN</a>
+          <a class="submenu-link" href="#">C1</a>
+          <a class="submenu-link" href="#">C2</a>
+          <a class="submenu-link" href="#">C3</a>
+          <a class="submenu-link" href="#">C4</a>
+          <a class="submenu-link" href="#">C5</a>
+          <a class="submenu-link" href="#">C6</a>
+          <a class="submenu-link" href="#">C7</a>
+          <a class="submenu-link" href="#">C8</a>
+          <a class="submenu-link" href="#">C9</a>
+          <a class="submenu-link" href="#">C10</a>
         </div>
       </div>
     </div>
@@ -371,7 +382,11 @@ menuToggle.addEventListener("click", (e) => {
 });
 
 document.addEventListener("click", (e) => {
-  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target) && !locationsSubmenu.contains(e.target)) {
+  if (
+    !menuDropdown.contains(e.target) &&
+    !menuToggle.contains(e.target) &&
+    !locationsSubmenu.contains(e.target)
+  ) {
     menuDropdown.classList.remove("open");
     locationsSubmenu.classList.remove("open");
     menuToggle.classList.remove("active", "spin", "shake", "double");
