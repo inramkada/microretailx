@@ -41,16 +41,53 @@
     }
 
     .menu-dot {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: white;
       cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
       opacity: 0.85;
     }
 
     .menu-dot:hover {
+      background: #00eaff;
+      box-shadow: 0 0 8px #00eaff, 0 0 12px #00eaff;
       opacity: 1;
+    }
+
+    .menu-dot::before, .menu-dot::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2px;
+      height: 12px;
+      background: #00eaff;
+      transform-origin: center;
+      opacity: 0;
+      transition: all 0.25s ease;
+    }
+
+    .menu-dot::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .menu-dot::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    .menu-dot.active {
+      background: transparent;
+      box-shadow: none;
+      opacity: 1;
+    }
+
+    .menu-dot.active::before,
+    .menu-dot.active::after {
+      opacity: 1;
+      box-shadow: 0 0 8px #00eaff;
     }
 
     .menu-dropdown {
@@ -60,8 +97,14 @@
       background: black;
       border: 1px solid #444;
       min-width: 130px;
-      display: none;
       box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
+    }
+
+    .menu-dropdown.open {
+      max-height: 200px;
     }
 
     .menu-dropdown a {
@@ -155,14 +198,17 @@
 const menuToggle = document.getElementById("menuToggle");
 const menuDropdown = document.getElementById("menuDropdown");
 
-menuToggle.addEventListener("click", () => {
-  const isOpen = menuDropdown.style.display === "block";
-  menuDropdown.style.display = isOpen ? "none" : "block";
+menuToggle.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const open = menuDropdown.classList.contains("open");
+  menuDropdown.classList.toggle("open");
+  menuToggle.classList.toggle("active", !open);
 });
 
 document.addEventListener("click", (e) => {
   if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
-    menuDropdown.style.display = "none";
+    menuDropdown.classList.remove("open");
+    menuToggle.classList.remove("active");
   }
 });
 
@@ -279,6 +325,7 @@ function drawDeathMarkers(now) {
       ctx.lineTo(x2, y2);
       ctx.stroke();
     }
+
     ctx.restore();
   }
 }
@@ -336,7 +383,7 @@ function animate() {
 
     if (p.inX) {
       p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
-      p.vy += Math.cos(now * 0.1 + p.y) * 0.4;
+      p.vy += Math.cos(now * 0.1 + п y) * 0.4;
       p.radius = 3.3 + Math.sin(now * 0.05 + p.x + p.y) * 1.4;
       if (Math.random() < 0.4) p.hexCode = randomHex();
       ctx.font = "12px monospace";
