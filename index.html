@@ -71,6 +71,7 @@
     const MAX_CONNECTIONS = MOBILE_MODE ? 4 : 10;
     const SPEED = 0.5;
     const xZoneMargin = 40;
+    const X_SAT_THRESHOLD = MOBILE_MODE ? 25 : 60;
 
     const particles = [];
     const deathMarkers = [];
@@ -205,6 +206,10 @@
         if (p.inX) inXCount++;
       }
 
+      const saturated = inXCount >= X_SAT_THRESHOLD;
+      const cx = width / 2;
+      const cy = height / 2;
+
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
@@ -221,17 +226,26 @@
       drawDeathMarkers(now);
 
       for (const p of particles) {
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 100) {
-          const force = (100 - dist) * 0.007;
-          p.vx += (dx / dist) * force;
-          p.vy += (dy / dist) * force;
+        const dxm = p.x - mouse.x;
+        const dym = p.y - mouse.y;
+        const distm = Math.sqrt(dxm * dxm + dym * dym);
+        if (distm < 100) {
+          const force = (100 - distm) * 0.007;
+          p.vx += (dxm / distm) * force;
+          p.vy += (dym / distm) * force;
         }
 
         if (p.inX && !p.prevInX) {
           addDeathMarker(p.x, p.y);
+        }
+
+        if (saturated && p.inX) {
+          const dx = p.x - cx;
+          const dy = p.y - cy;
+          const d = Math.sqrt(dx * dx + dy * dy) || 1;
+          const push = 0.9;
+          p.vx += (dx / d) * push;
+          p.vy += (dy / d) * push;
         }
 
         const wasInX = p.prevInX;
