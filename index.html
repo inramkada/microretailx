@@ -14,18 +14,6 @@
     canvas {
       display: block;
     }
-    .title {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-family: monospace;
-      font-size: clamp(18px, 2.5vw, 40px);
-      z-index: 10;
-      pointer-events: none;
-      text-align: center;
-    }
     .footer-links {
       position: absolute;
       bottom: 10px;
@@ -45,40 +33,23 @@
     .footer-links a:hover {
       text-decoration: underline;
     }
-    body.viulenza {
-      animation: shake 0.15s infinite;
-    }
-    body.glitch-flash canvas {
-      filter: contrast(400%) brightness(200%) invert(1);
-    }
-    @keyframes shake {
-      0% { transform: translate(1px, 1px); }
-      25% { transform: translate(-1px, 1px); }
-      50% { transform: translate(-1px, -1px); }
-      75% { transform: translate(1px, -1px); }
-      100% { transform: translate(1px, 1px); }
-    }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <audio id="glitchSound" src="glitch.mp3" preload="auto"></audio>
+
   <div class="footer-links">
-  <a href="terms.html" target="_blank">Terms & Conditions</a> |
-  <a href="privacy.html" target="_blank">Privacy Policy</a> |
-  <a href="cookies.html" target="_blank">Cookie Policy</a> |
-  <a href="legal.html" target="_blank">Legal Notice</a>
-</div>
+    <a href="terms.html" target="_blank">Terms & Conditions</a> |
+    <a href="privacy.html" target="_blank">Privacy Policy</a> |
+    <a href="cookies.html" target="_blank">Cookie Policy</a> |
+    <a href="legal.html" target="_blank">Legal Notice</a>
+  </div>
 
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
-
-    const glitchSound = document.getElementById("glitchSound");
-    let viulenzaActive = false;
-    let lastGlitchTime = 0;
 
     const mouse = { x: -1000, y: -1000 };
     window.addEventListener('mousemove', e => {
@@ -101,13 +72,8 @@
     const SPEED = 0.5;
     const xZoneMargin = 40;
 
-    if (MOBILE_MODE) {
-      console.log("🧪 Modo móvil activado: 400 nodos, 4 conexiones máximas por nodo");
-    } else {
-      console.log("🧬 Modo escritorio activado: 2000 nodos, 10 conexiones máximas por nodo");
-    }
-
     const particles = [];
+    const deathMarkers = [];
 
     function inXZone(x, y) {
       const d1 = Math.abs(y - (x * height / width));
@@ -134,6 +100,7 @@
         baseColor: "white",
         color: "white",
         inX: false,
+        prevInX: false,
         hasLaunched: false,
         hexCode: randomHex()
       };
@@ -181,26 +148,68 @@
       ctx.fillText("i2 ACTIVATED", width / 2, bottomY + 30);
     }
 
-    function triggerGlitchFlash() {
-      document.body.classList.add("glitch-flash");
-      setTimeout(() => document.body.classList.remove("glitch-flash"), 150);
-      glitchSound.currentTime = 0;
-      glitchSound.play();
+    function addDeathMarker(x, y) {
+      deathMarkers.push({
+        x,
+        y,
+        createdAt: performance.now(),
+        angle: Math.random() * Math.PI * 2
+      });
+    }
+
+    function drawDeathMarkers(now) {
+      const LIFETIME = 700;
+      for (let i = deathMarkers.length - 1; i >= 0; i--) {
+        const m = deathMarkers[i];
+        const age = now - m.createdAt;
+        if (age > LIFETIME) {
+          deathMarkers.splice(i, 1);
+          continue;
+        }
+        const t = age / LIFETIME;
+        const alpha = 1 - t;
+        const rays = 4;
+        const lenMin = 3;
+        const lenMax = 10;
+        const len = lenMin + (lenMax - lenMin) * t;
+
+        ctx.save();
+        ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.4})`;
+        ctx.lineWidth = 0.8;
+
+        for (let k = 0; k < rays; k++) {
+          const a = m.angle + (Math.PI * 2 * k / rays);
+          const inner = 0;
+          const outer = len;
+          const x1 = m.x + Math.cos(a) * inner;
+          const y1 = m.y + Math.sin(a) * inner;
+          const x2 = m.x + Math.cos(a) * outer;
+          const y2 = m.y + Math.sin(a) * outer;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
     }
 
     function animate() {
       const now = performance.now();
       let inXCount = 0;
+
       for (const p of particles) {
+        p.prevInX = p.inX;
         p.inX = inXZone(p.x, p.y);
         if (p.inX) inXCount++;
       }
 
-      ctx.fillStyle = inXCount >= 20 ? `rgba(255, 0, 0, ${Math.random() * 0.2 + 0.05})` : "black";
+      ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
 
-      ctx.strokeStyle = "rgba(255, 0, 0, 0.05)";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(0, 255, 255, 0.06)";
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(0, 0);
       ctx.lineTo(width, height);
@@ -209,6 +218,7 @@
       ctx.stroke();
 
       drawConnections();
+      drawDeathMarkers(now);
 
       for (const p of particles) {
         const dx = p.x - mouse.x;
@@ -220,17 +230,22 @@
           p.vy += dy / dist * force;
         }
 
-        const wasInX = p.inX;
+        if (p.inX && !p.prevInX) {
+          addDeathMarker(p.x, p.y);
+        }
+
+        const wasInX = p.prevInX;
+
         if (p.inX && !p.hasLaunched) {
-          const dx = width - p.x;
-          const dy = height - p.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          p.vx += (dx / dist) * 6;
-          p.vy += (dy / dist) * 6;
+          const tx = width - p.x;
+          const ty = height - p.y;
+          const d2 = Math.sqrt(tx * tx + ty * ty) || 1;
+          p.vx += (tx / d2) * 6;
+          p.vy += (ty / d2) * 6;
           p.hasLaunched = true;
         }
 
-        p.color = (p.inX && inXCount >= 20) ? "red" : p.baseColor;
+        p.color = p.baseColor;
 
         if (p.inX) {
           p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
@@ -239,7 +254,6 @@
           if (Math.random() < 0.4) p.hexCode = randomHex();
           ctx.font = "12px monospace";
           ctx.fillStyle = "white";
-          ctx.fillText("viulenza", p.x + 10, p.y - 8);
           ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
         } else {
           if (wasInX) {
@@ -253,41 +267,12 @@
         p.vy += (p.oy - p.y) * 0.002;
         p.vx += (Math.random() - 0.5) * 0.05;
         p.vy += (Math.random() - 0.5) * 0.05;
+
         p.x += p.vx;
         p.y += p.vy;
+
         p.vx *= 0.97;
         p.vy *= 0.97;
+
         if (p.x < 0 || p.x > width) p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
-
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      if (inXCount >= 20) {
-        drawTriangleOverlay(now);
-        document.body.classList.add("viulenza");
-
-        if (!viulenzaActive) {
-          glitchSound.currentTime = 0;
-          glitchSound.play();
-          viulenzaActive = true;
-          lastGlitchTime = now;
-        } else if (now - lastGlitchTime > 3000) {
-          triggerGlitchFlash();
-          lastGlitchTime = now;
-        }
-      } else {
-        document.body.classList.remove("viulenza");
-        viulenzaActive = false;
-      }
-
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-  </script>
-</body>
-</html>
+        if (p.y < 0 || p.y > height) p.vy *= -1;*
