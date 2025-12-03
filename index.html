@@ -49,6 +49,7 @@
       transition: all 0.25s ease;
       position: relative;
       opacity: 0.85;
+      transform: scale(1) rotate(0deg);
     }
 
     .menu-dot:hover {
@@ -78,16 +79,26 @@
       transform: translate(-50%, -50%) rotate(-45deg);
     }
 
+    @keyframes xPulseGlow {
+      0% {
+        box-shadow: 0 0 6px #00eaff, 0 0 10px #00eaff;
+      }
+      100% {
+        box-shadow: 0 0 14px #00eaff, 0 0 24px #00eaff;
+      }
+    }
+
     .menu-dot.active {
       background: transparent;
       box-shadow: none;
       opacity: 1;
+      transform: scale(1.1) rotate(90deg);
     }
 
     .menu-dot.active::before,
     .menu-dot.active::after {
       opacity: 1;
-      box-shadow: 0 0 8px #00eaff;
+      animation: xPulseGlow 1.1s ease-in-out infinite alternate;
     }
 
     .menu-dropdown {
@@ -383,7 +394,7 @@ function animate() {
 
     if (p.inX) {
       p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
-      p.vy += Math.cos(now * 0.1 + п y) * 0.4;
+      p.vy += Math.cos(now * 0.1 + p.y) * 0.4;
       p.radius = 3.3 + Math.sin(now * 0.05 + p.x + p.y) * 1.4;
       if (Math.random() < 0.4) p.hexCode = randomHex();
       ctx.font = "12px monospace";
