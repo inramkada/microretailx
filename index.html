@@ -178,11 +178,74 @@
       color: #b8faff;
       text-decoration: none;
       letter-spacing: 1px;
+      position: relative;
     }
 
     .menu-dropdown a:hover {
       background: rgba(0, 40, 60, 0.65);
       color: #ffffff;
+    }
+
+    .menu-dropdown a.locations-link {
+      padding-right: 28px;
+    }
+
+    .menu-dropdown a.locations-link::after {
+      content: "▸";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: #8ff3ff;
+    }
+
+    .menu-dropdown-sub {
+      position: absolute;
+      top: 0;
+      right: 100%;
+      margin-right: 10px;
+      min-width: 220px;
+      border-radius: 6px;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      background: rgba(0, 8, 18, 0.95);
+      border: 1px solid #00eaff77;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 18px #00eaff66;
+      transition: max-height 0.3s ease, opacity 0.24s ease;
+      padding: 8px 0;
+    }
+
+    .menu-dropdown-sub.open {
+      max-height: 500px;
+      opacity: 1;
+    }
+
+    .submenu-group {
+      padding: 4px 14px 6px;
+    }
+
+    .submenu-label {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #7fd8ff;
+      opacity: 0.8;
+      margin-bottom: 2px;
+    }
+
+    .submenu-link {
+      display: block;
+      font-size: 13px;
+      padding: 3px 0;
+      color: #e8ffff;
+      text-decoration: none;
+    }
+
+    .submenu-link:hover {
+      color: #ffffff;
+      text-shadow: 0 0 6px #00eaff;
     }
 
     .footer-bar {
@@ -223,97 +286,12 @@
       pointer-events: auto;
     }
 
-    .hud-panel {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.96);
-      min-width: 320px;
-      padding: 18px 22px 18px;
-      background: rgba(0, 8, 16, 0.9);
-      border-radius: 8px;
-      border: 1px solid #00eaff77;
-      box-shadow: 0 0 26px #00eaff66;
-      backdrop-filter: blur(14px);
-      color: #e8ffff;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      z-index: 20;
-    }
-
-    .hud-panel.visible {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .hud-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .hud-title {
-      font-size: 14px;
-      letter-spacing: 2px;
-      color: #9dfcff;
-    }
-
-    .hud-close {
-      font-size: 14px;
-      cursor: pointer;
-      color: #ff3355;
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid #ff3355aa;
-    }
-
-    .hud-close:hover {
-      background: #ff335522;
-    }
-
-    .hud-row {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 10px;
-    }
-
-    .hud-label {
-      font-size: 11px;
-      letter-spacing: 1px;
-      color: #7fd8ff;
-      margin-bottom: 4px;
-    }
-
-    .hud-select {
-      background: rgba(0, 15, 30, 0.9);
-      border: 1px solid #00eaff88;
-      border-radius: 4px;
-      color: #e8ffff;
-      padding: 6px 8px;
-      font-size: 13px;
-      outline: none;
-    }
-
-    .hud-select:focus {
-      box-shadow: 0 0 8px #00eaffaa;
-    }
-
-    .hud-note {
-      font-size: 10px;
-      opacity: 0.65;
-      margin-top: 4px;
-      letter-spacing: 1px;
-    }
-
     @media (max-width: 600px) {
       .menu-dot { width: 12px; height: 12px; }
       .menu-dropdown a { font-size: 13px; }
       .footer-links { font-size: 13px; }
       .copyright { font-size: 8px; }
-      .hud-panel { min-width: 260px; padding: 16px 16px 16px; }
+      .menu-dropdown-sub { min-width: 190px; }
     }
   </style>
 </head>
@@ -325,11 +303,38 @@
     <div class="menu">
       <div class="menu-dot" id="menuToggle"></div>
       <div class="menu-dropdown" id="menuDropdown">
-        <a href="#" data-hud="locations">LOCATIONS</a>
-        <a href="#">LAB SYSTEMS</a>
-        <a href="#">DATA NODES</a>
-        <a href="#">SECURITY</a>
-        <a href="#">SETTINGS</a>
+        <a href="#" class="locations-link" id="locationsLink">LOCATIONS</a>
+        <a href="ae1.html">AE1</a>
+        <a href="ae2.html">AE2</a>
+        <a href="ae3.html">AE3</a>
+        <a href="ae4.html">AE4</a>
+      </div>
+
+      <div class="menu-dropdown-sub" id="locationsSubmenu">
+        <div class="submenu-group">
+          <div class="submenu-label">AFRICA</div>
+          <a class="submenu-link" href="morocco.html">MOROCCO</a>
+        </div>
+        <div class="submenu-group">
+          <div class="submenu-label">AMERICA</div>
+          <a class="submenu-link" href="texas.html">TEXAS</a>
+          <a class="submenu-link" href="panama.html">PANAMA</a>
+        </div>
+        <div class="submenu-group">
+          <div class="submenu-label">ASIA</div>
+          <a class="submenu-link" href="uae.html">UAE</a>
+          <a class="submenu-link" href="china.html">CHINA</a>
+          <a class="submenu-link" href="russia.html">RUSSIA</a>
+        </div>
+        <div class="submenu-group">
+          <div class="submenu-label">AUSTRALIA</div>
+          <a class="submenu-link" href="australia.html">AUSTRALIA</a>
+          <a class="submenu-link" href="new-zealand.html">NEW ZEALAND</a>
+        </div>
+        <div class="submenu-group">
+          <div class="submenu-label">EUROPE</div>
+          <a class="submenu-link" href="spain.html">SPAIN</a>
+        </div>
       </div>
     </div>
   </div>
@@ -347,34 +352,12 @@
     </div>
   </div>
 
-  <div class="hud-panel" id="hudLocations">
-    <div class="hud-header">
-      <div class="hud-title">LOCATIONS</div>
-      <div class="hud-close" id="hudClose">X</div>
-    </div>
-    <div class="hud-row">
-      <div class="hud-label">CONTINENT</div>
-      <select class="hud-select" id="continentSelect">
-        <option value="AFRICA">AFRICA</option>
-        <option value="AMERICA">AMERICA</option>
-        <option value="ASIA">ASIA</option>
-        <option value="AUSTRALIA">AUSTRALIA</option>
-        <option value="EUROPE">EUROPE</option>
-      </select>
-    </div>
-    <div class="hud-row">
-      <div class="hud-label">COUNTRY OF OPERATION</div>
-      <select class="hud-select" id="countrySelect"></select>
-      <div class="hud-note">ACTIVE NODES BY SELECTED LOCATION</div>
-    </div>
-  </div>
-
 <script>
 const menuToggle = document.getElementById("menuToggle");
 const menuDropdown = document.getElementById("menuDropdown");
 const menuLinks = menuDropdown.querySelectorAll("a");
-const hudLocations = document.getElementById("hudLocations");
-const hudClose = document.getElementById("hudClose");
+const locationsLink = document.getElementById("locationsLink");
+const locationsSubmenu = document.getElementById("locationsSubmenu");
 
 menuToggle.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -383,16 +366,15 @@ menuToggle.addEventListener("click", (e) => {
   menuToggle.classList.toggle("active", !open);
   if (!open === false) {
     menuToggle.classList.remove("spin", "shake", "double");
+    locationsSubmenu.classList.remove("open");
   }
 });
 
 document.addEventListener("click", (e) => {
-  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target) && !locationsSubmenu.contains(e.target)) {
     menuDropdown.classList.remove("open");
+    locationsSubmenu.classList.remove("open");
     menuToggle.classList.remove("active", "spin", "shake", "double");
-  }
-  if (!hudLocations.contains(e.target) && e.target !== hudLocations && !e.target.dataset?.hud) {
-    hudLocations.classList.remove("visible");
   }
 });
 
@@ -405,23 +387,18 @@ menuLinks.forEach(link => {
       }, 400);
     }
   });
-
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
-    if (menuToggle.classList.contains("active")) {
-      menuToggle.classList.add("shake", "double");
-      setTimeout(() => {
-        menuToggle.classList.remove("shake", "double");
-      }, 230);
-    }
-    if (link.dataset.hud === "locations") {
-      hudLocations.classList.add("visible");
-    }
-  });
 });
 
-hudClose.addEventListener("click", () => {
-  hudLocations.classList.remove("visible");
+locationsLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (menuToggle.classList.contains("active")) {
+    menuToggle.classList.add("shake", "double");
+    setTimeout(() => {
+      menuToggle.classList.remove("shake", "double");
+    }, 230);
+  }
+  const isOpen = locationsSubmenu.classList.contains("open");
+  locationsSubmenu.classList.toggle("open", !isOpen);
 });
 
 const canvas = document.getElementById("canvas");
@@ -630,32 +607,6 @@ function animate() {
 
   requestAnimationFrame(animate);
 }
-
-const continentSelect = document.getElementById("continentSelect");
-const countrySelect = document.getElementById("countrySelect");
-
-const countriesByContinent = {
-  "AFRICA": ["P1"],
-  "AMERICA": ["P1", "P2"],
-  "ASIA": ["P1", "P2", "P3"],
-  "AUSTRALIA": ["P1", "P2"],
-  "EUROPE": ["P1"]
-};
-
-function populateCountries() {
-  const cont = continentSelect.value;
-  const list = countriesByContinent[cont] || [];
-  countrySelect.innerHTML = "";
-  list.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    countrySelect.appendChild(opt);
-  });
-}
-
-continentSelect.addEventListener("change", populateCountries);
-populateCountries();
 
 animate();
 </script>
