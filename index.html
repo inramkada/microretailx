@@ -20,8 +20,6 @@
       color: white;
       font-family: monospace;
       font-size: 14px;
-      z-index: 20;
-      text-align: center;
     }
     .footer-links a {
       color: white;
@@ -31,6 +29,7 @@
     .footer-links a:hover { text-decoration: underline; }
   </style>
 </head>
+
 <body>
   <canvas id="canvas"></canvas>
 
@@ -49,7 +48,6 @@ let height = canvas.height = window.innerHeight;
 
 const mouse = { x: -1000, y: -1000 };
 window.addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-window.addEventListener("mouseleave", () => { mouse.x = -1000; mouse.y = -1000; });
 window.addEventListener("resize", () => {
   width = canvas.width = window.innerWidth;
   height = canvas.height = window.innerHeight;
@@ -60,20 +58,19 @@ function isMobile() {
 }
 
 const MOBILE_MODE = isMobile();
-const NUM_PARTICLES = MOBILE_MODE ? 250 : 900;
-const MAX_CONNECTIONS = MOBILE_MODE ? 3 : 7;
-const SPEED = 0.45;
-const ABSORB_RADIUS = 18;
+const NUM_PARTICLES = MOBILE_MODE ? 350 : 1800;
+const MAX_CONNECTIONS = MOBILE_MODE ? 4 : 10;
+const SPEED = 0.5;
+const xZoneMargin = 42;
+const X_SAT_THRESHOLD = MOBILE_MODE ? 30 : 80;
 
 const particles = [];
 const deathMarkers = [];
-let absorbedCount = 0;
 
-function distanceToXLines(x, y) {
-  const k = height / width;
-  const d1 = Math.abs(k * x - y) / Math.sqrt(k * k + 1);
-  const d2 = Math.abs(-k * x - y + height) / Math.sqrt(k * k + 1);
-  return Math.min(d1, d2);
+function inXZone(x, y) {
+  const d1 = Math.abs(y - (x * height / width));
+  const d2 = Math.abs(y - (height - x * height / width));
+  return (d1 < xZoneMargin || d2 < xZoneMargin);
 }
 
 function randomHex() {
@@ -86,14 +83,18 @@ function createParticle() {
   do {
     x = Math.random() * width;
     y = Math.random() * height;
-  } while (distanceToXLines(x, y) < ABSORB_RADIUS * 2);
+  } while (inXZone(x, y));
+
   return {
     x, y,
+    ox: x, oy: y,
     vx: (Math.random() - 0.5) * SPEED,
     vy: (Math.random() - 0.5) * SPEED,
     radius: 1.5,
+    baseColor: "white",
     color: "white",
-    alive: true,
+    inX: false,
+    prevInX: false,
     hexCode: randomHex()
   };
 }
@@ -102,20 +103,16 @@ for (let i = 0; i < NUM_PARTICLES; i++) particles.push(createParticle());
 
 function drawConnections() {
   for (let i = 0; i < particles.length; i++) {
-    const pi = particles[i];
-    if (!pi.alive) continue;
     let connections = 0;
     for (let j = i + 1; j < particles.length && connections < MAX_CONNECTIONS; j++) {
-      const pj = particles[j];
-      if (!pj.alive) continue;
-      const dx = pi.x - pj.x;
-      const dy = pi.y - pj.y;
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < 100) {
         ctx.strokeStyle = `rgba(0,255,255,${1 - dist / 100})`;
         ctx.beginPath();
-        ctx.moveTo(pi.x, pi.y);
-        ctx.lineTo(pj.x, pj.y);
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
         ctx.stroke();
         connections++;
       }
@@ -131,7 +128,7 @@ function addDeathMarker(x, y) {
   });
 }
 
-function drawDeathMarkers(now, progress) {
+function drawDeathMarkers(now) {
   const LIFETIME = 650;
   for (let i = deathMarkers.length - 1; i >= 0; i--) {
     const m = deathMarkers[i];
@@ -141,13 +138,13 @@ function drawDeathMarkers(now, progress) {
       continue;
     }
     const t = age / LIFETIME;
-    const alpha = (1 - t) * (0.25 + 0.75 * progress);
+    const alpha = 1 - t;
     const rays = 4;
     const len = 2 + (8 * t);
 
     ctx.save();
-    ctx.strokeStyle = `rgba(0,255,255,${alpha})`;
-    ctx.lineWidth = 0.9 + progress * 0.6;
+    ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.4})`;
+    ctx.lineWidth = 0.8;
 
     for (let k = 0; k < rays; k++) {
       const a = m.angle + (Math.PI * 2 * k / rays);
@@ -162,14 +159,25 @@ function drawDeathMarkers(now, progress) {
   }
 }
 
-function drawXLines(now, progress) {
-  const baseAlpha = 0.12 + progress * 0.55;
-  const flicker = progress * 0.18 * (0.5 + 0.5 * Math.sin(now * 0.025));
-  const alpha = Math.min(baseAlpha + flicker, 1);
-  const widthBase = 1.5 + progress * 4;
+function animate() {
+  const now = performance.now();
+  let inXCount = 0;
 
-  ctx.strokeStyle = `rgba(0,255,255,${alpha})`;
-  ctx.lineWidth = widthBase;
+  for (const p of particles) {
+    p.prevInX = p.inX;
+    p.inX = inXZone(p.x, p.y);
+    if (p.inX) inXCount++;
+  }
+
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const saturated = inXCount >= X_SAT_THRESHOLD;
+
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.strokeStyle = "rgba(0,255,255,0.06)";
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(0, 0);
   ctx.lineTo(width, height);
@@ -177,58 +185,50 @@ function drawXLines(now, progress) {
   ctx.lineTo(0, height);
   ctx.stroke();
 
-  if (progress > 0.1) {
-    ctx.strokeStyle = `rgba(0,255,255,${alpha * 0.35})`;
-    ctx.lineWidth = widthBase + 4;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(width, height);
-    ctx.moveTo(width, 0);
-    ctx.lineTo(0, height);
-    ctx.stroke();
-  }
-}
-
-function animate() {
-  const now = performance.now();
-  const progress = Math.min(absorbedCount / NUM_PARTICLES, 1);
-
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, width, height);
-
-  drawXLines(now, progress);
-
-  if (progress < 1) {
-    drawConnections();
-  }
-
-  drawDeathMarkers(now, progress);
+  drawConnections();
+  drawDeathMarkers(now);
 
   for (const p of particles) {
-    if (!p.alive) continue;
-
     const dxm = p.x - mouse.x;
     const dym = p.y - mouse.y;
     const distm = Math.sqrt(dxm * dxm + dym * dym);
-
-    if (distm < 140) {
-      const force = (140 - distm) * 0.018;
-      const fx = (dxm / (distm || 1)) * force;
-      const fy = (dym / (distm || 1)) * force;
-      p.vx += fx;
-      p.vy += fy;
+    if (distm < 100) {
+      const force = (100 - distm) * 0.007;
+      p.vx += (dxm / distm) * force;
+      p.vy += (dym / distm) * force;
     }
 
-    const dX = distanceToXLines(p.x, p.y);
-    if (dX < ABSORB_RADIUS) {
-      p.alive = false;
-      absorbedCount++;
-      addDeathMarker(p.x, p.y);
-      continue;
+    if (p.inX && !p.prevInX) addDeathMarker(p.x, p.y);
+
+    if (p.inX && saturated) {
+      const dx = p.x - centerX;
+      const dy = p.y - centerY;
+      const d = Math.sqrt(dx * dx + dy * dy) || 1;
+      p.vx += (dx / d) * 1.2;
+      p.vy += (dy / d) * 1.2;
     }
 
-    p.vx += (Math.random() - 0.5) * 0.02;
-    p.vy += (Math.random() - 0.5) * 0.02;
+    p.color = p.baseColor;
+
+    if (p.inX) {
+      p.vx += Math.sin(now * 0.1 + p.x) * 0.4;
+      p.vy += Math.cos(now * 0.1 + p.y) * 0.4;
+      p.radius = 3.3 + Math.sin(now * 0.05 + p.x + p.y) * 1.4;
+      if (Math.random() < 0.4) p.hexCode = randomHex();
+      ctx.font = "12px monospace";
+      ctx.fillStyle = "white";
+      ctx.fillText(p.hexCode, p.x + 10, p.y + 6);
+    } else {
+      if (p.prevInX) {
+        p.radius = 1.5;
+        p.hexCode = randomHex();
+      }
+    }
+
+    p.vx += (p.ox - p.x) * 0.002;
+    p.vy += (p.oy - p.y) * 0.002;
+    p.vx += (Math.random() - 0.5) * 0.05;
+    p.vy += (Math.random() - 0.5) * 0.05;
 
     p.x += p.vx;
     p.y += p.vy;
@@ -239,17 +239,10 @@ function animate() {
     if (p.x < 0 || p.x > width) p.vx *= -1;
     if (p.y < 0 || p.y > height) p.vy *= -1;
 
-    if (progress < 1) {
-      if (Math.random() < 0.35) p.hexCode = randomHex();
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.font = "11px monospace";
-      ctx.fillStyle = "white";
-      ctx.fillText(p.hexCode, p.x + 10, p.y + 4);
-    }
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   requestAnimationFrame(animate);
