@@ -1,116 +1,118 @@
+Aquí lo tienes, **completo, limpio, sin comentarios**, totalmente listo para usar:
+
+---
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>microretailX</title>
+
   <style>
-    /* RESET Y ESTRUCTURA FLEXBOX */
     html, body {
       margin: 0;
       padding: 0;
       background: black;
-      height: 100vh; /* Ocupar toda la altura */
-      width: 100vw;
-      overflow: hidden; /* Evitar scroll */
-      display: flex;    /* Activar Flexbox */
-      flex-direction: column; /* Apilar elementos verticalmente */
+      overflow: hidden;
       font-family: monospace;
     }
 
-    /* 1. BARRA SUPERIOR (Para las pestañas) */
-    nav.top-bar {
-      height: 50px; /* Altura de la barra superior */
-      width: 100%;
-      background: black;
-      flex-shrink: 0; /* No encogerse */
-      border-bottom: 1px solid #111; /* Opcional: línea sutil separadora */
-      display: flex;
-      align-items: center;
-      padding-left: 20px;
-      color: #666; 
-      /* Aquí irían tus pestañas HOME, ETC */
-    }
+    canvas { display: block; }
 
-    /* 2. ÁREA CENTRAL (Canvas) */
-    main.canvas-container {
-      flex-grow: 1; /* Ocupa todo el espacio disponible */
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-    }
-    
-    canvas { 
-      display: block; 
-    }
-
-    /* 3. BARRA INFERIOR (Footer) */
-    footer.bottom-bar {
-      height: 40px; /* Altura de la barra inferior */
-      width: 100%;
-      background: black;
-      flex-shrink: 0; /* No encogerse */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 14px;
-      border-top: 1px solid #111; /* Opcional: línea sutil */
+    .ui-layer {
+      position: absolute;
       z-index: 10;
+      color: white;
+      text-shadow: 0 0 4px rgba(0,0,0,0.7);
+      user-select: none;
     }
 
+    .home-link {
+      top: 20px;
+      right: 30px;
+      font-size: 14px;
+      text-decoration: none;
+      letter-spacing: 1px;
+      opacity: 0.85;
+    }
+    .home-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .footer-container {
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .footer-links {
+      font-size: 13px;
+      pointer-events: auto;
+      margin-bottom: 6px;
+    }
     .footer-links a {
       color: white;
-      margin: 0 15px;
       text-decoration: none;
+      margin: 0 10px;
+      opacity: 0.85;
     }
-    .footer-links a:hover { text-decoration: underline; }
+    .footer-links a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .copyright {
+      font-size: 12px;
+      letter-spacing: 1px;
+      opacity: 0.55;
+    }
+
+    @media (max-width: 600px) {
+      .home-link { font-size: 12px; right: 16px; }
+      .footer-links { font-size: 11px; }
+      .copyright { font-size: 10px; }
+    }
   </style>
 </head>
 
 <body>
+  <canvas id="canvas"></canvas>
 
-  <nav class="top-bar">
-    <span>[ HOME TABS PLACEHOLDER ]</span>
-  </nav>
+  <a href="index.html" class="ui-layer home-link">HOME</a>
 
-  <main class="canvas-container" id="canvas-container">
-    <canvas id="canvas"></canvas>
-  </main>
-
-  <footer class="bottom-bar">
+  <div class="ui-layer footer-container">
     <div class="footer-links">
       <a href="terms.html" target="_blank">Terms</a> |
       <a href="privacy.html" target="_blank">Privacy</a> |
       <a href="cookies.html" target="_blank">Cookies</a> |
       <a href="legal.html" target="_blank">Legal</a>
     </div>
-  </footer>
+
+    <div class="copyright">
+      © 2023-2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
+    </div>
+  </div>
 
 <script>
 const canvas = document.getElementById("canvas");
-const container = document.getElementById("canvas-container"); // Referencia al contenedor
 const ctx = canvas.getContext("2d");
-
-// Función para ajustar tamaño al contenedor, no a la ventana
-function resize() {
-  width = canvas.width = container.clientWidth;
-  height = canvas.height = container.clientHeight;
-}
-
-let width, height;
-resize(); // Llamada inicial
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
 
 const mouse = { x: -1000, y: -1000 };
-
-// Ajuste crítico: Calcular la posición del mouse relativa al canvas
-window.addEventListener("mousemove", e => { 
-  const rect = canvas.getBoundingClientRect();
-  mouse.x = e.clientX - rect.left; 
-  mouse.y = e.clientY - rect.top; 
+window.addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+window.addEventListener("resize", () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
 });
-
-window.addEventListener("resize", resize);
 
 function isMobile() {
   return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
@@ -127,20 +129,17 @@ const particles = [];
 const deathMarkers = [];
 
 function inXZone(x, y) {
-  // Las zonas X se calculan en base al ancho/alto actual del canvas
   const d1 = Math.abs(y - (x * height / width));
   const d2 = Math.abs(y - (height - x * height / width));
   return (d1 < xZoneMargin || d2 < xZoneMargin);
 }
 
 function randomHex() {
-  return "#" + Math.floor(Math.random() * 0xFFFFFF)
-    .toString(16).padStart(6, "0");
+  return "#" + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, "0");
 }
 
 function createParticle() {
   let x, y;
-  // Aseguramos que la partícula nazca dentro de las dimensiones actuales
   do {
     x = Math.random() * width;
     y = Math.random() * height;
@@ -237,7 +236,6 @@ function animate() {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, width, height);
 
-  // Dibuja la X de fondo
   ctx.strokeStyle = "rgba(0,255,255,0.06)";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -254,8 +252,6 @@ function animate() {
     const dxm = p.x - mouse.x;
     const dym = p.y - mouse.y;
     const distm = Math.sqrt(dxm * dxm + dym * dym);
-    
-    // Interacción con mouse
     if (distm < 100) {
       const force = (100 - distm) * 0.007;
       p.vx += (dxm / distm) * force;
@@ -289,22 +285,17 @@ function animate() {
       }
     }
 
-    // Retorno al origen (elasticidad)
     p.vx += (p.ox - p.x) * 0.002;
     p.vy += (p.oy - p.y) * 0.002;
-    
-    // Movimiento browniano
     p.vx += (Math.random() - 0.5) * 0.05;
     p.vy += (Math.random() - 0.5) * 0.05;
 
     p.x += p.vx;
     p.y += p.vy;
 
-    // Fricción
     p.vx *= 0.97;
     p.vy *= 0.97;
 
-    // Rebote en bordes
     if (p.x < 0 || p.x > width) p.vx *= -1;
     if (p.y < 0 || p.y > height) p.vy *= -1;
 
@@ -319,5 +310,11 @@ function animate() {
 
 animate();
 </script>
+
 </body>
 </html>
+```
+
+---
+
+Si quieres, te preparo la **versión glassmorphism**, o una **versión con fade-in**, o incluso un **modo “stealth UI”** donde la interfaz aparece solo cuando mueves el ratón.
