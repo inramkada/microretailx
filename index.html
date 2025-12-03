@@ -20,19 +20,17 @@
       position: absolute;
       z-index: 10;
       color: white;
-      text-shadow: 0 0 4px rgba(0,0,0,0.7);
       user-select: none;
     }
 
     .top-bar {
       top: 0;
-      left: 0;
+      right: 0;
       width: 100%;
       background: black;
       display: flex;
       justify-content: flex-end;
-      align-items: center;
-      padding: 10px 24px;
+      padding: 12px 26px;
       box-sizing: border-box;
     }
 
@@ -41,21 +39,29 @@
     }
 
     .menu-dot {
-      width: 14px;
-      height: 14px;
+      width: 15px;
+      height: 15px;
       border-radius: 50%;
       background: white;
       cursor: pointer;
       transition: all 0.25s ease;
       position: relative;
       opacity: 0.85;
-      transform: scale(1) rotate(0deg);
     }
 
-    .menu-dot:hover {
-      background: #00eaff;
-      box-shadow: 0 0 8px #00eaff, 0 0 12px #00eaff;
+    @keyframes redPulse {
+      0% {
+        box-shadow: 0 0 4px #ff3333, 0 0 8px #ff3333;
+      }
+      100% {
+        box-shadow: 0 0 10px #ff3333, 0 0 18px #ff3333;
+      }
+    }
+
+    .menu-dot:hover:not(.active) {
+      background: #ff3333;
       opacity: 1;
+      animation: redPulse 0.9s ease-in-out infinite alternate;
     }
 
     .menu-dot::before, .menu-dot::after {
@@ -64,7 +70,7 @@
       top: 50%;
       left: 50%;
       width: 2px;
-      height: 12px;
+      height: 14px;
       background: #00eaff;
       transform-origin: center;
       opacity: 0;
@@ -79,12 +85,12 @@
       transform: translate(-50%, -50%) rotate(-45deg);
     }
 
-    @keyframes xPulseGlow {
+    @keyframes hudPulse {
       0% {
         box-shadow: 0 0 6px #00eaff, 0 0 10px #00eaff;
       }
       100% {
-        box-shadow: 0 0 14px #00eaff, 0 0 24px #00eaff;
+        box-shadow: 0 0 16px #00eaff, 0 0 30px #00eaff;
       }
     }
 
@@ -92,43 +98,47 @@
       background: transparent;
       box-shadow: none;
       opacity: 1;
-      transform: scale(1.1) rotate(90deg);
     }
 
     .menu-dot.active::before,
     .menu-dot.active::after {
       opacity: 1;
-      animation: xPulseGlow 1.1s ease-in-out infinite alternate;
+      animation: hudPulse 1.2s ease-in-out infinite alternate;
     }
 
     .menu-dropdown {
       position: absolute;
-      top: 150%;
+      top: 160%;
       right: 0;
-      background: black;
-      border: 1px solid #444;
-      min-width: 130px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+      min-width: 180px;
+      border-radius: 6px;
       overflow: hidden;
       max-height: 0;
-      transition: max-height 0.3s ease;
+      opacity: 0;
+      background: rgba(0, 10, 20, 0.55);
+      border: 1px solid #00eaff55;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 14px #00eaff44;
+      transition: max-height 0.34s ease, opacity 0.25s ease;
     }
 
     .menu-dropdown.open {
-      max-height: 200px;
+      max-height: 400px;
+      opacity: 1;
     }
 
     .menu-dropdown a {
       display: block;
-      padding: 6px 14px;
-      font-size: 12px;
+      padding: 10px 14px;
+      font-size: 15px;
+      color: #b8faff;
       text-decoration: none;
-      color: white;
-      white-space: nowrap;
+      letter-spacing: 1px;
     }
 
     .menu-dropdown a:hover {
-      background: #111;
+      background: rgba(0, 40, 60, 0.65);
+      color: #ffffff;
     }
 
     .footer-bar {
@@ -170,7 +180,8 @@
     }
 
     @media (max-width: 600px) {
-      .menu-dot { width: 10px; height: 10px; }
+      .menu-dot { width: 12px; height: 12px; }
+      .menu-dropdown a { font-size: 13px; }
       .footer-links { font-size: 13px; }
       .copyright { font-size: 8px; }
     }
@@ -184,10 +195,11 @@
     <div class="menu">
       <div class="menu-dot" id="menuToggle"></div>
       <div class="menu-dropdown" id="menuDropdown">
-        <a href="#">TEST 1</a>
-        <a href="#">TEST 2</a>
-        <a href="#">TEST 3</a>
-        <a href="#">TEST 4</a>
+        <a href="#">DASHBOARD</a>
+        <a href="#">LAB SYSTEMS</a>
+        <a href="#">DATA NODES</a>
+        <a href="#">SECURITY</a>
+        <a href="#">SETTINGS</a>
       </div>
     </div>
   </div>
@@ -236,7 +248,7 @@ window.addEventListener("resize", () => {
 });
 
 function isMobile() {
-  return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+  return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 }
 
 const MOBILE_MODE = isMobile();
