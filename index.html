@@ -24,56 +24,101 @@
       user-select: none;
     }
 
-    .home-link {
-      top: 20px;
-      right: 30px;
-      font-size: 14px;
-      text-decoration: none;
-      letter-spacing: 1px;
-      opacity: 0.85;
-    }
-    .home-link:hover {
-      opacity: 1;
-      text-decoration: underline;
+    .top-bar {
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: black;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 10px 24px;
+      box-sizing: border-box;
     }
 
-    .footer-container {
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+    .menu {
+      position: relative;
+    }
+
+    .menu-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+
+    .menu-dot:hover {
+      opacity: 1;
+    }
+
+    .menu-dropdown {
+      position: absolute;
+      top: 150%;
+      right: 0;
+      background: black;
+      border: 1px solid #444;
+      min-width: 130px;
+      display: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    }
+
+    .menu-dropdown a {
+      display: block;
+      padding: 6px 14px;
+      font-size: 12px;
+      text-decoration: none;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .menu-dropdown a:hover {
+      background: #111;
+    }
+
+    .footer-bar {
+      bottom: 0;
+      left: 0;
       width: 100%;
+      background: black;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 10px 0 8px;
+      box-sizing: border-box;
       pointer-events: none;
     }
 
     .footer-links {
-      font-size: 13px;
+      font-size: 15px;
       pointer-events: auto;
       margin-bottom: 6px;
     }
+
     .footer-links a {
       color: white;
       text-decoration: none;
-      margin: 0 10px;
+      margin: 0 12px;
       opacity: 0.85;
     }
+
     .footer-links a:hover {
       opacity: 1;
       text-decoration: underline;
     }
 
     .copyright {
-      font-size: 12px;
+      font-size: 9px;
       letter-spacing: 1px;
-      opacity: 0.55;
+      opacity: 0.45;
+      pointer-events: auto;
     }
 
     @media (max-width: 600px) {
-      .home-link { font-size: 12px; right: 16px; }
-      .footer-links { font-size: 11px; }
-      .copyright { font-size: 10px; }
+      .menu-dot { width: 10px; height: 10px; }
+      .footer-links { font-size: 13px; }
+      .copyright { font-size: 8px; }
     }
   </style>
 </head>
@@ -81,9 +126,19 @@
 <body>
   <canvas id="canvas"></canvas>
 
-  <a href="index.html" class="ui-layer home-link">HOME</a>
+  <div class="ui-layer top-bar">
+    <div class="menu">
+      <div class="menu-dot" id="menuToggle"></div>
+      <div class="menu-dropdown" id="menuDropdown">
+        <a href="#">TEST 1</a>
+        <a href="#">TEST 2</a>
+        <a href="#">TEST 3</a>
+        <a href="#">TEST 4</a>
+      </div>
+    </div>
+  </div>
 
-  <div class="ui-layer footer-container">
+  <div class="ui-layer footer-bar">
     <div class="footer-links">
       <a href="terms.html" target="_blank">Terms</a> |
       <a href="privacy.html" target="_blank">Privacy</a> |
@@ -97,6 +152,20 @@
   </div>
 
 <script>
+const menuToggle = document.getElementById("menuToggle");
+const menuDropdown = document.getElementById("menuDropdown");
+
+menuToggle.addEventListener("click", () => {
+  const isOpen = menuDropdown.style.display === "block";
+  menuDropdown.style.display = isOpen ? "none" : "block";
+});
+
+document.addEventListener("click", (e) => {
+  if (!menuDropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+    menuDropdown.style.display = "none";
+  }
+});
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 let width = canvas.width = window.innerWidth;
