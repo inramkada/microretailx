@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <style> body { margin: 0; background-color: #000; overflow: hidden; } </style>
+  <style> body { margin: 0; background-color: #111; overflow: hidden; } </style>
   <script src="//unpkg.com/globe.gl"></script>
 </head>
 <body>
-  <div id="globo-realista"></div>
+  <div id="globo-minimalista"></div>
 
   <script>
-    // 1. TUS DATOS (Mismas ubicaciones)
+    // 1. TUS DATOS
     const misSedes = [
       { name: "Texas, USA", lat: 31.9686, lng: -99.9018 },
       { name: "Panamá", lat: 8.5380, lng: -80.7821 },
@@ -26,42 +26,44 @@
       { name: "Chile", lat: -35.6751, lng: -71.5430 }
     ];
 
-    // 2. Configuración Realista
+    // 2. Configuración Minimalista
     const mundo = Globe()
-      (document.getElementById('globo-realista'))
+      (document.getElementById('globo-minimalista'))
       
-      // -- A. Texturas Satelitales (Estilo NASA) --
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png') // Añade relieve/montañas
-      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png') // Fondo de estrellas real
+      // -- A. Apariencia "Escultura Gris" --
+      // Usamos la imagen de topología como textura base. Es gris y blanca.
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png') // Mantenemos el relieve
+      .backgroundColor('#111111') // Fondo gris muy oscuro (Casi negro, pero más suave)
       
-      // -- B. Atmósfera Natural --
-      .atmosphereColor('lightskyblue') 
-      .atmosphereAltitude(0.15)
+      // -- B. Atmósfera Sutil --
+      .atmosphereColor('#ffffff') // Atmósfera blanca
+      .atmosphereAltitude(0.1)    // Muy bajita, solo un borde fino
       
-      // -- C. Marcadores (Estilo "Chincheta" o Baliza Roja) --
+      // -- C. Puntos de Color --
+      // Al ser el mapa gris, usamos un color vibrante para las sedes.
       .pointsData(misSedes)
       .pointLat('lat')
       .pointLng('lng')
-      .pointColor(() => 'red') // Rojo puro para contrastar con el azul del mar
-      .pointAltitude(0.02)     // Ligeramente elevados
-      .pointRadius(0.5)        // Puntos sólidos y visibles
+      .pointColor(() => '#00C2FF') // Azul Cyan eléctrico (o puedes poner 'orange', 'red')
+      .pointAltitude(0.01)
+      .pointRadius(0.6)
       
-      // -- D. Etiquetas Limpias --
+      // -- D. Interactividad --
       .pointLabel(d => `
-        <div style="background: white; color: black; padding: 4px 8px; border-radius: 2px; font-family: Arial, sans-serif; font-size: 12px; box-shadow: 0px 2px 5px rgba(0,0,0,0.5);">
-          <b>${d.name}</b>
+        <div style="color: #333; background: #fff; padding: 4px 8px; border-radius: 4px; font-family: sans-serif; font-weight: bold;">
+          ${d.name}
         </div>
       `);
 
-    // 3. Configuración de la "Cámara"
+    // 3. Ajustes de Luz y Movimiento
     mundo.controls().autoRotate = true;
-    mundo.controls().autoRotateSpeed = 0.6; // Rotación majestuosa y lenta
-    
-    // Iluminación solar (hace que se vea 3D real con sombras)
-    // Esto añade una luz direccional que simula el sol
-    const globeMaterial = mundo.globeMaterial();
-    globeMaterial.shininess = 0.8; // Reflejo en los océanos
+    mundo.controls().autoRotateSpeed = 0.5;
+
+    // Reducir el brillo del material para que parezca mate (piedra/papel)
+    const materialGlobo = mundo.globeMaterial();
+    materialGlobo.shininess = 0.1; // Poco brillo
+    materialGlobo.color = new THREE.Color(0xcccccc); // Oscurecemos un poco la textura blanca original
   </script>
 </body>
 </html>
