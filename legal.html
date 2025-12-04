@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <style> body { margin: 0; background-color: #111; overflow: hidden; } </style>
+  <style> body { margin: 0; background-color: #000; overflow: hidden; } </style>
   <script src="//unpkg.com/globe.gl"></script>
 </head>
 <body>
-  <div id="globo-minimalista"></div>
+  <div id="globo-surveillance"></div>
 
   <script>
-    // 1. TUS DATOS
+    // 1. TUS DATOS (Tus ubicaciones exactas)
     const misSedes = [
       { name: "Texas, USA", lat: 31.9686, lng: -99.9018 },
       { name: "Panamá", lat: 8.5380, lng: -80.7821 },
@@ -26,44 +26,55 @@
       { name: "Chile", lat: -35.6751, lng: -71.5430 }
     ];
 
-    // 2. Configuración Minimalista
+    // 2. Configuración Fidedigna a Surveillance Watch
     const mundo = Globe()
-      (document.getElementById('globo-minimalista'))
+      (document.getElementById('globo-surveillance'))
       
-      // -- A. Apariencia "Escultura Gris" --
-      // Usamos la imagen de topología como textura base. Es gris y blanca.
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png') // Mantenemos el relieve
-      .backgroundColor('#111111') // Fondo gris muy oscuro (Casi negro, pero más suave)
+      // -- A. LA TEXTURA CLAVE: "Earth at Night" --
+      // Esta es la imagen satelital real de las luces de la tierra.
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+      .backgroundColor('#000000') // Negro absoluto
       
-      // -- B. Atmósfera Sutil --
-      .atmosphereColor('#ffffff') // Atmósfera blanca
-      .atmosphereAltitude(0.1)    // Muy bajita, solo un borde fino
+      // -- B. Atmósfera estilo "Monitor" --
+      // Un brillo muy sutil azulado, apenas visible, para dar volumen.
+      .atmosphereColor('#4aaee3') 
+      .atmosphereAltitude(0.15)
       
-      // -- C. Puntos de Color --
-      // Al ser el mapa gris, usamos un color vibrante para las sedes.
+      // -- C. Puntos de Datos (Tus operaciones) --
+      // Usamos un verde brillante (#21ff00) o Cian que contrasta con las luces amarillas del mapa.
       .pointsData(misSedes)
       .pointLat('lat')
       .pointLng('lng')
-      .pointColor(() => '#00C2FF') // Azul Cyan eléctrico (o puedes poner 'orange', 'red')
-      .pointAltitude(0.01)
-      .pointRadius(0.6)
+      .pointColor(() => '#21ff00') // Verde neón estilo "Radar activo"
+      .pointAltitude(0.005)        // Muy pegados a la tierra
+      .pointRadius(0.5)            // Puntos pequeños y precisos
       
-      // -- D. Interactividad --
+      // -- D. Añadir Anillos de "Ping" (Opcional pero recomendado para este estilo) --
+      // Esto hace que el mapa se sienta "en vivo".
+      .ringsData(misSedes)
+      .ringColor(() => (t) => `rgba(33, 255, 0, ${1-t})`) // Mismo verde desvaneciéndose
+      .ringMaxRadius(3)
+      .ringPropagationSpeed(2)
+      .ringRepeatPeriod(2000) // Un pulso lento cada 2 segundos
+
+      // -- E. Etiquetas estilo UI --
       .pointLabel(d => `
-        <div style="color: #333; background: #fff; padding: 4px 8px; border-radius: 4px; font-family: sans-serif; font-weight: bold;">
+        <div style="
+          background: rgba(0,0,0,0.9); 
+          color: #21ff00; 
+          border: 1px solid #21ff00;
+          padding: 5px 10px; 
+          font-family: 'Courier New', monospace; 
+          font-size: 12px;
+          text-transform: uppercase;
+        ">
           ${d.name}
         </div>
       `);
 
-    // 3. Ajustes de Luz y Movimiento
+    // 3. Control de Cámara
     mundo.controls().autoRotate = true;
     mundo.controls().autoRotateSpeed = 0.5;
-
-    // Reducir el brillo del material para que parezca mate (piedra/papel)
-    const materialGlobo = mundo.globeMaterial();
-    materialGlobo.shininess = 0.1; // Poco brillo
-    materialGlobo.color = new THREE.Color(0xcccccc); // Oscurecemos un poco la textura blanca original
   </script>
 </body>
 </html>
