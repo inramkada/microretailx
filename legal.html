@@ -1,95 +1,184 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <style> 
-    body { margin: 0; padding: 0; overflow: hidden; background: #000; } 
-    #titulo {
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surveillance Map</title>
+  <style>
+    /* 1. ESTILO GENERAL "DARK MODE" */
+    body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Courier New', Courier, monospace; }
+
+    /* 2. EL MENÚ DE CONTROL (UI) */
+    #control-panel {
       position: absolute;
       top: 20px;
-      left: 20px;
-      color: white;
-      font-family: sans-serif;
-      z-index: 100;
-      background: rgba(0,0,0,0.5);
-      padding: 15px;
+      right: 20px;
+      background: rgba(0, 20, 40, 0.85); /* Azul muy oscuro semitransparente */
+      border: 1px solid #00ffff; /* Borde neón cian */
+      padding: 20px;
       border-radius: 8px;
-      pointer-events: none; /* Para que no interfiera con el click */
+      z-index: 100;
+      width: 250px;
+      color: #00ffff;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
     }
-    h1 { margin: 0; font-size: 24px; }
-    p { margin: 5px 0 0; color: #aaa; }
+
+    #control-panel h3 {
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #00ffff;
+      padding-bottom: 5px;
+    }
+
+    label {
+      font-size: 12px;
+      color: #aaa;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    /* Estilo del Select */
+    select {
+      width: 100%;
+      padding: 10px;
+      background: #000;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 4px;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+    }
+    
+    select:focus {
+      border-color: #00ffff;
+    }
+
+    /* Información de estado abajo */
+    #status-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 100;
+    }
   </style>
 
   <script src="//unpkg.com/globe.gl"></script>
 </head>
 <body>
 
-  <div id="titulo">
-    <h1>Red de Operaciones Global</h1>
-    <p>Hub Principal: Texas (Conectando USA)</p>
+  <div id="control-panel">
+    <h3>Operaciones Globales</h3>
+    <label>SELECCIONAR HUB ACTIVO:</label>
+    <select id="hubSelector" onchange="cambiarHub()">
+      <option value="texas">🇺🇸 TEXAS (Norteamérica)</option>
+      <option value="rotterdam">🇪🇺 ROTTERDAM (Europa)</option>
+    </select>
+    
+    <div style="margin-top: 15px; font-size: 11px; color: #aaa;">
+      <span style="color: #ff3333">●</span> Origen (Hub)<br>
+      <span style="color: #33ff33">●</span> Destino (Cliente)
+    </div>
+  </div>
+
+  <div id="status-bar">
+    > SISTEMA CONECTADO<br>
+    > VISUALIZACIÓN DE TRÁFICO DE PROTEÍNA
   </div>
 
   <div id="globeViz"></div>
 
   <script>
-    // 1. DATOS: Definimos las coordenadas (Latitud, Longitud)
-    // El Hub es Texas (usamos coordenadas centrales aprox)
-    const HUB_TEXAS = { name: "Texas Hub", lat: 31.96, lng: -99.90 };
+    // --- 1. BASE DE DATOS DE TUS OPERACIONES ---
+    // Aquí defines qué Hub conecta con qué ciudades
+    
+    const OPERACIONES = {
+      'texas': {
+        center: { lat: 32.77, lng: -96.79, name: "Dallas HQ" }, // Hub
+        spokes: [
+          { lat: 34.05, lng: -118.24, name: "Los Angeles" },
+          { lat: 40.71, lng: -74.00,  name: "New York" },
+          { lat: 25.76, lng: -80.19,  name: "Miami" },
+          { lat: 41.87, lng: -87.62,  name: "Chicago" },
+          { lat: 39.73, lng: -104.99, name: "Denver" },
+          { lat: 47.60, lng: -122.33, name: "Seattle" }
+        ],
+        view: { lat: 38, lng: -98, altitude: 1.7 } // Dónde mira la cámara
+      },
+      'rotterdam': { // He añadido un ejemplo europeo para que veas el cambio
+        center: { lat: 51.92, lng: 4.47, name: "Rotterdam Port" },
+        spokes: [
+          { lat: 48.85, lng: 2.35,   name: "Paris" },
+          { lat: 40.41, lng: -3.70,  name: "Madrid" },
+          { lat: 52.52, lng: 13.40,  name: "Berlin" },
+          { lat: 41.90, lng: 12.49,  name: "Roma" }
+        ],
+        view: { lat: 48, lng: 10, altitude: 1.5 }
+      }
+    };
 
-    // Los destinos (Spokes)
-    const DESTINOS = [
-      { name: "Los Angeles", lat: 34.05, lng: -118.24 },
-      { name: "Chicago",     lat: 41.87, lng: -87.62 },
-      { name: "Nueva York",  lat: 40.71, lng: -74.00 }
-    ];
-
-    // 2. PREPARAR DATOS PARA LAS LÍNEAS (ARCOS)
-    // Creamos una línea desde Texas hacia cada destino
-    const rutas = DESTINOS.map(destino => ({
-      startLat: HUB_TEXAS.lat,
-      startLng: HUB_TEXAS.lng,
-      endLat: destino.lat,
-      endLng: destino.lng,
-      color: ['#ff0000', '#ffffff'] // Gradiente rojo a blanco
-    }));
-
-    // 3. PREPARAR ETIQUETAS (Puntos en el mapa)
-    // Juntamos el Hub y los destinos en una sola lista para ponerles nombre
-    const etiquetas = [HUB_TEXAS, ...DESTINOS];
-
-    // 4. INICIALIZAR EL GLOBO
+    // --- 2. INICIALIZAR GLOBO ---
+    const elem = document.getElementById('globeViz');
     const world = Globe()
-      (document.getElementById('globeViz'))
-      
-      // Imagen de la tierra (Estilo Blue Marble de la NASA)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      // Imagen de fondo (Espacio con estrellas)
+      (elem)
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-      
-      // Configuración de los Arcos (Las líneas de ruta)
-      .arcsData(rutas)
-      .arcColor('color')
-      .arcDashLength(0.4)       // Longitud de los "guiones" animados
-      .arcDashGap(4)            // Espacio entre guiones
-      .arcDashAnimateTime(1000) // Velocidad de la animación (viaje)
-      .arcStroke(0.5)           // Grosor de la línea
+      .atmosphereColor('#00aaff')
+      .atmosphereAltitude(0.15)
+      // Configuración de PUNTOS
+      .pointLat(d => d.lat)
+      .pointLng(d => d.lng)
+      .pointColor(d => d.type === 'hub' ? '#ff3333' : '#33ff33') // Rojo si es Hub, Verde si no
+      .pointAltitude(0.02)
+      .pointRadius(0.5)
+      .pointResolution(16)
+      // Configuración de ARCOS (Líneas)
+      .arcColor(() => ['#ff3333', '#33ff33']) // Gradiente de Rojo a Verde
+      .arcDashLength(0.9)
+      .arcDashGap(2)
+      .arcDashAnimateTime(2000)
+      .arcStroke(0.6);
 
-      // Configuración de las Etiquetas (Nombres de ciudades)
-      .labelsData(etiquetas)
-      .labelLat(d => d.lat)
-      .labelLng(d => d.lng)
-      .labelText(d => d.name)
-      .labelSize(1.5)
-      .labelDotRadius(0.8)
-      .labelColor(() => 'white')
-      .labelResolution(2);
-
-    // 5. AUTO-ROTACIÓN Y ZOOM
-    // Enfocamos la cámara en USA al iniciar
-    world.pointOfView({ lat: 38, lng: -98, altitude: 1.8 });
-
-    // Hacemos que la tierra gire suavemente
+    // Activar rotación
     world.controls().autoRotate = true;
     world.controls().autoRotateSpeed = 0.5;
+
+    // --- 3. FUNCIÓN DE ACTUALIZACIÓN ---
+    function cambiarHub() {
+      // Obtener el valor seleccionado del menú
+      const seleccion = document.getElementById('hubSelector').value;
+      const datos = OPERACIONES[seleccion];
+
+      // Preparar los puntos (El Hub + Los Destinos)
+      // Al Hub le ponemos type: 'hub' para que se pinte rojo
+      const hubPoint = { ...datos.center, type: 'hub' };
+      const spokePoints = datos.spokes.map(s => ({ ...s, type: 'spoke' }));
+      const allPoints = [hubPoint, ...spokePoints];
+
+      // Preparar las rutas (Desde Hub -> Destinos)
+      const misRutas = datos.spokes.map(destino => ({
+        startLat: datos.center.lat,
+        startLng: datos.center.lng,
+        endLat: destino.lat,
+        endLng: destino.lng
+      }));
+
+      // Actualizar el mapa
+      world.pointsData(allPoints);
+      world.arcsData(misRutas);
+
+      // Mover la cámara suavemente a la nueva región
+      world.pointOfView(datos.view, 2000); // Tarda 2000ms en moverse
+    }
+
+    // --- 4. CARGAR TEXAS AL INICIO ---
+    // Llamamos a la función manualmente para que empiece cargado
+    cambiarHub(); 
 
   </script>
 </body>
