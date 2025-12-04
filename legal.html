@@ -3,179 +3,238 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Global Operations Network</title>
+  <title>Global Network</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/globe.gl"></script>
+  <script src="https://unpkg.com/three"></script>
 
   <style>
-    /* Fondo espacial oscuro, pero limpio */
-    body { margin: 0; padding: 0; overflow: hidden; background: #000011; font-family: 'Inter', sans-serif; }
+    body { margin: 0; padding: 0; overflow: hidden; background: #000510; font-family: 'Inter', sans-serif; }
 
-    /* PANEL DE CONTROL */
+    /* PANEL DE CONTROL FLOTANTE */
     #control-panel {
       position: absolute;
       top: 24px;
       right: 24px;
-      background: rgba(255, 255, 255, 0.1); /* Efecto cristal claro */
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(10, 25, 40, 0.85); /* Azul marino muy oscuro */
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 200, 255, 0.2);
       border-radius: 8px;
       padding: 24px;
       z-index: 100;
-      width: 250px;
+      width: 280px;
       color: white;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     }
 
     h3 {
       margin: 0 0 15px 0;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: #ffffff;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      letter-spacing: 2px;
+      color: #55aaff;
+      border-bottom: 1px solid rgba(85, 170, 255, 0.3);
       padding-bottom: 8px;
     }
 
     select {
       width: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(0, 10, 20, 0.6);
+      color: #e0f0ff;
+      border: 1px solid rgba(85, 170, 255, 0.3);
       padding: 10px;
       border-radius: 4px;
       font-family: inherit;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       outline: none;
+      transition: all 0.3s;
     }
-    
-    select:hover { border-color: white; }
+    select:hover { border-color: #55aaff; background: rgba(0, 20, 40, 0.8); }
 
-    .legend { margin-top: 15px; font-size: 11px; color: #ccc; }
-    .dot { display:inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right:5px; }
+    .legend { margin-top: 20px; font-size: 11px; color: #8899aa; display: flex; flex-direction: column; gap: 8px; }
+    .legend-row { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; }
+    
+    /* Indicador de estado */
+    #status {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 10px;
+      letter-spacing: 1px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
 
   <div id="control-panel">
-    <h3>Operations Center</h3>
+    <h3>Strategic Command</h3>
     <select id="viewSelector" onchange="enfocarRegion()">
-      <option value="all">🌍 Vista Global (Rotación)</option>
-      <option value="texas">🇺🇸 Norteamérica (Texas)</option>
-      <option value="europe">🇪🇺 Europa & África (Rotterdam)</option>
-      <option value="uae">🇦🇪 Medio Oriente (Dubai)</option>
-      <option value="asia">🇨🇳 Asia Pacífico (Shanghai)</option>
+      <option value="all">GLOBAL VIEW (Orbit)</option>
+      <option value="texas">🇺🇸 NORTH AMERICA (Texas HUB)</option>
+      <option value="europe">🇪🇺 EMEA (Rotterdam HUB)</option>
+      <option value="uae">🇦🇪 MENA (Dubai HUB)</option>
+      <option value="asia">🇨🇳 APAC (Shanghai HUB)</option>
     </select>
 
     <div class="legend">
-      <div style="margin-bottom: 5px;">
-        <span class="dot" style="background-color: #e63946;"></span> Hub Origen
+      <div class="legend-row">
+        <span class="dot" style="background-color: #ff3366; box-shadow: 0 0 8px #ff3366;"></span>
+        <span>Main Hub (Distribution Center)</span>
       </div>
-      <div>
-        <span class="dot" style="background-color: #00ff00;"></span> Destino
+      <div class="legend-row">
+        <span class="dot" style="background-color: #00ffcc; box-shadow: 0 0 8px #00ffcc;"></span>
+        <span>Strategic Market</span>
       </div>
     </div>
   </div>
 
+  <div id="status">LIVE SATELLITE FEED // NIGHT MODE ACTIVE</div>
+
   <div id="globeViz"></div>
 
   <script>
-    // --- 1. DEFINICIÓN DE PUNTOS Y RUTAS ---
+    // --- 1. CONFIGURACIÓN MASIVA DE DATOS ---
+    
     const HUBS = {
-      texas:   { lat: 32.77, lng: -96.79, name: "Texas Hub" },
-      europe:  { lat: 51.92, lng: 4.47,   name: "Rotterdam Hub" },
-      uae:     { lat: 25.20, lng: 55.27,  name: "Dubai Hub" },
-      asia:    { lat: 31.23, lng: 121.47, name: "Shanghai Hub" }
+      texas:   { lat: 32.77, lng: -96.79, name: "HUB: Texas" },
+      europe:  { lat: 51.92, lng: 4.47,   name: "HUB: Rotterdam" },
+      uae:     { lat: 25.20, lng: 55.27,  name: "HUB: Dubai" },
+      asia:    { lat: 31.23, lng: 121.47, name: "HUB: Shanghai" }
     };
 
     const NETWORK = [
-      // USA
+      // === AMÉRICA DEL NORTE (Desde Texas) ===
+      // Costa Oeste (Fitness & Tech)
       { hub: HUBS.texas, to: { lat: 34.05, lng: -118.24, name: "Los Angeles" } },
+      { hub: HUBS.texas, to: { lat: 37.77, lng: -122.41, name: "San Francisco" } },
+      { hub: HUBS.texas, to: { lat: 47.60, lng: -122.33, name: "Seattle" } },
+      // Costa Este (Finanzas & Densidad)
       { hub: HUBS.texas, to: { lat: 40.71, lng: -74.00,  name: "New York" } },
+      { hub: HUBS.texas, to: { lat: 42.36, lng: -71.05,  name: "Boston" } },
+      { hub: HUBS.texas, to: { lat: 25.76, lng: -80.19,  name: "Miami" } },
+      // Centro / Norte
       { hub: HUBS.texas, to: { lat: 41.87, lng: -87.62,  name: "Chicago" } },
+      { hub: HUBS.texas, to: { lat: 43.65, lng: -79.38,  name: "Toronto (CA)" } },
+      { hub: HUBS.texas, to: { lat: 19.43, lng: -99.13,  name: "Mexico City" } },
 
-      // EUROPA (Sin España) & AFRICA
-      { hub: HUBS.europe, to: { lat: 38.72, lng: -9.13,  name: "Lisboa" } },   // Portugal
-      { hub: HUBS.europe, to: { lat: 42.50, lng: 1.52,   name: "Andorra" } },  // Andorra
-      { hub: HUBS.europe, to: { lat: 33.57, lng: -7.58,  name: "Casablanca" } }, // Marruecos
+      // === EUROPA & ÁFRICA (Desde Rotterdam) ===
+      // Península Ibérica (Excluyendo España central, solo periféricos clave)
+      { hub: HUBS.europe, to: { lat: 38.72, lng: -9.13,  name: "Lisboa" } },
+      { hub: HUBS.europe, to: { lat: 42.50, lng: 1.52,   name: "Andorra" } },
+      // Europa Central/Norte (Poder adquisitivo alto)
+      { hub: HUBS.europe, to: { lat: 48.85, lng: 2.35,   name: "Paris" } },
+      { hub: HUBS.europe, to: { lat: 52.52, lng: 13.40,  name: "Berlin" } },
+      { hub: HUBS.europe, to: { lat: 55.67, lng: 12.56,  name: "Copenhagen" } },
+      { hub: HUBS.europe, to: { lat: 47.37, lng: 8.54,   name: "Zurich" } },
+      { hub: HUBS.europe, to: { lat: 51.50, lng: -0.12,  name: "London" } },
+      { hub: HUBS.europe, to: { lat: 41.90, lng: 12.49,  name: "Rome" } },
+      // África (Norte estratégico)
+      { hub: HUBS.europe, to: { lat: 33.57, lng: -7.58,  name: "Casablanca" } },
+      { hub: HUBS.europe, to: { lat: 30.04, lng: 31.23,  name: "Cairo" } },
 
-      // EMIRATOS (Local)
+      // === MEDIO ORIENTE (Desde Dubai) ===
+      // Emiratos Locales
       { hub: HUBS.uae, to: { lat: 24.45, lng: 54.37, name: "Abu Dhabi" } },
       { hub: HUBS.uae, to: { lat: 25.35, lng: 55.40, name: "Sharjah" } },
-      { hub: HUBS.uae, to: { lat: 25.40, lng: 55.51, name: "Ajman" } },
+      { hub: HUBS.uae, to: { lat: 25.56, lng: 55.93, name: "Ras Al Khaimah" } },
+      // Países del Golfo (GCC)
+      { hub: HUBS.uae, to: { lat: 24.71, lng: 46.67, name: "Riyadh (KSA)" } },
+      { hub: HUBS.uae, to: { lat: 21.48, lng: 39.19, name: "Jeddah (KSA)" } },
+      { hub: HUBS.uae, to: { lat: 25.28, lng: 51.53, name: "Doha (Qatar)" } },
+      { hub: HUBS.uae, to: { lat: 29.37, lng: 47.97, name: "Kuwait City" } },
 
-      // ASIA
+      // === ASIA PACÍFICO (Desde Shanghai) ===
+      // China & Hubs Financieros
       { hub: HUBS.asia, to: { lat: 39.90, lng: 116.40, name: "Beijing" } },
+      { hub: HUBS.asia, to: { lat: 22.31, lng: 114.16, name: "Hong Kong" } },
+      { hub: HUBS.asia, to: { lat: 35.68, lng: 139.69, name: "Tokyo" } },
+      { hub: HUBS.asia, to: { lat: 37.56, lng: 126.97, name: "Seoul" } },
+      { hub: HUBS.asia, to: { lat: 1.35,  lng: 103.81, name: "Singapore" } },
+      // Rusia & India
       { hub: HUBS.asia, to: { lat: 55.75, lng: 37.61,  name: "Moscow" } },
-      { hub: HUBS.asia, to: { lat: 22.31, lng: 114.16, name: "Hong Kong" } }
+      { hub: HUBS.asia, to: { lat: 19.07, lng: 72.87,  name: "Mumbai" } },
+      { hub: HUBS.asia, to: { lat: -33.86, lng: 151.20, name: "Sydney" } }
     ];
 
-    // Preparar datos
+    // --- 2. PREPARACIÓN DE GEOMETRÍA ---
     const allArcs = NETWORK.map(r => ({
       startLat: r.hub.lat, startLng: r.hub.lng,
-      endLat: r.to.lat, endLng: r.to.lng
+      endLat: r.to.lat, endLng: r.to.lng,
+      name: `${r.hub.name} -> ${r.to.name}`
     }));
 
     const points = [];
+    const added = new Set();
     NETWORK.forEach(r => {
-      points.push({ ...r.hub, type: 'hub' });
-      points.push({ ...r.to, type: 'spoke' });
+      const hKey = r.hub.name;
+      const tKey = r.to.name;
+      if(!added.has(hKey)) { points.push({...r.hub, type: 'hub'}); added.add(hKey); }
+      if(!added.has(tKey)) { points.push({...r.to, type: 'spoke'}); added.add(tKey); }
     });
 
-    // --- 2. GLOBO (SATÉLITE) ---
+    // --- 3. GLOBO ESPECTACULAR (SATÉLITE + LUCES) ---
     const world = Globe()
       (document.getElementById('globeViz'))
       
-      // ==> CAMBIO: Capa Blue Marble (Visible y clara)
-      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      // TEXTURA: Usamos "Earth at Night" de alta resolución.
+      // Esta textura es la mejor porque muestra el relieve de la tierra oscura con las luces de ciudad ya integradas.
+      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
       .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
       
-      // ==> CAMBIO: Atmósfera limpia (blanco azulado muy sutil)
-      .atmosphereColor('lightskyblue')
+      // ATMÓSFERA: Azul eléctrico brillante para resaltar el borde
+      .atmosphereColor('#2080ff') 
       .atmosphereAltitude(0.15)
 
-      // Puntos
+      // PUNTOS (Disimulados pero brillantes)
       .pointsData(points)
-      .pointColor(d => d.type === 'hub' ? '#e63946' : '#00ff00') // Rojo mate y verde brillante
-      .pointAltitude(0.01)
-      .pointRadius(0.3) // Sutiles
-      .pointResolution(10)
-      .pointLabel('name') // Mostrar nombre al pasar ratón
+      .pointColor(d => d.type === 'hub' ? '#ff3366' : '#00ffcc') // Rosa neón / Cian neón
+      .pointAltitude(0.005) // Pegados al suelo
+      .pointRadius(0.25)    // Puntos finos
+      .pointResolution(8)
+      .pointLabel('name')
 
-      // Líneas
+      // LÍNEAS DE RUTA (Flujo de datos)
       .arcsData(allArcs)
-      .arcColor(() => ['#e63946', '#00ff00']) // De Rojo a Verde
+      .arcColor(() => ['#ff3366', '#00ffcc']) // Gradiente Hub -> Spoke
       .arcDashLength(0.4)
-      .arcDashGap(1)
-      .arcDashAnimateTime(3000)
-      .arcStroke(0.5);
+      .arcDashGap(2)            // Espaciado elegante
+      .arcDashAnimateTime(3000) // Velocidad media
+      .arcStroke(0.3);          // Línea fina
 
-    // Rotación inicial activada
+    // Iluminación adicional para darle volumen (Sol simulado)
+    // Esto hace que una parte de la tierra tenga sombra y volumen, aumentando el realismo
+    const globeMaterial = world.globeMaterial();
+    globeMaterial.shininess = 0.5;
+    
+    // Configuración de Luz ambiental
+    const ambientLight = new THREE.AmbientLight(0xbbbbbb, 1.2); // Luz suave general
+    world.scene().add(ambientLight);
+
+    // Rotación inicial
     world.controls().autoRotate = true;
-    world.controls().autoRotateSpeed = 0.6;
+    world.controls().autoRotateSpeed = 0.5;
 
-    // --- 3. LÓGICA DE DETENCIÓN ---
+    // --- 4. CONTROL DE CÁMARA INTELIGENTE ---
     function enfocarRegion() {
       const region = document.getElementById('viewSelector').value;
       
-      // Si elegimos "Vista Global", activamos rotación
       if (region === 'all') {
         world.controls().autoRotate = true;
         world.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 2000);
-      } 
-      // Si elegimos una región específica, PARAMOS la rotación
-      else {
-        world.controls().autoRotate = false; // STOP
+      } else {
+        world.controls().autoRotate = false; // Detener rotación
 
         const coords = {
-          'texas':  { lat: 35, lng: -95, altitude: 1.5 },
-          'europe': { lat: 42, lng: 0, altitude: 1.2 }, // Centrado para ver Andorra/PT/Marruecos
-          'uae':    { lat: 25, lng: 55, altitude: 0.6 }, // Zoom muy cerca
-          'asia':   { lat: 35, lng: 110, altitude: 1.7 }
+          'texas':  { lat: 38, lng: -95, altitude: 1.6 },
+          'europe': { lat: 46, lng: 10, altitude: 1.4 },
+          'uae':    { lat: 26, lng: 55, altitude: 0.9 }, // Zoom medio para ver Golfo
+          'asia':   { lat: 30, lng: 115, altitude: 1.8 }
         };
         
         world.pointOfView(coords[region], 1500);
