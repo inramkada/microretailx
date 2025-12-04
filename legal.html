@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <style> body { margin: 0; background-color: #000; overflow: hidden; } </style>
+  <script src="//unpkg.com/globe.gl"></script>
+</head>
+<body>
+  <div id="globo-realista"></div>
+
+  <script>
+    // 1. TUS DATOS (Mismas ubicaciones)
+    const misSedes = [
+      { name: "Texas, USA", lat: 31.9686, lng: -99.9018 },
+      { name: "Panamá", lat: 8.5380, lng: -80.7821 },
+      { name: "Abu Dhabi", lat: 24.4539, lng: 54.3773 },
+      { name: "Marruecos", lat: 31.7917, lng: -7.0926 },
+      { name: "Nigeria", lat: 9.0820, lng: 8.6753 },
+      { name: "Reino Unido", lat: 55.3781, lng: -3.4360 },
+      { name: "Noruega", lat: 60.4720, lng: 8.4689 },
+      { name: "Suecia", lat: 60.1282, lng: 18.6435 },
+      { name: "Holanda", lat: 52.1326, lng: 5.2913 },
+      { name: "Alemania", lat: 51.1657, lng: 10.4515 },
+      { name: "Bruselas", lat: 50.8503, lng: 4.3517 },
+      { name: "Nueva Zelanda", lat: -40.9006, lng: 174.8860 },
+      { name: "Perth, Aus", lat: -31.9505, lng: 115.8605 },
+      { name: "Chile", lat: -35.6751, lng: -71.5430 }
+    ];
+
+    // 2. Configuración Realista
+    const mundo = Globe()
+      (document.getElementById('globo-realista'))
+      
+      // -- A. Texturas Satelitales (Estilo NASA) --
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png') // Añade relieve/montañas
+      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png') // Fondo de estrellas real
+      
+      // -- B. Atmósfera Natural --
+      .atmosphereColor('lightskyblue') 
+      .atmosphereAltitude(0.15)
+      
+      // -- C. Marcadores (Estilo "Chincheta" o Baliza Roja) --
+      .pointsData(misSedes)
+      .pointLat('lat')
+      .pointLng('lng')
+      .pointColor(() => 'red') // Rojo puro para contrastar con el azul del mar
+      .pointAltitude(0.02)     // Ligeramente elevados
+      .pointRadius(0.5)        // Puntos sólidos y visibles
+      
+      // -- D. Etiquetas Limpias --
+      .pointLabel(d => `
+        <div style="background: white; color: black; padding: 4px 8px; border-radius: 2px; font-family: Arial, sans-serif; font-size: 12px; box-shadow: 0px 2px 5px rgba(0,0,0,0.5);">
+          <b>${d.name}</b>
+        </div>
+      `);
+
+    // 3. Configuración de la "Cámara"
+    mundo.controls().autoRotate = true;
+    mundo.controls().autoRotateSpeed = 0.6; // Rotación majestuosa y lenta
+    
+    // Iluminación solar (hace que se vea 3D real con sombras)
+    // Esto añade una luz direccional que simula el sol
+    const globeMaterial = mundo.globeMaterial();
+    globeMaterial.shininess = 0.8; // Reflejo en los océanos
+  </script>
+</body>
+</html>
