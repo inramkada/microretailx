@@ -1,245 +1,156 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Global Monitor</title>
-  <script src="//unpkg.com/globe.gl"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  /* 1. Estilos Generales */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f9;
+    padding: 20px;
+  }
+
+  h2 {
+    color: #333;
+    text-align: center;
+  }
+
+  /* 2. Contenedor del Hub */
+  .operaciones-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* 3. Estilo de la Tarjeta del Hub */
+  .hub-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  /* El botón principal (Texas) */
+  .hub-header {
+    background-color: #0056b3; /* Color corporativo */
+    color: white;
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  .hub-header:hover {
+    background-color: #004494;
+  }
+
+  /* Icono de flecha */
+  .arrow {
+    transition: transform 0.3s ease;
+  }
   
-  <style>
-    body { 
-      margin: 0; 
-      background-color: #000; 
-      font-family: 'Share Tech Mono', monospace; 
-      color: #fff;
-      overflow: hidden; 
-    }
+  /* Clase para rotar la flecha cuando está activo */
+  .active .arrow {
+    transform: rotate(180deg);
+  }
 
-    /* --- SIDEBAR --- */
-    #sidebar {
-      position: absolute;
-      top: 0; left: 0;
-      width: 300px;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85); /* Fondo negro semitransparente */
-      border-right: 1px solid #333;
-      padding: 20px;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-    }
+  /* 4. Lista de destinos (Oculta por defecto) */
+  .destinos-list {
+    display: none; /* Oculto inicialmente */
+    padding: 20px;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+  }
 
-    h1 { margin: 0 0 10px 0; font-size: 20px; color: #ffcc00; border-bottom: 1px solid #444; padding-bottom: 10px; }
-    
-    .list-item {
-      padding: 12px 10px;
-      border-bottom: 1px solid #222;
-      cursor: pointer;
-      display: flex; justify-content: space-between;
-      font-size: 14px;
-    }
-    .list-item:hover { background: #111; color: #ffcc00; }
-    
-    /* Sub-lista de destinos */
-    .targets-list {
-      background: #111;
-      padding: 5px 15px;
-      font-size: 12px;
-      display: none; /* Oculto por defecto */
-      border-left: 2px solid #ffcc00;
-    }
-    .active .targets-list { display: block; } /* Mostrar si está activo */
+  .destinos-list h4 {
+    margin-top: 0;
+    color: #666;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+  }
 
-    #reset-btn {
-      margin-top: 20px;
-      padding: 10px;
-      background: #330000;
-      color: #ff5555;
-      text-align: center;
-      cursor: pointer;
-      display: none;
-      border: 1px solid #550000;
-    }
+  .destinos-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
 
-    /* --- GLOBO --- */
-    #globe-viz { width: 100vw; height: 100vh; }
-    
-    /* Etiquetas del mapa */
-    .map-label {
-      background: rgba(0,0,0,0.8);
-      color: #ffcc00;
-      padding: 4px 8px;
-      border: 1px solid #ffcc00;
-      border-radius: 2px;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 14px;
-      pointer-events: none;
-    }
-  </style>
+  .destinos-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Icono pequeño antes de la ciudad */
+  .destinos-list li::before {
+    content: "📍"; 
+    margin-right: 10px;
+  }
+
+</style>
 </head>
 <body>
 
-  <div id="sidebar">
-    <h1>LOCATIONS</h1>
-    <div id="locations-container"></div>
-    <div id="reset-btn" onclick="resetMap()">[ X ] CERRAR VISTA</div>
+  <h2>Nuestra Red de Operaciones</h2>
+
+  <div class="operaciones-container">
+
+    <div class="hub-card">
+      <div class="hub-header" onclick="toggleHub(this)">
+        <span>🏭 Hub Principal: Texas</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="destinos-list">
+        <h4>Rutas de Reparto activas:</h4>
+        <ul>
+          <li>Los Angeles</li>
+          <li>Chicago</li>
+          <li>Nueva York</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="hub-card">
+      <div class="hub-header" onclick="toggleHub(this)">
+        <span>🏭 Hub Secundario: Florida</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="destinos-list">
+        <h4>Rutas de Reparto activas:</h4>
+        <ul>
+          <li>Miami</li>
+          <li>Orlando</li>
+          <li>Atlanta</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 
-  <div id="globe-viz"></div>
-
   <script>
-    // ---------------- DATOS ----------------
-    // Estructura: HUB (Origen) -> TARGETS (Destinos)
-    const myData = [
-      {
-        id: 'texas',
-        name: "TEXAS HQ",
-        lat: 31.9686, lng: -99.9018,
-        color: '#ffcc00', // Amarillo Dorado
-        targets: [
-          { name: "California (AE1)", lat: 36.7783, lng: -119.4179 },
-          { name: "New York (AE2)", lat: 40.7128, lng: -74.0060 },
-          { name: "Chicago (AE3)", lat: 41.8781, lng: -87.6298 },
-          { name: "Colorado (AE4)", lat: 39.5501, lng: -105.7821 }
-        ]
-      },
-      {
-        id: 'panama',
-        name: "PANAMA OPS",
-        lat: 8.5380, lng: -80.7821,
-        color: '#ffcc00',
-        targets: [
-          { name: "Colombia", lat: 4.5709, lng: -74.2973 },
-          { name: "Costa Rica", lat: 9.7489, lng: -83.7534 }
-        ]
-      },
-      // Añadimos Abu Dhabi para probar
-      { id: 'abudhabi', name: "ABU DHABI", lat: 24.4539, lng: 54.3773, color: '#ffcc00', targets: [] },
-      { id: 'london', name: "LONDON", lat: 51.5074, lng: -0.1278, color: '#ffcc00', targets: [] }
-    ];
+    // Función para mostrar/ocultar
+    function toggleHub(elemento) {
+      // 1. Alternar la clase 'active' para la flecha
+      elemento.classList.toggle("active");
 
-    let currentView = null; // Para saber qué estamos viendo
+      // 2. Buscar el siguiente elemento hermano (la lista de destinos)
+      var contenido = elemento.nextElementSibling;
 
-    // ---------------- CONFIGURACIÓN GLOBO ----------------
-    const world = Globe()
-      (document.getElementById('globe-viz'))
-      
-      // 1. APARIENCIA "REAL NIGHT" (Sin Azul)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-      .backgroundColor('#000000') // Fondo negro absoluto
-      
-      // QUITAMOS LA ATMÓSFERA AZUL
-      .atmosphereColor('#ffcc00') // Le damos un tinte dorado muy leve
-      .atmosphereAltitude(0.05)   // Casi invisible, solo para borde
-      
-      // 2. CONFIGURACIÓN PUNTOS
-      .pointLat('lat')
-      .pointLng('lng')
-      .pointColor('color') 
-      .pointRadius(0.8) // Puntos GRANDES para verlos bien
-      .pointAltitude(0.02)
-      .pointLabel(d => `<div class="map-label">${d.name}</div>`)
-      
-      // 3. CONFIGURACIÓN ARCOS (Líneas)
-      .arcColor(() => '#ffcc00') // Líneas doradas
-      .arcDashLength(0.5)
-      .arcDashGap(2)
-      .arcDashAnimateTime(2000)
-      .arcStroke(0.5)
-
-      // Evento Click
-      .onPointClick(onNodeClick);
-
-    // Ajustar iluminación para que no se vea gris
-    world.globeMaterial().color = new THREE.Color(0xffffff);
-    world.controls().autoRotate = true;
-    world.controls().autoRotateSpeed = 0.5;
-
-    // ---------------- LÓGICA ----------------
-    
-    // Inicializar
-    renderList();
-    updateGlobe();
-
-    function renderList() {
-      const container = document.getElementById('locations-container');
-      container.innerHTML = '';
-
-      myData.forEach(hub => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        // Si es el activo, añadimos clase
-        if (currentView && currentView.id === hub.id) {
-          div.style.background = '#222';
-          div.style.color = '#ffcc00';
-          div.style.flexDirection = 'column'; // Para que la sublista baje
-          
-          // Generar sublista HTML
-          let subHtml = '<div class="targets-list">';
-          hub.targets.forEach(t => { subHtml += `<div>> ${t.name}</div>`; });
-          subHtml += '</div>';
-          
-          div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; width:100%">
-              <b>${hub.name}</b> <span>▼</span>
-            </div>
-            ${subHtml}
-          `;
-        } else {
-          div.innerHTML = `<span>${hub.name}</span> <span>+</span>`;
-          div.onclick = () => onNodeClick(hub);
-        }
-        container.appendChild(div);
-      });
-    }
-
-    function onNodeClick(node) {
-      // Solo reaccionamos si es un HUB principal
-      const hubData = myData.find(h => h.id === (node.id || node.id)); 
-      if (!hubData) return;
-
-      currentView = hubData;
-      
-      // Zoom al punto
-      world.pointOfView({ lat: hubData.lat, lng: hubData.lng, altitude: 1.5 }, 1500);
-      world.controls().autoRotate = false;
-
-      // Mostrar botón cerrar
-      document.getElementById('reset-btn').style.display = 'block';
-
-      renderList();
-      updateGlobe();
-    }
-
-    function resetMap() {
-      currentView = null;
-      world.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 1500);
-      world.controls().autoRotate = true;
-      document.getElementById('reset-btn').style.display = 'none';
-      renderList();
-      updateGlobe();
-    }
-
-    function updateGlobe() {
-      if (currentView) {
-        // MODO DETALLE: Mostrar Hub + Targets + Arcos
-        const points = [currentView, ...currentView.targets.map(t => ({...t, color: '#ff5555'}))]; // Targets en Rojo
-        
-        const arcs = currentView.targets.map(t => ({
-          startLat: currentView.lat, startLng: currentView.lng,
-          endLat: t.lat, endLng: t.lng
-        }));
-
-        world.pointsData(points);
-        world.arcsData(arcs);
-
+      // 3. Si está visible lo ocultamos, si no, lo mostramos
+      if (contenido.style.display === "block") {
+        contenido.style.display = "none";
       } else {
-        // MODO MUNDIAL: Solo Hubs
-        world.pointsData(myData);
-        world.arcsData([]);
+        contenido.style.display = "block";
       }
     }
   </script>
+
 </body>
 </html>
