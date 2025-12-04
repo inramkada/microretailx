@@ -2,335 +2,244 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Global Operations Monitor</title>
+  <title>Global Monitor</title>
   <script src="//unpkg.com/globe.gl"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
   <style>
-    /* --- ESTÉTICA SURVEILLANCE --- */
     body { 
       margin: 0; 
       background-color: #000; 
       font-family: 'Share Tech Mono', monospace; 
-      color: #00ffcc; /* EL COLOR "SURVEILLANCE" (Cian) */
+      color: #fff;
       overflow: hidden; 
     }
 
-    /* --- SIDEBAR (Panel de Control) --- */
+    /* --- SIDEBAR --- */
     #sidebar {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 320px;
+      top: 0; left: 0;
+      width: 300px;
       height: 100vh;
-      background: rgba(5, 10, 15, 0.9);
-      border-right: 2px solid #005544;
+      background: rgba(0, 0, 0, 0.85); /* Fondo negro semitransparente */
+      border-right: 1px solid #333;
+      padding: 20px;
+      z-index: 10;
       display: flex;
       flex-direction: column;
-      z-index: 10;
-      backdrop-filter: blur(10px);
-      transition: transform 0.3s ease;
     }
 
-    .header {
-      padding: 20px;
-      background: rgba(0, 255, 204, 0.1);
-      border-bottom: 1px solid #00ffcc;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 22px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    .subtitle {
-      font-size: 10px;
-      opacity: 0.7;
-      margin-top: 5px;
-    }
-
-    /* Lista de Lugares */
-    #location-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0;
-    }
-
-    .list-item {
-      padding: 15px 20px;
-      border-bottom: 1px solid #112222;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.2s;
-    }
-
-    .list-item:hover {
-      background: rgba(0, 255, 204, 0.1);
-      padding-left: 25px; /* Efecto de desplazamiento */
-    }
-
-    .list-item.active {
-      background: #00ffcc;
-      color: #000;
-      font-weight: bold;
-    }
-
-    /* Detalles del Nodo (El "Desplegable") */
-    .details-panel {
-      display: none; /* Oculto por defecto */
-      background: #001a1a;
-      padding: 10px 20px;
-      border-bottom: 1px solid #004433;
-      font-size: 12px;
-    }
+    h1 { margin: 0 0 10px 0; font-size: 20px; color: #ffcc00; border-bottom: 1px solid #444; padding-bottom: 10px; }
     
-    .sub-item {
-      padding: 5px 0;
-      color: #aaa;
-      display: flex;
-      justify-content: space-between;
-    }
-    .sub-item span.code { color: #fff; font-weight: bold; }
-
-    /* Botón Volver */
-    #reset-btn {
-      padding: 15px;
-      text-align: center;
-      background: #220000;
-      color: #ff3333;
+    .list-item {
+      padding: 12px 10px;
+      border-bottom: 1px solid #222;
       cursor: pointer;
-      border-top: 1px solid #550000;
-      text-transform: uppercase;
-      display: none; /* Se muestra solo al entrar en una ciudad */
+      display: flex; justify-content: space-between;
+      font-size: 14px;
     }
-    #reset-btn:hover { background: #440000; }
+    .list-item:hover { background: #111; color: #ffcc00; }
+    
+    /* Sub-lista de destinos */
+    .targets-list {
+      background: #111;
+      padding: 5px 15px;
+      font-size: 12px;
+      display: none; /* Oculto por defecto */
+      border-left: 2px solid #ffcc00;
+    }
+    .active .targets-list { display: block; } /* Mostrar si está activo */
+
+    #reset-btn {
+      margin-top: 20px;
+      padding: 10px;
+      background: #330000;
+      color: #ff5555;
+      text-align: center;
+      cursor: pointer;
+      display: none;
+      border: 1px solid #550000;
+    }
 
     /* --- GLOBO --- */
     #globe-viz { width: 100vw; height: 100vh; }
-
-    /* Estilos de Etiquetas en el Mapa (Más grandes como pediste) */
+    
+    /* Etiquetas del mapa */
     .map-label {
       background: rgba(0,0,0,0.8);
-      border: 1px solid #00ffcc;
-      color: #00ffcc;
+      color: #ffcc00;
       padding: 4px 8px;
+      border: 1px solid #ffcc00;
+      border-radius: 2px;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 14px; /* Letra más grande */
-      font-weight: bold;
-      pointer-events: none; /* Para que no interfiera con el click */
-      text-transform: uppercase;
-      box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+      font-size: 14px;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
   <div id="sidebar">
-    <div class="header">
-      <h1>LOCATIONS</h1>
-      <div class="subtitle">SECURE CONNECTION ESTABLISHED</div>
-    </div>
-
-    <div id="location-list">
-      </div>
-
-    <div id="reset-btn" onclick="resetView()">
-      [ X ] CERRAR VISTA DETALLADA
-    </div>
+    <h1>LOCATIONS</h1>
+    <div id="locations-container"></div>
+    <div id="reset-btn" onclick="resetMap()">[ X ] CERRAR VISTA</div>
   </div>
 
   <div id="globe-viz"></div>
 
   <script>
-    // ---------------------------------------------------------
-    // 1. BASE DE DATOS ESTRUCTURADA
-    // Definimos los "Hubs" (Padres) y sus "Targets" (Hijos/Donde reparten)
-    // ---------------------------------------------------------
-    const operationsData = [
+    // ---------------- DATOS ----------------
+    // Estructura: HUB (Origen) -> TARGETS (Destinos)
+    const myData = [
       {
         id: 'texas',
         name: "TEXAS HQ",
         lat: 31.9686, lng: -99.9018,
-        type: 'HUB',
-        // A dónde sirve Texas:
+        color: '#ffcc00', // Amarillo Dorado
         targets: [
-          { code: "AE1", name: "California", lat: 36.7783, lng: -119.4179 },
-          { code: "AE2", name: "Los Angeles", lat: 34.0522, lng: -118.2437 },
-          { code: "AE3", name: "New York", lat: 40.7128, lng: -74.0060 },
-          { code: "AE4", name: "Colorado", lat: 39.5501, lng: -105.7821 },
-          { code: "AE5", name: "Chicago", lat: 41.8781, lng: -87.6298 }
+          { name: "California (AE1)", lat: 36.7783, lng: -119.4179 },
+          { name: "New York (AE2)", lat: 40.7128, lng: -74.0060 },
+          { name: "Chicago (AE3)", lat: 41.8781, lng: -87.6298 },
+          { name: "Colorado (AE4)", lat: 39.5501, lng: -105.7821 }
         ]
       },
       {
         id: 'panama',
         name: "PANAMA OPS",
         lat: 8.5380, lng: -80.7821,
-        type: 'HUB',
+        color: '#ffcc00',
         targets: [
-          { code: "PA1", name: "Colombia", lat: 4.5709, lng: -74.2973 },
-          { code: "PA2", name: "Costa Rica", lat: 9.7489, lng: -83.7534 }
+          { name: "Colombia", lat: 4.5709, lng: -74.2973 },
+          { name: "Costa Rica", lat: 9.7489, lng: -83.7534 }
         ]
       },
-      // Datos de relleno para que el mapa no se vea vacío
-      { id: 'uk', name: "LONDON HUB", lat: 55.3781, lng: -3.4360, type: 'HUB', targets: [] },
-      { id: 'uae', name: "ABU DHABI", lat: 24.4539, lng: 54.3773, type: 'HUB', targets: [] },
-      { id: 'swe', name: "STOCKHOLM", lat: 60.1282, lng: 18.6435, type: 'HUB', targets: [] }
+      // Añadimos Abu Dhabi para probar
+      { id: 'abudhabi', name: "ABU DHABI", lat: 24.4539, lng: 54.3773, color: '#ffcc00', targets: [] },
+      { id: 'london', name: "LONDON", lat: 51.5074, lng: -0.1278, color: '#ffcc00', targets: [] }
     ];
 
-    let activeHub = null; // Variable para saber si estamos viendo una ciudad o el mundo entero
+    let currentView = null; // Para saber qué estamos viendo
 
-    // ---------------------------------------------------------
-    // 2. INICIALIZAR GLOBO
-    // ---------------------------------------------------------
+    // ---------------- CONFIGURACIÓN GLOBO ----------------
     const world = Globe()
       (document.getElementById('globe-viz'))
+      
+      // 1. APARIENCIA "REAL NIGHT" (Sin Azul)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-      .atmosphereColor('#00ffcc')
-      .atmosphereAltitude(0.15)
+      .backgroundColor('#000000') // Fondo negro absoluto
       
-      // CONFIGURACIÓN DE PUNTOS
+      // QUITAMOS LA ATMÓSFERA AZUL
+      .atmosphereColor('#ffcc00') // Le damos un tinte dorado muy leve
+      .atmosphereAltitude(0.05)   // Casi invisible, solo para borde
+      
+      // 2. CONFIGURACIÓN PUNTOS
       .pointLat('lat')
       .pointLng('lng')
-      .pointColor(d => d.type === 'HUB' ? '#00ffcc' : '#ff0055') // Verde Hubs, Rojo Destinos
-      .pointRadius(d => d.type === 'HUB' ? 0.6 : 0.3) // Hubs más grandes
-      .pointAltitude(0.01)
+      .pointColor('color') 
+      .pointRadius(0.8) // Puntos GRANDES para verlos bien
+      .pointAltitude(0.02)
+      .pointLabel(d => `<div class="map-label">${d.name}</div>`)
       
-      // ETIQUETAS PERSONALIZADAS (HTML)
-      .pointLabel(d => `
-        <div class="map-label" style="border-color: ${d.type === 'HUB' ? '#00ffcc' : '#ff0055'}">
-          ${d.name}
-        </div>
-      `)
-
-      // CONFIGURACIÓN DE ARCOS (LÍNEAS)
-      .arcColor(() => ['rgba(0, 255, 204, 0.2)', 'rgba(0, 255, 204, 1)']) // Degunado cian
-      .arcDashLength(0.4)
+      // 3. CONFIGURACIÓN ARCOS (Líneas)
+      .arcColor(() => '#ffcc00') // Líneas doradas
+      .arcDashLength(0.5)
       .arcDashGap(2)
-      .arcDashAnimateTime(1500) // Velocidad de los datos viajando
+      .arcDashAnimateTime(2000)
       .arcStroke(0.5)
 
-      // EVENTO CLICK EN EL MAPA
-      .onPointClick(handleNodeClick);
+      // Evento Click
+      .onPointClick(onNodeClick);
 
-    // Ajustes de Material (Hacerlo más oscuro/elegante)
-    world.globeMaterial().color = new THREE.Color(0x333333);
+    // Ajustar iluminación para que no se vea gris
+    world.globeMaterial().color = new THREE.Color(0xffffff);
     world.controls().autoRotate = true;
     world.controls().autoRotateSpeed = 0.5;
 
-    // ---------------------------------------------------------
-    // 3. LÓGICA DE CONTROL (EL CEREBRO)
-    // ---------------------------------------------------------
+    // ---------------- LÓGICA ----------------
+    
+    // Inicializar
+    renderList();
+    updateGlobe();
 
-    // Renderizar lista inicial
-    renderSidebar();
-    updateMapData();
+    function renderList() {
+      const container = document.getElementById('locations-container');
+      container.innerHTML = '';
 
-    function renderSidebar() {
-      const list = document.getElementById('location-list');
-      list.innerHTML = ''; // Limpiar
-
-      operationsData.forEach(hub => {
-        // Crear elemento de lista
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        if (activeHub && activeHub.id === hub.id) item.className += ' active';
-        
-        item.innerHTML = `<span>${hub.name}</span> <span>[+]</span>`;
-        item.onclick = () => handleNodeClick(hub);
-        list.appendChild(item);
-
-        // Si este Hub está activo, mostrar sus DETALLES (Desplegable)
-        if (activeHub && activeHub.id === hub.id) {
-          const details = document.createElement('div');
-          details.className = 'details-panel';
-          details.style.display = 'block'; // Mostrar
+      myData.forEach(hub => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        // Si es el activo, añadimos clase
+        if (currentView && currentView.id === hub.id) {
+          div.style.background = '#222';
+          div.style.color = '#ffcc00';
+          div.style.flexDirection = 'column'; // Para que la sublista baje
           
-          if(hub.targets.length > 0) {
-            hub.targets.forEach(t => {
-              details.innerHTML += `
-                <div class="sub-item">
-                  <span class="code">${t.code}</span>
-                  <span>${t.name}</span>
-                </div>
-              `;
-            });
-          } else {
-            details.innerHTML = '<div style="color:#555">NO ACTIVE ROUTES</div>';
-          }
-          list.appendChild(details);
+          // Generar sublista HTML
+          let subHtml = '<div class="targets-list">';
+          hub.targets.forEach(t => { subHtml += `<div>> ${t.name}</div>`; });
+          subHtml += '</div>';
+          
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; width:100%">
+              <b>${hub.name}</b> <span>▼</span>
+            </div>
+            ${subHtml}
+          `;
+        } else {
+          div.innerHTML = `<span>${hub.name}</span> <span>+</span>`;
+          div.onclick = () => onNodeClick(hub);
         }
+        container.appendChild(div);
       });
     }
 
-    // Función principal cuando se elige una ciudad
-    function handleNodeClick(node) {
-      if (node.type !== 'HUB') return; // Si clickas un destino, no hacemos nada (o podrías mostrar info)
+    function onNodeClick(node) {
+      // Solo reaccionamos si es un HUB principal
+      const hubData = myData.find(h => h.id === (node.id || node.id)); 
+      if (!hubData) return;
 
-      activeHub = node; // Guardamos quién está activo
+      currentView = hubData;
       
-      // 1. Mover cámara
-      world.pointOfView({ lat: node.lat, lng: node.lng, altitude: 1.8 }, 1500);
-      world.controls().autoRotate = false; // Parar rotación para que el usuario explore
+      // Zoom al punto
+      world.pointOfView({ lat: hubData.lat, lng: hubData.lng, altitude: 1.5 }, 1500);
+      world.controls().autoRotate = false;
 
-      // 2. Actualizar UI
+      // Mostrar botón cerrar
       document.getElementById('reset-btn').style.display = 'block';
-      renderSidebar();
-      
-      // 3. Actualizar Datos del Mapa (Mostrar hijos y líneas)
-      updateMapData();
+
+      renderList();
+      updateGlobe();
     }
 
-    // Volver a la vista general
-    function resetView() {
-      activeHub = null;
-      document.getElementById('reset-btn').style.display = 'none';
+    function resetMap() {
+      currentView = null;
+      world.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 1500);
       world.controls().autoRotate = true;
-      world.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 1500); // Zoom out
-      renderSidebar();
-      updateMapData();
+      document.getElementById('reset-btn').style.display = 'none';
+      renderList();
+      updateGlobe();
     }
 
-    // Calcular qué mostrar en el globo
-    function updateMapData() {
-      // PUNTOS: Si hay un hub activo, mostramos el Hub + sus Hijos. 
-      // Si no, mostramos todos los Hubs.
-      let pointsToShow = [];
-      let arcsToShow = [];
-
-      if (activeHub) {
-        // Modo Detalle: Solo el Hub activo y sus destinos
-        pointsToShow.push(activeHub);
-        // Añadir hijos y formatearlos como puntos
-        const children = activeHub.targets.map(t => ({
-          ...t,
-          type: 'TARGET' // Marcarlos diferente
+    function updateGlobe() {
+      if (currentView) {
+        // MODO DETALLE: Mostrar Hub + Targets + Arcos
+        const points = [currentView, ...currentView.targets.map(t => ({...t, color: '#ff5555'}))]; // Targets en Rojo
+        
+        const arcs = currentView.targets.map(t => ({
+          startLat: currentView.lat, startLng: currentView.lng,
+          endLat: t.lat, endLng: t.lng
         }));
-        pointsToShow = pointsToShow.concat(children);
 
-        // Crear lineas (Arcos) desde Hub a Hijos
-        arcsToShow = activeHub.targets.map(t => ({
-          startLat: activeHub.lat,
-          startLng: activeHub.lng,
-          endLat: t.lat,
-          endLng: t.lng
-        }));
+        world.pointsData(points);
+        world.arcsData(arcs);
 
       } else {
-        // Modo General: Mostrar todos los Hubs
-        pointsToShow = operationsData;
-        arcsToShow = []; // Sin líneas en vista general para no ensuciar
+        // MODO MUNDIAL: Solo Hubs
+        world.pointsData(myData);
+        world.arcsData([]);
       }
-
-      // Inyectar datos al globo
-      world.pointsData(pointsToShow);
-      world.arcsData(arcsToShow);
     }
-
   </script>
 </body>
 </html>
