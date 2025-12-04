@@ -3,130 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Global Operations - Night Vision</title>
+  <title>Global Ops - Hologram Mode</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-  <style>
-    body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Inter', sans-serif; }
+  <script src="https://unpkg.com/globe.gl"></script>
+  <script src="https://unpkg.com/three"></script>
 
-    /* PANEL DE CONTROL ESTILO CRISTAL */
+  <style>
+    body { margin: 0; padding: 0; overflow: hidden; background: #020402; font-family: 'Inter', sans-serif; }
+
+    /* UI: PANEL DE CONTROL */
     #control-panel {
       position: absolute;
       top: 24px;
       right: 24px;
-      background: rgba(10, 20, 15, 0.85); /* Fondo verdoso muy oscuro */
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(50, 255, 100, 0.2); /* Borde verde sutil */
+      background: rgba(0, 20, 10, 0.9);
+      border: 1px solid rgba(0, 255, 100, 0.3);
+      backdrop-filter: blur(5px);
       border-radius: 4px;
-      padding: 24px;
+      padding: 20px;
       z-index: 100;
-      width: 240px;
-      color: #cfc;
+      width: 250px;
+      color: #e0ffe0;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
     }
 
-    #control-panel h3 {
+    h3 {
       margin: 0 0 15px 0;
       font-size: 11px;
-      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: #4ade80; /* Verde Palantir brillante */
-      border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+      color: #00ff66;
+      border-bottom: 1px solid rgba(0, 255, 100, 0.2);
       padding-bottom: 8px;
     }
 
-    /* SELECTOR MODERNO */
     select {
       width: 100%;
+      background: #001100;
+      color: #00ff66;
+      border: 1px solid #004411;
       padding: 8px;
-      background: rgba(0, 0, 0, 0.3);
-      color: #fff;
-      border: 1px solid rgba(74, 222, 128, 0.3);
-      border-radius: 4px;
-      font-family: 'Inter', sans-serif;
+      font-family: inherit;
       font-size: 12px;
-      outline: none;
       cursor: pointer;
+      outline: none;
     }
-    select:hover { border-color: #4ade80; }
+    select:hover { border-color: #00ff66; }
 
-    /* LEYENDA */
-    .legend { margin-top: 20px; font-size: 10px; color: #8ba; display: flex; flex-direction: column; gap: 6px; }
-    .legend-item { display: flex; align-items: center; gap: 8px; }
-    .dot { width: 4px; height: 4px; border-radius: 50%; }
-
-    /* TOOLTIP PERSONALIZADO (Al pasar el ratón) */
-    .scene-tooltip {
-      background: rgba(0, 20, 10, 0.9) !important;
-      border: 1px solid #4ade80 !important;
-      color: #4ade80 !important;
-      font-family: 'Inter', sans-serif !important;
-      font-size: 12px !important;
-      padding: 8px !important;
-      border-radius: 2px !important;
-      box-shadow: 0 0 10px rgba(74,222,128,0.2) !important;
+    #status {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: #00aa44;
+      font-size: 10px;
+      letter-spacing: 1px;
+      font-family: monospace;
+      pointer-events: none;
     }
   </style>
-
-  <script src="//unpkg.com/globe.gl"></script>
 </head>
 <body>
 
   <div id="control-panel">
-    <h3>Network Command</h3>
+    <h3>System Override</h3>
     <select id="viewSelector" onchange="enfocarRegion()">
-      <option value="all">Global View (All Operations)</option>
-      <option value="texas">Region: North America</option>
-      <option value="europe">Region: Europe & Africa</option>
-      <option value="uae">Region: Middle East (UAE)</option>
-      <option value="asia">Region: Asia Pacific</option>
+      <option value="all">Global Network (All)</option>
+      <option value="texas">North America (Texas Hub)</option>
+      <option value="europe">EMEA (Rotterdam Hub)</option>
+      <option value="uae">Middle East (Dubai Hub)</option>
+      <option value="asia">APAC (Shanghai Hub)</option>
     </select>
-
-    <div class="legend">
-      <div class="legend-item">
-        <span class="dot" style="background-color: #ff3b30; box-shadow: 0 0 5px #ff3b30;"></span>
-        <span>Distribution Hub</span>
-      </div>
-      <div class="legend-item">
-        <span class="dot" style="background-color: #4ade80; box-shadow: 0 0 5px #4ade80;"></span>
-        <span>Delivery Point</span>
-      </div>
+    <div style="margin-top:15px; font-size:10px; color:#88aa88;">
+      <span style="color:#ff3333">■</span> Hub (Origin)<br>
+      <span style="color:#00ff66">■</span> Spoke (Delivery)
     </div>
   </div>
+
+  <div id="status">> CONNECTED TO SATELLITE FEED...</div>
 
   <div id="globeViz"></div>
 
   <script>
-    // --- 1. DEFINICIÓN DE PUNTOS Y RUTAS ---
-    
-    // Coordenadas Clave
+    // --- DATOS DE LA RED (Los mismos que definimos) ---
     const HUBS = {
-      texas:   { lat: 32.77, lng: -96.79, name: "HUB: Dallas (USA)" },
-      europe:  { lat: 51.92, lng: 4.47,   name: "HUB: Rotterdam" }, // Hub central europeo
-      uae:     { lat: 25.20, lng: 55.27,  name: "HUB: Dubai (UAE)" },
-      asia:    { lat: 31.23, lng: 121.47, name: "HUB: Shanghai" }
+      texas:   { lat: 32.77, lng: -96.79, name: "Dallas HQ" },
+      europe:  { lat: 51.92, lng: 4.47,   name: "Rotterdam" },
+      uae:     { lat: 25.20, lng: 55.27,  name: "Dubai" },
+      asia:    { lat: 31.23, lng: 121.47, name: "Shanghai" }
     };
 
-    // Estructura de Rutas (Spokes)
     const NETWORK = [
-      // --- RED AMERICANA ---
-      { hub: HUBS.texas, to: { lat: 34.05, lng: -118.24, name: "Los Angeles" } },
-      { hub: HUBS.texas, to: { lat: 40.71, lng: -74.00,  name: "New York" } },
-      { hub: HUBS.texas, to: { lat: 41.87, lng: -87.62,  name: "Chicago" } },
+      { hub: HUBS.texas, to: { lat: 34.05, lng: -118.24 } }, // LA
+      { hub: HUBS.texas, to: { lat: 40.71, lng: -74.00 } },  // NY
+      { hub: HUBS.texas, to: { lat: 41.87, lng: -87.62 } },  // Chicago
+      
+      { hub: HUBS.europe, to: { lat: 38.72, lng: -9.13 } },  // Lisboa
+      { hub: HUBS.europe, to: { lat: 42.50, lng: 1.52 } },   // Andorra
+      { hub: HUBS.europe, to: { lat: 33.57, lng: -7.58 } },  // Casablanca
 
-      // --- RED EUROPA / AFRICA (Sin España) ---
-      // Conectamos el Hub (Rotterdam) con Andorra, Portugal y Marruecos
-      { hub: HUBS.europe, to: { lat: 38.72, lng: -9.13,  name: "Lisboa (PT)" } },
-      { hub: HUBS.europe, to: { lat: 42.50, lng: 1.52,   name: "Andorra la Vella" } },
-      { hub: HUBS.europe, to: { lat: 33.57, lng: -7.58,  name: "Casablanca (MA)" } }, // Marruecos
+      { hub: HUBS.uae, to: { lat: 24.45, lng: 54.37 } },     // Abu Dhabi
+      { hub: HUBS.uae, to: { lat: 25.35, lng: 55.40 } },     // Sharjah
+      { hub: HUBS.uae, to: { lat: 25.40, lng: 55.51 } },     // Ajman
 
-      // --- RED EMIRATOS (UAE) ---
-      // Distribución interna y cercana
-      { hub: HUBS.uae, to: { lat: 24.45, lng: 54.37, name: "Abu Dhabi" } },
-      { hub: HUBS.uae, to: { lat: 25.35, lng: 55.40, name: "Sharjah" } },
-      { hub: HUBS.uae, to: { lat: 25.40, lng: 55.51, name: "Ajman" } }, // Otro emirato
+      { hub: HUBS.asia, to: { lat: 39.90, lng: 116.40 } },   // Beijing
+      { hub: HUBS.asia, to: { lat: 55.75, lng: 37.61 } },    // Moscow
+      { hub: HUBS.asia, to: { lat: 22.31, lng: 114.16 } }    // Hong Kong
+    ];
 
-      // --- RED ASIÁTICA (Desde Shanghai) ---
-      { hub: HUBS.asia, to: { lat: 39.90, lng: 116.40, name: "Beijing" } },
-      { hub: HUBS.asia, to: { lat: 55.75, lng: 37.61,  name:
+    // Procesar datos
+    const allArcs = NETWORK.map(r => ({
+      startLat: r.hub.lat, startLng: r.hub.lng,
+      endLat: r.to.lat, endLng: r.to.lng
+    }));
+    
+    // Puntos combinados
+    const points = [];
+    NETWORK.forEach(r => {
+      points.push({ ...r.hub, type: 'hub' });
+      points.push({ ...r.to, type: 'spoke' });
+    });
+
+    // --- RENDERIZADO DEL GLOBO ---
+    const world = Globe()
+      (document.getElementById('globeViz'))
+      
+      // 1. INTENTO DE CARGAR TEXTURA (Con HTTPS explícito)
+      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
+      .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+      
+      // 2. ATMÓSFERA VERDE "HACKER"
+      .atmosphereColor('#00ff44')
+      .atmosphereAltitude(0.2)
+
+      // 3. PUNTOS SUTILES
+      .pointsData(points)
+      .pointColor(d => d.type === 'hub' ? '#ff3333' : '#00ff66')
+      .pointAltitude(0.01)
+      .pointRadius(0.3) // Puntos muy finos
+      .pointResolution(10)
+
+      // 4. LÍNEAS DE RUTA
+      .arcsData(allArcs)
+      .arcColor(() => ['#ff3333', '#00ff66'])
+      .arcDashLength(0.4)
+      .arcDashGap(1.5)
+      .arcDashAnimateTime(3000)
+      .arcStroke(0.4);
+
+    // --- TRUCO DE SEGURIDAD VISUAL ---
+    // Si la imagen falla (pantalla negra), esto asegura que se vea algo:
+    // Configuramos el material del globo para que sea visible sin textura
+    setTimeout(() => {
+        const globeMaterial = world.globeMaterial();
+        // Si no se ve nada, esto fuerza un color base oscuro
+        globeMaterial.color = new THREE.Color(0x001100); 
+        globeMaterial.emissive = new THREE.Color(0x002200);
+        globeMaterial.emissiveIntensity = 0.2;
+    }, 1000);
+
+    world.controls().autoRotate = true;
+    world.controls().autoRotateSpeed = 0.5;
+
+    // --- FUNCIÓN DE CÁMARA ---
+    function enfocarRegion() {
+      const v = document.getElementById('viewSelector').value;
+      const coords = {
+        'all':    { lat: 20, lng: 0, altitude: 2.5 },
+        'texas':  { lat: 35, lng: -95, altitude: 1.4 },
+        'europe': { lat: 45, lng: 5, altitude: 1.2 },
+        'uae':    { lat: 25, lng: 55, altitude: 0.7 },
+        'asia':   { lat: 35, lng: 110, altitude: 1.6 }
+      };
+      world.pointOfView(coords[v], 1500);
+    }
+  </script>
+</body>
+</html>
