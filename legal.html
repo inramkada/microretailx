@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Global Network - Northern Expansion</title>
+  <title>Global Network - Clean Hierarchy</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/globe.gl"></script>
@@ -12,7 +12,7 @@
   <style>
     body { margin: 0; padding: 0; overflow: hidden; background: #000510; font-family: 'Inter', sans-serif; }
 
-    /* UI PANEL - Mantenido en Blanco Limpio */
+    /* UI PANEL */
     #control-panel {
       position: absolute;
       top: 24px;
@@ -76,7 +76,7 @@
     <select id="viewSelector" onchange="enfocarRegion()">
       <option value="all">ORBITA GLOBAL</option>
       <option value="delaware">HQ GLOBAL (Delaware)</option>
-      <option value="morocco">🇲🇦 TANGER (The Gateway)</option>
+      <option value="morocco">🇲🇦 TANGER (Gateway)</option>
       <option value="europe">🇪🇺 EUROPE HUB (Rotterdam)</option>
       <option value="texas">🇺🇸 NORTH AMERICA (Texas)</option>
       <option value="uae">🇦🇪 MIDDLE EAST (Dubai)</option>
@@ -84,17 +84,17 @@
     </select>
     
     <div class="legend">
-      <div><span class="dot" style="background-color: #ffff00;"></span>HQ Global (Delaware)</div>
-      <div><span class="dot" style="background-color: #ff3366;"></span>HUB</div>
+      <div><span class="dot" style="background-color: #ffff00;"></span>HQ Global</div>
+      <div><span class="dot" style="background-color: #ff3366;"></span>Regional Hub</div>
       <div><span class="dot" style="background-color: #00ffcc;"></span>City</div>
       <div style="margin-top:5px; border-top:1px solid #333; padding-top:5px;">
-        <div><span class="line" style="background-color: #ffff00;"></span>Intercontinental</div>
-        <div><span class="line" style="background-color: #ff3366;"></span>Regional</div>
+        <div><span class="line" style="background-color: #ffff00;"></span>Global Link (Orbital)</div>
+        <div><span class="line" style="background-color: #ff3366;"></span>Regional Link</div>
       </div>
     </div>
   </div>
 
-  <div id="status">SYSTEM: ONLINE | TANGER NORTHERN LINK ESTABLISHED</div>
+  <div id="status">SYSTEM: ONLINE | HIERARCHY OPTIMIZED</div>
 
   <div id="globeViz"></div>
 
@@ -110,31 +110,27 @@
       asia:    { lat: 31.23, lng: 121.47, name: "Hub Shanghai" }
     };
 
-    // --- 2. RED REGIONAL (ACTUALIZADA) ---
+    // --- 2. RED REGIONAL (Conexiones Hub -> Ciudades) ---
     const REGIONAL_NETWORK = [
-      // === TÁNGER: CONEXIÓN ÁFRICA & "VERDADERA EUROPA" ===
-      // África
-      { hub: HUBS.morocco, to: { lat: 30.04, lng: 31.23, name: "Cairo (EG)" } },
-      { hub: HUBS.morocco, to: { lat: 6.52,  lng: 3.37,  name: "Lagos (NG)" } }, 
-      { hub: HUBS.morocco, to: { lat: -1.29, lng: 36.82, name: "Nairobi (KE)" } }, 
-      { hub: HUBS.morocco, to: { lat: 14.69, lng: -17.44, name: "Dakar (SN)" } }, 
-      
-      // Europa del Norte (Directo desde Tánger)
-      { hub: HUBS.morocco, to: { lat: 51.50, lng: -0.12,  name: "London (UK)" } },
-      { hub: HUBS.morocco, to: { lat: 52.52, lng: 13.40,  name: "Berlin (DE)" } },
-      { hub: HUBS.morocco, to: { lat: 50.85, lng: 4.35,   name: "Brussels (EU HQ)" } },
-      { hub: HUBS.morocco, to: { lat: 52.36, lng: 4.90,   name: "Amsterdam (NL)" } },
-      { hub: HUBS.morocco, to: { lat: 53.34, lng: -6.26,  name: "Dublin (IE)" } },
-      { hub: HUBS.morocco, to: { lat: 59.32, lng: 18.06,  name: "Stockholm (SE)" } },
-      // Conexión clásica
-      { hub: HUBS.morocco, to: { lat: 48.85, lng: 2.35,   name: "Paris (FR)" } },
+      // === TÁNGER (Conexión Estratégica Norte-Sur) ===
+      { hub: HUBS.morocco, to: { lat: 30.04, lng: 31.23, name: "Cairo" } },
+      { hub: HUBS.morocco, to: { lat: 6.52,  lng: 3.37,  name: "Lagos" } }, 
+      { hub: HUBS.morocco, to: { lat: -1.29, lng: 36.82, name: "Nairobi" } }, 
+      { hub: HUBS.morocco, to: { lat: 14.69, lng: -17.44, name: "Dakar" } }, 
+      // Europa Norte Directa
+      { hub: HUBS.morocco, to: { lat: 51.50, lng: -0.12,  name: "London" } },
+      { hub: HUBS.morocco, to: { lat: 52.52, lng: 13.40,  name: "Berlin" } },
+      { hub: HUBS.morocco, to: { lat: 50.85, lng: 4.35,   name: "Brussels" } },
+      { hub: HUBS.morocco, to: { lat: 52.36, lng: 4.90,   name: "Amsterdam" } },
+      { hub: HUBS.morocco, to: { lat: 59.32, lng: 18.06,  name: "Stockholm" } },
+      { hub: HUBS.morocco, to: { lat: 48.85, lng: 2.35,   name: "Paris" } },
 
-
-      // === EUROPA (Desde Rotterdam - Distribución local restante) ===
+      // === EUROPA (Rotterdam - Local) ===
       { hub: HUBS.europe, to: { lat: 47.37, lng: 8.54,   name: "Zurich" } },
       { hub: HUBS.europe, to: { lat: 55.67, lng: 12.56,  name: "Copenhagen" } },
       { hub: HUBS.europe, to: { lat: 48.20, lng: 16.37,  name: "Vienna" } },
       { hub: HUBS.europe, to: { lat: 52.22, lng: 21.01,  name: "Warsaw" } },
+      { hub: HUBS.europe, to: { lat: 41.90, lng: 12.49,  name: "Rome" } },
 
       // === USA (Texas) ===
       { hub: HUBS.texas, to: { lat: 34.05, lng: -118.24, name: "Los Angeles" } },
@@ -155,8 +151,9 @@
       { hub: HUBS.asia, to: { lat: -33.86, lng: 151.20, name: "Sydney" } }
     ];
 
-    // --- 3. PROCESAMIENTO DE DATOS ---
+    // --- 3. PROCESAMIENTO LIMPIO ---
     
+    // Lista de todas las ciudades destino (sin duplicados) para dibujar los puntos
     const allDestinations = [];
     const destSet = new Set();
     REGIONAL_NETWORK.forEach(r => {
@@ -166,22 +163,15 @@
       }
     });
 
-    const globalRoutes = allDestinations.map(city => ({
-      startLat: GLOBAL_HQ.lat, startLng: GLOBAL_HQ.lng,
-      endLat: city.lat, endLng: city.lng,
-      name: `Global -> ${city.name}`,
-      type: 'global'
+    // 1. RUTAS GLOBALES: ÚNICAMENTE HQ -> HUBS (5 líneas limpias)
+    const globalRoutes = Object.values(HUBS).map(hub => ({
+        startLat: GLOBAL_HQ.lat, startLng: GLOBAL_HQ.lng,
+        endLat: hub.lat, endLng: hub.lng,
+        name: `HQ -> ${hub.name}`,
+        type: 'global'
     }));
-    
-    Object.values(HUBS).forEach(hub => {
-        globalRoutes.push({
-            startLat: GLOBAL_HQ.lat, startLng: GLOBAL_HQ.lng,
-            endLat: hub.lat, endLng: hub.lng,
-            name: `Global HQ -> ${hub.name}`,
-            type: 'global'
-        });
-    });
 
+    // 2. RUTAS REGIONALES: HUBS -> CIUDADES
     const regionalArcs = REGIONAL_NETWORK.map(r => ({
       startLat: r.hub.lat, startLng: r.hub.lng,
       endLat: r.to.lat, endLng: r.to.lng,
@@ -190,6 +180,7 @@
 
     const finalArcs = [...regionalArcs, ...globalRoutes];
 
+    // Puntos (Nodos)
     const points = [GLOBAL_HQ];
     const addedPoints = new Set([GLOBAL_HQ.name]);
 
@@ -218,26 +209,27 @@
         if(d.type === 'hub') return '#ff3366'; 
         return '#00ffcc';                       
       })
-      .pointAltitude(d => d.type === 'hq' ? 0.04 : 0.006)
-      .pointRadius(d => d.type === 'hq' ? 0.7 : (d.type === 'hub' ? 0.4 : 0.25))
+      .pointAltitude(d => d.type === 'hq' ? 0.05 : 0.01)
+      .pointRadius(d => d.type === 'hq' ? 0.8 : (d.type === 'hub' ? 0.4 : 0.25))
       .pointLabel('name')
 
       .arcsData(finalArcs)
       .arcColor(d => d.type === 'global' ? ['#ffff00', 'rgba(255, 255, 0, 0.5)'] : ['#ff3366', '#00ffcc'])
-      // Mantenemos líneas largas (altas)
-      .arcAltitude(d => d.type === 'global' ? 0.5 : null) 
-      .arcStroke(d => d.type === 'global' ? 0.3 : 0.4)
+      // ==> AJUSTE DE LONGITUD DE LINEA <==
+      // Global: 0.6 (Muy alto/largo). Regional: null (Automático/Bajo)
+      .arcAltitude(d => d.type === 'global' ? 0.6 : null) 
+      .arcStroke(d => d.type === 'global' ? 0.5 : 0.3)
       .arcDashLength(0.4)
-      .arcDashGap(d => d.type === 'global' ? 5 : 2)
-      .arcDashAnimateTime(d => d.type === 'global' ? 5000 : 3000);
+      .arcDashGap(d => d.type === 'global' ? 4 : 2)
+      .arcDashAnimateTime(d => d.type === 'global' ? 4000 : 3000);
 
-    // Luces
+    // Luces y Material
     const globeMaterial = world.globeMaterial();
     globeMaterial.shininess = 0.9;
     world.scene().add(new THREE.AmbientLight(0xffffff, 1));
     
     world.controls().autoRotate = true;
-    world.controls().autoRotateSpeed = 0.5;
+    world.controls().autoRotateSpeed = 0.6;
 
     // --- 5. CONTROL DE CÁMARA ---
     function enfocarRegion() {
@@ -245,11 +237,11 @@
       world.controls().autoRotate = false;
 
       const coords = {
-        'all':      { lat: 20, lng: 0, altitude: 2.5 },
+        'all':      { lat: 25, lng: -20, altitude: 2.5 },
         'delaware': { lat: 39.15, lng: -75.52, altitude: 1.2 },
         'morocco':  { lat: 35, lng: -5, altitude: 1.0 }, 
         'texas':    { lat: 35, lng: -95, altitude: 1.5 },
-        'europe':   { lat: 48, lng: 10, altitude: 1.3 },
+        'europe':   { lat: 50, lng: 10, altitude: 1.2 },
         'uae':      { lat: 26, lng: 55, altitude: 0.9 },
         'asia':     { lat: 30, lng: 115, altitude: 1.8 }
       };
