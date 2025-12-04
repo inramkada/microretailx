@@ -1,156 +1,96 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-  /* 1. Estilos Generales */
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f4f9;
-    padding: 20px;
-  }
+  <style> 
+    body { margin: 0; padding: 0; overflow: hidden; background: #000; } 
+    #titulo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 100;
+      background: rgba(0,0,0,0.5);
+      padding: 15px;
+      border-radius: 8px;
+      pointer-events: none; /* Para que no interfiera con el click */
+    }
+    h1 { margin: 0; font-size: 24px; }
+    p { margin: 5px 0 0; color: #aaa; }
+  </style>
 
-  h2 {
-    color: #333;
-    text-align: center;
-  }
-
-  /* 2. Contenedor del Hub */
-  .operaciones-container {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  /* 3. Estilo de la Tarjeta del Hub */
-  .hub-card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-bottom: 15px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-
-  /* El botón principal (Texas) */
-  .hub-header {
-    background-color: #0056b3; /* Color corporativo */
-    color: white;
-    padding: 15px 20px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1.1rem;
-  }
-
-  .hub-header:hover {
-    background-color: #004494;
-  }
-
-  /* Icono de flecha */
-  .arrow {
-    transition: transform 0.3s ease;
-  }
-  
-  /* Clase para rotar la flecha cuando está activo */
-  .active .arrow {
-    transform: rotate(180deg);
-  }
-
-  /* 4. Lista de destinos (Oculta por defecto) */
-  .destinos-list {
-    display: none; /* Oculto inicialmente */
-    padding: 20px;
-    background-color: #fff;
-    border-top: 1px solid #eee;
-  }
-
-  .destinos-list h4 {
-    margin-top: 0;
-    color: #666;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-  }
-
-  .destinos-list ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .destinos-list li {
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f0f0;
-    color: #333;
-    display: flex;
-    align-items: center;
-  }
-
-  /* Icono pequeño antes de la ciudad */
-  .destinos-list li::before {
-    content: "📍"; 
-    margin-right: 10px;
-  }
-
-</style>
+  <script src="//unpkg.com/globe.gl"></script>
 </head>
 <body>
 
-  <h2>Nuestra Red de Operaciones</h2>
-
-  <div class="operaciones-container">
-
-    <div class="hub-card">
-      <div class="hub-header" onclick="toggleHub(this)">
-        <span>🏭 Hub Principal: Texas</span>
-        <span class="arrow">▼</span>
-      </div>
-      <div class="destinos-list">
-        <h4>Rutas de Reparto activas:</h4>
-        <ul>
-          <li>Los Angeles</li>
-          <li>Chicago</li>
-          <li>Nueva York</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="hub-card">
-      <div class="hub-header" onclick="toggleHub(this)">
-        <span>🏭 Hub Secundario: Florida</span>
-        <span class="arrow">▼</span>
-      </div>
-      <div class="destinos-list">
-        <h4>Rutas de Reparto activas:</h4>
-        <ul>
-          <li>Miami</li>
-          <li>Orlando</li>
-          <li>Atlanta</li>
-        </ul>
-      </div>
-    </div>
-
+  <div id="titulo">
+    <h1>Red de Operaciones Global</h1>
+    <p>Hub Principal: Texas (Conectando USA)</p>
   </div>
 
+  <div id="globeViz"></div>
+
   <script>
-    // Función para mostrar/ocultar
-    function toggleHub(elemento) {
-      // 1. Alternar la clase 'active' para la flecha
-      elemento.classList.toggle("active");
+    // 1. DATOS: Definimos las coordenadas (Latitud, Longitud)
+    // El Hub es Texas (usamos coordenadas centrales aprox)
+    const HUB_TEXAS = { name: "Texas Hub", lat: 31.96, lng: -99.90 };
 
-      // 2. Buscar el siguiente elemento hermano (la lista de destinos)
-      var contenido = elemento.nextElementSibling;
+    // Los destinos (Spokes)
+    const DESTINOS = [
+      { name: "Los Angeles", lat: 34.05, lng: -118.24 },
+      { name: "Chicago",     lat: 41.87, lng: -87.62 },
+      { name: "Nueva York",  lat: 40.71, lng: -74.00 }
+    ];
 
-      // 3. Si está visible lo ocultamos, si no, lo mostramos
-      if (contenido.style.display === "block") {
-        contenido.style.display = "none";
-      } else {
-        contenido.style.display = "block";
-      }
-    }
+    // 2. PREPARAR DATOS PARA LAS LÍNEAS (ARCOS)
+    // Creamos una línea desde Texas hacia cada destino
+    const rutas = DESTINOS.map(destino => ({
+      startLat: HUB_TEXAS.lat,
+      startLng: HUB_TEXAS.lng,
+      endLat: destino.lat,
+      endLng: destino.lng,
+      color: ['#ff0000', '#ffffff'] // Gradiente rojo a blanco
+    }));
+
+    // 3. PREPARAR ETIQUETAS (Puntos en el mapa)
+    // Juntamos el Hub y los destinos en una sola lista para ponerles nombre
+    const etiquetas = [HUB_TEXAS, ...DESTINOS];
+
+    // 4. INICIALIZAR EL GLOBO
+    const world = Globe()
+      (document.getElementById('globeViz'))
+      
+      // Imagen de la tierra (Estilo Blue Marble de la NASA)
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      // Imagen de fondo (Espacio con estrellas)
+      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+      
+      // Configuración de los Arcos (Las líneas de ruta)
+      .arcsData(rutas)
+      .arcColor('color')
+      .arcDashLength(0.4)       // Longitud de los "guiones" animados
+      .arcDashGap(4)            // Espacio entre guiones
+      .arcDashAnimateTime(1000) // Velocidad de la animación (viaje)
+      .arcStroke(0.5)           // Grosor de la línea
+
+      // Configuración de las Etiquetas (Nombres de ciudades)
+      .labelsData(etiquetas)
+      .labelLat(d => d.lat)
+      .labelLng(d => d.lng)
+      .labelText(d => d.name)
+      .labelSize(1.5)
+      .labelDotRadius(0.8)
+      .labelColor(() => 'white')
+      .labelResolution(2);
+
+    // 5. AUTO-ROTACIÓN Y ZOOM
+    // Enfocamos la cámara en USA al iniciar
+    world.pointOfView({ lat: 38, lng: -98, altitude: 1.8 });
+
+    // Hacemos que la tierra gire suavemente
+    world.controls().autoRotate = true;
+    world.controls().autoRotateSpeed = 0.5;
+
   </script>
-
 </body>
 </html>
