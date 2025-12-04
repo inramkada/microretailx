@@ -1,80 +1,190 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <style> body { margin: 0; background-color: #000; overflow: hidden; } </style>
+  <meta charset="UTF-8">
+  <title>Global Operations Monitor</title>
   <script src="//unpkg.com/globe.gl"></script>
+  <style>
+    /* 1. ESTILO GENERAL - COPIA DE LA UI */
+    body { 
+      margin: 0; 
+      background-color: #000; 
+      font-family: 'Courier New', Courier, monospace; /* Fuente estilo Terminal */
+      color: #e0e0e0;
+      overflow: hidden; 
+    }
+
+    /* 2. BARRA LATERAL (La lista de entidades a la izquierda) */
+    #sidebar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 100vh;
+      background: rgba(10, 10, 15, 0.85); /* Semitransparente oscuro */
+      backdrop-filter: blur(5px);
+      border-right: 1px solid #333;
+      padding: 20px;
+      z-index: 10;
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 1px solid #444;
+      padding-bottom: 10px;
+      color: #fff;
+    }
+
+    .entity-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #222;
+      font-size: 13px;
+      cursor: pointer;
+      transition: color 0.2s;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .entity-item:hover {
+      color: #00ffcc; /* Cyan brillante al pasar el mouse */
+    }
+
+    .status-dot {
+      height: 8px;
+      width: 8px;
+      background-color: #00ffcc;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 5px #00ffcc;
+    }
+
+    /* 3. CONTENEDOR DEL GLOBO */
+    #globe-viz {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* 4. ETIQUETAS FLOTANTES SOBRE EL MAPA */
+    .globe-tooltip {
+      background: rgba(0,0,0,0.9);
+      border: 1px solid #00ffcc;
+      padding: 8px;
+      border-radius: 2px;
+      color: #00ffcc;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+  </style>
 </head>
 <body>
-  <div id="globo-surveillance"></div>
+
+  <div id="sidebar">
+    <h1>Entidades Activas</h1>
+    <div id="entity-list"></div>
+    <div style="margin-top: 20px; font-size: 11px; color: #666;">
+      SYSTEM STATUS: ONLINE<br>
+      MONITORING: GLOBAL
+    </div>
+  </div>
+
+  <div id="globe-viz"></div>
 
   <script>
-    // 1. TUS DATOS (Tus ubicaciones exactas)
-    const misSedes = [
-      { name: "Texas, USA", lat: 31.9686, lng: -99.9018 },
-      { name: "Panamá", lat: 8.5380, lng: -80.7821 },
-      { name: "Abu Dhabi", lat: 24.4539, lng: 54.3773 },
-      { name: "Marruecos", lat: 31.7917, lng: -7.0926 },
-      { name: "Nigeria", lat: 9.0820, lng: 8.6753 },
-      { name: "Reino Unido", lat: 55.3781, lng: -3.4360 },
-      { name: "Noruega", lat: 60.4720, lng: 8.4689 },
-      { name: "Suecia", lat: 60.1282, lng: 18.6435 },
-      { name: "Holanda", lat: 52.1326, lng: 5.2913 },
-      { name: "Alemania", lat: 51.1657, lng: 10.4515 },
-      { name: "Bruselas", lat: 50.8503, lng: 4.3517 },
-      { name: "Nueva Zelanda", lat: -40.9006, lng: 174.8860 },
-      { name: "Perth, Aus", lat: -31.9505, lng: 115.8605 },
-      { name: "Chile", lat: -35.6751, lng: -71.5430 }
+    // --- TUS DATOS ---
+    const rawData = [
+      { name: "Texas HQ", country: "USA", lat: 31.9686, lng: -99.9018 },
+      { name: "Panama Ops", country: "PAN", lat: 8.5380, lng: -80.7821 },
+      { name: "Abu Dhabi Hub", country: "UAE", lat: 24.4539, lng: 54.3773 },
+      { name: "Casablanca", country: "MAR", lat: 31.7917, lng: -7.0926 },
+      { name: "Lagos Center", country: "NGA", lat: 9.0820, lng: 8.6753 },
+      { name: "London Office", country: "GBR", lat: 55.3781, lng: -3.4360 },
+      { name: "Oslo Data", country: "NOR", lat: 60.4720, lng: 8.4689 },
+      { name: "Stockholm", country: "SWE", lat: 60.1282, lng: 18.6435 },
+      { name: "Amsterdam", country: "NLD", lat: 52.1326, lng: 5.2913 },
+      { name: "Berlin Node", country: "DEU", lat: 51.1657, lng: 10.4515 },
+      { name: "Brussels", country: "BEL", lat: 50.8503, lng: 4.3517 },
+      { name: "Wellington", country: "NZL", lat: -40.9006, lng: 174.8860 },
+      { name: "Perth Site", country: "AUS", lat: -31.9505, lng: 115.8605 },
+      { name: "Santiago", country: "CHL", lat: -35.6751, lng: -71.5430 }
     ];
 
-    // 2. Configuración Fidedigna a Surveillance Watch
-    const mundo = Globe()
-      (document.getElementById('globo-surveillance'))
+    // --- GENERAR ARCOS (CONEXIONES) ---
+    // Para imitar Surveillance Watch, creamos lineas que conectan sitios.
+    // Aquí conectamos todos con "Texas" y "Bruselas" para simular tráfico.
+    const arcsData = [];
+    rawData.forEach(site => {
+      if (site.name !== "Texas HQ") {
+        arcsData.push({
+          startLat: 31.9686, startLng: -99.9018, // Desde Texas
+          endLat: site.lat, endLng: site.lng,    // Hasta el sitio
+          color: ['rgba(0, 255, 204, 0)', 'rgba(0, 255, 204, 0.5)'] // Desvanecido
+        });
+      }
+    });
+
+    // --- RENDERIZAR LA LISTA LATERAL ---
+    const listContainer = document.getElementById('entity-list');
+    rawData.forEach(site => {
+      const div = document.createElement('div');
+      div.className = 'entity-item';
+      div.innerHTML = `<span>${site.name}</span> <span class="status-dot"></span>`;
       
-      // -- A. LA TEXTURA CLAVE: "Earth at Night" --
-      // Esta es la imagen satelital real de las luces de la tierra.
+      // Al hacer click en la lista, el globo gira a ese sitio
+      div.onclick = () => {
+        world.pointOfView({ lat: site.lat, lng: site.lng, altitude: 1.5 }, 1500);
+      };
+      
+      listContainer.appendChild(div);
+    });
+
+    // --- CONFIGURACIÓN DEL GLOBO ---
+    const world = Globe()
+      (document.getElementById('globe-viz'))
+      
+      // 1. Texturas Fieles (Noche + Cielo Estrellado)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-      .backgroundColor('#000000') // Negro absoluto
+      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       
-      // -- B. Atmósfera estilo "Monitor" --
-      // Un brillo muy sutil azulado, apenas visible, para dar volumen.
-      .atmosphereColor('#4aaee3') 
-      .atmosphereAltitude(0.15)
+      // 2. Atmósfera (El brillo azul característico)
+      .atmosphereColor('#2a4494') // Un azul profundo
+      .atmosphereAltitude(0.2)
       
-      // -- C. Puntos de Datos (Tus operaciones) --
-      // Usamos un verde brillante (#21ff00) o Cian que contrasta con las luces amarillas del mapa.
-      .pointsData(misSedes)
+      // 3. Puntos (Sedes)
+      .pointsData(rawData)
       .pointLat('lat')
       .pointLng('lng')
-      .pointColor(() => '#21ff00') // Verde neón estilo "Radar activo"
-      .pointAltitude(0.005)        // Muy pegados a la tierra
-      .pointRadius(0.5)            // Puntos pequeños y precisos
+      .pointColor(() => '#00ffcc') // Cian "Surveillance"
+      .pointAltitude(0.01)
+      .pointRadius(0.4) // Puntos pequeños y finos
+      .pointPulseRing(true) // Anillo pulsante
       
-      // -- D. Añadir Anillos de "Ping" (Opcional pero recomendado para este estilo) --
-      // Esto hace que el mapa se sienta "en vivo".
-      .ringsData(misSedes)
-      .ringColor(() => (t) => `rgba(33, 255, 0, ${1-t})`) // Mismo verde desvaneciéndose
-      .ringMaxRadius(3)
-      .ringPropagationSpeed(2)
-      .ringRepeatPeriod(2000) // Un pulso lento cada 2 segundos
+      // 4. Arcos (Las lineas de conexión)
+      .arcsData(arcsData)
+      .arcColor('color')
+      .arcDashLength(0.4)
+      .arcDashGap(4)
+      .arcDashInitialGap(() => Math.random() * 5)
+      .arcDashAnimateTime(2000) // Animación de flujo de datos
+      .arcStroke(0.3) // Lineas muy finas
 
-      // -- E. Etiquetas estilo UI --
+      // 5. Etiquetas
       .pointLabel(d => `
-        <div style="
-          background: rgba(0,0,0,0.9); 
-          color: #21ff00; 
-          border: 1px solid #21ff00;
-          padding: 5px 10px; 
-          font-family: 'Courier New', monospace; 
-          font-size: 12px;
-          text-transform: uppercase;
-        ">
-          ${d.name}
+        <div class="globe-tooltip">
+          <b>${d.name}</b><br>
+          <span style="font-size:10px; opacity:0.8">COORDS: ${d.lat.toFixed(2)}, ${d.lng.toFixed(2)}</span>
         </div>
       `);
 
-    // 3. Control de Cámara
-    mundo.controls().autoRotate = true;
-    mundo.controls().autoRotateSpeed = 0.5;
+    // Ajustes de Cámara
+    world.controls().autoRotate = true;
+    world.controls().autoRotateSpeed = 0.6;
+    
+    // Ajuste de colores del material para que sea oscuro pero visible
+    world.globeMaterial().color = new THREE.Color(0x555555); // Aclara un poco la textura negra
+    
   </script>
 </body>
 </html>
