@@ -1,64 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MicroretailX LLC</title>
+# MicroretailX
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #000;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                   Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue",
-                   Arial, sans-serif;
-    }
+<p align="center">
+  <svg width="420" height="140" viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#00eaff"/>
+        <stop offset="100%" stop-color="#ffffff"/>
+      </linearGradient>
+    </defs>
 
-    .container {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 24px;
-      box-sizing: border-box;
-    }
+    <rect width="420" height="140" fill="#000"/>
 
-    h1 {
-      font-size: 22px;
-      font-weight: 500;
-      letter-spacing: 1.2px;
-      margin: 0 0 18px 0;
-    }
+    <line x1="40" y1="20" x2="380" y2="120" stroke="url(#g)" stroke-width="1.5">
+      <animate attributeName="opacity"
+               values="0.15;0.9;0.15"
+               dur="3.5s"
+               repeatCount="indefinite"/>
+    </line>
 
-    p {
-      font-size: 14px;
-      opacity: 0.7;
-      margin: 0 0 40px 0;
-    }
+    <line x1="380" y1="20" x2="40" y2="120" stroke="url(#g)" stroke-width="1.5">
+      <animate attributeName="opacity"
+               values="0.9;0.15;0.9"
+               dur="3.5s"
+               repeatCount="indefinite"/>
+    </line>
 
-    footer {
-      position: absolute;
-      bottom: 18px;
-      font-size: 10px;
-      opacity: 0.45;
-      letter-spacing: 0.8px;
-    }
-  </style>
-</head>
+    <text x="210" y="78"
+          text-anchor="middle"
+          fill="#e8ffff"
+          font-size="14"
+          font-family="monospace"
+          opacity="0.85">
+      We’re working.
+      <animate attributeName="opacity"
+               values="0.3;0.9;0.3"
+               dur="2.8s"
+               repeatCount="indefinite"/>
+    </text>
+  </svg>
+</p>
 
-<body>
-  <div class="container">
-    <h1>MicroretailX LLC</h1>
-    <p>This repository is currently under active development.</p>
-  </div>
-
-  <footer>
-    © MicroretailX LLC — All rights reserved.
-  </footer>
-</body>
-</html>
+<p align="center">
+Nothing here is accidental.
+</p>
