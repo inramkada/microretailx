@@ -5,13 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Privacy | microretailX</title>
   <style>
-    html, body{
-      margin:0;
-      padding:0;
-      background:#000;
-      overflow:hidden;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-    }
+    html, body{ margin:0; padding:0; background:#000; overflow:hidden; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; }
     canvas{ display:block; transition: filter 1.2s ease-in-out, opacity 1.2s ease-in-out; }
     body.consent-locked canvas{ filter: grayscale(1) brightness(0.72) contrast(1.08); opacity: 0.85; }
     body.consent-waking canvas{ filter: grayscale(0) brightness(1) contrast(1); opacity: 1; }
@@ -52,12 +46,10 @@
       display:none;
     }
     .consent-banner.open{ display:block; }
-
     .consent-row{ display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
     .consent-text{ color:#e8ffff; opacity:.92; font-size:13px; line-height:1.4; max-width:860px; }
     .consent-text a{ color:#fff; text-decoration:none; opacity:.95; text-shadow:0 0 10px rgba(255,255,255,.35); }
     .consent-text a:hover{ text-decoration:underline; opacity:1; }
-
     .consent-actions{ display:flex; gap:10px; flex-wrap:wrap; }
     .consent-btn{
       appearance:none;
@@ -85,7 +77,6 @@
       padding:18px; box-sizing:border-box;
     }
     .consent-modal-backdrop.open{ display:flex; }
-
     .consent-modal{
       width:min(720px,100%);
       border-radius:16px;
@@ -108,7 +99,6 @@
       color:#fff; cursor:pointer; font-family: inherit; font-size:14px; opacity:.9;
     }
     .consent-modal-close:hover{ opacity:1; }
-
     .consent-modal-body{
       padding:14px 16px 8px;
       color:#e8ffff; font-size:13px; line-height:1.45; opacity:.93;
@@ -171,14 +161,9 @@
     body.consent-locked .consent-banner.open{ animation: execPulse 1.2s ease-in-out infinite alternate; }
 
     .policy-wrap{
-      position:absolute;
-      inset:0;
-      z-index:9;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:84px 18px 86px;
-      box-sizing:border-box;
+      position:absolute; inset:0; z-index:9;
+      display:flex; align-items:center; justify-content:center;
+      padding:84px 18px 86px; box-sizing:border-box;
     }
     .policy-panel{
       width:min(980px, 100%);
@@ -195,43 +180,20 @@
     }
 
     .policy-header{
-      position:sticky;
-      top:0;
-      z-index:2;
+      position:sticky; top:0; z-index:2;
       background: linear-gradient(to bottom, rgba(0,8,18,.98), rgba(0,8,18,.78));
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(0,234,255,.22);
       margin: -14px -16px 14px;
       padding: 14px 16px 10px;
     }
-
-    .policy-title{
-      font-size:13px;
-      letter-spacing:1px;
-      text-transform:uppercase;
-      margin:0 0 6px;
-    }
-    .policy-meta{
-      font-size:11px;
-      line-height:1.55;
-      color:#b8faff;
-      opacity:.92;
-      margin:0;
-    }
-    .policy-docmeta{
-      margin-top:8px;
-      font-size:10px;
-      letter-spacing:.8px;
-      opacity:.62;
-      color:#e8ffff;
-    }
+    .policy-title{ font-size:13px; letter-spacing:1px; text-transform:uppercase; margin:0 0 6px; }
+    .policy-meta{ font-size:11px; line-height:1.55; color:#b8faff; opacity:.92; margin:0; }
+    .policy-docmeta{ margin-top:8px; font-size:10px; letter-spacing:.8px; opacity:.62; color:#e8ffff; }
 
     .policy-actions.compact{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      align-items:center;
+      display:flex; gap:10px; flex-wrap:wrap;
+      justify-content:flex-end; align-items:center;
       margin-top:10px;
     }
     .icon-btn{
@@ -248,25 +210,13 @@
       text-decoration:none;
     }
     .icon-btn svg{ width:16px;height:16px; display:block; }
-    .icon-btn:hover{
-      opacity:1;
-      border-color: rgba(255,255,255,.22);
-      background: rgba(255,255,255,.04);
-    }
+    .icon-btn:hover{ opacity:1; border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.04); }
     .icon-btn:active{ background: rgba(255,255,255,.06); }
     .icon-btn[disabled]{ opacity:.30; cursor:not-allowed; }
-    .icon-btn:focus-visible{
-      outline:none;
-      border-color: rgba(0,234,255,.40);
-      box-shadow:0 0 0 2px rgba(0,234,255,.25);
-      opacity:1;
-    }
+    .icon-btn:focus-visible{ outline:none; border-color: rgba(0,234,255,.40); box-shadow:0 0 0 2px rgba(0,234,255,.25); opacity:1; }
 
     .policy-body{
-      font-size:14.5px;
-      line-height:1.85;
-      color:#fff;
-      opacity:.985;
+      font-size:14.5px; line-height:1.85; color:#fff; opacity:.985;
       text-shadow: 0 0 10px rgba(0,0,0,.35);
       letter-spacing: .1px;
     }
@@ -312,15 +262,7 @@
       body{ background:#fff !important; overflow:visible !important; }
       canvas, .footer-bar, .consent-banner, .consent-modal-backdrop, .privacy-toast{ display:none !important; }
       .policy-wrap{ position:static !important; padding:0 !important; }
-      .policy-panel{
-        max-height:none !important;
-        overflow:visible !important;
-        border:none !important;
-        box-shadow:none !important;
-        background:#fff !important;
-        color:#000 !important;
-        text-shadow:none !important;
-      }
+      .policy-panel{ max-height:none !important; overflow:visible !important; border:none !important; box-shadow:none !important; background:#fff !important; color:#000 !important; text-shadow:none !important; }
       .policy-header{ position:static !important; border:none !important; background:#fff !important; margin:0 !important; padding:0 0 12px !important; }
       .policy-meta, .policy-docmeta{ color:#000 !important; opacity:1 !important; }
       .policy-body{ color:#000 !important; opacity:1 !important; }
@@ -329,30 +271,15 @@
     }
 
     .footer-links{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      align-items:center;
-      gap:0;
-      text-align:center;
-      padding:0 16px;
-      line-height:1.9;
+      display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
+      gap:0; text-align:center; padding:0 16px; line-height:1.9;
     }
-    .footer-links a{
-      display:inline-block;
-      margin:4px 0;
-      padding:0 10px;
-      position:relative;
-    }
+    .footer-links a{ display:inline-block; margin:4px 0; padding:0 10px; position:relative; }
     .footer-links a:not(:last-child)::after{
       content:"·";
-      position:absolute;
-      right:-2px;
-      top:50%;
-      transform:translateY(-52%);
-      opacity:.38;
+      position:absolute; right:-2px; top:50%;
+      transform:translateY(-52%); opacity:.38;
     }
-
     @media (max-width: 600px){
       .footer-links{ padding:0 12px; }
       .footer-links a{ padding:0 10px; }
@@ -375,7 +302,7 @@
           MICRORETAILX LLC (Delaware, USA)<br/>
           (MicroretailX Group – Global Operations Framework)<br/>
           <span class="mono">Last updated:</span> 2026-01-01 · <span class="mono">Effective date:</span> 2026-01-01
-          <div class="policy-docmeta">Document ID: MRX-PRIV-GDPR-2026-01-01 · Version: 2</div>
+          <div class="policy-docmeta">Document ID: MRX-PRIV-GDPR-2026-01-01 · Version: 3</div>
         </div>
 
         <div class="policy-actions compact">
@@ -409,81 +336,79 @@
 
         <h2>1. Purpose and Scope</h2>
         <p><span class="mono">1.1</span> This Privacy Policy explains how <span class="mono">MICRORETAILX LLC</span> (“MICRORETAILX”, “we”, “us”, “our”) processes personal data in connection with this Website and related communications.</p>
-        <p><span class="mono">1.2</span> The Website is designed under a <strong>Zero Data Strategy</strong>: we provide information; we do not aim to collect, analyze, profile, or monetize visitor data.</p>
-        <p><span class="mono">1.3</span> For users in the European Economic Area (“EEA”), the United Kingdom (“UK”), and Switzerland, this Policy is intended to meet GDPR/UK GDPR transparency and applicable ePrivacy requirements. For other jurisdictions, we apply equivalent high standards where feasible.</p>
+        <p><span class="mono">1.2</span> The Website follows a <strong>Zero Data Strategy</strong>: we provide information; we do not aim to collect, analyze, profile, or monetize visitor data.</p>
+        <p><span class="mono">1.3</span> For users in the European Economic Area (“EEA”), the United Kingdom (“UK”), and Switzerland, this Policy is intended to meet GDPR/UK GDPR transparency and applicable ePrivacy requirements.</p>
 
         <h2>2. Controller and Contact</h2>
         <p><span class="mono">2.1</span> Data controller: <strong>MICRORETAILX LLC</strong> (Delaware, USA).</p>
         <p><span class="mono">2.2</span> Privacy/legal contact: <span class="mono">legal@microretailx.com</span>.</p>
 
         <h2>3. DPO / EU Representative</h2>
-        <p><span class="mono">3.1</span> Data Protection Officer (“DPO”): not appointed unless legally required based on the nature and scale of processing. If appointed, details will be published here.</p>
+        <p><span class="mono">3.1</span> DPO: not appointed unless legally required based on the nature and scale of processing. If appointed, details will be published here.</p>
         <p><span class="mono">3.2</span> EU/UK Representative (Art. 27 GDPR / UK GDPR): not designated unless legally required. If designated, details will be published here.</p>
 
         <h2>4. Categories of Personal Data We Process</h2>
         <p><span class="mono">4.1</span> <strong>Strictly necessary technical data</strong> for website delivery and security. This may include limited technical information processed by servers and security layers (e.g., timestamps, requested URLs, basic device/browser headers, and security/abuse signals) strictly to deliver the service and protect integrity.</p>
-        <p><span class="mono">4.2</span> <strong>Cookie preference data</strong> (your choices) and a <strong>non-identifying consent reference</strong> used for accountability and to respect your selection.</p>
+        <p><span class="mono">4.2</span> <strong>Cookie preference data</strong> stored on your device (your choices) to respect your selection.</p>
         <p><span class="mono">4.3</span> <strong>Communications</strong>: if you contact us (email; and in the future, a contact form), we process the information you provide (e.g., contact details and message content) to respond and to maintain compliance records where necessary.</p>
-        <p><span class="mono">4.4</span> We do not run behavioural analytics or marketing tracking by default.</p>
+        <p><span class="mono">4.4</span> We do not use marketing cookies. Optional analytics are disabled by default and will only be enabled if you explicitly opt in.</p>
 
-        <h2>5. Sources</h2>
-        <p><span class="mono">5.1</span> Data is obtained directly from you (when you send it) and from your device when accessing the Website (strictly necessary technical data).</p>
+        <h2>5. Purposes</h2>
+        <p><span class="mono">5.1</span> Provide the requested information and deliver website content.</p>
+        <p><span class="mono">5.2</span> Maintain security, prevent abuse, and ensure service integrity.</p>
+        <p><span class="mono">5.3</span> Respect cookie preferences stored on your device.</p>
+        <p><span class="mono">5.4</span> Respond to inquiries (email / contact form when enabled).</p>
 
-        <h2>6. Purposes</h2>
-        <p><span class="mono">6.1</span> Provide the requested information and deliver website content.</p>
-        <p><span class="mono">6.2</span> Maintain security, prevent abuse, and ensure service integrity.</p>
-        <p><span class="mono">6.3</span> Record and honor cookie preferences and demonstrate compliance.</p>
-        <p><span class="mono">6.4</span> Respond to inquiries (email / contact form when enabled).</p>
+        <h2>6. Legal Bases (GDPR / UK GDPR)</h2>
+        <p><span class="mono">6.1</span> <strong>Website delivery and security</strong>: legitimate interests (Art. 6(1)(f)) in operating a secure and reliable service; and/or performance of a service requested by the user (Art. 6(1)(b)) where applicable.</p>
+        <p><span class="mono">6.2</span> <strong>Strictly necessary cookies</strong>: legitimate interests and/or necessity for providing a service requested by you, depending on context and local ePrivacy implementation.</p>
+        <p><span class="mono">6.3</span> <strong>Optional analytics</strong> (if ever enabled): consent (Art. 6(1)(a)).</p>
+        <p><span class="mono">6.4</span> <strong>Communications</strong>: legitimate interests (Art. 6(1)(f)) and/or pre-contractual steps (Art. 6(1)(b)), plus legal obligations (Art. 6(1)(c)) where applicable.</p>
 
-        <h2>7. Legal Bases (GDPR / UK GDPR)</h2>
-        <p><span class="mono">7.1</span> <strong>Website delivery and security</strong>: legitimate interests (Art. 6(1)(f)) in operating a secure and reliable service; and/or performance of a service requested by the user (Art. 6(1)(b)) where applicable.</p>
-        <p><span class="mono">7.2</span> <strong>Cookie preferences</strong>: legitimate interests / accountability and compliance; and consent (Art. 6(1)(a)) where required for optional categories.</p>
-        <p><span class="mono">7.3</span> <strong>Communications</strong>: legitimate interests (Art. 6(1)(f)) and/or pre-contractual steps (Art. 6(1)(b)) depending on context; plus legal obligations (Art. 6(1)(c)) where applicable.</p>
+        <h2>7. Cookies and Similar Technologies (ePrivacy)</h2>
+        <p><span class="mono">7.1</span> We use <strong>necessary cookies</strong> to store your cookie preferences and keep the site functional and secure.</p>
+        <p><span class="mono">7.2</span> We do not use marketing cookies.</p>
+        <p><span class="mono">7.3</span> Optional analytics remain disabled by default and would only load after explicit opt-in via “Cookie Preferences”.</p>
 
-        <h2>8. Cookies and Similar Technologies (ePrivacy)</h2>
-        <p><span class="mono">8.1</span> We use <strong>necessary cookies</strong> to store your cookie preferences and keep the site functional and secure.</p>
-        <p><span class="mono">8.2</span> Optional categories (analytics/marketing) are disabled by default and will only load after explicit, granular consent via “Cookie Preferences”.</p>
-        <p><span class="mono">8.3</span> You can refuse, modify, or withdraw consent at any time via “Cookie Preferences”.</p>
+        <h2>8. Consent Reference Hash (Browser-Side Accountability)</h2>
+        <p><span class="mono">8.1</span> To support accountability while minimizing data, the Website may generate a <strong>one-way cryptographic hash (SHA-256)</strong> of your cookie preference record <strong>locally in your browser</strong>.</p>
+        <p><span class="mono">8.2</span> This reference is stored <strong>on your device</strong> (e.g., in a cookie/local storage) to help preserve your choices and provide a non-identifying reference if needed.</p>
+        <p><span class="mono">8.3</span> MICRORETAILX does not receive or store this browser-side consent reference on its servers unless you voluntarily provide it (for example, in an email to support).</p>
 
-        <h2>9. Consent Reference Hash (Accountability by Design)</h2>
-        <p><span class="mono">9.1</span> To support accountability while minimizing data, we generate a <strong>consent reference</strong> derived from your preference record using a <strong>one-way cryptographic hash (SHA-256)</strong>.</p>
-        <p><span class="mono">9.2</span> This hash is used to evidence that a consent event occurred and to help avoid storing unnecessary identifiers. It is <strong>not used to identify you</strong> and does not contain your name, email, or content.</p>
-        <p><span class="mono">9.3</span> The consent reference may be displayed on-screen (e.g., “CONSENT-REF”) and stored together with your preference flags.</p>
+        <h2>9. Processors and Service Providers</h2>
+        <p><span class="mono">9.1</span> We use <strong>Cloudflare</strong> to provide security and performance services (e.g., CDN and protective controls). Cloudflare may process limited technical data as part of delivering and securing the Website.</p>
+        <p><span class="mono">9.2</span> We use privacy-focused encrypted email services (e.g., <strong>Proton</strong>) for communications and support end-to-end encryption where available.</p>
 
-        <h2>10. Processors and Service Providers</h2>
-        <p><span class="mono">10.1</span> We use <strong>Cloudflare</strong> to provide security and performance services (e.g., CDN and protective controls). Cloudflare may process limited technical data as part of delivering and securing the Website.</p>
-        <p><span class="mono">10.2</span> Where service providers act as processors, they are engaged under appropriate contractual terms and confidentiality and are only permitted to process data for the agreed purposes.</p>
+        <h2>10. Sharing and Disclosure</h2>
+        <p><span class="mono">10.1</span> We do not sell personal data.</p>
+        <p><span class="mono">10.2</span> We may disclose data if required by law or to protect rights, safety, and security.</p>
 
-        <h2>11. Sharing and Disclosure</h2>
-        <p><span class="mono">11.1</span> We do not sell personal data.</p>
-        <p><span class="mono">11.2</span> We may disclose data if required by law, court order, or to protect rights, safety, and security.</p>
+        <h2>11. International Transfers</h2>
+        <p><span class="mono">11.1</span> MICRORETAILX LLC is established in the United States. If personal data from the EEA/UK/Switzerland is transferred internationally, we implement appropriate safeguards where required (e.g., Standard Contractual Clauses or equivalent mechanisms).</p>
 
-        <h2>12. International Transfers</h2>
-        <p><span class="mono">12.1</span> MICRORETAILX LLC is established in the United States. If personal data from the EEA/UK/Switzerland is transferred internationally, we implement appropriate safeguards where required (e.g., Standard Contractual Clauses or equivalent mechanisms).</p>
+        <h2>12. Retention</h2>
+        <p><span class="mono">12.1</span> We retain data only for as long as necessary for the purposes described and to comply with legal obligations.</p>
+        <p><span class="mono">12.2</span> Cookie preferences and browser-side consent references are stored on your device and may be refreshed periodically.</p>
+        <p><span class="mono">12.3</span> Contact messages are retained for a reasonable period to manage responses and compliance, then deleted or minimized where appropriate.</p>
 
-        <h2>13. Retention</h2>
-        <p><span class="mono">13.1</span> We retain data only for as long as necessary for the purposes described and to comply with legal obligations.</p>
-        <p><span class="mono">13.2</span> Cookie preferences and consent references are retained to respect your choices and to demonstrate compliance, and may be refreshed periodically.</p>
-        <p><span class="mono">13.3</span> Contact messages are retained for a reasonable period to manage responses and compliance, then deleted or minimized where appropriate.</p>
+        <h2>13. Security</h2>
+        <p><span class="mono">13.1</span> We apply technical and organizational measures designed to protect the Website and communications, including security controls supported by Cloudflare and encrypted email services.</p>
 
-        <h2>14. Security</h2>
-        <p><span class="mono">14.1</span> We apply technical and organizational measures designed to protect the Website and data against unauthorized access, loss, misuse, and alteration, including security controls supported by Cloudflare.</p>
+        <h2>14. Your Rights (EEA/UK/CH)</h2>
+        <p><span class="mono">14.1</span> Subject to legal conditions, you may have rights to: access, rectification, erasure, restriction, portability, objection; and to withdraw consent at any time without affecting processing before withdrawal.</p>
+        <p><span class="mono">14.2</span> To exercise rights, contact: <span class="mono">legal@microretailx.com</span>. We may request proportionate information to verify identity.</p>
+        <p><span class="mono">14.3</span> You may lodge a complaint with a supervisory authority where applicable.</p>
 
-        <h2>15. Your Rights (EEA/UK/CH)</h2>
-        <p><span class="mono">15.1</span> Subject to legal conditions, you may have rights to: access, rectification, erasure, restriction, portability, objection; and to withdraw consent at any time without affecting processing before withdrawal.</p>
-        <p><span class="mono">15.2</span> To exercise rights, contact: <span class="mono">legal@microretailx.com</span>. We may request proportionate information to verify identity.</p>
-        <p><span class="mono">15.3</span> You may lodge a complaint with a supervisory authority where applicable.</p>
+        <h2>15. Automated Decision-Making</h2>
+        <p><span class="mono">15.1</span> We do not perform automated decision-making producing legal or similarly significant effects through this Website.</p>
 
-        <h2>16. Automated Decision-Making</h2>
-        <p><span class="mono">16.1</span> We do not perform automated decision-making producing legal or similarly significant effects through this Website.</p>
+        <h2>16. Children</h2>
+        <p><span class="mono">16.1</span> This Website is not intended for children under 16 and we do not knowingly collect children’s personal data.</p>
 
-        <h2>17. Children</h2>
-        <p><span class="mono">17.1</span> This Website is not intended for children under 16 and we do not knowingly collect children’s personal data.</p>
+        <h2>17. Changes</h2>
+        <p><span class="mono">17.1</span> We may update this Policy. The “Last updated” date reflects the current version.</p>
 
-        <h2>18. Changes</h2>
-        <p><span class="mono">18.1</span> We may update this Policy. The “Last updated” date reflects the current version.</p>
-
-        <h2>19. Contact</h2>
+        <h2>18. Contact</h2>
         <p><span class="mono">MICRORETAILX LLC</span> · Attn: Legal &amp; Compliance · <span class="mono">legal@microretailx.com</span></p>
 
       </div>
@@ -506,7 +431,7 @@
   <div class="consent-banner" id="consentBanner" aria-live="polite">
     <div class="consent-row">
       <div class="consent-text">
-        We use necessary cookies to operate this site. Optional analytics/marketing remain disabled by default and will only load with your consent.
+        We use necessary cookies to operate this site. Optional analytics remain disabled by default and would only load with your consent.
         You can change your choice anytime via <a href="#" id="cookiePreferencesInline">Cookie Preferences</a>.
       </div>
       <div class="consent-actions">
@@ -541,19 +466,11 @@
             </div>
             <div class="toggle" id="toggleAnalytics" role="switch" aria-checked="false" tabindex="0" aria-label="Analytics cookies"></div>
           </div>
-
-          <div class="consent-cat">
-            <div>
-              <strong>Marketing</strong>
-              <p>Optional. Disabled by default. Enabled only with your consent.</p>
-            </div>
-            <div class="toggle" id="toggleMarketing" role="switch" aria-checked="false" tabindex="0" aria-label="Marketing cookies"></div>
-          </div>
         </div>
       </div>
       <div class="consent-modal-footer">
         <button class="consent-btn" id="consentSave">Save</button>
-        <button class="consent-btn primary" id="consentAcceptAll">Accept All</button>
+        <button class="consent-btn primary" id="consentAcceptAll">Accept (Analytics)</button>
       </div>
     </div>
   </div>
@@ -586,7 +503,7 @@
     }
     numberSections();
 
-    const CONSENT_KEY = "mrxx_consent_v2";
+    const CONSENT_KEY = "mrxx_consent_v3";
     const CONSENT_MAX_DAYS = 365;
 
     const consentBanner = document.getElementById("consentBanner");
@@ -603,7 +520,6 @@
     const consentAcceptAll = document.getElementById("consentAcceptAll");
 
     const toggleAnalytics = document.getElementById("toggleAnalytics");
-    const toggleMarketing = document.getElementById("toggleMarketing");
 
     function lockSite(){
       document.body.classList.add("consent-locked");
@@ -651,22 +567,12 @@
     }
 
     async function saveConsent(consent){
-      // Store the full record locally
       localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
-
-      // Store a minimized cookie record + consentRefHash (no message content, no identifiers)
-      const minimal = {
-        necessary: true,
-        analytics: !!consent.analytics,
-        marketing: !!consent.marketing,
-        ts: consent.ts,
-        decision: consent.decision,
-        consentRef: consent.consentRef // already hashed
-      };
+      const minimal = { necessary:true, analytics: !!consent.analytics, ts: consent.ts, decision: consent.decision, consentRef: consent.consentRef };
       setCookie(CONSENT_KEY, JSON.stringify(minimal), CONSENT_MAX_DAYS);
     }
 
-    function displayAuditID(ref){
+    function displayConsentRef(ref){
       let el = document.getElementById("audit-display");
       if (!el){
         el = document.createElement("div");
@@ -674,13 +580,12 @@
         el.style.cssText = "font-size:7px;opacity:0.25;margin-top:8px;letter-spacing:1px;text-transform:uppercase;color:white;";
         document.querySelector(".footer-bar").appendChild(el);
       }
-      el.textContent = ref ? `CONSENT-REF: ${String(ref).slice(0,24).toUpperCase()}` : "PREFERENCES: MINIMAL";
+      el.textContent = ref ? `CONSENT-REF (LOCAL): ${String(ref).slice(0,24).toUpperCase()}` : "PREFERENCES: MINIMAL";
     }
 
     function applyConsent(consent){
       document.documentElement.dataset.analytics = consent.analytics ? "1" : "0";
-      document.documentElement.dataset.marketing = consent.marketing ? "1" : "0";
-      document.documentElement.dataset.consent = (consent.analytics || consent.marketing) ? "granted" : "denied";
+      document.documentElement.dataset.consent = consent.analytics ? "granted" : "denied";
     }
 
     function setToggle(el, on){
@@ -689,9 +594,8 @@
     }
 
     function openConsentPanel(){
-      const current = loadConsent() || { necessary:true, analytics:false, marketing:false, ts:Date.now(), decision:"rejected", consentRef:null };
+      const current = loadConsent() || { necessary:true, analytics:false, ts:Date.now(), decision:"rejected", consentRef:null };
       setToggle(toggleAnalytics, !!current.analytics);
-      setToggle(toggleMarketing, !!current.marketing);
       consentModalBackdrop.classList.add("open");
       consentModalBackdrop.setAttribute("aria-hidden", "false");
     }
@@ -706,37 +610,27 @@
       wakeSite();
     }
 
-    async function buildConsentRecord(analytics, marketing){
-      const decision = (analytics || marketing) ? "accepted" : "rejected";
-      const base = {
-        necessary: true,
-        analytics: !!analytics,
-        marketing: !!marketing,
-        ts: Date.now(),
-        decision
-      };
-      // Hash only the preference record (accountability), not a user identifier.
+    async function buildConsentRecord(analytics){
+      const base = { necessary:true, analytics: !!analytics, ts: Date.now(), decision: analytics ? "accepted" : "rejected" };
       const ref = await sha256Hex(JSON.stringify(base));
       return { ...base, consentRef: ref };
     }
 
     async function setAllConsent(val){
-      const granted = !!val;
-      const consent = await buildConsentRecord(granted, granted);
+      const consent = await buildConsentRecord(!!val);
       await saveConsent(consent);
       applyConsent(consent);
-      displayAuditID(consent.consentRef);
+      displayConsentRef(consent.consentRef);
       hideBanner();
       closeConsentPanel();
     }
 
     async function saveFromPanel(){
       const analytics = toggleAnalytics.classList.contains("on");
-      const marketing = toggleMarketing.classList.contains("on");
-      const consent = await buildConsentRecord(analytics, marketing);
+      const consent = await buildConsentRecord(analytics);
       await saveConsent(consent);
       applyConsent(consent);
-      displayAuditID(consent.consentRef);
+      displayConsentRef(consent.consentRef);
       hideBanner();
       closeConsentPanel();
     }
@@ -761,15 +655,13 @@
     document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closeConsentPanel(); });
 
     toggleAnalytics.addEventListener("click", ()=>toggleSwitch(toggleAnalytics));
-    toggleMarketing.addEventListener("click", ()=>toggleSwitch(toggleMarketing));
     toggleAnalytics.addEventListener("keydown", (e)=>handleSwitchKey(toggleAnalytics, e));
-    toggleMarketing.addEventListener("keydown", (e)=>handleSwitchKey(toggleMarketing, e));
 
     (async function initConsent(){
       const existing = loadConsent();
       if (existing){
         applyConsent(existing);
-        displayAuditID(existing.consentRef || null);
+        displayConsentRef(existing.consentRef || null);
         wakeSite();
       } else {
         lockSite();
@@ -783,66 +675,32 @@
         showToast("Nothing to print.");
         return;
       }
-
-      const html = `<!doctype html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+      const html = `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>microretailX Privacy</title>
 <style>
-  html,body{margin:0;padding:0;background:#fff;color:#000;font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
-  .wrap{padding:18px 20px;}
-  @page{ margin:14mm; }
-  h2{margin:18px 0 8px;font-size:12.5px;letter-spacing:1px;text-transform:uppercase;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;}
-  .meta{font-size:11px;line-height:1.45;margin-bottom:14px;}
-  .body{font-size:13px;line-height:1.75;}
-  .secno{margin-right:8px;}
-</style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="meta">
-      <div><strong>MICRORETAILX LLC</strong> (Delaware, USA)</div>
-      <div>MicroretailX Group – Global Operations Framework</div>
-      <div>Last updated: 2026-01-01 · Effective date: 2026-01-01</div>
-    </div>
-    <div class="body">${content}</div>
-  </div>
-</body>
-</html>`;
-
+html,body{margin:0;padding:0;background:#fff;color:#000;font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
+.wrap{padding:18px 20px;}
+@page{ margin:14mm; }
+h2{margin:18px 0 8px;font-size:12.5px;letter-spacing:1px;text-transform:uppercase;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;}
+.meta{font-size:11px;line-height:1.45;margin-bottom:14px;}
+.body{font-size:13px;line-height:1.75;}
+.secno{margin-right:8px;}
+</style></head><body><div class="wrap">
+<div class="meta"><div><strong>MICRORETAILX LLC</strong> (Delaware, USA)</div><div>MicroretailX Group – Global Operations Framework</div>
+<div>Last updated: 2026-01-01 · Effective date: 2026-01-01</div></div>
+<div class="body">${content}</div></div></body></html>`;
       const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
-      iframe.style.border = "0";
-      iframe.style.opacity = "0";
-      iframe.setAttribute("aria-hidden", "true");
+      iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;";
+      iframe.setAttribute("aria-hidden","true");
       document.body.appendChild(iframe);
-
       const doc = iframe.contentWindow.document;
-      doc.open();
-      doc.write(html);
-      doc.close();
-
+      doc.open(); doc.write(html); doc.close();
       const w = iframe.contentWindow;
-      const cleanup = () => { try { document.body.removeChild(iframe); } catch(e){} };
-      const tryPrint = () => {
-        try { w.focus(); } catch(e){}
-        try { w.print(); } catch(e){ cleanup(); }
-      };
-
+      const cleanup = ()=>{ try{ document.body.removeChild(iframe);}catch(e){} };
+      const tryPrint = ()=>{ try{ w.focus(); }catch(e){} try{ w.print(); }catch(e){ cleanup(); } };
       w.onafterprint = cleanup;
-
-      if (doc.readyState === "complete") {
-        setTimeout(tryPrint, 50);
-      } else {
-        iframe.onload = () => setTimeout(tryPrint, 50);
-        setTimeout(tryPrint, 200);
-      }
+      if (doc.readyState === "complete") setTimeout(tryPrint, 50);
+      else { iframe.onload = ()=>setTimeout(tryPrint,50); setTimeout(tryPrint,200); }
     }
 
     const printBtn = document.getElementById("printPDF");
@@ -853,9 +711,7 @@
 
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha:false });
-
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    let width = window.innerWidth, height = window.innerHeight;
     const PR = Math.min(2, window.devicePixelRatio || 1);
 
     function resizeHiDPI(){
@@ -864,8 +720,7 @@
       canvas.style.width = window.innerWidth + "px";
       canvas.style.height = window.innerHeight + "px";
       ctx.setTransform(PR, 0, 0, PR, 0, 0);
-      width = window.innerWidth;
-      height = window.innerHeight;
+      width = window.innerWidth; height = window.innerHeight;
     }
     resizeHiDPI();
     window.addEventListener("resize", resizeHiDPI);
@@ -883,12 +738,9 @@
       g.addColorStop(0.35, `rgba(0,234,255,${a*0.35})`);
       g.addColorStop(1, "rgba(0,234,255,0)");
       ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
-
     function drawX(alpha){
       ctx.save();
       ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
@@ -897,7 +749,6 @@
       ctx.moveTo(0, 0); ctx.lineTo(width, height);
       ctx.moveTo(width, 0); ctx.lineTo(0, height);
       ctx.stroke();
-
       ctx.strokeStyle = `rgba(0,234,255,${alpha*0.52})`;
       ctx.lineWidth = 3.2;
       ctx.beginPath();
@@ -907,15 +758,9 @@
       ctx.restore();
     }
 
-    let phaseT = 0;
-    let last = performance.now();
-
-    const PHASE_IN = 2.8;
-    const PHASE_HOLD = 1.15;
-    const PHASE_OUT = 2.2;
-    const PHASE_REST = 0.55;
+    let phaseT = 0, last = performance.now();
+    const PHASE_IN = 2.8, PHASE_HOLD = 1.15, PHASE_OUT = 2.2, PHASE_REST = 0.55;
     const CYCLE = PHASE_IN + PHASE_HOLD + PHASE_OUT + PHASE_REST;
-
     function lerp(a,b,t){ return a + (b-a)*t; }
 
     function loop(now){
@@ -926,24 +771,21 @@
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, width, height);
 
-      const cx = width / 2;
-      const cy = height / 2;
-
+      const cx = width / 2, cy = height / 2;
       const tIn = clamp(phaseT / PHASE_IN, 0, 1);
       const tHold = clamp((phaseT - PHASE_IN) / PHASE_HOLD, 0, 1);
       const tOut = clamp((phaseT - PHASE_IN - PHASE_HOLD) / PHASE_OUT, 0, 1);
+
       const inActive = phaseT < PHASE_IN;
       const holdActive = phaseT >= PHASE_IN && phaseT < PHASE_IN + PHASE_HOLD;
       const outActive = phaseT >= PHASE_IN + PHASE_HOLD && phaseT < PHASE_IN + PHASE_HOLD + PHASE_OUT;
 
       const travelIn = easeInOutCubic(tIn);
       const travelOut = easeInOutCubic(tOut);
-
       const glowUp = smoothPulse(tHold);
       const fadeOut = 1 - smoothPulse(tOut);
 
       const baseA = 0.045;
-
       let lineA = baseA;
       if (inActive) lineA = baseA + 0.08 * smoothPulse(tIn);
       if (holdActive) lineA = baseA + 0.18 * glowUp;
@@ -951,30 +793,17 @@
 
       drawX(lineA);
 
-      const origins = [
-        {x:0, y:0},
-        {x:width, y:0},
-        {x:0, y:height},
-        {x:width, y:height}
-      ];
+      const origins = [{x:0,y:0},{x:width,y:0},{x:0,y:height},{x:width,y:height}];
+      function positionFromOrigin(origin, progress){ return { x: lerp(origin.x, cx, progress), y: lerp(origin.y, cy, progress) }; }
+      function positionReturnToOrigin(origin, progress){ return { x: lerp(cx, origin.x, progress), y: lerp(cy, origin.y, progress) }; }
 
-      function positionFromOrigin(origin, progress){
-        return { x: lerp(origin.x, cx, progress), y: lerp(origin.y, cy, progress) };
-      }
-
-      function positionReturnToOrigin(origin, progress){
-        return { x: lerp(cx, origin.x, progress), y: lerp(cy, origin.y, progress) };
-      }
-
-      const headR = 62;
-      const tailSteps = 14;
-      const tailSpan = 0.10;
+      const headR = 62, tailSteps = 14, tailSpan = 0.10;
 
       function drawTrailTo(posFn, prog, alphaScale){
-        for (let oi = 0; oi < origins.length; oi++){
+        for (let oi=0; oi<origins.length; oi++){
           const o = origins[oi];
           const head = posFn(o, prog);
-          for (let i = 0; i < tailSteps; i++){
+          for (let i=0;i<tailSteps;i++){
             const k = i / tailSteps;
             const tt = clamp(prog - k*tailSpan, 0, 1);
             const e = easeInOutCubic(tt);
@@ -996,13 +825,10 @@
       } else if (outActive){
         const a = Math.max(0, 0.9 * fadeOut);
         drawTrailTo(positionReturnToOrigin, travelOut, a);
-        const centerA = (0.10 + 0.20 * fadeOut);
-        drawGlowDot(cx, cy, 78, centerA * 0.35);
+        drawGlowDot(cx, cy, 78, (0.10 + 0.20 * fadeOut) * 0.35);
       } else {
-        const restA = 0.02;
-        drawGlowDot(cx, cy, 64, restA);
+        drawGlowDot(cx, cy, 64, 0.02);
       }
-
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
@@ -1013,104 +839,64 @@
       const stopBtn = document.getElementById("ttsStop");
       const policyEl = document.getElementById("policyText");
       if (!playBtn || !pauseBtn || !stopBtn || !policyEl) return;
-
       const synth = window.speechSynthesis;
       const supported = !!(synth && window.SpeechSynthesisUtterance);
-      if (!supported){
-        playBtn.disabled = true;
-        pauseBtn.disabled = true;
-        stopBtn.disabled = true;
-        return;
-      }
+      if (!supported){ playBtn.disabled = true; pauseBtn.disabled = true; stopBtn.disabled = true; return; }
 
       function setState(state){
-        if (state === "idle"){
-          playBtn.disabled = false;
-          pauseBtn.disabled = true;
-          stopBtn.disabled = true;
-          pauseBtn.title = "Pause";
-        } else if (state === "speaking"){
-          playBtn.disabled = true;
-          pauseBtn.disabled = false;
-          stopBtn.disabled = false;
-          pauseBtn.title = "Pause";
-        } else {
-          playBtn.disabled = true;
-          pauseBtn.disabled = false;
-          stopBtn.disabled = false;
-          pauseBtn.title = "Resume";
-        }
+        if (state === "idle"){ playBtn.disabled=false; pauseBtn.disabled=true; stopBtn.disabled=true; pauseBtn.title="Pause"; }
+        else if (state === "speaking"){ playBtn.disabled=true; pauseBtn.disabled=false; stopBtn.disabled=false; pauseBtn.title="Pause"; }
+        else { playBtn.disabled=true; pauseBtn.disabled=false; stopBtn.disabled=false; pauseBtn.title="Resume"; }
       }
-
       function normalizeText(str){ return (str || "").replace(/\s+/g, " ").trim(); }
-
-      function chunkText(text, maxLen = 900){
-        const chunks = [];
-        let t = text;
-        while (t.length > maxLen){
-          let cut = t.lastIndexOf(". ", maxLen);
-          if (cut < 200) cut = t.lastIndexOf("; ", maxLen);
-          if (cut < 200) cut = t.lastIndexOf(", ", maxLen);
-          if (cut < 200) cut = maxLen;
-          chunks.push(t.slice(0, cut + 1).trim());
-          t = t.slice(cut + 1).trim();
+      function chunkText(text, maxLen=900){
+        const chunks=[]; let t=text;
+        while (t.length>maxLen){
+          let cut=t.lastIndexOf(". ",maxLen);
+          if (cut<200) cut=t.lastIndexOf("; ",maxLen);
+          if (cut<200) cut=t.lastIndexOf(", ",maxLen);
+          if (cut<200) cut=maxLen;
+          chunks.push(t.slice(0,cut+1).trim());
+          t=t.slice(cut+1).trim();
         }
         if (t.length) chunks.push(t);
         return chunks;
       }
-
-      let queue = [];
-      function cancelAll(){
-        try { synth.cancel(); } catch(_){}
-        queue = [];
-        setState("idle");
-      }
-
+      let queue=[];
+      function cancelAll(){ try{synth.cancel();}catch(_){} queue=[]; setState("idle"); }
       function speakNext(){
         if (!queue.length){ setState("idle"); return; }
-        const part = queue.shift();
-        const u = new SpeechSynthesisUtterance(part);
+        const part=queue.shift();
+        const u=new SpeechSynthesisUtterance(part);
         try{
-          const voices = synth.getVoices ? synth.getVoices() : [];
-          const enVoice = voices.find(v => /^en(-|_)?/i.test(v.lang || ""));
-          if (enVoice) u.voice = enVoice;
-          u.lang = enVoice?.lang || "en-US";
-        } catch(_){
-          u.lang = "en-US";
-        }
-        u.rate = 1.02;
-        u.pitch = 1.0;
-        u.volume = 1.0;
-        u.onend = ()=>{ if (!synth.paused) speakNext(); };
-        u.onerror = ()=>{ speakNext(); };
-        setState("speaking");
-        synth.speak(u);
+          const voices=synth.getVoices ? synth.getVoices():[];
+          const enVoice=voices.find(v=>/^en(-|_)?/i.test(v.lang||""));
+          if (enVoice) u.voice=enVoice;
+          u.lang=enVoice?.lang||"en-US";
+        }catch(_){ u.lang="en-US"; }
+        u.rate=1.02; u.pitch=1.0; u.volume=1.0;
+        u.onend=()=>{ if (!synth.paused) speakNext(); };
+        u.onerror=()=>{ speakNext(); };
+        setState("speaking"); synth.speak(u);
       }
 
-      const msg = "Audio runs locally in your browser/device (no uploads, no storage). You can stop anytime.";
-      [playBtn, pauseBtn, stopBtn].forEach(el => el.addEventListener("mouseenter", ()=>showToast(msg)));
+      const msg="Audio runs locally in your browser/device (no uploads, no storage). You can stop anytime.";
+      [playBtn,pauseBtn,stopBtn].forEach(el=>el.addEventListener("mouseenter",()=>showToast(msg)));
 
-      playBtn.addEventListener("click", ()=>{
+      playBtn.addEventListener("click",()=>{
         showToast(msg);
         cancelAll();
-        const text = normalizeText(policyEl.innerText);
+        const text=normalizeText(policyEl.innerText);
         if (!text) return;
-        queue = chunkText(text, 900);
+        queue=chunkText(text,900);
         speakNext();
       });
-
-      pauseBtn.addEventListener("click", ()=>{
-        if (synth.paused){
-          try { synth.resume(); } catch(_){}
-          setState("speaking");
-        } else {
-          try { synth.pause(); } catch(_){}
-          setState("paused");
-        }
+      pauseBtn.addEventListener("click",()=>{
+        if (synth.paused){ try{synth.resume();}catch(_){} setState("speaking"); }
+        else { try{synth.pause();}catch(_){} setState("paused"); }
       });
-
-      stopBtn.addEventListener("click", ()=>cancelAll());
-      window.addEventListener("beforeunload", ()=>{ try { synth.cancel(); } catch(_){} });
+      stopBtn.addEventListener("click",()=>cancelAll());
+      window.addEventListener("beforeunload",()=>{ try{synth.cancel();}catch(_){} });
       setState("idle");
     })();
   </script>
