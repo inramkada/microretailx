@@ -32,12 +32,10 @@
       font-size:9px; letter-spacing:1px; opacity:.45;
       pointer-events:auto; text-align:center; padding:0 14px; line-height:1.35;
     }
-
     @media (max-width: 600px){
       .footer-links{ font-size:13px; }
       .copyright{ font-size:8px; }
     }
-
     @media (prefers-reduced-motion: reduce){
       canvas{ transition:none !important; }
       body.consent-locked .consent-banner.open{ animation:none !important; }
@@ -54,12 +52,10 @@
       display:none;
     }
     .consent-banner.open{ display:block; }
-
     .consent-row{ display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
     .consent-text{ color:#e8ffff; opacity:.92; font-size:13px; line-height:1.4; max-width:860px; }
     .consent-text a{ color:#fff; text-decoration:none; opacity:.95; text-shadow:0 0 10px rgba(255,255,255,.35); }
     .consent-text a:hover{ text-decoration:underline; opacity:1; }
-
     .consent-actions{ display:flex; gap:10px; flex-wrap:wrap; }
     .consent-btn{
       appearance:none;
@@ -87,7 +83,6 @@
       padding:18px; box-sizing:border-box;
     }
     .consent-modal-backdrop.open{ display:flex; }
-
     .consent-modal{
       width:min(720px,100%);
       border-radius:16px;
@@ -329,7 +324,6 @@
       .policy-body h2{ text-decoration-color: #000 !important; text-decoration-thickness: 1px !important; }
     }
 
-    /* ---------- Footer alignment + separators (no HTML pipes) ---------- */
     .footer-links{
       display:flex;
       flex-wrap:wrap;
@@ -354,15 +348,10 @@
       transform:translateY(-52%);
       opacity:.38;
     }
-
     @media (max-width: 600px){
       .footer-links{ padding:0 12px; }
       .footer-links a{ padding:0 10px; }
       .footer-links a:not(:last-child)::after{ right:-3px; }
-    }
-
-    /* ---------- Mobile: sticky spacing ---------- */
-    @media (max-width: 600px){
       .policy-panel{ -webkit-overflow-scrolling: touch; scroll-padding-top: 140px; }
       .policy-body h2{ scroll-margin-top: 140px; }
       .policy-header{ position: sticky; top: 0; z-index: 5; }
@@ -376,12 +365,12 @@
   <div class="policy-wrap">
     <div class="policy-panel" id="policyPanel">
       <div class="policy-header">
-        <div class="policy-title">PRIVACY POLICY (GLOBAL)</div>
+        <div class="policy-title">PRIVACY POLICY (GDPR-FIRST · GLOBAL)</div>
         <div class="policy-meta">
           MICRORETAILX LLC (Delaware, USA)<br/>
           (MicroretailX Group – Global Operations Framework)<br/>
           <span class="mono">Last updated:</span> 2026-01-01 · <span class="mono">Effective date:</span> 2026-01-01
-          <div class="policy-docmeta">Document ID: MRX-PRIV-2026-01-01 · Version: 1</div>
+          <div class="policy-docmeta">Document ID: MRX-PRIV-GDPR-2026-01-01 · Version: 1</div>
         </div>
 
         <div class="policy-actions compact">
@@ -412,57 +401,86 @@
       </div>
 
       <div class="policy-body" id="policyText">
-        <h2>Scope and Principles</h2>
-        <p><span class="mono">1.1</span> This Privacy Policy explains how MICRORETAILX LLC (“MICRORETAILX”, “we”, “us”, “our”) handles information in connection with this Website.</p>
-        <p><span class="mono">1.2</span> The Website is engineered with a Zero Data Strategy by default: no accounts; no visitor profiling by default; no third-party tracking by default; optional technologies remain disabled unless you opt in.</p>
 
-        <h2>Controller and Contact</h2>
-        <p><span class="mono">2.1</span> Data controller: <span class="mono">MICRORETAILX LLC</span> (Delaware, USA).</p>
-        <p><span class="mono">2.2</span> Contact (privacy/legal): <span class="mono">legal@microretailx.com</span> (Attn: Legal &amp; Compliance).</p>
+        <h2>1. Purpose and Scope</h2>
+        <p><span class="mono">1.1</span> This Privacy Policy describes how <span class="mono">MICRORETAILX LLC</span> (“MICRORETAILX”, “we”, “us”, “our”) processes personal data in connection with this Website and related communications.</p>
+        <p><span class="mono">1.2</span> Our default design principle is a <strong>Zero Data Strategy</strong>: no account creation, no visitor profiling by default, and no optional tracking technologies unless you explicitly opt in.</p>
+        <p><span class="mono">1.3</span> For users in the European Economic Area (“EEA”), the United Kingdom (“UK”), and Switzerland, this Policy is intended to satisfy the transparency requirements under the GDPR/UK GDPR and applicable ePrivacy rules.</p>
 
-        <h2>What We Collect</h2>
-        <p><span class="mono">3.1</span> By default, we do not request personal data and do not run analytics/marketing trackers.</p>
-        <p><span class="mono">3.2</span> We may process strictly necessary technical data required for secure delivery of the Website (e.g., basic server logs, anti-abuse signals) limited to what is necessary to maintain security and integrity.</p>
-        <p><span class="mono">3.3</span> If you contact us by email, we will receive the information you include in the message and may process it to respond and maintain compliance records.</p>
+        <h2>2. Controller</h2>
+        <p><span class="mono">2.1</span> The data controller is: <strong>MICRORETAILX LLC</strong> (Delaware, USA).</p>
+        <p><span class="mono">2.2</span> Contact point for privacy/legal requests: <span class="mono">legal@microretailx.com</span>.</p>
 
-        <h2>Cookies and Similar Technologies</h2>
-        <p><span class="mono">4.1</span> We may use strictly necessary cookies to store consent choices and to protect Website integrity. Where applicable, such cookies do not require consent.</p>
-        <p><span class="mono">4.2</span> Analytics and marketing technologies (if ever enabled) are loaded only after explicit, granular consent through Cookie Preferences.</p>
-        <p><span class="mono">4.3</span> You can refuse, modify, or withdraw consent at any time via Cookie Preferences.</p>
+        <h2>3. Data Protection Officer / EU Representative</h2>
+        <p><span class="mono">3.1</span> Data Protection Officer (“DPO”): <strong>Not appointed</strong> unless and until legally required based on the nature and scale of processing. If appointed, details will be published here.</p>
+        <p><span class="mono">3.2</span> EU/UK Representative (Art. 27 GDPR / UK GDPR): <strong>Not designated</strong> unless and until legally required. If designated, details will be published here.</p>
 
-        <h2>Legal Bases (GDPR / ePrivacy where applicable)</h2>
-        <p><span class="mono">5.1</span> Strictly necessary processing: legitimate interests in security and service integrity, and/or performance of a service requested by the user (as applicable).</p>
-        <p><span class="mono">5.2</span> Optional technologies (analytics/marketing): consent.</p>
-        <p><span class="mono">5.3</span> Communications: legitimate interests and/or performance of pre-contractual steps; and legal obligations where applicable.</p>
+        <h2>4. Personal Data We Process</h2>
+        <p><span class="mono">4.1</span> <strong>Website access and delivery (strictly necessary technical data).</strong> Like most websites, servers and security layers may process limited technical data strictly required to deliver pages securely and protect integrity (e.g., timestamps, requested URLs, basic device/browser headers, and security/abuse signals).</p>
+        <p><span class="mono">4.2</span> <strong>Contact communications.</strong> If you email us, we process the information you choose to include (e.g., email address, message content) to respond and to maintain compliance records where necessary.</p>
+        <p><span class="mono">4.3</span> <strong>Cookie consent preferences.</strong> We store your cookie preference choices (and an internal consent reference) to demonstrate compliance and to ensure your choice is respected.</p>
+        <p><span class="mono">4.4</span> <strong>We do not</strong> require accounts, and we do not run behavioural analytics or marketing trackers by default.</p>
 
-        <h2>Sharing</h2>
-        <p><span class="mono">6.1</span> We do not sell personal data.</p>
-        <p><span class="mono">6.2</span> We may share limited data with service providers strictly to operate the Website (e.g., hosting/security), under confidentiality and appropriate safeguards.</p>
-        <p><span class="mono">6.3</span> We may disclose information if required by law, court order, or to protect rights, safety, and security.</p>
+        <h2>5. Sources of Data</h2>
+        <p><span class="mono">5.1</span> We collect data directly from you when you contact us, and from your device when you access the Website (strictly necessary technical data).</p>
 
-        <h2>International Transfers</h2>
-        <p><span class="mono">7.1</span> MICRORETAILX is Delaware-based and operates globally. If personal data is transferred internationally, we implement appropriate safeguards where required (e.g., SCCs or equivalent mechanisms).</p>
+        <h2>6. Purposes of Processing</h2>
+        <p><span class="mono">6.1</span> Operate the Website, deliver requested content, and provide core functionality.</p>
+        <p><span class="mono">6.2</span> Maintain security, prevent fraud/abuse, and ensure service integrity.</p>
+        <p><span class="mono">6.3</span> Record and honor cookie choices, and demonstrate compliance.</p>
+        <p><span class="mono">6.4</span> Respond to inquiries and maintain communications.</p>
 
-        <h2>Retention</h2>
-        <p><span class="mono">8.1</span> We retain personal data only as long as necessary for the purposes described, and to comply with legal obligations.</p>
-        <p><span class="mono">8.2</span> Consent preferences are retained for transparency and compliance and may be refreshed periodically.</p>
+        <h2>7. Legal Bases (GDPR / UK GDPR)</h2>
+        <p><span class="mono">7.1</span> <strong>Strictly necessary website/security processing:</strong> legitimate interests (Art. 6(1)(f)) in operating a secure and reliable service, and/or performance of a service requested by the user (Art. 6(1)(b)) where applicable.</p>
+        <p><span class="mono">7.2</span> <strong>Cookie consent preferences:</strong> compliance and accountability (Art. 6(1)(c) and/or Art. 6(1)(f)), and consent (Art. 6(1)(a)) where required for optional categories.</p>
+        <p><span class="mono">7.3</span> <strong>Communications:</strong> legitimate interests (Art. 6(1)(f)) and/or pre-contractual steps (Art. 6(1)(b)), depending on context, and legal obligation (Art. 6(1)(c)) where applicable.</p>
 
-        <h2>Security</h2>
-        <p><span class="mono">9.1</span> We apply technical and organisational measures designed to protect the Website and data against unauthorised access, loss, misuse, and alteration.</p>
+        <h2>8. Cookies and Similar Technologies (ePrivacy)</h2>
+        <p><span class="mono">8.1</span> <strong>Necessary cookies</strong> may be used to store your consent preferences and to protect the Website (always-on, no consent required under many ePrivacy implementations where strictly necessary).</p>
+        <p><span class="mono">8.2</span> <strong>Optional cookies/technologies</strong> (e.g., analytics, marketing) are disabled by default and will only load after explicit consent through Cookie Preferences.</p>
+        <p><span class="mono">8.3</span> You can withdraw or change consent at any time via “Cookie Preferences”.</p>
 
-        <h2>Your Rights (GDPR / UK GDPR where applicable)</h2>
-        <p><span class="mono">10.1</span> You may have the right to access, rectify, erase, restrict, object, and port your data, and to withdraw consent at any time (without affecting processing before withdrawal).</p>
-        <p><span class="mono">10.2</span> To exercise rights, contact: <span class="mono">legal@microretailx.com</span>.</p>
-        <p><span class="mono">10.3</span> You may also lodge a complaint with your supervisory authority where applicable.</p>
+        <h2>9. Data Sharing and Disclosure</h2>
+        <p><span class="mono">9.1</span> We do not sell personal data.</p>
+        <p><span class="mono">9.2</span> We may use service providers (processors) strictly to operate the Website and maintain security (e.g., hosting, infrastructure, security filtering). Where used, they act under contract, confidentiality, and applicable data protection terms.</p>
+        <p><span class="mono">9.3</span> We may disclose information to comply with law, to respond to lawful requests, or to protect rights, safety, and security.</p>
 
-        <h2>Children</h2>
-        <p><span class="mono">11.1</span> The Website is not intended for children under 16, and we do not knowingly collect children’s data.</p>
+        <h2>10. International Transfers</h2>
+        <p><span class="mono">10.1</span> MICRORETAILX LLC is established in the United States. If personal data from the EEA/UK/Switzerland is transferred internationally, we implement appropriate safeguards where required (e.g., Standard Contractual Clauses or equivalent mechanisms).</p>
+        <p><span class="mono">10.2</span> Where required, we will provide additional information about safeguards and transfer impact measures upon request.</p>
 
-        <h2>Changes</h2>
-        <p><span class="mono">12.1</span> We may update this Privacy Policy at any time. The “Last updated” date reflects the current version.</p>
+        <h2>11. Retention</h2>
+        <p><span class="mono">11.1</span> We retain personal data only as long as necessary for the purposes described and to meet legal obligations.</p>
+        <p><span class="mono">11.2</span> Contact communications are retained for a reasonable period to manage responses and compliance, then deleted or anonymized where appropriate.</p>
+        <p><span class="mono">11.3</span> Consent preference records are retained to demonstrate compliance and to ensure your choices are respected.</p>
 
-        <h2>Contact</h2>
-        <p>MICRORETAILX LLC · Attn: Legal &amp; Compliance · Email: <span class="mono">legal@microretailx.com</span></p>
+        <h2>12. Security Measures</h2>
+        <p><span class="mono">12.1</span> We implement technical and organizational measures designed to protect data and the Website against unauthorized access, loss, misuse, and alteration.</p>
+        <p><span class="mono">12.2</span> No method of transmission or storage is 100% secure; however, we continuously aim to minimize data and reduce exposure through design.</p>
+
+        <h2>13. Data Subject Rights (EEA/UK/CH)</h2>
+        <p><span class="mono">13.1</span> Subject to legal conditions, you may have rights to: access, rectification, erasure, restriction, portability, and objection; and to withdraw consent at any time without affecting prior lawful processing.</p>
+        <p><span class="mono">13.2</span> To exercise rights, contact <span class="mono">legal@microretailx.com</span>. We may request information necessary to verify identity, proportionate to the request and risk.</p>
+        <p><span class="mono">13.3</span> You also have the right to lodge a complaint with a supervisory authority (e.g., your habitual residence, workplace, or place of the alleged infringement).</p>
+
+        <h2>14. Automated Decision-Making</h2>
+        <p><span class="mono">14.1</span> We do not perform automated decision-making with legal or similarly significant effects on users through this Website.</p>
+
+        <h2>15. Children</h2>
+        <p><span class="mono">15.1</span> This Website is not intended for children under 16 and we do not knowingly collect children’s personal data.</p>
+
+        <h2>16. Third-Party Links</h2>
+        <p><span class="mono">16.1</span> The Website may contain links to third-party sites. Their privacy practices are governed by their own policies. We are not responsible for third-party processing.</p>
+
+        <h2>17. Changes to This Policy</h2>
+        <p><span class="mono">17.1</span> We may update this Policy. The “Last updated” date reflects the current version.</p>
+
+        <h2>18. Contact</h2>
+        <p><span class="mono">MICRORETAILX LLC</span> · Attn: Legal &amp; Compliance · <span class="mono">legal@microretailx.com</span></p>
+        <p style="opacity:.72;font-size:12px;line-height:1.55;margin-top:10px;">
+          [IF APPLICABLE] For EEA/UK users: if an EU/UK representative or DPO is appointed, details will be published in Section 3.
+        </p>
+
       </div>
     </div>
   </div>
@@ -823,7 +841,6 @@
 
     let width = window.innerWidth;
     let height = window.innerHeight;
-
     const PR = Math.min(2, window.devicePixelRatio || 1);
 
     function resizeHiDPI(){
