@@ -329,7 +329,6 @@
       .terms-body h2{ text-decoration-color: #000 !important; text-decoration-thickness: 1px !important; }
     }
   
-    /* ---------- Footer alignment + separators (no HTML pipes) ---------- */
     .footer-links{
       display:flex;
       flex-wrap:wrap;
@@ -362,13 +361,10 @@
     }
 
   
-    /* ---------- Mobile: keep header fixed-like but prevent content being covered ---------- */
     @media (max-width: 600px){
-      /* iOS/Android smoother scroll + proper sticky behavior */
       .terms-panel{ -webkit-overflow-scrolling: touch; scroll-padding-top: 140px; }
       .terms-body h2{ scroll-margin-top: 140px; }
 
-      /* Ensure the sticky header has an opaque backdrop and sits above content */
       .terms-header{ position: sticky; top: 0; z-index: 5; }
     }
 
@@ -384,7 +380,7 @@
         <div class="terms-title">TERMS OF USE (GLOBAL)</div>
         <div class="terms-meta">
           MICRORETAILX LLC (Delaware, USA)<br/>
-          (MicroretailX Group – Global Operations Framework)<br/>
+          MicroretailX Group – Global Operations Framework<br/>
           <span class="mono">Last updated:</span> 2026-01-01 · <span class="mono">Effective date:</span> 2026-01-01
           <div class="terms-docmeta">Document ID: MRX-TOU-2026-01-01 · Version: 1</div>
         </div>
@@ -503,7 +499,7 @@
       <a href="#" id="cookiePreferencesLink">Cookie Preferences</a>
       <a href="legal.html" target="_blank" rel="noopener">Legal</a>
     </div>
-    <div class="copyright">© 2023-2026 MICRORETAILX LLC — ALL RIGHTS RESERVED</div>
+    <div class="copyright">© 2023-2025 MICRORETAILX LLC — ALL RIGHTS RESERVED</div>
   </div>
 
   <div class="privacy-toast" id="privacyToast" role="status" aria-live="polite"></div>
@@ -800,7 +796,7 @@
     <div class="meta">
       <div><strong>MICRORETAILX LLC</strong> (Delaware, USA)</div>
       <div>MicroretailX Group – Global Operations Framework</div>
-      <div>Last updated: 2025-12-24 · Effective date: 2025-12-24</div>
+      <div>Last updated: 2025-12-25 · Effective date: 2025-12-25</div>
     </div>
     <div class="body">${content}</div>
   </div>
