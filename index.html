@@ -360,7 +360,7 @@
     </div>
 
     <div class="copyright">
-      © 2023-2026 MICRORETAILX LLC — ALL RIGHTS RESERVED<br/>
+      © 2023-2025 MICRORETAILX LLC — ALL RIGHTS RESERVED<br/>
     </div>
   </div>
 
@@ -422,7 +422,6 @@
   <script>
     "use strict";
 
-    // ================== MENU ==================
     const menuToggle = document.getElementById("menuToggle");
     const menuDropdown = document.getElementById("menuDropdown");
     const verticalsLink = document.getElementById("verticalsLink");
@@ -501,7 +500,6 @@
     verticalsSubmenu.querySelectorAll("a").forEach(a => a.addEventListener("click", () => setMenuOpen(false)));
     window.addEventListener("resize", () => { if (verticalsSubmenu.classList.contains("open")) positionVerticalsSubmenu(); });
 
-    // ================== CONSENT ==================
     const CONSENT_KEY = "mrxx_consent_v1";
     const CONSENT_MAX_DAYS = 365;
 
@@ -698,9 +696,7 @@
       consentBanner.classList.add("open");
     }
 
-    // ================== TU CANVAS (PEGADO TAL CUAL) ==================
 
-    // ---------------- Canvas / Particles ----------------
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
 
@@ -733,8 +729,7 @@
   let PULSE_RGB = { r:255, g:35, b:90 };
 
     const REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // ================== TERMS X EFFECT (MOBILE ONLY) ==================
-    // On mobile we reuse the same "executive" X-cycle from terms.html for consistency.
+
     let xPhaseT = 0;
     let xLastT = performance.now();
 
@@ -790,7 +785,6 @@
 
     function renderTermsX(now){
       function redPulseMix(t){
-        // t in [0,1] -> returns {r,g,b}
         const p = Math.pow(t, 1.6);
         const r = Math.round(234 * p + 0 * (1-p));
         const g = Math.round(20 * p + 234 * (1-p));
@@ -874,17 +868,14 @@
       } else if (holdActive){
         const centerBurst = 0.25 + 0.70 * glowUp;
 
-        // Base core (DOT color)
         xDrawGlowDot(cx, cy, 120, centerBurst * 0.22, DOT_RGB);
 
-        // Platform pulse (iPhone: red, Android: green) — visible peak
         if (glowUp > 0.55){
           const pulseA = (IS_IOS ? 0.62 : 0.48) * centerBurst;
           xDrawGlowDot(cx, cy, 145 + 45*glowUp, pulseA, PULSE_RGB);
           xDrawGlowDot(cx, cy, 92 + 20*glowUp, pulseA * 0.55, PULSE_RGB);
         }
 
-        // Tight inner core
         xDrawGlowDot(cx, cy, 44, centerBurst * 0.68, DOT_RGB);
 } else if (outActive){
         const a = Math.max(0, 0.9 * fadeOut);
