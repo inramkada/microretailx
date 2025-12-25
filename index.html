@@ -16,7 +16,6 @@
 
     canvas { display: block; }
 
-    /* Wake effect: NO toca tu arte, solo aplica filtro mientras está bloqueado */
     canvas { transition: filter 1.2s ease-in-out, opacity 1.2s ease-in-out; }
     body.consent-locked canvas { filter: grayscale(1) brightness(0.72) contrast(1.08); opacity: 0.85; }
     body.consent-waking canvas { filter: grayscale(0) brightness(1) contrast(1); opacity: 1; }
@@ -137,14 +136,12 @@
       .copyright{ font-size:8px; }
       .menu-dropdown-sub{ min-width:190px; margin-right:10px; }
 
-      /* Mobile: enforce TERMS-style X for menu button */
       .menu-dot.active { background:transparent; box-shadow:none; opacity:1; transform:scale(1.1); }
       .menu-dot::before, .menu-dot::after{ height:12px; } /* keep proportions when dot shrinks */
       .menu-dot.active::before, .menu-dot.active::after{ opacity:1; animation:xPulseDual 1.4s ease-in-out infinite; }
       .menu-dot.active.shake{ animation:none !important; }
       .menu-dot.active.double::before, .menu-dot.active.double::after{ box-shadow:none !important; }
 
-      /* Mobile: footer links centered & clean wrapping */
       .footer-links{
         text-align:center;
         padding:0 12px;
@@ -164,7 +161,6 @@
       .menu-dot, .menu-dot::before, .menu-dot::after{ transition:none !important; animation:none !important; }
     }
 
-    /* ---------- Consent UI ---------- */
     .consent-banner{
       position:fixed; left:0; right:0; bottom:0;
       z-index:9999;
@@ -274,12 +270,10 @@
       border-top:1px solid rgba(255,255,255,.12);
     }
 
-    /* Hard gate: bloquea TODO menos el banner/modal */
     body.consent-locked .ui-layer{ pointer-events:none !important; }
     body.consent-locked #consentBanner,
     body.consent-locked #consentModalBackdrop{ pointer-events:auto !important; }
 
-    /* Banner centrado cuando locked */
     body.consent-locked .consent-banner{
       left:50%; right:auto; bottom:auto; top:50%;
       transform: translate(-50%,-50%);
@@ -294,7 +288,6 @@
     }
     body.consent-locked .consent-banner.open{ animation: execPulse 1.2s ease-in-out infinite alternate; }
   
-    /* ---------- Footer alignment + separators (no HTML pipes) ---------- */
     .footer-links{
       display:flex;
       flex-wrap:wrap;
@@ -589,11 +582,9 @@
 
       if (consent.analytics && !analyticsLoaded) {
         analyticsLoaded = true;
-        // inject analytics here (solo si analytics === true)
       }
       if (consent.marketing && !marketingLoaded) {
         marketingLoaded = true;
-        // inject marketing here (solo si marketing === true)
       }
     }
 
@@ -1021,14 +1012,12 @@
         window._lastFrameT = now;
       }
 
-      // Mobile: show ONLY the Terms-style X + glow balls (no nodes/links) for a clean executive look.
-      // Note: if iOS "Reduce Motion" is enabled, we render a static X (still no nodes).
+
       if (MOBILE_MODE){
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, width, height);
 
         if (REDUCED_MOTION){
-          // Static, high-contrast X (no animation)
           ctx.save();
           ctx.strokeStyle = "rgba(0,234,255,0.12)";
           ctx.lineWidth = 2.2;
