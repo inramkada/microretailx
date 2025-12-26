@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
   <title>microretailX</title>
 
   <style>
@@ -337,7 +340,7 @@
       <div class="menu-dropdown-sub" id="verticalsSubmenu" aria-hidden="true">
         <div class="submenu-group">
           <div class="submenu-label">BIOTECH</div>
-          <a class="submenu-link" href="https://www.microlabsx.com">
+          <a class="submenu-link" href="https://www.microlabsx.com" target="_blank" rel="noopener">microlabsX</a>
         </div>
       </div>
     </div>
@@ -739,7 +742,7 @@
     function xDrawGlowDot(x, y, r, a, rgb){
       if (a <= 0) return;
       const c = rgb || DOT_RGB;
-      const boost = IS_IOS ? 1.45 : 1.0; 
+      const boost = IS_IOS ? 1.45 : 1.0; // iPhone needs more punch
       const aa = Math.min(1, a * boost);
 
       ctx.save();
@@ -996,6 +999,7 @@
 
     function animate(now) {
 
+      // --- iOS/iPad performance airbags ---
       if (typeof paused === "undefined") {
         window.paused = false;
         document.addEventListener("visibilitychange", () => { window.paused = document.hidden; }, { passive:true });
