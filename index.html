@@ -155,7 +155,7 @@
 
     }
 
-    @media (prefers-reduced-motion: reduce): reduce){
+    @media (prefers-reduced-motion: reduce){
       canvas{ transition:none !important; }
       body.consent-locked .consent-banner.open{ animation:none !important; }
       .menu-dot, .menu-dot::before, .menu-dot::after{ transition:none !important; animation:none !important; }
@@ -330,7 +330,7 @@
       <div class="menu-dot" id="menuToggle" role="button" tabindex="0" aria-label="Open menu" aria-expanded="false" aria-controls="menuDropdown"></div>
 
       <div class="menu-dropdown" id="menuDropdown" role="menu" aria-hidden="true">
-        <a href="#" class="locations-link" id="verticalsLink" role="menuitem" aria-haspopup="true" aria-expanded="false">VERTICALS</a>
+        <a href="javascript:void(0)" class="locations-link" id="verticalsLink" role="menuitem" aria-haspopup="true" aria-expanded="false">VERTICALS</a>
         <a href="contact.html" id="contactLink" role="menuitem">CONTACT</a>
       </div>
 
@@ -348,7 +348,7 @@
       <a href="terms.html" target="_blank" rel="noopener">Terms</a>
       <a href="privacy.html" target="_blank" rel="noopener">Privacy</a>
       <a href="cookies.html" target="_blank" rel="noopener">Cookies</a>
-      <a href="#" id="cookiePreferencesLink">Cookie Preferences</a>
+      <a href="javascript:void(0)" id="cookiePreferencesLink">Cookie Preferences</a>
       <a href="legal.html" target="_blank" rel="noopener">Legal</a>
     </div>
 
@@ -361,7 +361,7 @@
     <div class="consent-row">
       <div class="consent-text">
         We use necessary cookies to operate this site. With your consent, we may also use analytics and marketing cookies.
-        You can change your choice anytime via <a href="#" id="cookiePreferencesInline">Cookie Preferences</a>.
+        You can change your choice anytime via <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
       </div>
       <div class="consent-actions">
         <button class="consent-btn" id="consentReject">Reject</button>
@@ -739,7 +739,7 @@
     function xDrawGlowDot(x, y, r, a, rgb){
       if (a <= 0) return;
       const c = rgb || DOT_RGB;
-      const boost = IS_IOS ? 1.45 : 1.0; // iPhone needs more punch
+      const boost = IS_IOS ? 1.45 : 1.0; 
       const aa = Math.min(1, a * boost);
 
       ctx.save();
@@ -838,7 +838,7 @@
         for (let oi = 0; oi < origins.length; oi++){
           const o = origins[oi];
           const head = posFn(o, prog);
-          const tint = (IS_IOS ? clamp((prog - 0.70) / 0.30, 0, 1) : 0);
+          const tint = (IS_IOS ? xClamp((prog - 0.70) / 0.30, 0, 1) : 0);
           const headRGB = (tint > 0 ? xBlendRGB(DOT_RGB, PULSE_RGB, tint) : DOT_RGB);
 
 
@@ -996,7 +996,6 @@
 
     function animate(now) {
 
-      // --- iOS/iPad performance airbags ---
       if (typeof paused === "undefined") {
         window.paused = false;
         document.addEventListener("visibilitychange", () => { window.paused = document.hidden; }, { passive:true });
