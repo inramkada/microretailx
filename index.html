@@ -13,18 +13,10 @@
 <body>
   <canvas id="canvas"></canvas>
 
-  <!-- TOP BAR -->
   <div class="ui-layer top-bar">
     <div class="menu">
-      <div
-        class="menu-dot"
-        id="menuToggle"
-        role="button"
-        tabindex="0"
-        aria-label="Open menu"
-        aria-expanded="false"
-        aria-controls="menuDropdown">
-      </div>
+      <div class="menu-dot" id="menuToggle" role="button" tabindex="0"
+           aria-label="Open menu" aria-expanded="false" aria-controls="menuDropdown"></div>
 
       <div class="menu-dropdown" id="menuDropdown" role="menu" aria-hidden="true">
         <a href="javascript:void(0)" class="locations-link" id="verticalsLink"
@@ -43,10 +35,8 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
   <div class="ui-layer footer-bar">
     <div class="footer-links">
-      <!-- ✅ ABSOLUTO (evita rutas raras) -->
       <a href="/legal/terms.html" class="legal-link">Terms</a>
       <a href="/legal/privacy.html" class="legal-link">Privacy</a>
       <a href="/legal/cookies.html" class="legal-link">Cookies</a>
@@ -55,18 +45,16 @@
     </div>
 
     <div class="copyright">
-      © 2023-2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
+      © 2023-2026 MICRORETAILX LLC — ALL RIGHTS RESERVED<br/>
     </div>
   </div>
 
-  <!-- CONSENT BANNER -->
   <div class="consent-banner" id="consentBanner" aria-live="polite">
     <div class="consent-row">
       <div class="consent-text">
         We use strictly necessary technologies to operate this site and store your preferences locally in your browser.
         Optional categories (Analytics / Marketing) are currently not active and will only apply if such technologies are implemented in the future and you explicitly enable them.
-        You can review or change your choice anytime via
-        <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
+        You can review or change your choice anytime via <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
       </div>
       <div class="consent-actions">
         <button class="consent-btn" id="consentReject">Reject</button>
@@ -76,18 +64,14 @@
     </div>
   </div>
 
-  <!-- CONSENT MODAL -->
   <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true">
     <div class="consent-modal" role="dialog" aria-modal="true" aria-label="Cookie Preferences">
       <div class="consent-modal-header">
         <div class="consent-modal-title">COOKIE PREFERENCES</div>
         <button class="consent-modal-close" id="consentModalClose" aria-label="Close">×</button>
       </div>
-
       <div class="consent-modal-body">
-        Choose which optional categories you would allow if such technologies are implemented in the future.
-        Strictly necessary technologies are always enabled and do not require consent.
-
+        Choose which optional categories you would allow if such technologies are implemented in the future. Strictly necessary technologies are always enabled and do not require consent.
         <div class="consent-cats">
           <div class="consent-cat">
             <div>
@@ -100,7 +84,10 @@
           <div class="consent-cat">
             <div>
               <strong>Analytics (future use)</strong>
-              <p>No analytics technologies are currently active on this Website.</p>
+              <p>
+                No analytics technologies are currently active on this Website.
+                If implemented in the future, they would only be loaded after your explicit consent.
+              </p>
             </div>
             <div class="toggle" id="toggleAnalytics" role="switch" aria-checked="false" tabindex="0" aria-label="Analytics cookies"></div>
           </div>
@@ -108,13 +95,15 @@
           <div class="consent-cat">
             <div>
               <strong>Marketing (future use)</strong>
-              <p>No marketing or tracking technologies are currently active.</p>
+              <p>
+                No marketing or tracking technologies are currently active.
+                If implemented in the future, they would only be loaded after your explicit consent.
+              </p>
             </div>
             <div class="toggle" id="toggleMarketing" role="switch" aria-checked="false" tabindex="0" aria-label="Marketing cookies"></div>
           </div>
         </div>
       </div>
-
       <div class="consent-modal-footer">
         <button class="consent-btn" id="consentSave">Save</button>
         <button class="consent-btn primary" id="consentAcceptAll">Accept All</button>
@@ -122,7 +111,7 @@
     </div>
   </div>
 
-  <!-- Cache-buster -->
-  <script src="/assets/app.js?v=20260101-3" defer></script>
+  <!-- cache-buster -->
+  <script src="/assets/app.js?v=20260101-legalgate1" defer></script>
 </body>
 </html>
