@@ -777,3 +777,73 @@ function animate(now) {
 }
 
 requestAnimationFrame(animate);
+
+/* =========================
+   LEGAL GATE — decision based
+   ========================= */
+
+function hasConsentDecision() {
+  const c = loadConsent();
+  return !!(c && (c.decision === "accepted" || c.decision === "rejected"));
+}
+
+function isLegalAnchor(a) {
+  if (!a) return false;
+  let url;
+  try {
+    url = new URL(a.href, window.location.href);
+  } catch {
+    return false;
+  }
+  return url.pathname.includes("/legal/");
+}
+
+function interceptLegalNavigation(e) {
+  // ✅ solo bloqueamos si NO hay decisión
+  if (hasConsentDecision()) return;
+
+  const a = e.target && e.target.closest ? e.target.closest("a") : null;
+  if (!isLegalAnchor(a)) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+  if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+
+  // mostramos SOLO el banner, sin bucles
+  lockSite();
+  if (consentBanner) consentBanner.classList.add("open");
+
+  return false;
+}
+
+function initLegalGate() {
+  document.addEventListener("click", interceptLegalNavigation, true);
+  document.addEventListener("auxclick", (e) => {
+    if (e.button === 1) interceptLegalNavigation(e);
+  }, true);
+  document.addEventListener("mousedown", (e) => {
+    if (e.button === 0 && (e.ctrlKey || e.metaKey)) interceptLegalNavigation(e);
+  }, true);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") interceptLegalNavigation(e);
+  }, true);
+}
+
+/* =========================
+   INIT (parte final del app.js)
+   ========================= */
+
+const existingConsent = loadConsent();
+
+if (existingConsent && (existingConsent.decision === "accepted" || existingConsent.decision === "rejected")) {
+  applyConsent(existingConsent);
+  if (consentBanner) consentBanner.classList.remove("open");
+  closeConsentPanel?.();
+  unlockSite();
+} else {
+  lockSite();
+  if (consentBanner) consentBanner.classList.add("open");
+}
+
+initLegalGate();
+
