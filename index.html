@@ -5,42 +5,111 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
-  <title>microretailX</title>
+
+  <title>Legal | microretailX</title>
 
   <link rel="stylesheet" href="/assets/app.css">
+
+  <!-- HARD CONSENT GATE (antes de cargar nada visual) -->
+  <script>
+  (function () {
+    const v = localStorage.getItem("cookieConsent");
+    const decided = (v === "accepted" || v === "rejected");
+    if (!decided) {
+      const next = encodeURIComponent(location.pathname + location.search + location.hash);
+      window.location.replace("/?consent_required=1&next=" + next);
+    }
+  })();
+  </script>
+
+  <!-- Soft gate + return logic -->
+  <script src="/assets/consent-gate.js" defer></script>
 </head>
 
 <body>
+
+  <!-- 🔹 MISMO CANVAS QUE INDEX -->
   <canvas id="canvas"></canvas>
 
+  <!-- 🔹 MISMA TOP BAR QUE INDEX -->
   <div class="ui-layer top-bar">
     <div class="menu">
-      <div class="menu-dot" id="menuToggle" role="button" tabindex="0" aria-label="Open menu" aria-expanded="false" aria-controls="menuDropdown"></div>
+      <div class="menu-dot" id="menuToggle" role="button" tabindex="0"
+           aria-label="Open menu" aria-expanded="false" aria-controls="menuDropdown"></div>
 
       <div class="menu-dropdown" id="menuDropdown" role="menu" aria-hidden="true">
-        <a href="javascript:void(0)" class="locations-link" id="verticalsLink" role="menuitem" aria-haspopup="true" aria-expanded="false">VERTICALS</a>
-        <a href="contact.html" id="contactLink" role="menuitem">CONTACT</a>
+        <a href="javascript:void(0)" class="locations-link" id="verticalsLink"
+           role="menuitem" aria-haspopup="true" aria-expanded="false">VERTICALS</a>
+        <a href="/contact.html" id="contactLink" role="menuitem">CONTACT</a>
       </div>
 
       <div class="menu-dropdown-sub" id="verticalsSubmenu" aria-hidden="true">
         <div class="submenu-group">
           <div class="submenu-label">BIOTECH</div>
-          <a class="submenu-link" href="https://www.microlabsx.com" target="_blank" rel="noopener">microlabsX</a>
+          <a class="submenu-link" href="https://www.microlabsx.com">microlabsX</a>
           <div class="submenu-label">CREATIVE STUDIO</div>
-          <a class="submenu-link" href="https://www.microstudiox.com" target="_blank" rel="noopener">microstudioX</a>
+          <a class="submenu-link" href="https://www.microstudiox.com">microstudioX</a>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- 🔹 CONTENIDO LEGAL -->
+  <main class="legal-page">
+    <div class="legal-container">
+
+      <h1>Legal Notice</h1>
+
+      <p>
+        This website is operated by <strong>MICRORETAILX LLC</strong>, a limited liability
+        company incorporated under the laws of the State of Delaware, United States.
+      </p>
+
+      <h2>No Offer / No Advice</h2>
+      <p>
+        The information provided on this Website does not constitute legal, financial,
+        tax, investment, or other professional advice, nor does it constitute an offer
+        or solicitation of any kind.
+      </p>
+
+      <h2>Global Operating Model</h2>
+      <p>
+        MICRORETAILX operates under a global, project-based model. References to
+        “group”, “network”, “verticals”, or similar terms are descriptive only and do not
+        imply the existence of a partnership, joint venture, agency, fiduciary
+        relationship, or permanent establishment in any jurisdiction.
+      </p>
+
+      <h2>Intellectual Property</h2>
+      <p>
+        All content, source code, designs, visuals, trademarks, and materials displayed
+        on this Website are the exclusive property of MICRORETAILX LLC or its licensors
+        and are protected by applicable intellectual property laws.
+      </p>
+
+      <h2>Limitation of Liability</h2>
+      <p>
+        To the maximum extent permitted by law, MICRORETAILX LLC shall not be liable for
+        any damages arising out of or in connection with the use of this Website.
+      </p>
+
+      <h2>Governing Law</h2>
+      <p>
+        This Legal Notice shall be governed by and construed in accordance with the laws
+        of the State of Delaware, United States.
+      </p>
+
+    </div>
+  </main>
+
+  <!-- 🔹 MISMO FOOTER QUE INDEX -->
   <div class="ui-layer footer-bar">
     <div class="footer-links">
-      <!-- LEGAL LINKS: no target=_blank, no rel=noopener, gated by consent script below -->
-      <a href="legal/terms.html" class="legal-link">Terms</a>
-      <a href="legal/privacy.html" class="legal-link">Privacy</a>
-      <a href="legal/cookies.html" class="legal-link">Cookies</a>
+      <a href="/legal/terms.html" class="legal-link">Terms</a>
+      <a href="/legal/privacy.html" class="legal-link">Privacy</a>
+      <a href="/legal/cookies.html" class="legal-link">Cookies</a>
       <a href="javascript:void(0)" id="cookiePreferencesLink">Cookie Preferences</a>
-      <a href="legal/legal.html" class="legal-link">Legal</a>
+      <a href="/legal/legal.html" class="legal-link">Legal</a>
     </div>
 
     <div class="copyright">
@@ -48,12 +117,13 @@
     </div>
   </div>
 
+  <!-- 🔹 MISMA CONSENT UI QUE INDEX -->
   <div class="consent-banner" id="consentBanner" aria-live="polite">
     <div class="consent-row">
       <div class="consent-text">
-        We use strictly necessary technologies to operate this site and store your preferences locally in your browser.
-        Optional categories (Analytics / Marketing) are currently not active and will only apply if such technologies are implemented in the future and you explicitly enable them.
-        You can review or change your choice anytime via <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
+        We use strictly necessary technologies to operate this site and store your
+        preferences locally in your browser. You can review or change your choice
+        anytime via <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
       </div>
       <div class="consent-actions">
         <button class="consent-btn" id="consentReject">Reject</button>
@@ -64,44 +134,14 @@
   </div>
 
   <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true">
-    <div class="consent-modal" role="dialog" aria-modal="true" aria-label="Cookie Preferences">
+    <div class="consent-modal" role="dialog" aria-modal="true">
       <div class="consent-modal-header">
         <div class="consent-modal-title">COOKIE PREFERENCES</div>
-        <button class="consent-modal-close" id="consentModalClose" aria-label="Close">×</button>
+        <button class="consent-modal-close" id="consentModalClose">×</button>
       </div>
       <div class="consent-modal-body">
-        Choose which optional categories you would allow if such technologies are implemented in the future. Strictly necessary technologies are always enabled and do not require consent.
-        <div class="consent-cats">
-          <div class="consent-cat">
-            <div>
-              <strong>Necessary</strong>
-              <p>Required for basic functionality, security and page delivery. Always on.</p>
-            </div>
-            <div class="toggle on locked" aria-label="Necessary cookies (always on)"></div>
-          </div>
-
-          <div class="consent-cat">
-            <div>
-              <strong>Analytics (future use)</strong>
-              <p>
-                No analytics technologies are currently active on this Website.
-                If implemented in the future, they would only be loaded after your explicit consent.
-              </p>
-            </div>
-            <div class="toggle" id="toggleAnalytics" role="switch" aria-checked="false" tabindex="0" aria-label="Analytics cookies"></div>
-          </div>
-
-          <div class="consent-cat">
-            <div>
-              <strong>Marketing (future use)</strong>
-              <p>
-                No marketing or tracking technologies are currently active.
-                If implemented in the future, they would only be loaded after your explicit consent.
-              </p>
-            </div>
-            <div class="toggle" id="toggleMarketing" role="switch" aria-checked="false" tabindex="0" aria-label="Marketing cookies"></div>
-          </div>
-        </div>
+        Strictly necessary technologies are always enabled. Optional categories are
+        currently not active and will only apply if implemented in the future.
       </div>
       <div class="consent-modal-footer">
         <button class="consent-btn" id="consentSave">Save</button>
@@ -110,34 +150,7 @@
     </div>
   </div>
 
+  <!-- 🔹 MISMO JS QUE INDEX -->
   <script src="/assets/app.js" defer></script>
-
-  <!-- Consent gate for legal pages -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const legalLinks = document.querySelectorAll(".legal-link");
-
-      // IMPORTANT: keep this key aligned with /assets/app.js consent storage.
-      // If your app uses another key/value, change it here accordingly.
-      const hasConsent = () => localStorage.getItem("cookieConsent") === "accepted";
-
-      const openConsentUI = () => {
-        const banner = document.getElementById("consentBanner");
-        if (banner) banner.style.display = "block";
-
-        const modalBackdrop = document.getElementById("consentModalBackdrop");
-        if (modalBackdrop) modalBackdrop.setAttribute("aria-hidden", "false");
-      };
-
-      legalLinks.forEach((link) => {
-        link.addEventListener("click", (e) => {
-          if (!hasConsent()) {
-            e.preventDefault();
-            openConsentUI();
-          }
-        });
-      });
-    });
-  </script>
 </body>
 </html>
