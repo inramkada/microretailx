@@ -112,12 +112,11 @@
 
   <script src="/assets/app.js" defer></script>
 
- <!-- Consent gate for legal pages (INDEX ONLY) -->
+<!-- Consent gate for ALL /legal/ links (INDEX) -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const legalLinks = document.querySelectorAll(".legal-link");
 
-    // BLOQUEA si NO está explícitamente "accepted"
+    // Solo deja pasar si está explícitamente accepted
     const isAccepted = () => localStorage.getItem("cookieConsent") === "accepted";
 
     const openConsentUI = () => {
@@ -128,26 +127,53 @@
       if (modalBackdrop) modalBackdrop.setAttribute("aria-hidden", "false");
     };
 
-    const block = (e) => {
-      if (!isAccepted()) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation?.(); // por si otros listeners compiten
-        openConsentUI();
-        return false;
-      }
+    // Captura TODOS los clicks en enlaces que vayan a /legal/
+    const shouldBlockAnchor = (a) => {
+      if (!a) return false;
+      const href = (a.getAttribute("href") || "").trim();
+      if (!href) return false;
+      // Bloquea rutas relativas y absolutas hacia /legal/
+      return href.startsWith("legal/") || href.startsWith("/legal/");
     };
 
-    // Captura en fase CAPTURE para ganar a cualquier otro handler
-    legalLinks.forEach((link) => {
-      link.addEventListener("click", block, true);
+    const block = (e) => {
+      if (isAccepted()) return;
 
-      // Extra: Enter/Space si el foco cae en un link (accesibilidad)
-      link.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") block(e);
-      }, true);
-    });
+      const a = e.target.closest && e.target.closest("a");
+      if (!a) return;
+      if (!shouldBlockAnchor(a)) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+
+      openConsentUI();
+      return false;
+    };
+
+    // 1) Click normal (captura)
+    document.addEventListener("click", block, true);
+
+    // 2) Click medio (rueda) que abre nueva pestaña
+    document.addEventListener("auxclick", (e) => {
+      if (e.button === 1) block(e);
+    }, true);
+
+    // 3) Ctrl/Cmd + click
+    document.addEventListener("mousedown", (e) => {
+      if (e.button === 0 && (e.ctrlKey || e.metaKey)) block(e);
+    }, true);
+
+    // 4) Teclado (Enter/Space) cuando un link tiene foco
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const a = document.activeElement && document.activeElement.closest && document.activeElement.closest("a");
+      if (!a) return;
+      if (!shouldBlockAnchor(a)) return;
+      block(e);
+    }, true);
   });
 </script>
+
 </body>
 </html>
