@@ -28,7 +28,60 @@
       </div>
 
       <div class="terms-actions compact">
-        <a class="icon-btn" href="../index.html" aria-label="Home" title="Home">
+
+  <!-- Download / Print -->
+  <button class="icon-btn" id="printPDF" type="button"
+          aria-label="Download (Print dialog)"
+          title="Download (Print dialog)">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3v10m0 0l4-4m-4 4L8 9"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 15v4h14v-4"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <!-- Audio: Play -->
+  <button class="icon-btn" id="ttsPlay" type="button"
+          aria-label="Play audio" title="Listen">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 5v14l11-7z" fill="currentColor"/>
+    </svg>
+  </button>
+
+  <!-- Audio: Pause -->
+  <button class="icon-btn" id="ttsPause" type="button"
+          aria-label="Pause/Resume audio" title="Pause" disabled>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"/>
+    </svg>
+  </button>
+
+  <!-- Audio: Stop -->
+  <button class="icon-btn" id="ttsStop" type="button"
+          aria-label="Stop audio" title="Stop" disabled>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 7h10v10H7z" fill="currentColor"/>
+    </svg>
+  </button>
+
+  <!-- Home -->
+  <a class="icon-btn" href="../index.html"
+     aria-label="Home" title="Home">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 19l-7-7 7-7"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M3 12h18"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </a>
+
+</div>
+
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M10 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2"/>
             <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="2"/>
