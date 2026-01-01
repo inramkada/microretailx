@@ -97,11 +97,16 @@
             behavioural advertising or selling personal data.
           </p>
 
-          <h2>Cookies and consent</h2>
+          <h2>Cookies, consent, and local identifiers</h2>
           <p>
-            The Website may use strictly necessary cookies (or similar technologies) required to deliver core functionality, maintain security,
-            and store consent choices. Optional cookies (analytics/marketing) are disabled by default and are only enabled after consent where required.
-            See the Cookies page for additional detail.
+            The Website may use strictly necessary cookies or similar technologies required to deliver core functionality, maintain security,
+            and store consent choices. Optional cookies (analytics/marketing) are disabled by default and are only enabled after explicit consent where required.
+          </p>
+          <p>
+            Consent preferences are stored locally in your browser. A locally generated reference code (referred to as a
+            <strong>CONSENT REF</strong>) may be created on your device to reference your current consent state on that specific browser or device.
+            The CONSENT REF is not intended to identify you personally or track you across websites.
+            Additional details are available in the Cookie Policy.
           </p>
 
           <h2>Strict security posture (policy and practice)</h2>
@@ -128,41 +133,23 @@
           </p>
 
           <p>
-  For transparency purposes, the Website’s security configuration may be independently
-  verified using publicly available security analysis tools operated by third parties.
-  These tools assess aspects such as transport security, TLS configuration, and HTTP
-  security headers at a specific point in time.
-</p>
-
-<p>
-  At the time of publication, relevant examples include:
-</p>
-
-<ul>
-  <li>
-    <strong>Mozilla Observatory</strong>
-    <a href="https://observatory.mozilla.org/analyze/www.microretailx.com"
-       target="_blank" rel="noopener">
-      https://observatory.mozilla.org/analyze/www.microretailx.com
-    </a>
-  </li>
-  <li>
-    <strong>SecurityHeaders</strong>
-    <a href="https://securityheaders.com/?q=www.microretailx.com&followRedirects=on"
-       target="_blank" rel="noopener">
-      https://securityheaders.com/?q=www.microretailx.com&followRedirects=on
-    </a>
-  </li>
-</ul>
-
-
-<p>
-  External security ratings are indicative only, may change over time, and do not
-  constitute a warranty of continuous security. We treat such assessments as
-  continuous-improvement signals and prioritise remediation of materially relevant
-  findings.
-</p>
-
+            For transparency purposes, the Website’s security configuration may be independently verified using publicly available security analysis tools
+            operated by third parties, including:
+          </p>
+          <ul>
+            <li>
+              <strong>Mozilla Observatory</strong> –
+              <a href="https://observatory.mozilla.org/analyze/www.microretailx.com" target="_blank" rel="noopener">
+                https://observatory.mozilla.org/analyze/www.microretailx.com
+              </a>
+            </li>
+            <li>
+              <strong>SecurityHeaders</strong> –
+              <a href="https://securityheaders.com/?q=www.microretailx.com&followRedirects=on" target="_blank" rel="noopener">
+                https://securityheaders.com/?q=www.microretailx.com&followRedirects=on
+              </a>
+            </li>
+          </ul>
 
           <h2>Infrastructure providers (hosting / CDN / security layers)</h2>
           <p>
@@ -239,68 +226,9 @@
       <a href="legal.html">Legal</a>
     </div>
     <div class="copyright">
-      © 2023-2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
+      © 2023-2025 MICRORETAILX LLC — ALL RIGHTS RESERVED
     </div>
   </div>
-
-  <div class="privacy-toast" id="privacyToast" role="status" aria-live="polite"></div>
-
-  <div class="consent-banner" id="consentBanner" aria-live="polite">
-    <div class="consent-row">
-      <div class="consent-text">
-        We use necessary cookies to operate this site. With your consent, we may also use analytics and marketing cookies.
-        You can change your choice anytime via <a href="#" id="cookiePreferencesInline">Cookie Preferences</a>.
-      </div>
-      <div class="consent-actions">
-        <button class="consent-btn" id="consentReject">Reject</button>
-        <button class="consent-btn" id="consentManage">Preferences</button>
-        <button class="consent-btn primary" id="consentAccept">Accept</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true">
-    <div class="consent-modal" role="dialog" aria-modal="true" aria-label="Cookie Preferences" tabindex="-1">
-      <div class="consent-modal-header">
-        <div class="consent-modal-title">COOKIE PREFERENCES</div>
-        <button class="consent-modal-close" id="consentModalClose" aria-label="Close">×</button>
-      </div>
-      <div class="consent-modal-body">
-        Choose which optional categories you want to allow. Necessary cookies are always enabled.
-        <div class="consent-cats">
-          <div class="consent-cat">
-            <div>
-              <strong>Necessary</strong>
-              <p>Required for basic functionality, security and page delivery. Always on.</p>
-            </div>
-            <div class="toggle on locked" aria-label="Necessary cookies (always on)"></div>
-          </div>
-
-          <div class="consent-cat">
-            <div>
-              <strong>Analytics</strong>
-              <p>Helps us understand traffic and improve the Website. Loaded only with your consent.</p>
-            </div>
-            <div class="toggle" id="toggleAnalytics" role="switch" tabindex="0" aria-checked="false" aria-label="Analytics cookies"></div>
-          </div>
-
-          <div class="consent-cat">
-            <div>
-              <strong>Marketing</strong>
-              <p>Enables marketing / tracking technologies. Loaded only with your consent.</p>
-            </div>
-            <div class="toggle" id="toggleMarketing" role="switch" tabindex="0" aria-checked="false" aria-label="Marketing cookies"></div>
-          </div>
-        </div>
-      </div>
-      <div class="consent-modal-footer">
-        <button class="consent-btn" id="consentSave">Save</button>
-        <button class="consent-btn primary" id="consentAcceptAll">Accept All</button>
-      </div>
-    </div>
-  </div>
-
-  <button id="backToTop" aria-label="Back to top">↑</button>
 
   <script src="../assets/legal-terms.js" defer></script>
 </body>
