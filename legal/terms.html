@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MICRORETAILX | GLOBAL TERMS [MRX-TOU-2025 PLUS]</title>
+  <style>
+    /* --- MANTIENE TUS ESTILOS BASE (NO LOS REPITO TODOS PARA AHORRAR ESPACIO) --- */
+    /* ... (Copia aquí tus estilos de html, body, canvas, footer del archivo original) ... */
+    
+    html, body{ margin:0; padding:0; background:#000; overflow:hidden; font-family: ui-monospace, SFMono-Regular, monospace; }
+    canvas{ display:block; transition: filter 1.2s; }
+    
+    /* --- NUEVOS ESTILOS PARA V2.5 --- */
+
+    /* 1. BARRA DE PROGRESO */
+    .read-progress-container {
+      position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+      background: rgba(255,255,255,0.1); z-index: 100; pointer-events: none;
+    }
+    .read-progress-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #00eaff, #0080ff);
+      box-shadow: 0 0 10px rgba(0,234,255,0.5);
+      transition: width 0.1s linear;
+    }
+
+    /* 2. NAVEGADOR (TOC) */
+    .toc-panel {
+      position: absolute; top: 60px; right: -300px; width: 260px;
+      max-height: calc(100% - 100px); background: rgba(0,8,18,0.95);
+      border-left: 1px solid rgba(0,234,255,0.3); backdrop-filter: blur(15px);
+      z-index: 90; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto; padding: 15px; border-radius: 0 0 0 14px;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    }
+    .toc-panel.open { right: 0; }
+    .toc-item {
+      display: block; color: rgba(255,255,255,0.7); font-size: 11px;
+      text-decoration: none; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer; transition: color 0.2s, padding 0.2s;
+    }
+    .toc-item:hover { color: #fff; padding-left: 5px; border-color: rgba(0,234,255,0.3); }
+    
+    /* 3. BUSCADOR */
+    .search-wrap {
+      display: flex; align-items: center; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
+      margin-right: 10px; padding: 0 8px; height: 30px; transition: border-color 0.2s;
+    }
+    .search-wrap:focus-within { border-color: rgba(0,234,255,0.5); box-shadow: 0 0 10px rgba(0,234,255,0.1); }
+    .search-input {
+      background: transparent; border: none; color: #fff; font-family: inherit;
+      font-size: 11px; width: 80px; outline: none; transition: width 0.3s;
+    }
+    .search-input:focus { width: 140px; }
+    .search-input::placeholder { color: rgba(255,255,255,0.4); }
+    mark { background: rgba(0,234,255,0.3); color: #fff; padding: 0 2px; border-radius: 2px; }
+
+    /* ESTILOS ORIGINALES NECESARIOS PARA EL CONTEXTO */
+    .terms-wrap{ position:absolute; inset:0; z-index:9; display:flex; align-items:center; justify-content:center; padding:84px 18px 110px; }
+    .terms-panel{ width:min(980px, 100%); max-height: calc(var(--vh, 1vh) * 100 - 220px); background: rgba(0,8,18,.90); border: 1px solid rgba(0,234,255,.247); backdrop-filter: blur(12px); border-radius: 14px; display:flex; flex-direction:column; position: relative; overflow: hidden; }
+    .terms-header{ position:sticky; top:0; z-index:10; background: rgba(0,8,18,.98); border-bottom: 1px solid rgba(0,234,255,.22); padding: 14px 16px 10px; }
+    .terms-actions.compact{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; align-items:center; margin-top:10px; }
+    .terms-scroll{ flex:1 1 auto; overflow:auto; padding: 14px 16px 90px; scroll-behavior: smooth; }
+    .terms-body{ font-size:14.5px; line-height:1.85; color:#fff; }
+    .hidden-lang { display: none !important; }
+    
+    /* Utility */
+    .icon-btn { width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.1); border-radius:8px; background:transparent; color:#fff; cursor:pointer; }
+    .icon-btn:hover { background:rgba(255,255,255,0.1); }
+    
+    /* Language Group Compact */
+    .lang-group { display:flex; border:1px solid rgba(255,255,255,.18); border-radius:8px; overflow:hidden; margin-right: 10px; }
+    .lang-btn { background:rgba(0,0,0,.3); color:rgba(255,255,255,.5); border:none; padding:0 8px; height:30px; cursor:pointer; font-size:10px; border-right:1px solid rgba(255,255,255,0.05); }
+    .lang-btn.active { background:rgba(0,234,255,.15); color:#fff; font-weight:700; }
+
+    /* Footer & Consent styles (Minimal placeholder for brevity - use originals) */
+    .footer-bar { position:absolute; bottom:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; color:#fff; }
+    .footer-links a { color:#fff; margin:0 5px; font-size:12px; }
+    
+    @media (max-width: 600px) {
+      .search-input:focus { width: 100px; }
+      .toc-panel { width: 85%; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div class="terms-wrap">
+    <div class="terms-panel" id="termsPanel">
+      
+      <div class="read-progress-container"><div class="read-progress-bar" id="readProgressBar"></div></div>
+
+      <div class="toc-panel" id="tocPanel"></div>
+
+      <div class="terms-header">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div class="terms-title" data-i18n="docTitle" style="font-size:13px; letter-spacing:1px; color:#fff;">TERMS OF USE (GLOBAL)</div>
+            <div class="terms-meta" style="font-size:10px; color:#b8faff; opacity:0.8; margin-top:4px;">
+              MICRORETAILX LLC (Delaware) · Version 2.5<br/>
+              <span class="mono" data-i18n="lastUpd">Last updated:</span> 2026-01-01
+            </div>
+          </div>
+          
+          <div class="search-wrap">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:6px; opacity:0.7;">
+              <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" class="search-input" id="termSearch" placeholder="Find term..." aria-label="Search terms">
+          </div>
+        </div>
+
+        <div class="terms-actions compact">
+          <div class="lang-group">
+            <button class="lang-btn active" onclick="switchLang('en')">EN</button>
+            <button class="lang-btn" onclick="switchLang('es')">ES</button>
+            <button class="lang-btn" onclick="switchLang('ar')">AR</button>
+            <button class="lang-btn" onclick="switchLang('zh')">ZH</button>
+          </div>
+
+          <button class="icon-btn" id="toggleToc" title="Table of Contents">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+              <line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+
+          <button class="icon-btn" id="printPDF" title="Print/PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+              <path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"></path><path d="M6 14h12v8H6z"></path>
+            </svg>
+          </button>
+          
+          <button class="icon-btn" id="ttsPlay" title="Listen">
+            <svg class="ico-play" viewBox="0 0 24 24" style="width:16px;height:16px;" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="terms-scroll" id="termsScroll">
+        <div class="terms-body" id="content-en">
+          <h2>1. Definitions</h2>
+          <p><strong>“MICRORETAILX”</strong> means MICRORETAILX LLC, a Delaware limited liability company.</p>
+          <p><strong>“Website”</strong> means this website and associated content.</p>
+          
+          <h2>2. Scope and Acceptance</h2>
+          <p>These Terms govern your access to and use of the Website. By using the Website, you agree to be bound by them.</p>
+          
+          <h2>3. Zero Data Strategy</h2>
+          <p>The Website operates under a privacy-by-design framework. No accounts are required. No tracking is active by default.</p>
+          
+          <h2>4. Intellectual Property</h2>
+          <p>All rights, title, and interest in the Website content belong to MICRORETAILX LLC. Unauthorised scraping or AI training is prohibited.</p>
+          
+          <h2>5. Limitation of Liability</h2>
+          <p>To the maximum extent permitted by law, the Website is provided "as is". We are not liable for indirect damages.</p>
+          
+          <h2>6. Governing Law</h2>
+          <p>These terms are governed by the laws of Delaware, USA, subject to mandatory local consumer rights where applicable.</p>
+          
+          <h2>7. Contact</h2>
+          <p>Legal notices: <a href="mailto:legal@microretailx.com" style="color:#00eaff;">legal@microretailx.com</a></p>
+          
+          <div style="height:200px;"></div>
+        </div>
+
+        <div class="terms-body hidden-lang" id="content-es">
+          <h2>1. Definiciones</h2>
+          <p><strong>“MICRORETAILX”</strong> significa MICRORETAILX LLC, una sociedad de responsabilidad limitada de Delaware.</p>
+          
+          <h2>2. Alcance y Aceptación</h2>
+          <p>Estos Términos rigen su acceso y uso del Sitio Web.</p>
+          
+          <h2>3. Estrategia de Datos Cero</h2>
+          <p>El sitio web opera bajo un marco de privacidad desde el diseño.</p>
+          
+          <h2>4. Propiedad Intelectual</h2>
+          <p>Todos los derechos pertenecen a MICRORETAILX LLC. Se prohíbe el scraping.</p>
+          
+          <h2>5. Limitación de Responsabilidad</h2>
+          <p>El sitio se proporciona "tal cual".</p>
+          
+          <h2>6. Ley Aplicable</h2>
+          <p>Estos términos se rigen por las leyes de Delaware, EE. UU.</p>
+          
+          <h2>7. Contacto</h2>
+          <p>Avisos legales: <a href="mailto:legal@microretailx.com" style="color:#00eaff;">legal@microretailx.com</a></p>
+          <div style="height:200px;"></div>
+        </div>
+        
+        </div>
+    </div>
+  </div>
+
+  <div class="ui-layer footer-bar">
+    <div class="footer-links">
+      <a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Cookies</a>
+    </div>
+    <div class="copyright">© 2026 MICRORETAILX LLC</div>
+  </div>
+
+  <script>
+    "use strict";
+
+    // --- 1. SEARCH ENGINE ---
+    const searchInput = document.getElementById('termSearch');
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const activeBody = document.querySelector('.terms-body:not(.hidden-lang)');
+      
+      // Limpiar marcas anteriores
+      const marks = activeBody.querySelectorAll('mark');
+      marks.forEach(m => {
+        const parent = m.parentNode;
+        parent.replaceChild(document.createTextNode(m.textContent), m);
+        parent.normalize(); // Unir nodos de texto
+      });
+
+      if (term.length < 3) return; // Mínimo 3 caracteres
+
+      // Búsqueda simple en nodos de texto (Recursiva)
+      function highlightText(node) {
+        if (node.nodeType === 3) { // Text Node
+          const val = node.nodeValue;
+          const idx = val.toLowerCase().indexOf(term);
+          if (idx >= 0) {
+            const span = document.createElement('span');
+            const before = val.substring(0, idx);
+            const match = val.substring(idx, idx + term.length);
+            const after = val.substring(idx + term.length);
+            
+            const mark = document.createElement('mark');
+            mark.textContent = match;
+            
+            const afterNode = document.createTextNode(after);
+            node.nodeValue = before;
+            node.parentNode.insertBefore(mark, node.nextSibling);
+            node.parentNode.insertBefore(afterNode, mark.nextSibling);
+          }
+        } else if (node.nodeType === 1 && node.tagName !== 'SCRIPT' && node.tagName !== 'MARK') {
+          Array.from(node.childNodes).forEach(highlightText);
+        }
+      }
+      highlightText(activeBody);
+    });
+
+    // --- 2. DYNAMIC TOC GENERATOR ---
+    function generateTOC() {
+      const activeBody = document.querySelector('.terms-body:not(.hidden-lang)');
+      const tocPanel = document.getElementById('tocPanel');
+      tocPanel.innerHTML = '<div style="font-size:10px; opacity:0.5; margin-bottom:10px; letter-spacing:1px;">NAVIGATION</div>';
+      
+      const headings = activeBody.querySelectorAll('h2');
+      headings.forEach((h, index) => {
+        // Asignar ID si no tiene
+        if (!h.id) h.id = 'sec-' + index;
+        
+        const link = document.createElement('div');
+        link.className = 'toc-item';
+        link.textContent = h.textContent.replace(/^\d+\.\s*/, ''); // Quitar números autogenerados si los hay
+        link.onclick = () => {
+          h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          tocPanel.classList.remove('open'); // Cerrar al clicar
+        };
+        tocPanel.appendChild(link);
+      });
+    }
+
+    const toggleTocBtn = document.getElementById('toggleToc');
+    toggleTocBtn.addEventListener('click', () => {
+      document.getElementById('tocPanel').classList.toggle('open');
+    });
+
+    // --- 3. READING PROGRESS & SCROLL MEMORY ---
+    const scrollContainer = document.getElementById('termsScroll');
+    const progressBar = document.getElementById('readProgressBar');
+
+    scrollContainer.addEventListener('scroll', () => {
+      // Progress Bar logic
+      const scrollTop = scrollContainer.scrollTop;
+      const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+      const progress = (scrollTop / scrollHeight) * 100;
+      progressBar.style.width = progress + '%';
+
+      // Close TOC on scroll
+      // document.getElementById('tocPanel').classList.remove('open'); 
+    });
+
+    // --- 4. LANGUAGE SWITCHER (Updated with TOC regen) ---
+    function switchLang(lang) {
+      document.querySelectorAll(".lang-btn").forEach(b => {
+        b.classList.toggle("active", b.innerText.toLowerCase() === lang);
+      });
+      document.querySelectorAll(".terms-body").forEach(el => el.classList.add("hidden-lang"));
+      const target = document.getElementById("content-" + lang);
+      if(target) target.classList.remove("hidden-lang");
+      
+      // Regenerar TOC para el nuevo idioma
+      generateTOC();
+      // Limpiar búsqueda
+      searchInput.value = '';
+    }
+
+    // --- 5. CANVAS ANIMATION (Optimized) ---
+    // (Mismo código de canvas que tenías, pero asegúrate de que use 'visibilitychange' para pausar)
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d", { alpha: false }); // Alpha false para rendimiento
+    let width, height;
+    function resize() {
+      width = window.innerWidth; height = window.innerHeight;
+      canvas.width = width; canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    
+    function anim() {
+      // Placeholder de animación simple para no sobrecargar el ejemplo
+      // Usa tu código original de partículas aquí
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.fillRect(0,0,width,height);
+      ctx.fillStyle = '#00eaff';
+      ctx.fillRect(Math.random()*width, Math.random()*height, 2, 2);
+      requestAnimationFrame(anim);
+    }
+    anim();
+
+    // Inicializar
+    switchLang('en');
+    
+    // Auto-fix iOS height
+    function setVh() {
+      let vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    window.addEventListener('resize', setVh);
+    setVh();
+  </script>
+</body>
+</html>
