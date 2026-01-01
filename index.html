@@ -16,15 +16,13 @@
   <!-- TOP BAR -->
   <div class="ui-layer top-bar">
     <div class="menu">
-      <div
-        class="menu-dot"
-        id="menuToggle"
-        role="button"
-        tabindex="0"
-        aria-label="Open menu"
-        aria-expanded="false"
-        aria-controls="menuDropdown">
-      </div>
+      <div class="menu-dot"
+           id="menuToggle"
+           role="button"
+           tabindex="0"
+           aria-label="Open menu"
+           aria-expanded="false"
+           aria-controls="menuDropdown"></div>
 
       <div class="menu-dropdown" id="menuDropdown" role="menu" aria-hidden="true">
         <a href="javascript:void(0)" class="locations-link" id="verticalsLink"
@@ -46,12 +44,11 @@
   <!-- FOOTER -->
   <div class="ui-layer footer-bar">
     <div class="footer-links">
-      <!-- IMPORTANTE: links normales, sin JS aquí -->
-      <a href="legal/terms.html" class="legal-link">Terms</a>
-      <a href="legal/privacy.html" class="legal-link">Privacy</a>
-      <a href="legal/cookies.html" class="legal-link">Cookies</a>
+      <a href="/legal/terms.html">Terms</a>
+      <a href="/legal/privacy.html">Privacy</a>
+      <a href="/legal/cookies.html">Cookies</a>
       <a href="javascript:void(0)" id="cookiePreferencesLink">Cookie Preferences</a>
-      <a href="legal/legal.html" class="legal-link">Legal</a>
+      <a href="/legal/legal.html">Legal</a>
     </div>
 
     <div class="copyright">
@@ -64,7 +61,7 @@
     <div class="consent-row">
       <div class="consent-text">
         We use strictly necessary technologies to operate this site and store your preferences locally in your browser.
-        Optional categories (Analytics / Marketing) are currently not active and will only apply if such technologies are implemented in the future and you explicitly enable them.
+        Optional categories (Analytics / Marketing) are currently not active.
         You can review or change your choice anytime via
         <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
       </div>
@@ -78,39 +75,25 @@
 
   <!-- CONSENT MODAL -->
   <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true">
-    <div class="consent-modal" role="dialog" aria-modal="true" aria-label="Cookie Preferences">
+    <div class="consent-modal" role="dialog" aria-modal="true">
       <div class="consent-modal-header">
         <div class="consent-modal-title">COOKIE PREFERENCES</div>
-        <button class="consent-modal-close" id="consentModalClose" aria-label="Close">×</button>
+        <button class="consent-modal-close" id="consentModalClose">×</button>
       </div>
 
       <div class="consent-modal-body">
-        Choose which optional categories you would allow if such technologies are implemented in the future.
-        Strictly necessary technologies are always enabled and do not require consent.
-
         <div class="consent-cats">
           <div class="consent-cat">
-            <div>
-              <strong>Necessary</strong>
-              <p>Required for basic functionality, security and page delivery. Always on.</p>
-            </div>
+            <strong>Necessary</strong>
             <div class="toggle on locked"></div>
           </div>
-
           <div class="consent-cat">
-            <div>
-              <strong>Analytics (future use)</strong>
-              <p>No analytics technologies are currently active.</p>
-            </div>
-            <div class="toggle" id="toggleAnalytics" role="switch" aria-checked="false" tabindex="0"></div>
+            <strong>Analytics</strong>
+            <div class="toggle" id="toggleAnalytics"></div>
           </div>
-
           <div class="consent-cat">
-            <div>
-              <strong>Marketing (future use)</strong>
-              <p>No marketing or tracking technologies are currently active.</p>
-            </div>
-            <div class="toggle" id="toggleMarketing" role="switch" aria-checked="false" tabindex="0"></div>
+            <strong>Marketing</strong>
+            <div class="toggle" id="toggleMarketing"></div>
           </div>
         </div>
       </div>
@@ -122,7 +105,7 @@
     </div>
   </div>
 
-  <!-- ÚNICO JS -->
+  <!-- ÚNICO SCRIPT -->
   <script src="/assets/app.js" defer></script>
 </body>
 </html>
