@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
+  <title>microretailX</title>
+
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div class="ui-layer top-bar">
+    <div class="menu">
+      <div class="menu-dot" id="menuToggle" role="button" tabindex="0" aria-label="Open menu" aria-expanded="false" aria-controls="menuDropdown"></div>
+
+      <div class="menu-dropdown" id="menuDropdown" role="menu" aria-hidden="true">
+        <a href="javascript:void(0)" class="locations-link" id="verticalsLink" role="menuitem" aria-haspopup="true" aria-expanded="false">VERTICALS</a>
+        <a href="contact.html" id="contactLink" role="menuitem">CONTACT</a>
+      </div>
+
+      <div class="menu-dropdown-sub" id="verticalsSubmenu" aria-hidden="true">
+        <div class="submenu-group">
+          <div class="submenu-label">BIOTECH</div>
+          <a class="submenu-link" href="https://www.microlabsx.com" target="_blank" rel="noopener">microlabsX</a>
+          <div class="submenu-label">CREATIVE STUDIO</div>
+          <a class="submenu-link" href="https://www.microstudiox.com" target="_blank" rel="noopener">microstudioX</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui-layer footer-bar">
+    <div class="footer-links">
+      <a href="legal/terms.html" target="_blank" rel="noopener">Terms</a>
+      <a href="legal/privacy.html" target="_blank" rel="noopener">Privacy</a>
+      <a href="legal/cookies.html" target="_blank" rel="noopener">Cookies</a>
+      <a href="javascript:void(0)" id="cookiePreferencesLink">Cookie Preferences</a>
+      <a href="legal/legal.html" target="_blank" rel="noopener">Legal</a>
+    </div>
+
+    <div class="copyright">
+      © 2023-2026 MICRORETAILX LLC — ALL RIGHTS RESERVED<br/>
+    </div>
+  </div>
+
+  <div class="consent-banner" id="consentBanner" aria-live="polite">
+    <div class="consent-row">
+      <div class="consent-text">
+        We use strictly necessary technologies to operate this site and store your preferences locally in your browser.
+        Optional categories (Analytics / Marketing) are currently not active and will only apply if such technologies are implemented in the future and you explicitly enable them.
+        You can review or change your choice anytime via <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
+      </div>
+      <div class="consent-actions">
+        <button class="consent-btn" id="consentReject">Reject</button>
+        <button class="consent-btn" id="consentManage">Preferences</button>
+        <button class="consent-btn primary" id="consentAccept">Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true">
+    <div class="consent-modal" role="dialog" aria-modal="true" aria-label="Cookie Preferences">
+      <div class="consent-modal-header">
+        <div class="consent-modal-title">COOKIE PREFERENCES</div>
+        <button class="consent-modal-close" id="consentModalClose" aria-label="Close">×</button>
+      </div>
+      <div class="consent-modal-body">
+        Choose which optional categories you would allow if such technologies are implemented in the future. Strictly necessary technologies are always enabled and do not require consent.
+        <div class="consent-cats">
+          <div class="consent-cat">
+            <div>
+              <strong>Necessary</strong>
+              <p>Required for basic functionality, security and page delivery. Always on.</p>
+            </div>
+            <div class="toggle on locked" aria-label="Necessary cookies (always on)"></div>
+          </div>
+
+          <div class="consent-cat">
+            <div>
+              <strong>Analytics (future use)</strong>
+              <p>
+                No analytics technologies are currently active on this Website.
+                If implemented in the future, they would only be loaded after your explicit consent.
+              </p>
+            </div>
+            <div class="toggle" id="toggleAnalytics" role="switch" aria-checked="false" tabindex="0" aria-label="Analytics cookies"></div>
+          </div>
+
+          <div class="consent-cat">
+            <div>
+              <strong>Marketing (future use)</strong>
+              <p>
+                No marketing or tracking technologies are currently active.
+                If implemented in the future, they would only be loaded after your explicit consent.
+              </p>
+            </div>
+            <div class="toggle" id="toggleMarketing" role="switch" aria-checked="false" tabindex="0" aria-label="Marketing cookies"></div>
+          </div>
+        </div>
+      </div>
+      <div class="consent-modal-footer">
+        <button class="consent-btn" id="consentSave">Save</button>
+        <button class="consent-btn primary" id="consentAcceptAll">Accept All</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
