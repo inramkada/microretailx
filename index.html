@@ -112,32 +112,42 @@
 
   <script src="/assets/app.js" defer></script>
 
-  <!-- Consent gate for legal pages -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const legalLinks = document.querySelectorAll(".legal-link");
+ <!-- Consent gate for legal pages (INDEX ONLY) -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const legalLinks = document.querySelectorAll(".legal-link");
 
-      // IMPORTANT: keep this key aligned with /assets/app.js consent storage.
-      // If your app uses another key/value, change it here accordingly.
-      const hasConsent = () => localStorage.getItem("cookieConsent") === "accepted";
+    // BLOQUEA si NO está explícitamente "accepted"
+    const isAccepted = () => localStorage.getItem("cookieConsent") === "accepted";
 
-      const openConsentUI = () => {
-        const banner = document.getElementById("consentBanner");
-        if (banner) banner.style.display = "block";
+    const openConsentUI = () => {
+      const banner = document.getElementById("consentBanner");
+      if (banner) banner.style.display = "block";
 
-        const modalBackdrop = document.getElementById("consentModalBackdrop");
-        if (modalBackdrop) modalBackdrop.setAttribute("aria-hidden", "false");
-      };
+      const modalBackdrop = document.getElementById("consentModalBackdrop");
+      if (modalBackdrop) modalBackdrop.setAttribute("aria-hidden", "false");
+    };
 
-      legalLinks.forEach((link) => {
-        link.addEventListener("click", (e) => {
-          if (!hasConsent()) {
-            e.preventDefault();
-            openConsentUI();
-          }
-        });
-      });
+    const block = (e) => {
+      if (!isAccepted()) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation?.(); // por si otros listeners compiten
+        openConsentUI();
+        return false;
+      }
+    };
+
+    // Captura en fase CAPTURE para ganar a cualquier otro handler
+    legalLinks.forEach((link) => {
+      link.addEventListener("click", block, true);
+
+      // Extra: Enter/Space si el foco cae en un link (accesibilidad)
+      link.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") block(e);
+      }, true);
     });
-  </script>
+  });
+</script>
 </body>
 </html>
