@@ -233,76 +233,66 @@ function handleSwitchKey(el, e) {
 }
 
 /* =========================
-   LEGAL GATE (blocking)
-   - blocks .legal-link until there is a saved consent object
+   LEGAL GATE (blocking ALL /legal/)
    ========================= */
 
-function hasConsentDecision() {
-  // any stored object means user already made a decision (accept/reject/custom)
-  return !!loadConsent();
+function hasAcceptedConsent() {
+  const c = loadConsent();
+  return !!(c && c.decision === "accepted");
 }
 
 function forceConsentUI() {
-  // make sure site is locked and UI is visible
   lockSite();
   if (consentBanner) consentBanner.classList.add("open");
   openConsentPanel();
 }
 
+function isLegalHref(href) {
+  if (!href) return false;
+  href = href.trim();
+  return href.startsWith("legal/") || href.startsWith("/legal/");
+}
+
+function interceptLegalNavigation(e) {
+  if (hasAcceptedConsent()) return;
+
+  const a = e.target.closest && e.target.closest("a");
+  if (!a) return;
+
+  const href = a.getAttribute("href");
+  if (!isLegalHref(href)) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+  if (typeof e.stopImmediatePropagation === "function") {
+    e.stopImmediatePropagation();
+  }
+
+  forceConsentUI();
+  return false;
+}
+
 function initLegalGate() {
-  const legalLinks = document.querySelectorAll("a.legal-link");
-  if (!legalLinks || !legalLinks.length) return;
+  // Click normal
+  document.addEventListener("click", interceptLegalNavigation, true);
 
-  legalLinks.forEach((a) => {
-    a.addEventListener("click", (e) => {
-      if (!hasConsentDecision()) {
-        e.preventDefault();
-        e.stopPropagation();
-        forceConsentUI();
-      }
-    });
-  });
-}
+  // Click medio (rueda)
+  document.addEventListener("auxclick", (e) => {
+    if (e.button === 1) interceptLegalNavigation(e);
+  }, true);
 
-/* =========================
-   Bind consent UI events
-   ========================= */
+  // Ctrl / Cmd + click
+  document.addEventListener("mousedown", (e) => {
+    if (e.button === 0 && (e.ctrlKey || e.metaKey)) {
+      interceptLegalNavigation(e);
+    }
+  }, true);
 
-if (cookiePreferencesLink) cookiePreferencesLink.addEventListener("click", (e) => { e.preventDefault(); openConsentPanel(); });
-if (cookiePreferencesInline) cookiePreferencesInline.addEventListener("click", (e) => { e.preventDefault(); openConsentPanel(); });
-
-if (consentManage) consentManage.addEventListener("click", () => openConsentPanel());
-if (consentReject) consentReject.addEventListener("click", () => setAllConsent(false));
-if (consentAccept) consentAccept.addEventListener("click", () => setAllConsent(true));
-
-if (consentModalClose) consentModalClose.addEventListener("click", () => closeConsentPanel());
-if (consentSave) consentSave.addEventListener("click", () => saveFromPanel());
-if (consentAcceptAll) consentAcceptAll.addEventListener("click", () => setAllConsent(true));
-
-if (consentModalBackdrop) consentModalBackdrop.addEventListener("click", (e) => { if (e.target === consentModalBackdrop) closeConsentPanel(); });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeConsentPanel(); });
-
-if (toggleAnalytics) {
-  toggleAnalytics.addEventListener("click", () => toggleSwitch(toggleAnalytics));
-  toggleAnalytics.addEventListener("keydown", (e) => handleSwitchKey(toggleAnalytics, e));
-}
-if (toggleMarketing) {
-  toggleMarketing.addEventListener("click", () => toggleSwitch(toggleMarketing));
-  toggleMarketing.addEventListener("keydown", (e) => handleSwitchKey(toggleMarketing, e));
-}
-
-/* =========================
-   Init consent + gate
-   ========================= */
-
-const existingConsent = loadConsent();
-if (existingConsent) {
-  applyConsent(existingConsent);
-  displayAuditID(existingConsent.auditId);
-  wakeSite();
-} else {
-  lockSite();
-  if (consentBanner) consentBanner.classList.add("open");
+  // Teclado (Enter / Space)
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    interceptLegalNavigation(e);
+  }, true);
 }
 
 // IMPORTANT: gate legal links after consent init
