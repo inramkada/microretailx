@@ -1,173 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MICRORETAILX | COOKIES POLICY [MRX-CP-2026-01-01 V3]</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MICRORETAILX | COOKIES POLICY [MRX-CP-2026-01-01 V3]</title>
 
-<link href="../assets/legal-terms.css" rel="stylesheet"/>
+  <!-- Same styling system as Terms -->
+  <link href="../assets/legal-terms.css" rel="stylesheet"/>
 </head>
 
 <body>
 
-<canvas id="canvas"></canvas>
+  <!-- Background canvas -->
+  <canvas id="canvas" aria-hidden="true"></canvas>
 
-<div class="terms-wrap">
-  <div class="terms-panel" id="termsPanel">
+  <div class="terms-wrap">
+    <div class="terms-panel" id="termsPanel">
 
-    <div class="terms-header">
-      <div class="terms-title">COOKIES POLICY</div>
-      <div class="terms-meta">
-        MICRORETAILX LLC (Delaware, USA)<br/>
-        MicroretailX Group – Global Operations Framework<br/>
-        <span class="mono">Last updated:</span> 2026-01-01 ·
-        <span class="mono">Effective date:</span> 2026-01-01
-        <div class="terms-docmeta">
-          Document ID: MRX-CP-2026-01-01 · Version: 3
+      <div class="terms-header">
+        <div class="terms-title">COOKIES POLICY</div>
+
+        <div class="terms-meta">
+          MICRORETAILX LLC (Delaware, USA)<br/>
+          MicroretailX Group – Global Operations Framework<br/>
+          <span class="mono">Last updated:</span> 2026-01-01 ·
+          <span class="mono">Effective date:</span> 2026-01-01
+          <div class="terms-docmeta">
+            Document ID: MRX-CP-2026-01-01 · Version: 3
+          </div>
+        </div>
+
+        <!-- Actions (same IDs as Terms so legal-terms.js hooks work) -->
+        <div class="terms-actions compact">
+
+          <!-- Download / Print -->
+          <button class="icon-btn" id="printPDF" type="button"
+                  aria-label="Download (Print dialog)"
+                  title="Download (Print dialog)">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M12 3v10m0 0l4-4m-4 4L8 9"
+                    fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              <path d="M5 15v4h14v-4"
+                    fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+          </button>
+
+          <!-- Audio: Play -->
+          <button class="icon-btn" id="ttsPlay" type="button"
+                  aria-label="Play audio" title="Listen">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" fill="currentColor"></path>
+            </svg>
+          </button>
+
+          <!-- Audio: Pause -->
+          <button class="icon-btn" id="ttsPause" type="button"
+                  aria-label="Pause/Resume audio" title="Pause" disabled>
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"></path>
+            </svg>
+          </button>
+
+          <!-- Audio: Stop -->
+          <button class="icon-btn" id="ttsStop" type="button"
+                  aria-label="Stop audio" title="Stop" disabled>
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M7 7h10v10H7z" fill="currentColor"></path>
+            </svg>
+          </button>
+
+          <!-- Home -->
+          <a class="icon-btn" href="../index.html" aria-label="Home" title="Home">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M10 19l-7-7 7-7"
+                    fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              <path d="M3 12h18"
+                    fill="none" stroke="currentColor"
+                    stroke-linecap="round" stroke-width="2"></path>
+            </svg>
+          </a>
+
         </div>
       </div>
 
-      <div class="terms-actions compact">
+      <div class="terms-scroll" id="termsScroll">
+        <div class="terms-body" id="termsText">
 
-  <!-- Download / Print -->
-  <button class="icon-btn" id="printPDF" type="button"
-          aria-label="Download (Print dialog)"
-          title="Download (Print dialog)">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3v10m0 0l4-4m-4 4L8 9"
-            fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M5 15v4h14v-4"
-            fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </button>
+          <h2>1. INTRODUCTION</h2>
+          <p>
+            This Cookies Policy explains how <strong>MICRORETAILX LLC</strong> uses cookies and similar technologies on this website.
+          </p>
 
-  <!-- Audio: Play -->
-  <button class="icon-btn" id="ttsPlay" type="button"
-          aria-label="Play audio" title="Listen">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M8 5v14l11-7z" fill="currentColor"/>
-    </svg>
-  </button>
+          <h2>2. WHAT ARE COOKIES?</h2>
+          <p>
+            Cookies are small text files stored on your device when you visit a website. They are widely used to ensure basic functionality,
+            enhance security, and improve user experience.
+          </p>
 
-  <!-- Audio: Pause -->
-  <button class="icon-btn" id="ttsPause" type="button"
-          aria-label="Pause/Resume audio" title="Pause" disabled>
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"/>
-    </svg>
-  </button>
+          <h2>3. STRICTLY NECESSARY COOKIES</h2>
+          <p>
+            This website uses strictly necessary cookies required for core functionality, security, consent storage, and page delivery.
+            These cookies do not require user consent under applicable law.
+          </p>
 
-  <!-- Audio: Stop -->
-  <button class="icon-btn" id="ttsStop" type="button"
-          aria-label="Stop audio" title="Stop" disabled>
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 7h10v10H7z" fill="currentColor"/>
-    </svg>
-  </button>
+          <h2>4. OPTIONAL COOKIES</h2>
+          <p>
+            Analytics or marketing cookies are disabled by default and are only activated where legally required and after explicit,
+            granular user consent via the Cookie Preferences interface.
+          </p>
 
-  <!-- Home -->
-  <a class="icon-btn" href="../index.html"
-     aria-label="Home" title="Home">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M10 19l-7-7 7-7"
-            fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M3 12h18"
-            fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round"/>
-    </svg>
-  </a>
+          <h2>5. CONSENT MANAGEMENT</h2>
+          <p>
+            You may accept, reject, or modify your cookie preferences at any time using the <strong>Cookie Preferences</strong> controls available on this website.
+          </p>
 
-</div>
+          <h2>6. THIRD-PARTY TECHNOLOGIES</h2>
+          <p>
+            Where enabled by consent, certain third-party technologies may be used solely to provide analytics or marketing functionality.
+            No cookies are used for profiling without explicit consent.
+          </p>
 
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M10 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </a>
+          <h2>7. CONTACT</h2>
+          <p>
+            For questions regarding this Cookies Policy, please contact
+            <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>.
+          </p>
+
+        </div>
       </div>
+
     </div>
+  </div>
 
-    <div class="terms-scroll" id="termsScroll">
-      <div class="terms-body" id="termsText">
-
-        <h2>Introduction</h2>
-        <p>
-          This Cookies Policy explains how <strong>MICRORETAILX LLC</strong>
-          uses cookies and similar technologies on this website.
-        </p>
-
-        <h2>What are cookies?</h2>
-        <p>
-          Cookies are small text files stored on your device when you visit a website.
-          They are widely used to ensure basic functionality, enhance security,
-          and improve user experience.
-        </p>
-
-        <h2>Strictly necessary cookies</h2>
-        <p>
-          This website uses strictly necessary cookies required for core functionality,
-          security, consent storage, and page delivery.
-          These cookies do not require user consent under applicable law.
-        </p>
-
-        <h2>Optional cookies</h2>
-        <p>
-          Analytics or marketing cookies are disabled by default and are only activated
-          where legally required and after explicit, granular user consent via
-          the Cookie Preferences interface.
-        </p>
-
-        <h2>Consent management</h2>
-        <p>
-          You may accept, reject, or modify your cookie preferences at any time
-          using the <strong>Cookie Preferences</strong> controls available on this website.
-        </p>
-
-        <h2>Third-party technologies</h2>
-        <p>
-          Where enabled by consent, certain third-party technologies may be used
-          solely to provide analytics or marketing functionality.
-          No cookies are used for profiling without explicit consent.
-        </p>
-
-        <h2>Contact</h2>
-        <p>
-          For questions regarding this Cookies Policy, please contact
-          <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>.
-        </p>
-
-      </div>
+  <!-- FOOTER (no new tabs, no noopener) -->
+  <div class="ui-layer footer-bar">
+    <div class="footer-links">
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="#" id="cookiePreferencesLink">Cookie Preferences</a>
+      <a href="legal.html">Legal</a>
     </div>
-
+    <div class="copyright">© 2023–2025 MICRORETAILX LLC — ALL RIGHTS RESERVED</div>
   </div>
-</div>
 
-<!-- FOOTER -->
-<div class="ui-layer footer-bar">
-  <div class="footer-links">
-    <a href="terms.html" target="_blank" rel="noopener">Terms</a>
-    <a href="privacy.html" target="_blank" rel="noopener">Privacy</a>
-    <a href="cookies.html" target="_blank" rel="noopener">Cookies</a>
-    <a href="#" id="cookiePreferencesLink">Cookie Preferences</a>
-    <a href="legal.html" target="_blank" rel="noopener">Legal</a>
-  </div>
-  <div class="copyright">
-    © 2023–2025 MICRORETAILX LLC — ALL RIGHTS RESERVED
-  </div>
-</div>
+  <div class="privacy-toast" id="privacyToast" role="status" aria-live="polite"></div>
 
-<div class="privacy-toast" id="privacyToast" role="status" aria-live="polite"></div>
+  <!-- Consent UI containers (legal-terms.js will populate/control) -->
+  <div class="consent-banner" id="consentBanner" aria-live="polite"></div>
+  <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true"></div>
 
-<!-- CONSENT UI (IDENTICAL TO TERMS) -->
-<div class="consent-banner" id="consentBanner" aria-live="polite"></div>
-<div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true"></div>
+  <!-- Back to Top -->
+  <button id="backToTop" aria-label="Back to top">↑</button>
 
-<button id="backToTop" aria-label="Back to top">↑</button>
+  <!-- Your existing legal logic -->
+  <script src="../assets/legal-terms.js" defer></script>
 
-<script src="../assets/legal-terms.js" defer></script>
+  <!-- FORCE the X background (independent canvas module) -->
+  <script src="../assets/js/canvas-bg.js" defer></script>
 
 </body>
 </html>
