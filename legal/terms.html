@@ -1,241 +1,62 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MICRORETAILX | GLOBAL DEPLOYMENT</title>
-  <style>
-    /* --- BASE RESET & FONTS --- */
-    html, body{
-      margin:0; padding:0; background:#000;
-      overflow:hidden;
-      font-family: ui-monospace, SFMono-Regular, "SF Mono", "Segoe UI", "Microsoft YaHei", "Noto Sans", monospace;
-    }
-    canvas{ display:block; }
-
-    /* --- LAYOUT --- */
-    .terms-wrap{
-      position:absolute; inset:0; z-index:9;
-      display:flex; align-items:center; justify-content:center;
-      padding:20px; box-sizing:border-box;
-    }
-    .terms-panel{
-      width:min(920px, 100%);
-      background: rgba(0,8,18,.94); 
-      border: 1px solid rgba(0,234,255,.35);
-      backdrop-filter: blur(20px); 
-      border-radius: 14px;
-      display:flex; flex-direction:column;
-      overflow:hidden;
-      box-shadow: 0 0 50px rgba(0,234,255,.18);
-    }
-
-    /* --- HEADER --- */
-    .terms-header{
-      padding: 20px 30px;
-      border-bottom: 1px solid rgba(0,234,255,.2);
-      background: rgba(0,8,18,.6);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-left h1 {
-      margin:0; font-size:13px; letter-spacing:2px; color:#fff; text-transform:uppercase;
-    }
-    .header-left span { font-size:9px; color:#00eaff; opacity:0.8; font-family: monospace; }
-
-    /* --- CONTENT AREA --- */
-    .terms-content {
-      padding: 50px 40px;
-      text-align: center;
-      min-height: 280px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .status-msg {
-      font-size: 15px;
-      line-height: 1.8;
-      color: #fff;
-      max-width: 700px;
-      margin-bottom: 25px;
-    }
-    .status-msg strong { color: #00eaff; font-weight: normal; letter-spacing: 1px; }
-
-    /* SYNC ANIMATION */
-    .sync-visual {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin: 20px 0;
-    }
-    .sync-bar-container {
-      width: 320px; height: 2px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px; overflow: hidden;
-      position: relative;
-    }
-    .sync-bar-fill {
-      position: absolute; height: 100%; width: 40%;
-      background: linear-gradient(90deg, transparent, #00eaff, transparent);
-      animation: syncMove 2.5s infinite linear;
-    }
-
-    /* --- ACTIONS & LANGUAGES --- */
-    .terms-actions {
-      padding: 15px 30px;
-      background: rgba(0,0,0,0.4);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .lang-group { display: flex; gap: 6px; flex-wrap: wrap; }
-    .lang-btn {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.5);
-      padding: 4px 9px; font-size: 9px; border-radius: 4px;
-      cursor: pointer; transition: all 0.3s;
-    }
-    .lang-btn.active { 
-      background: rgba(0,234,255,0.12); border-color: #00eaff; color: #fff; 
-      box-shadow: 0 0 10px rgba(0,234,255,0.2);
-    }
-
-    .download-btn {
-      background: transparent; border: 1px solid rgba(0,234,255,0.5);
-      color: #00eaff; padding: 7px 14px; font-size: 10px;
-      border-radius: 6px; cursor: pointer; display: flex;
-      align-items: center; gap: 8px; transition: all 0.3s;
-    }
-    .download-btn:hover { border-color: #00eaff; background: rgba(0,234,255,0.05); }
-
-    @keyframes syncMove {
-      0% { left: -40%; }
-      100% { left: 100%; }
-    }
-
-    .hidden { display: none !important; }
-    body.rtl .status-msg { direction: rtl; text-align: right; }
-  </style>
+  <title>MICRORETAILX | TERMS OF USE</title>
+  <link rel="stylesheet" href="/assets/app.css">
 </head>
 <body>
-
   <canvas id="canvas"></canvas>
 
   <div class="terms-wrap">
     <div class="terms-panel">
-      
       <div class="terms-header">
         <div class="header-left">
-          <h1>Global Legal Consolidation</h1>
+          <h1 id="header-title">Global Legal Consolidation</h1>
           <span>ID: MRX-TOU-2026-DEPLOYMENT</span>
         </div>
       </div>
 
-      <div class="terms-content" id="msg-es">
-        <div class="status-msg">
+      <div class="terms-content" id="legal-msg-container">
+        <div class="status-msg" id="status-text">
           <strong>CONSOLIDANDO EL MARCO LEGAL GLOBAL</strong><br><br>
-          En MICRORETAILX, la transparencia y el cumplimiento normativo son nuestra prioridad. Estamos actualizando nuestros Términos de Uso Globales para reflejar nuestras últimas innovaciones en privacidad y nuestra expansión internacional. Gracias por su paciencia mientras blindamos nuestra infraestructura legal.
-        </div>
-        <div class="sync-visual"><div class="sync-bar-container"><div class="sync-bar-fill"></div></div></div>
-      </div>
-
-      <div class="terms-content hidden" id="msg-en">
-        <div class="status-msg">
-          <strong>CONSOLIDATING GLOBAL LEGAL FRAMEWORK</strong><br><br>
-          At MICRORETAILX, transparency and regulatory compliance are our top priority. We are updating our Global Terms of Use to reflect our latest privacy innovations and international expansion. Thank you for your patience while we reinforce our legal infrastructure.
-        </div>
-        <div class="sync-visual"><div class="sync-bar-container"><div class="sync-bar-fill"></div></div></div>
-      </div>
-
-      <div class="terms-content hidden" id="msg-ar">
-        <div class="status-msg" style="direction: rtl;">
-          <strong>توطيد الإطار القانوني العالمي</strong><br><br>
-          في MICRORETAILX، تعتبر الشفافية والامتثال التنظيمي أولويتنا القصوى. نقوم حاليًا بتحديث شروط الاستخدام العالمية لدينا لتعكس أحدث ابتكارات الخصوصية وتوسعنا الدولي. نشكركم على صبركم بينما نقوم بتحصين بنيتنا التحتية القانونية.
-        </div>
-        <div class="sync-visual"><div class="sync-bar-container"><div class="sync-bar-fill"></div></div></div>
-      </div>
-
-      <div class="terms-content hidden" id="msg-zh">
-        <div class="status-msg">
-          <strong>巩固全球法律框架</strong><br><br>
-          在 MICRORETAILX，透明度和合规性是我们的首要任务。我们正在更新全球使用条款，以反映我们在隐私方面的最新创新及国际扩张。感谢您在我们加固法律基础设施期间的耐心等待。
-        </div>
-        <div class="sync-visual"><div class="sync-bar-container"><div class="sync-bar-fill"></div></div></div>
-      </div>
-
-      <div class="terms-content hidden" id="msg-ru">
-        <div class="status-msg">
-          <strong>КОНСОЛИДАЦИЯ ГЛОБАЛЬНОЙ ПРАВОВОЙ БАЗЫ</strong><br><br>
-          В MICRORETAILX прозрачность и соблюдение нормативных требований являются нашим приоритетом. Мы обновляем наши Глобальные условия использования, чтобы отразить последние инновации в области конфиденциальности и наше международное расширение. Благодарим за терпение, пока мы укрепляем нашу юридическую инфраструктуру.
-        </div>
-        <div class="sync-visual"><div class="sync-bar-container"><div class="sync-bar-fill"></div></div></div>
-      </div>
-
-      <div class="terms-content hidden" id="msg-hi">
-        <div class="status-msg">
-          <strong>वैश्विक कानूनी ढांचे को मजबूत करना</strong><br><br>
-          MICRORETAILX में, पारदर्शिता और नियामक अनुपालन हमारी सर्वोच्च प्राथमिकता है। हम अपनी नवीनतम गोपनीयता नवाचारों और अंतरराष्ट्रीय विस्तार को प्रतिबिंबित करने के लिए अपने वैश्विक उपयोग की शर्तों को अपडेट कर रहे हैं। हमारी कानूनी बुनियादी ढांचे को मजबूत करने के दौरान आपके धैर्य के लिए धन्यवाद।
+          En MICRORETAILX, la transparencia y el cumplimiento normativo son nuestra prioridad. Estamos actualizando nuestros Términos de Uso Globales para reflejar nuestras últimas innovaciones en privacidad y nuestra expansión internacional.
         </div>
         <div class="sync-visual"><div class="sync-bar-container"><div class="sync-bar-fill"></div></div></div>
       </div>
 
       <div class="terms-actions">
         <div class="lang-group">
-          <button class="lang-btn active" onclick="switchLang('es')">ES</button>
-          <button class="lang-btn" onclick="switchLang('en')">EN</button>
-          <button class="lang-btn" onclick="switchLang('ar')">AR</button>
-          <button class="lang-btn" onclick="switchLang('zh')">ZH</button>
-          <button class="lang-btn" onclick="switchLang('ru')">RU</button>
-          <button class="lang-btn" onclick="switchLang('hi')">HI</button>
+          <button class="lang-btn active" onclick="updateMsg('es')">ES</button>
+          <button class="lang-btn" onclick="updateMsg('en')">EN</button>
+          <button class="lang-btn" onclick="updateMsg('ar')">AR</button>
+          <button class="lang-btn" onclick="updateMsg('zh')">ZH</button>
+          <button class="lang-btn" onclick="updateMsg('ru')">RU</button>
+          <button class="lang-btn" onclick="updateMsg('hi')">HI</button>
         </div>
-
-        <button class="download-btn" onclick="alert('Sealing MRX-TOU-2026 PDF...')">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          Export Final PDF
+        <button class="download-btn" onclick="location.href='mailto:legal@microretailx.com'">
+          Contact Legal
         </button>
       </div>
-
     </div>
   </div>
 
+  <script src="/assets/app.js" defer></script>
   <script>
-    function switchLang(lang) {
-      document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.innerText.toLowerCase() === lang));
-      document.querySelectorAll('.terms-content').forEach(c => c.classList.add('hidden'));
-      document.getElementById('msg-' + lang).classList.remove('hidden');
-      if(lang === 'ar') document.body.classList.add('rtl'); else document.body.classList.remove('rtl');
+    // Script específico para manejar las traducciones del mensaje de consolidación
+    const messages = {
+      es: "<strong>CONSOLIDANDO EL MARCO LEGAL GLOBAL</strong><br><br>En MICRORETAILX, la transparencia y el cumplimiento normativo son nuestra prioridad. Estamos actualizando nuestros Términos de Uso Globales.",
+      en: "<strong>CONSOLIDATING GLOBAL LEGAL FRAMEWORK</strong><br><br>At MICRORETAILX, transparency and regulatory compliance are our top priority. We are updating our Global Terms of Use.",
+      ar: "<strong>توطيد الإطار القانوني العالمي</strong><br><br>في MICRORETAILX، تعتبر الشفافية والامتثال التنظيمي أولويتنا القصوى.",
+      zh: "<strong>巩固全球法律框架</strong><br><br>在 MICRORETAILX，透明度和合规性是我们的首要任务。",
+      ru: "<strong>КОНСОЛИДАЦИЯ ГЛОБАЛЬНОЙ ПРАВОВОЙ БАЗЫ</strong><br><br>В MICRORETAILX прозрачность и соблюдение нормативных требований являются нашим приоритетом.",
+      hi: "<strong>वैश्विक कानूनी ढांचे को मजबूत करना</strong><br><br>MICRORETAILX में, पारदर्शिता और नियामक अनुपालन हमारी सर्वोच्च प्राथमिकता है।"
+    };
+    function updateMsg(l) {
+      document.getElementById('status-text').innerHTML = messages[l];
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase() === l));
     }
-
-    // CANVAS ANIMATION (Mismo sistema fluido)
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    let w, h;
-    function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
-    window.addEventListener("resize", resize); resize();
-
-    const particles = [];
-    for(let i=0; i<50; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4 });
-
-    function animate() {
-      ctx.fillStyle = "rgba(0, 5, 12, 0.15)";
-      ctx.fillRect(0, 0, w, h);
-      particles.forEach(p => {
-        p.x = (p.x + p.vx + w) % w; p.y = (p.y + p.vy + h) % h;
-        ctx.fillStyle = "rgba(0, 234, 255, 0.3)";
-        ctx.beginPath(); ctx.arc(p.x, p.y, 0.8, 0, Math.PI*2); ctx.fill();
-      });
-      requestAnimationFrame(animate);
-    }
-    animate();
   </script>
 </body>
 </html>
