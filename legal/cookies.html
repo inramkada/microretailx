@@ -1,31 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MICRORETAILX | PRIVACY & COOKIES</title>
-  <link rel="stylesheet" href="/assets/app.css">
+  <meta charset="utf-8">
+  <title>Cookies | MICRORETAILX</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+  <!-- Minimal background support -->
+  <link rel="stylesheet" href="../assets/css/legal-bg.css">
+
+  <!-- Optional: basic typography for content -->
+  <style>
+    .ui-layer{
+      position:relative;
+      z-index:10;
+      color:#ffffff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+                   "Liberation Mono","Courier New", monospace;
+      padding:64px 24px;
+      max-width:960px;
+      margin:0 auto;
+      line-height:1.7;
+    }
+    h1{
+      font-size:18px;
+      letter-spacing:1px;
+      margin-bottom:18px;
+      text-transform:uppercase;
+    }
+    h2{
+      font-size:13px;
+      letter-spacing:1px;
+      margin-top:32px;
+      margin-bottom:8px;
+      text-transform:uppercase;
+      opacity:.9;
+    }
+    p{
+      font-size:14px;
+      opacity:.95;
+      margin:10px 0;
+    }
+    a{ color:#9ff; text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+  </style>
 </head>
+
 <body>
-  <canvas id="canvas"></canvas>
-  <div class="terms-wrap">
-    <div class="terms-panel">
-      <div class="terms-header">
-        <div class="header-left">
-          <h1>Zero Data Strategy</h1>
-          <span>Compliance Level: EU/UAE/USA Standard</span>
-        </div>
-      </div>
-      <div class="terms-scroll">
-        <div class="terms-body">
-          <h2>Privacy-by-Design</h2>
-          <p>Este sitio web está diseñado bajo una estrategia de **Cero Datos**. No requerimos creación de cuentas ni realizamos perfiles de usuario por defecto.</p>
-          <h2>Cookies</h2>
-          <p>Solo se utilizan tecnologías estrictamente necesarias para la seguridad y la entrega de la interfaz. Las cookies de marketing y análisis están desactivadas por defecto.</p>
-        </div>
-      </div>
-    </div>
+
+  <!-- Background canvas -->
+  <canvas id="canvas" aria-hidden="true"></canvas>
+
+  <!-- Page content -->
+  <div class="ui-layer">
+    <h1>Cookies Policy</h1>
+
+    <p>
+      This Cookies Policy explains how <strong>MICRORETAILX LLC</strong> uses cookies
+      and similar technologies on this website.
+    </p>
+
+    <h2>1. What are cookies?</h2>
+    <p>
+      Cookies are small text files stored on your device when you visit a website.
+      They are widely used to make websites work, improve efficiency, and provide
+      information to site operators.
+    </p>
+
+    <h2>2. Necessary cookies</h2>
+    <p>
+      This website uses strictly necessary cookies required for basic functionality,
+      security, and delivery of the site. These cookies do not require your consent.
+    </p>
+
+    <h2>3. Optional cookies</h2>
+    <p>
+      Analytics or marketing cookies are only used where required by law and
+      only after you provide explicit consent via the cookie preferences interface.
+    </p>
+
+    <h2>4. Managing your preferences</h2>
+    <p>
+      You may manage or withdraw your consent at any time through the
+      <a href="#" onclick="return false;">Cookie Preferences</a> link provided on the site.
+    </p>
+
+    <h2>5. Contact</h2>
+    <p>
+      For questions regarding this Cookies Policy, please contact
+      <a href="mailto:legal@microretailx.com">legal@microretailx.com</a>.
+    </p>
   </div>
-  <script src="/assets/app.js" defer></script>
+
+  <!-- Canvas background script -->
+  <script src="../assets/js/canvas-bg.js" defer></cript>
+
 </body>
 </html>
