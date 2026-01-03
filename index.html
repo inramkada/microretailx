@@ -39,7 +39,20 @@
       pointer-events:none;
     }
   </style>
+
+  <style>
+    /* CONSENT LOCK (index) */
+    body.consent-locked .footer-links a{
+      pointer-events:none;
+      opacity:0.55;
+    }
+    body.consent-locked #backToTop{
+      pointer-events:none;
+      opacity:0.55;
+    }
+  </style>
 </head>
+
 
 
 
@@ -162,5 +175,56 @@
   <!-- JS único (cache-buster) -->
 <script src="assets/legal-terms.js" defer></script>
   <script src="assets/app.js" defer></script>
+
+  <script>
+    (function(){
+      var STORAGE_FLAG = "mrx_consent_decided_v1";
+
+      function hasAnyConsentKey(){
+        try{
+          if (localStorage.getItem(STORAGE_FLAG)) return true;
+          // If legal-terms.js uses its own keys, detect any key containing 'consent'
+          for (var i=0; i<localStorage.length; i++){
+            var k = localStorage.key(i);
+            if (!k) continue;
+            if (k.toLowerCase().includes("consent")) return true;
+          }
+        }catch(e){}
+        return false;
+      }
+
+      function setLocked(isLocked){
+        document.body.classList.toggle("consent-locked", !!isLocked);
+      }
+
+      function markDecided(){
+        try{ localStorage.setItem(STORAGE_FLAG, "1"); }catch(e){}
+        setLocked(false);
+      }
+
+      // Initial state
+      setLocked(!hasAnyConsentKey());
+
+      // Unlock on any explicit choice
+      ["consentAccept","consentReject","consentSave","consentAcceptAll"].forEach(function(id){
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("click", markDecided, true);
+      });
+
+      // Also unlock once banner disappears (fallback)
+      var banner = document.getElementById("consentBanner");
+      if (banner && window.MutationObserver){
+        var obs = new MutationObserver(function(){
+          // If banner is hidden by JS, consider it decided
+          var style = window.getComputedStyle(banner);
+          if (style.display === "none" || banner.getAttribute("aria-hidden") === "true" || banner.classList.contains("hidden")){
+            markDecided();
+          }
+        });
+        obs.observe(banner, {attributes:true, attributeFilter:["style","class","aria-hidden"]});
+      }
+    })();
+  </script>
 </body>
 </html>
