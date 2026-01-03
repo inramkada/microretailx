@@ -16,7 +16,19 @@
     #canvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;}
     .ui-layer, .menu, .hero, .terms-wrap{position:relative;z-index:2;}
   </style>
+
+  <style>
+    /* FOOTER FIX */
+    body{min-height:100vh;}
+    .footer-bar{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:3;
+    }
+    .page-content{padding-bottom:72px;}
+  </style>
 </head>
+
 
 <body>
   <canvas id="canvas"></canvas>
