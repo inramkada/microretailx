@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MICRORETAILX</title>
+  <title>microretailX</title>
 
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Permissions-Policy"
@@ -100,14 +100,6 @@
 (() => {
   "use strict";
 
-  // ---------------------------
-  //  Physarum X-Maze
-  //  - Intro: white sweep draws the X (more body)
-  //  - Then: slime network grows on X
-  //  - Mousemove: drops food snapped to X (branches emerge ON the X)
-  //  - No aggressive zoom: stable scale, no re-draw recursion
-  // ---------------------------
-
   const view = document.getElementById("view");
   const vctx = view.getContext("2d", { alpha: false });
 
@@ -180,7 +172,7 @@
     foodLifeMs: 1300,
     mouseFoodEveryMs: IS_MOBILE ? 42 : 28,
 
-    // initial “ink” on X so maze starts there
+   
     xInk: 0.42,
 
     // render
