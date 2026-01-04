@@ -10,20 +10,19 @@
         content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
 
   <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%;
-      background: #000; overflow: hidden; color:#fff;
+    html, body{
+      margin:0; padding:0; height:100%;
+      background:#000; overflow:hidden; color:#fff;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
                    "Liberation Mono", "Courier New", monospace;
     }
-    canvas { display:block; width:100vw; height:100vh; }
+    canvas{ display:block; width:100vw; height:100vh; }
 
-    .ui-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
-
+    .ui-layer{ position:fixed; inset:0; pointer-events:none; z-index:10; }
     .top-bar{
       position:absolute; top:0; left:0; right:0;
       padding:14px 18px;
-      background: rgba(0,0,0,0.78);
+      background:rgba(0,0,0,0.78);
       border-bottom:1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(10px);
       display:flex;
@@ -37,7 +36,7 @@
     .footer-bar{
       position:absolute; bottom:0; left:0; right:0;
       padding:14px 18px 12px;
-      background: rgba(0,0,0,0.78);
+      background:rgba(0,0,0,0.78);
       border-top:1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(10px);
       display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -75,6 +74,32 @@
 (() => {
   "use strict";
 
+  // ---------- helpers ----------
+  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+  const lerp  = (a,b,t)=> a + (b-a)*t;
+  const ease  = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+
+  // HSV -> RGB (0..1)
+  function hsv2rgb(h,s,v){
+    h = ((h % 1) + 1) % 1;
+    const i = Math.floor(h*6);
+    const f = h*6 - i;
+    const p = v*(1-s);
+    const q = v*(1-f*s);
+    const t = v*(1-(1-f)*s);
+    let r,g,b;
+    switch(i % 6){
+      case 0: r=v; g=t; b=p; break;
+      case 1: r=q; g=v; b=p; break;
+      case 2: r=p; g=v; b=t; break;
+      case 3: r=p; g=q; b=v; break;
+      case 4: r=t; g=p; b=v; break;
+      case 5: r=v; g=p; b=q; break;
+    }
+    return { r: (r*255)|0, g: (g*255)|0, b: (b*255)|0 };
+  }
+
+  // ---------- canvas ----------
   const view = document.getElementById("view");
   const vctx = view.getContext("2d", { alpha: false });
 
@@ -87,10 +112,6 @@
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(UA);
 
-  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
-  const lerp  = (a,b,t)=> a + (b-a)*t;
-  const ease  = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
-
   const DPR_CAP = IS_IOS ? 1.6 : 2;
   let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
 
@@ -101,35 +122,35 @@
   let agents = [];
   let foods  = [];
 
-  // particle pre-phase
+  // pre-phase particles
   let particles = [];
-  let started = false;          // becomes true after first click
-  let absorption = 0;           // 0..1 absorb strength ramp
-  let xComplete = 0;            // 0..1 “X formed” metric
+  let started = false;
+  let absorption = 0;     // 0..1
+  let xComplete = 0;      // 0..1
   let startAt = 0;
 
-  // mouse food throttling
   let lastMouseFoodAt = 0;
   let lastFrame = performance.now();
   let frame = 0;
 
-  // CONFIG
+  // cursor influence
+  let cursorX = 0, cursorY = 0;
+  let cursorEnergy = 0;
+
+  // ---------- config ----------
   const CFG = {
     gridMax: IS_MOBILE ? 560 : 860,
 
-    // Particles (pre-phase)
     particleCount: IS_MOBILE ? 1300 : 2200,
     particleSpeed: IS_MOBILE ? 0.55 : 0.75,
     particleJitter: 0.35,
 
-    // Absorption / build-up timing
-    absorbRampMs: 1000,      // ramp absorption force after first click
-    mazeEnableMs: 900,       // when slime starts being visible
-    xScoreWarmupMs: 1400,    // after click, begin scoring completeness
+    absorbRampMs: 1000,
+    mazeEnableMs: 650,
+    xScoreWarmupMs: 900,
     xScoreSmoothing: 0.08,
 
-    // Slime (physarum)
-    agentCount: IS_MOBILE ? 7000 : 13000,
+    agentCount: IS_MOBILE ? 7200 : 13500,
     step: IS_MOBILE ? 0.95 : 1.08,
 
     sensorDist: IS_MOBILE ? 6.5 : 7.9,
@@ -141,24 +162,25 @@
     diffuseEvery: 2,
     diffuseMix: 0.42,
 
-    // X (more body)
-    xBias: 0.90,
-    xWidthPx: IS_MOBILE ? 5.0 : 6.6,   // <<< MÁS CUERPO REAL (sim space)
-    xInk: 0.36,
+    // X thickness (MORE BODY)
+    xBias: 0.95,
+    xWidthPx: IS_MOBILE ? 5.3 : 7.2,
+    xInk: 0.40,
 
-    // mouse interaction (branches born on X)
+    // mouse interaction
     foodRadius: IS_MOBILE ? 18 : 22,
-    foodStrength: 1.55,
-    foodLifeMs: 1200,
+    foodStrength: 1.75,
+    foodLifeMs: 1150,
     mouseFoodEveryMs: IS_MOBILE ? 42 : 26,
 
-    // render
-    crush: 0.030,
+    crush: 0.028,
 
-    // glow thickness in screen space for the “X body”
-    xStrokeCore: IS_MOBILE ? 3.8 : 5.2,
-    xStrokeGlow: IS_MOBILE ? 12 : 16
+    // screen neon body
+    xStrokeCore: IS_MOBILE ? 4.4 : 6.2,
+    xStrokeGlow: IS_MOBILE ? 14 : 20
   };
+
+  function idx(x, y){ return x + y * simW; }
 
   function resize() {
     dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
@@ -171,7 +193,6 @@
     view.style.height = H + "px";
     vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // sim grid
     const maxSide = CFG.gridMax;
     const aspect = W / Math.max(1, H);
     if (W >= H) {
@@ -197,8 +218,6 @@
     seedParticles(true);
   }
   window.addEventListener("resize", resize);
-
-  function idx(x, y){ return x + y * simW; }
 
   function buildXField() {
     const w=simW, h=simH;
@@ -228,7 +247,7 @@
         x = (Math.random()*simW)|0;
         y = (Math.random()*simH)|0;
         const xf = xField[idx(x,y)];
-        if (Math.random() < 0.16 + 0.84*xf || tries++ > 10) break;
+        if (Math.random() < 0.14 + 0.86*xf || tries++ > 10) break;
       }
       agents.push({ x: x + Math.random(), y: y + Math.random(), a: Math.random()*Math.PI*2 });
     }
@@ -243,7 +262,6 @@
         y: Math.random()*H,
         vx: (Math.random()-0.5)*CFG.particleSpeed*2,
         vy: (Math.random()-0.5)*CFG.particleSpeed*2,
-        life: 1
       });
     }
   }
@@ -284,12 +302,11 @@
     for (let y=0; y<h; y++){
       for (let x=0; x<w; x++){
         const xf = xField[idx(x,y)];
-        if (xf > 0.12) trailA[idx(x,y)] = Math.max(trailA[idx(x,y)], amount * xf);
+        if (xf > 0.10) trailA[idx(x,y)] = Math.max(trailA[idx(x,y)], amount * xf);
       }
     }
   }
 
-  // Snap to nearest diagonal (in sim space)
   function snapToX_sim(x, y){
     const w=simW, h=simH;
     const a = (h - 1) / Math.max(1, (w - 1));
@@ -311,7 +328,6 @@
 
     let fx = clamp((clientX/W)*simW, 0, simW-1);
     let fy = clamp((clientY/H)*simH, 0, simH-1);
-
     const s = snapToX_sim(fx, fy);
     fx = clamp(s.x, 0, simW-1);
     fy = clamp(s.y, 0, simH-1);
@@ -322,10 +338,10 @@
       amp: 1.0
     });
 
-    depositAt(trailA, fx, fy, strong ? 0.95 : 0.60);
+    depositAt(trailA, fx, fy, strong ? 1.0 : 0.62);
+    cursorEnergy = clamp(cursorEnergy + (strong ? 0.55 : 0.22), 0, 1);
   }
 
-  // Start only after first click on black background
   function startOnFirstClick(e){
     const el = document.elementFromPoint(e.clientX, e.clientY);
     const a = el && el.closest ? el.closest("a") : null;
@@ -335,28 +351,28 @@
       started = true;
       startAt = performance.now();
       absorption = 0;
-      // first “shock” ink so the X begins to appear
-      inkXLine(0.55);
-      // also drop a strong food at click point (snapped to X)
+      xComplete = 0;
+      foods.length = 0;
+
+      inkXLine(0.62);
       addMouseFood(e.clientX, e.clientY, true);
     } else {
-      // later clicks = strong food (still snapped to X)
       addMouseFood(e.clientX, e.clientY, true);
     }
   }
 
   window.addEventListener("pointerdown", startOnFirstClick, { passive:true });
+
   window.addEventListener("pointermove", (e) => {
+    cursorX = e.clientX; cursorY = e.clientY;
     if (!started) return;
     addMouseFood(e.clientX, e.clientY, false);
   }, { passive:true });
 
-  // Pre-phase: particles drifting, then attracted/absorbed into X after start
   function stepParticles(dt){
     const sp = CFG.particleSpeed;
     const jit = CFG.particleJitter;
 
-    // ramp absorption 0..1 after start
     if (started) {
       const t = performance.now() - startAt;
       absorption = clamp(t / CFG.absorbRampMs, 0, 1);
@@ -365,49 +381,40 @@
     for (let i=0; i<particles.length; i++){
       const p = particles[i];
 
-      // mild random drift
       p.vx += (Math.random()-0.5)*jit*0.02;
       p.vy += (Math.random()-0.5)*jit*0.02;
 
-      // cap speed
       const v = Math.hypot(p.vx, p.vy) || 1;
-      const cap = sp;
-      if (v > cap) { p.vx = (p.vx/v)*cap; p.vy = (p.vy/v)*cap; }
+      if (v > sp) { p.vx = (p.vx/v)*sp; p.vy = (p.vy/v)*sp; }
 
-      // attraction to X after start
       if (absorption > 0) {
-        // convert screen -> sim
         const sx = (p.x / W) * simW;
         const sy = (p.y / H) * simH;
         const s = snapToX_sim(sx, sy);
 
-        // target in screen coords
         const tx = (s.x / simW) * W;
         const ty = (s.y / simH) * H;
 
         const dx = tx - p.x;
         const dy = ty - p.y;
 
-        // stronger pull as absorption rises
-        const pull = 0.0025 + 0.0085*absorption;
+        const pull = 0.0025 + 0.0105*absorption;
         p.vx += dx * pull;
         p.vy += dy * pull;
 
-        // deposit trail while being absorbed (this is the “particles absorbed into X” effect)
-        const dep = 0.08 + 0.22*absorption;
+        // deposit into X as they get absorbed
+        const dep = 0.10 + 0.28*absorption;
         depositAt(trailA, s.x, s.y, dep);
       }
 
       p.x += p.vx * dt * 0.06;
       p.y += p.vy * dt * 0.06;
 
-      // wrap
       if (p.x < 0) p.x += W; else if (p.x >= W) p.x -= W;
       if (p.y < 0) p.y += H; else if (p.y >= H) p.y -= H;
     }
   }
 
-  // Score how “formed” the X is by sampling along both diagonals in trailA
   function computeXCompleteness(){
     const samples = IS_MOBILE ? 80 : 120;
     let acc = 0;
@@ -417,28 +424,24 @@
       const y1 = t*(simH-1);
       const y2 = (simH-1) - y1;
 
-      // sample a tiny band using xField as weight
       const k1 = idx(x|0, y1|0);
       const k2 = idx(x|0, y2|0);
 
-      const v1 = trailA[k1] * (0.6 + 0.4*xField[k1]);
-      const v2 = trailA[k2] * (0.6 + 0.4*xField[k2]);
+      const v1 = trailA[k1] * (0.55 + 0.45*xField[k1]);
+      const v2 = trailA[k2] * (0.55 + 0.45*xField[k2]);
 
       acc += clamp(v1, 0, 1);
       acc += clamp(v2, 0, 1);
     }
     const raw = acc / (samples*2);
-    // smooth
-    xComplete = lerp(xComplete, clamp(raw*1.35, 0, 1), CFG.xScoreSmoothing);
+    xComplete = lerp(xComplete, clamp(raw*1.25, 0, 1), CFG.xScoreSmoothing);
   }
 
-  // Slime sim
   function stepSlime(dtMs){
-    // foods aging
     for (let i=foods.length-1; i>=0; i--){
       foods[i].life -= dtMs;
       if (foods[i].life <= 0) foods.splice(i, 1);
-      else foods[i].amp = foods[i].life / (CFG.foodLifeMs*1.0);
+      else foods[i].amp = foods[i].life / CFG.foodLifeMs;
     }
 
     const step = CFG.step;
@@ -466,12 +469,10 @@
       let fL = sampleField(trailA, lx, ly);
       let fR = sampleField(trailA, rx, ry);
 
-      // X bias
       fF += xBias * sampleField(xField, fx, fy);
       fL += xBias * sampleField(xField, lx, ly);
       fR += xBias * sampleField(xField, rx, ry);
 
-      // foods
       if (foods.length){
         let addF=0, addL=0, addR=0;
         const rr = CFG.foodRadius;
@@ -484,9 +485,9 @@
           const dxL = lx - fd.x, dyL = ly - fd.y;
           const dxR = rx - fd.x, dyR = ry - fd.y;
 
-          addF += Math.exp(-(dxF*dxF + dyF*dyF) / rr2) * amp;
-          addL += Math.exp(-(dxL*dxL + dyL*dyL) / rr2) * amp;
-          addR += Math.exp(-(dxR*dxR + dyR*dyR) / rr2) * amp;
+          addF += Math.exp(-(dxF*dxF + dyF*dyF)/rr2) * amp;
+          addL += Math.exp(-(dxL*dxL + dyL*dyL)/rr2) * amp;
+          addR += Math.exp(-(dxR*dxR + dyR*dyR)/rr2) * amp;
         }
         fF += foodStr * addF;
         fL += foodStr * addL;
@@ -512,7 +513,7 @@
       depositAt(trailA, p.x, p.y, CFG.deposit);
     }
 
-    // decay + diffuse
+    // decay + diffusion
     const d = CFG.decay;
     for (let k=0; k<trailA.length; k++) trailA[k] *= d;
 
@@ -522,124 +523,33 @@
     }
   }
 
-  // Draw a fat neon X overlay (only as “body” layer, still driven by xComplete)
-  function drawXBodyOverlay(alpha, hueShift01){
-    // hueShift01: 0=cian, 1=rosa
-    // We’ll mix via RGB rather than HSL to keep it simple and fast.
-    const cCyan = { r: 140, g: 255, b: 255 = 255; // (we'll not use b variable like this)
-  }
-
-  // Render trails with palette controlled by xComplete: cyan -> pink
-  function renderMaze() {
-    const n = simW * simH;
-
-    // palette endpoints
-    // cyan: (90, 255, 255)
-    // pink: (255, 120, 230)
-    const pr0 = 90,  pg0 = 255, pb0 = 255;
-    const pr1 = 255, pg1 = 120, pb1 = 230;
-
-    // ease color change so it “earns” the pink
-    const cMix = ease(clamp(xComplete, 0, 1));
-
-    const R0 = lerp(pr0, pr1, cMix);
-    const G0 = lerp(pg0, pg1, cMix);
-    const B0 = lerp(pb0, pb1, cMix);
-
-    for (let k=0, p=0; k<n; k++, p+=4) {
-      const t = trailA[k];
-      const v = t <= 0 ? 0 : Math.pow(clamp(t, 0, 1), 0.62);
-
-      // emphasize the X band
-      const xf = xField[k];
-      const c = clamp(v * (0.86 + 0.32*xf), 0, 1);
-
-      // build neon: bright core + slight white-hot
-      const core = c;
-      const hot  = Math.pow(c, 0.45);
-
-      let r = (R0 * core + 255 * 0.16 * hot);
-      let g = (G0 * core + 255 * 0.10 * hot);
-      let b = (B0 * core + 255 * 0.18 * hot);
-
-      // crush blacks
-      const on = c < CFG.crush ? 0 : 1;
-      img8[p+0] = on ? clamp(r,0,255)|0 : 0;
-      img8[p+1] = on ? clamp(g,0,255)|0 : 0;
-      img8[p+2] = on ? clamp(b,0,255)|0 : 0;
-      img8[p+3] = 255;
-    }
-
-    sctx.putImageData(imgData, 0, 0);
-
-    // draw to full view (no zoom madness)
-    vctx.fillStyle = "#000";
-    vctx.fillRect(0,0,W,H);
-    vctx.imageSmoothingEnabled = true;
-    vctx.drawImage(simCanvas, 0,0,simW,simH, 0,0,W,H);
-
-    // X "body" overlay (screen space) - stronger when xComplete grows
-    const a = clamp(0.12 + 0.55*xComplete, 0, 0.75);
-    const mix = ease(clamp(xComplete, 0, 1));
-    const coreR = lerp(120, 255, mix);
-    const coreG = lerp(255, 140, mix);
-    const coreB = lerp(255, 230, mix);
-
-    // glow stroke
-    vctx.save();
-    vctx.globalCompositeOperation = "lighter";
-    vctx.lineCap = "round";
-
-    vctx.strokeStyle = `rgba(${coreR|0},${coreG|0},${coreB|0},${a*0.38})`;
-    vctx.lineWidth = CFG.xStrokeGlow;
-    vctx.beginPath();
-    vctx.moveTo(0,0); vctx.lineTo(W,H);
-    vctx.moveTo(W,0); vctx.lineTo(0,H);
-    vctx.stroke();
-
-    // core stroke
-    vctx.strokeStyle = `rgba(${coreR|0},${coreG|0},${coreB|0},${a})`;
-    vctx.lineWidth = CFG.xStrokeCore;
-    vctx.beginPath();
-    vctx.moveTo(0,0); vctx.lineTo(W,H);
-    vctx.moveTo(W,0); vctx.lineTo(0,H);
-    vctx.stroke();
-
-    // center “knot” bloom
-    const cx=W/2, cy=H/2;
-    const rr = Math.min(W,H) * 0.18;
-    const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
-    g.addColorStop(0, `rgba(${coreR|0},${coreG|0},${coreB|0},${a*0.42})`);
-    g.addColorStop(0.35, `rgba(${coreR|0},${coreG|0},${coreB|0},${a*0.12})`);
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    vctx.fillStyle = g;
-    vctx.beginPath(); vctx.arc(cx,cy,rr,0,Math.PI*2); vctx.fill();
-
-    vctx.restore();
-  }
-
-  function renderParticles() {
-    // cian pre-phase (solo puntos + micro glow)
+  function renderParticles(now){
     vctx.fillStyle = "#000";
     vctx.fillRect(0,0,W,H);
 
+    // cyan-ish particles, but with slight shimmer as absorption grows
     vctx.save();
     vctx.globalCompositeOperation = "lighter";
+
+    const t = now * 0.001;
+    const hue = 0.52 + 0.06*Math.sin(t*1.2); // cyan base
+    const base = hsv2rgb(hue, 0.9, 1.0);
+
     for (let i=0; i<particles.length; i++){
       const p = particles[i];
-      const r = 1.0 + (absorption*0.7);
-      const a = 0.35 + absorption*0.35;
-      vctx.fillStyle = `rgba(120,255,255,${a})`;
+      const r = 1.0 + absorption*0.9;
+      const a = 0.22 + absorption*0.36;
+      vctx.fillStyle = `rgba(${base.r},${base.g},${base.b},${a})`;
       vctx.beginPath();
       vctx.arc(p.x, p.y, r, 0, Math.PI*2);
       vctx.fill();
     }
 
-    // tiny hint of X when absorption starts (but still mainly particles)
-    if (absorption > 0.03) {
-      const hint = clamp(absorption*0.20, 0, 0.18);
-      vctx.strokeStyle = `rgba(120,255,255,${hint})`;
-      vctx.lineWidth = IS_MOBILE ? 2.2 : 2.8;
+    // faint diagonal hint once absorption begins
+    if (absorption > 0.04) {
+      const hint = clamp(absorption*0.18, 0, 0.18);
+      vctx.strokeStyle = `rgba(${base.r},${base.g},${base.b},${hint})`;
+      vctx.lineWidth = IS_MOBILE ? 2.4 : 3.0;
       vctx.beginPath();
       vctx.moveTo(0,0); vctx.lineTo(W,H);
       vctx.moveTo(W,0); vctx.lineTo(0,H);
@@ -648,10 +558,8 @@
 
     vctx.restore();
 
-    // “Click to start” ultra sutil (solo antes de start)
     if (!started) {
       vctx.save();
-      vctx.globalCompositeOperation = "source-over";
       vctx.fillStyle = "rgba(255,255,255,0.14)";
       vctx.font = "600 10px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
       vctx.textAlign = "center";
@@ -660,49 +568,144 @@
     }
   }
 
+  function renderMaze(now){
+    const n = simW * simH;
+    const t = now * 0.001;
+
+    // ---- “people flip” color logic ----
+    // Start cyan. As X completes, we unlock:
+    // - fast hue rotation on the X band
+    // - iridescent interference on filaments
+    // - cursor energy kicks pulses
+    const unlock = ease(clamp(xComplete, 0, 1));
+    cursorEnergy = lerp(cursorEnergy, 0, 0.06);
+
+    // base hue rotates slowly; unlocked adds fast rotation + strobe pulses
+    const baseHue = 0.52;                     // cyan start
+    const slow = 0.06 * Math.sin(t*0.45);
+    const fast = unlock * (0.55*Math.sin(t*1.35) + 0.25*Math.sin(t*3.2));
+    const pulse = unlock * cursorEnergy * (0.18*Math.sin(t*14.0));
+    const H0 = baseHue + slow + fast + pulse;
+
+    for (let k=0, p=0; k<n; k++, p+=4){
+      const tr = trailA[k];
+      const v  = tr <= 0 ? 0 : Math.pow(clamp(tr, 0, 1), 0.62);
+
+      const xf = xField[k];                         // stronger on X
+      const c  = clamp(v * (0.82 + 0.38*xf), 0, 1);
+
+      // iridescent interference
+      const x = (k % simW);
+      const y = (k / simW) | 0;
+      const wave = Math.sin((x*0.035 + y*0.028) + t*(1.2 + 2.4*unlock));
+      const wave2 = Math.sin((x*0.018 - y*0.021) + t*(2.1 + 3.8*unlock));
+      const ir = (0.5 + 0.5*wave) * (0.35 + 0.65*unlock) + (0.5 + 0.5*wave2)*0.18*unlock;
+
+      // hue varies slightly with xField + interference
+      const hue = H0 + 0.22*ir + 0.10*xf*unlock;
+      const sat = 0.88 + 0.10*unlock;
+      const val = clamp(0.10 + 1.15*c, 0, 1);
+
+      const rgb = hsv2rgb(hue, sat, val);
+
+      // white-hot core for thick X
+      const hot = Math.pow(c, 0.42) * (0.20 + 0.32*xf);
+
+      const on = c < CFG.crush ? 0 : 1;
+      img8[p+0] = on ? clamp(rgb.r + 255*hot, 0, 255) | 0 : 0;
+      img8[p+1] = on ? clamp(rgb.g + 255*hot*0.55, 0, 255) | 0 : 0;
+      img8[p+2] = on ? clamp(rgb.b + 255*hot*0.85, 0, 255) | 0 : 0;
+      img8[p+3] = 255;
+    }
+
+    sctx.putImageData(imgData, 0, 0);
+
+    vctx.fillStyle = "#000";
+    vctx.fillRect(0,0,W,H);
+    vctx.imageSmoothingEnabled = true;
+    vctx.drawImage(simCanvas, 0,0,simW,simH, 0,0,W,H);
+
+    // screen-space neon body for the X (more body, more glow)
+    const unlock = ease(clamp(xComplete, 0, 1));
+    const hueX = 0.52 + unlock*(0.55*Math.sin(t*1.35) + 0.20*Math.sin(t*4.8));
+    const col = hsv2rgb(hueX, 0.95, 1.0);
+
+    const alpha = clamp(0.14 + 0.62*unlock, 0, 0.85);
+
+    vctx.save();
+    vctx.globalCompositeOperation = "lighter";
+    vctx.lineCap = "round";
+
+    // glow
+    vctx.strokeStyle = `rgba(${col.r},${col.g},${col.b},${alpha*0.35})`;
+    vctx.lineWidth = CFG.xStrokeGlow;
+    vctx.beginPath();
+    vctx.moveTo(0,0); vctx.lineTo(W,H);
+    vctx.moveTo(W,0); vctx.lineTo(0,H);
+    vctx.stroke();
+
+    // core
+    vctx.strokeStyle = `rgba(${col.r},${col.g},${col.b},${alpha})`;
+    vctx.lineWidth = CFG.xStrokeCore;
+    vctx.beginPath();
+    vctx.moveTo(0,0); vctx.lineTo(W,H);
+    vctx.moveTo(W,0); vctx.lineTo(0,H);
+    vctx.stroke();
+
+    // center knot bloom
+    const cx=W/2, cy=H/2;
+    const rr = Math.min(W,H) * 0.18;
+    const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
+    g.addColorStop(0, `rgba(${col.r},${col.g},${col.b},${alpha*0.45})`);
+    g.addColorStop(0.32, `rgba(${col.r},${col.g},${col.b},${alpha*0.14})`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    vctx.fillStyle = g;
+    vctx.beginPath(); vctx.arc(cx,cy,rr,0,Math.PI*2); vctx.fill();
+
+    vctx.restore();
+  }
+
   function loop(now){
     const dt = clamp(now - lastFrame, 8, 40);
     lastFrame = now;
 
-    // always step particles (pre-phase and during absorption)
+    // always update particles
     stepParticles(dt);
 
     if (!started) {
-      renderParticles();
+      renderParticles(now);
       requestAnimationFrame(loop);
       return;
     }
 
-    // After start: slime begins to emerge progressively
     const t = now - startAt;
 
-    // keep “feeding” the X in early seconds so it locks in as a thick band
+    // early: keep ink feeding the X so it locks thick & clean
     if (t < 1100) inkXLine(CFG.xInk);
 
-    // run slime sim always after start (it’s what forms the maze)
+    // slime step
     stepSlime(dt);
 
-    // compute completeness after warmup
+    // compute completeness
     if (t > CFG.xScoreWarmupMs) computeXCompleteness();
 
-    // blend between particles view and maze view in early stage
-    const mazeMix = clamp((t - CFG.mazeEnableMs) / 900, 0, 1);
-    if (mazeMix < 1) {
-      // draw particles then fade in maze on top
-      renderParticles();
+    // blend particles -> maze
+    const mix = clamp((t - CFG.mazeEnableMs) / 800, 0, 1);
+    if (mix < 1) {
+      renderParticles(now);
       vctx.save();
-      vctx.globalAlpha = ease(mazeMix);
-      renderMaze();
+      vctx.globalAlpha = ease(mix);
+      renderMaze(now);
       vctx.restore();
     } else {
-      renderMaze();
+      renderMaze(now);
     }
 
     frame++;
     requestAnimationFrame(loop);
   }
 
-  // dev: reseed
+  // reset key
   window.addEventListener("keydown", (e) => {
     if (e.key === "r" || e.key === "R") {
       started = false;
@@ -713,6 +716,9 @@
       seedParticles(true);
     }
   });
+
+  // extra “energy” on clicks/moves
+  window.addEventListener("pointermove", () => { cursorEnergy = clamp(cursorEnergy + 0.01, 0, 1); }, { passive:true });
 
   resize();
   requestAnimationFrame(loop);
