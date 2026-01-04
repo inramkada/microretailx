@@ -122,11 +122,20 @@ export function init(canvasId = "canvas") {
     raf = requestAnimationFrame(step);
   };
 
+  const onVis = () => {
+    if (document.visibilityState === "hidden") {
+      cancelAnimationFrame(raf);
+    } else {
+      raf = requestAnimationFrame(step);
+    }
+  };
+
   resize();
   window.addEventListener("resize", resize, { passive: true });
   window.addEventListener("pointermove", onMove, { passive: true });
   window.addEventListener("pointerdown", onMove, { passive: true });
   window.addEventListener("pointerleave", onLeave, { passive: true });
+  document.addEventListener("visibilitychange", onVis);
 
   raf = requestAnimationFrame(step);
 
@@ -136,6 +145,7 @@ export function init(canvasId = "canvas") {
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("pointerdown", onMove);
     window.removeEventListener("pointerleave", onLeave);
+    document.removeEventListener("visibilitychange", onVis);
     try {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
