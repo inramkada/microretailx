@@ -2,23 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MICRORETAILX</title>
-
-  <!-- Si ya usas CSP en Cloudflare headers, elimina este meta -->
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self';
-                 script-src 'self' 'unsafe-inline';
-                 style-src 'self' 'unsafe-inline';
-                 img-src 'self' data:;
-                 font-src 'self';
-                 connect-src 'self';
-                 base-uri 'self';
-                 frame-ancestors 'none';
-                 form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>microretailXX</title>
 
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
+  <meta http-equiv="Permissions-Policy"
+        content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
 
   <style>
     html, body {
@@ -38,16 +27,44 @@
       height: 100vh;
     }
 
-    /* Center content */
-    .center {
+    /* === UI LAYER (estructura original) === */
+    .ui-layer {
       position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: flex-end;
+      background: rgba(0,0,0,0.78);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(10px);
+    }
+
+    .menu-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      opacity: 0.85;
+    }
+
+    .center {
+      position: absolute;
       inset: 0;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      text-align: center;
       pointer-events: none;
-      z-index: 5;
     }
 
     .brand {
@@ -57,22 +74,35 @@
       margin-bottom: 18px;
     }
 
-    .links {
+    .footer-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 14px 18px 12px;
+      display: flex;
+      justify-content: center;
+      background: rgba(0,0,0,0.78);
+      border-top: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(10px);
+      pointer-events: auto;
+    }
+
+    .footer-links {
       display: flex;
       gap: 22px;
       font-size: 11px;
       letter-spacing: 2px;
-      opacity: 0.6;
-      pointer-events: auto;
+      opacity: 0.65;
     }
 
-    .links a {
+    .footer-links a {
       color: #fff;
       text-decoration: none;
       opacity: 0.75;
     }
 
-    .links a:hover {
+    .footer-links a:hover {
       opacity: 1;
       text-decoration: underline;
     }
@@ -82,7 +112,7 @@
         font-size: 15px;
         letter-spacing: 4px;
       }
-      .links {
+      .footer-links {
         flex-wrap: wrap;
         justify-content: center;
         gap: 14px;
@@ -92,15 +122,24 @@
 </head>
 
 <body>
-  <canvas id="c"></canvas>
+  <canvas id="canvas"></canvas>
 
-  <div class="center">
-    <div class="brand">MICRORETAILX</div>
-    <div class="links">
-      <a href="terms.html">TERMS</a>
-      <a href="privacy.html">PRIVACY</a>
-      <a href="cookies.html">COOKIES</a>
-      <a href="legal.html">LEGAL</a>
+  <div class="ui-layer">
+    <div class="top-bar">
+      <div class="menu-dot" aria-hidden="true"></div>
+    </div>
+
+    <div class="center">
+      <div class="brand">MICRORETAILX</div>
+    </div>
+
+    <div class="footer-bar">
+      <div class="footer-links">
+        <a href="terms.html">TERMS</a>
+        <a href="privacy.html">PRIVACY</a>
+        <a href="cookies.html">COOKIES</a>
+        <a href="legal.html">LEGAL</a>
+      </div>
     </div>
   </div>
 
@@ -108,12 +147,14 @@
 (() => {
   "use strict";
 
-  const canvas = document.getElementById("c");
+  const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d", { alpha: false });
 
   const UA = navigator.userAgent || "";
-  const IS_IOS = /iPhone|iPad|iPod/i.test(UA) ||
-                 (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const IS_IOS =
+    /iPhone|iPad|iPod/i.test(UA) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
   const DPR_CAP = IS_IOS ? 1.6 : 2;
 
   let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
@@ -124,7 +165,7 @@
     W = window.innerWidth | 0;
     H = window.innerHeight | 0;
 
-    canvas.width  = (W * dpr) | 0;
+    canvas.width = (W * dpr) | 0;
     canvas.height = (H * dpr) | 0;
     canvas.style.width = W + "px";
     canvas.style.height = H + "px";
@@ -132,7 +173,7 @@
   }
   window.addEventListener("resize", resize);
 
-  // === Simple X pulse (clean, original style) ===
+  /* === SIMPLE X PULSE (original, limpio) === */
   let t = 0;
   let last = performance.now();
 
@@ -158,7 +199,7 @@
     ctx.restore();
   }
 
-  function frame(now) {
+  function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     t += dt;
@@ -166,15 +207,16 @@
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, W, H);
 
-    // gentle pulse
-    const a = 0.05 + 0.08 * (0.5 - 0.5 * Math.cos(t * 1.2));
-    drawX(a);
+    const pulse = 0.5 - 0.5 * Math.cos(t * 1.2);
+    const alpha = 0.05 + 0.08 * pulse;
 
-    requestAnimationFrame(frame);
+    drawX(alpha);
+
+    requestAnimationFrame(loop);
   }
 
   resize();
-  requestAnimationFrame(frame);
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
