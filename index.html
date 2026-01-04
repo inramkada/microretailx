@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>microretailX</title>
+  <title>MICRORETAILX</title>
 
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Permissions-Policy"
@@ -11,12 +11,8 @@
 
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-      color: #fff;
+      margin: 0; padding: 0; height: 100%;
+      background: #000; overflow: hidden; color:#fff;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
                    "Liberation Mono", "Courier New", monospace;
     }
@@ -24,53 +20,35 @@
 
     .ui-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 
-    .top-bar {
-      position: absolute; top: 0; left: 0; right: 0;
-      padding: 14px 18px;
-      display: flex; justify-content: flex-start;
+    .top-bar{
+      position:absolute; top:0; left:0; right:0;
+      padding:14px 18px;
       background: rgba(0,0,0,0.78);
-      border-bottom: 1px solid rgba(255,255,255,0.10);
+      border-bottom:1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(10px);
+      display:flex;
+    }
+    .brand{
+      font-size:12px; letter-spacing:4px; font-weight:900;
+      opacity:0.92; color:rgba(255,255,255,0.92);
+      mix-blend-mode:difference;
     }
 
-    .brand {
-      font-size: 12px;
-      letter-spacing: 4px;
-      font-weight: 900;
-      opacity: 0.92;
-      color: rgba(255,255,255,0.92);
-      mix-blend-mode: difference; /* “transparente RGB a fondos” */
-      text-shadow: none;
-    }
-
-    .footer-bar {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 14px 18px 12px;
-      display: flex; flex-direction: column; align-items: center;
-      gap: 8px;
+    .footer-bar{
+      position:absolute; bottom:0; left:0; right:0;
+      padding:14px 18px 12px;
       background: rgba(0,0,0,0.78);
-      border-top: 1px solid rgba(255,255,255,0.10);
+      border-top:1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(10px);
-      pointer-events: auto;
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      pointer-events:auto;
     }
+    .footer-links{ display:flex; gap:22px; font-size:11px; letter-spacing:2px; opacity:0.65; }
+    .footer-links a{ color:#fff; text-decoration:none; opacity:0.75; pointer-events:auto; }
+    .footer-links a:hover{ opacity:1; text-decoration:underline; }
+    .copyright{ font-size:9px; letter-spacing:1px; opacity:0.45; text-align:center; }
 
-    .footer-links {
-      display: flex; gap: 22px;
-      font-size: 11px; letter-spacing: 2px;
-      opacity: 0.65;
-    }
-    .footer-links a {
-      color:#fff; text-decoration:none;
-      opacity:0.75; pointer-events:auto;
-    }
-    .footer-links a:hover { opacity:1; text-decoration: underline; }
-
-    .copyright {
-      font-size: 9px; letter-spacing: 1px;
-      opacity: 0.45; text-align: center;
-    }
-
-    @media (max-width: 600px) {
+    @media (max-width: 600px){
       .brand { font-size: 11px; letter-spacing: 3px; }
       .footer-links { flex-wrap: wrap; justify-content:center; gap: 14px; }
     }
@@ -81,10 +59,7 @@
   <canvas id="view"></canvas>
 
   <div class="ui-layer">
-    <div class="top-bar">
-      <div class="brand">MICRORETAILX</div>
-    </div>
-
+    <div class="top-bar"><div class="brand">MICRORETAILX</div></div>
     <div class="footer-bar">
       <div class="footer-links">
         <a href="terms.html">TERMS</a>
@@ -103,7 +78,6 @@
   const view = document.getElementById("view");
   const vctx = view.getContext("2d", { alpha: false });
 
-  // offscreen simulation surface
   const simCanvas = document.createElement("canvas");
   const sctx = simCanvas.getContext("2d", { willReadFrequently: true });
 
@@ -120,63 +94,70 @@
   const DPR_CAP = IS_IOS ? 1.6 : 2;
   let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
 
-  let W=0, H=0;
-  let simW=0, simH=0;
+  let W=0, H=0, simW=0, simH=0;
 
-  // fields
-  let trailA, trailB;
-  let xField;
-  let imgData, img8;
+  // slime fields
+  let trailA, trailB, xField, imgData, img8;
   let agents = [];
-  let foods = []; // {x,y,life,amp}
-  let tPrev = performance.now();
+  let foods  = [];
+
+  // particle pre-phase
+  let particles = [];
+  let started = false;          // becomes true after first click
+  let absorption = 0;           // 0..1 absorb strength ramp
+  let xComplete = 0;            // 0..1 “X formed” metric
+  let startAt = 0;
+
+  // mouse food throttling
+  let lastMouseFoodAt = 0;
+  let lastFrame = performance.now();
   let frame = 0;
 
-  // intro
-  const INTRO = {
-    start: performance.now(),
-    durIn: 850,      // sweep to center
-    durFlash: 180,   // flash
-    durOut: 450,     // settle
-    get active() {
-      const t = performance.now() - this.start;
-      return t < (this.durIn + this.durFlash + this.durOut);
-    }
-  };
-
-  // Mouse “food” throttling
-  let lastMouseFoodAt = 0;
-
+  // CONFIG
   const CFG = {
-    gridMax: IS_MOBILE ? 540 : 820,
+    gridMax: IS_MOBILE ? 560 : 860,
 
-    agentCount: IS_MOBILE ? 6000 : 12000,
-    step: IS_MOBILE ? 0.90 : 1.05,
+    // Particles (pre-phase)
+    particleCount: IS_MOBILE ? 1300 : 2200,
+    particleSpeed: IS_MOBILE ? 0.55 : 0.75,
+    particleJitter: 0.35,
 
-    sensorDist: IS_MOBILE ? 6.2 : 7.8,
+    // Absorption / build-up timing
+    absorbRampMs: 1000,      // ramp absorption force after first click
+    mazeEnableMs: 900,       // when slime starts being visible
+    xScoreWarmupMs: 1400,    // after click, begin scoring completeness
+    xScoreSmoothing: 0.08,
+
+    // Slime (physarum)
+    agentCount: IS_MOBILE ? 7000 : 13000,
+    step: IS_MOBILE ? 0.95 : 1.08,
+
+    sensorDist: IS_MOBILE ? 6.5 : 7.9,
     sensorAngle: 0.55,
     turnSpeed: 0.34,
 
-    deposit: 0.94,
+    deposit: 0.95,
     decay: IS_MOBILE ? 0.973 : 0.979,
     diffuseEvery: 2,
     diffuseMix: 0.42,
 
-    // ---- X thicker (more body)
-    xBias: 0.82,
-    xWidthPx: IS_MOBILE ? 3.6 : 4.6,   // << cuerpo
+    // X (more body)
+    xBias: 0.90,
+    xWidthPx: IS_MOBILE ? 5.0 : 6.6,   // <<< MÁS CUERPO REAL (sim space)
+    xInk: 0.36,
 
-    // mouse food (snapped to X)
+    // mouse interaction (branches born on X)
     foodRadius: IS_MOBILE ? 18 : 22,
     foodStrength: 1.55,
-    foodLifeMs: 1300,
-    mouseFoodEveryMs: IS_MOBILE ? 42 : 28,
-
-   
-    xInk: 0.42,
+    foodLifeMs: 1200,
+    mouseFoodEveryMs: IS_MOBILE ? 42 : 26,
 
     // render
-    crush: 0.030, // black threshold
+    crush: 0.030,
+
+    // glow thickness in screen space for the “X body”
+    xStrokeCore: IS_MOBILE ? 3.8 : 5.2,
+    xStrokeGlow: IS_MOBILE ? 12 : 16
   };
 
   function resize() {
@@ -186,19 +167,19 @@
 
     view.width  = (W * dpr) | 0;
     view.height = (H * dpr) | 0;
-    view.style.width  = W + "px";
+    view.style.width = W + "px";
     view.style.height = H + "px";
     vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // sim size
+    // sim grid
     const maxSide = CFG.gridMax;
     const aspect = W / Math.max(1, H);
     if (W >= H) {
       simW = maxSide;
-      simH = Math.max(160, (maxSide / aspect) | 0);
+      simH = Math.max(180, (maxSide / aspect) | 0);
     } else {
       simH = maxSide;
-      simW = Math.max(160, (maxSide * aspect) | 0);
+      simW = Math.max(180, (maxSide * aspect) | 0);
     }
 
     simCanvas.width = simW;
@@ -208,169 +189,256 @@
     trailA = new Float32Array(n);
     trailB = new Float32Array(n);
     xField = new Float32Array(n);
-
     imgData = sctx.createImageData(simW, simH);
     img8 = imgData.data;
 
     buildXField();
     seedAgents(true);
-
-    // “ink” the X so the maze definitely nace ahí
-    inkXLine(CFG.xInk);
+    seedParticles(true);
   }
-
   window.addEventListener("resize", resize);
 
-  function idx(x, y) { return x + y * simW; }
+  function idx(x, y){ return x + y * simW; }
 
   function buildXField() {
-    const w = simW, h = simH;
+    const w=simW, h=simH;
     const a = (h - 1) / Math.max(1, (w - 1));
     const inv = 1 / Math.sqrt(1 + a*a);
 
     const sigma = CFG.xWidthPx;
-    const sigma2 = sigma * sigma;
+    const sigma2 = sigma*sigma;
 
-    for (let y=0; y<h; y++) {
-      for (let x=0; x<w; x++) {
+    for (let y=0; y<h; y++){
+      for (let x=0; x<w; x++){
         const d1 = Math.abs(a*x - y) * inv;
         const d2 = Math.abs(a*x + y - (h - 1)) * inv;
-        const d = Math.min(d1, d2);
-        const v = Math.exp(-(d*d) / (2*sigma2));
-        xField[idx(x,y)] = v;
+        const d  = Math.min(d1, d2);
+        xField[idx(x,y)] = Math.exp(-(d*d)/(2*sigma2));
       }
     }
   }
 
-  function seedAgents(resetTrails=false) {
-    if (resetTrails) { trailA.fill(0); trailB.fill(0); }
+  function seedAgents(reset=false){
+    if (reset) { trailA.fill(0); trailB.fill(0); }
     agents.length = 0;
-
     const n = CFG.agentCount;
-    for (let i=0; i<n; i++) {
-      let x, y, tries=0;
-      while (true) {
-        x = (Math.random() * simW) | 0;
-        y = (Math.random() * simH) | 0;
+    for (let i=0; i<n; i++){
+      let x,y, tries=0;
+      while(true){
+        x = (Math.random()*simW)|0;
+        y = (Math.random()*simH)|0;
         const xf = xField[idx(x,y)];
-        if (Math.random() < 0.18 + 0.82*xf || tries++ > 10) break;
+        if (Math.random() < 0.16 + 0.84*xf || tries++ > 10) break;
       }
-      agents.push({ x: x + Math.random(), y: y + Math.random(), a: Math.random() * Math.PI * 2 });
+      agents.push({ x: x + Math.random(), y: y + Math.random(), a: Math.random()*Math.PI*2 });
     }
   }
 
-  function depositAt(f, x, y, amt) {
-    const xi = x | 0, yi = y | 0;
-    if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return;
+  function seedParticles(reset=false){
+    if (reset) particles.length = 0;
+    const n = CFG.particleCount;
+    while(particles.length < n){
+      particles.push({
+        x: Math.random()*W,
+        y: Math.random()*H,
+        vx: (Math.random()-0.5)*CFG.particleSpeed*2,
+        vy: (Math.random()-0.5)*CFG.particleSpeed*2,
+        life: 1
+      });
+    }
+  }
+
+  function depositAt(f, x, y, amt){
+    const xi = x|0, yi = y|0;
+    if (xi<0||yi<0||xi>=simW||yi>=simH) return;
     const k = idx(xi, yi);
     f[k] = Math.min(1.0, f[k] + amt);
   }
-
-  function sampleField(f, x, y) {
-    const xi = x | 0, yi = y | 0;
-    if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return 0;
+  function sampleField(f, x, y){
+    const xi = x|0, yi = y|0;
+    if (xi<0||yi<0||xi>=simW||yi>=simH) return 0;
     return f[idx(xi, yi)];
   }
 
-  function diffuse(src, dst, mix) {
+  function diffuse(src, dst, mix){
     const w=simW, h=simH;
-    for (let y=1; y<h-1; y++) {
-      const row = y*w;
-      for (let x=1; x<w-1; x++) {
-        const k = row + x;
-        const v =
-          src[k] +
+    for (let y=1; y<h-1; y++){
+      const row=y*w;
+      for (let x=1; x<w-1; x++){
+        const k=row+x;
+        const v = src[k] +
           src[k-1] + src[k+1] +
           src[k-w] + src[k+w] +
           src[k-w-1] + src[k-w+1] +
           src[k+w-1] + src[k+w+1];
-        const blur = v / 9;
+        const blur = v/9;
         dst[k] = src[k]*(1-mix) + blur*mix;
       }
     }
-    for (let x=0; x<w; x++) { dst[x] = src[x]; dst[x + (h-1)*w] = src[x + (h-1)*w]; }
-    for (let y=0; y<h; y++) { dst[y*w] = src[y*w]; dst[(w-1) + y*w] = src[(w-1) + y*w]; }
+    for (let x=0; x<w; x++){ dst[x]=src[x]; dst[x+(h-1)*w]=src[x+(h-1)*w]; }
+    for (let y=0; y<h; y++){ dst[y*w]=src[y*w]; dst[(w-1)+y*w]=src[(w-1)+y*w]; }
   }
 
-  // paint extra trail along X (kickstart)
-  function inkXLine(amount) {
+  function inkXLine(amount){
     const w=simW, h=simH;
-    for (let y=0; y<h; y++) {
-      for (let x=0; x<w; x++) {
+    for (let y=0; y<h; y++){
+      for (let x=0; x<w; x++){
         const xf = xField[idx(x,y)];
-        if (xf > 0.18) trailA[idx(x,y)] = Math.max(trailA[idx(x,y)], amount * xf);
+        if (xf > 0.12) trailA[idx(x,y)] = Math.max(trailA[idx(x,y)], amount * xf);
       }
     }
   }
 
-  // snap a sim-point to the nearest diagonal (the X rails)
-  function snapToX(x, y) {
-    // lines: y = a x  and y = -a x + (h-1)
-    const w = simW, h = simH;
+  // Snap to nearest diagonal (in sim space)
+  function snapToX_sim(x, y){
+    const w=simW, h=simH;
     const a = (h - 1) / Math.max(1, (w - 1));
-
-    // distance proxy using vertical error
-    const y1 = a * x;
-    const y2 = (h - 1) - a * x;
+    const y1 = a*x;
+    const y2 = (h - 1) - a*x;
     const d1 = Math.abs(y - y1);
     const d2 = Math.abs(y - y2);
-
-    // project by moving y to the closest line (simple & stable)
-    if (d1 < d2) return { x, y: y1 };
-    return { x, y: y2 };
+    return d1 < d2 ? {x, y:y1} : {x, y:y2};
   }
 
-  // ---- Mouse food: only on X, branches appear there ----
-  function addMouseFood(clientX, clientY) {
+  function addMouseFood(clientX, clientY, strong=false){
     const now = performance.now();
-    if (now - lastMouseFoodAt < CFG.mouseFoodEveryMs) return;
+    if (!strong && now - lastMouseFoodAt < CFG.mouseFoodEveryMs) return;
     lastMouseFoodAt = now;
 
-    // ignore hover on links
     const el = document.elementFromPoint(clientX, clientY);
     const a = el && el.closest ? el.closest("a") : null;
     if (a) return;
 
-    let fx = clamp((clientX / W) * simW, 0, simW-1);
-    let fy = clamp((clientY / H) * simH, 0, simH-1);
+    let fx = clamp((clientX/W)*simW, 0, simW-1);
+    let fy = clamp((clientY/H)*simH, 0, simH-1);
 
-    // snap to X rails
-    const s = snapToX(fx, fy);
+    const s = snapToX_sim(fx, fy);
     fx = clamp(s.x, 0, simW-1);
     fy = clamp(s.y, 0, simH-1);
 
-    foods.push({ x: fx, y: fy, life: CFG.foodLifeMs, amp: 1.0 });
+    foods.push({
+      x: fx, y: fy,
+      life: strong ? CFG.foodLifeMs*1.8 : CFG.foodLifeMs,
+      amp: 1.0
+    });
 
-    // also “scratch” a tiny bit of trail on X to make it feel reactive
-    depositAt(trailA, fx, fy, 0.55);
+    depositAt(trailA, fx, fy, strong ? 0.95 : 0.60);
   }
 
-  window.addEventListener("pointermove", (e) => {
-    addMouseFood(e.clientX, e.clientY);
-  }, { passive:true });
-
-  // click = stronger food, still snapped to X
-  window.addEventListener("pointerdown", (e) => {
+  // Start only after first click on black background
+  function startOnFirstClick(e){
     const el = document.elementFromPoint(e.clientX, e.clientY);
     const a = el && el.closest ? el.closest("a") : null;
     if (a) return;
 
-    let fx = clamp((e.clientX / W) * simW, 0, simW-1);
-    let fy = clamp((e.clientY / H) * simH, 0, simH-1);
-    const s = snapToX(fx, fy);
-    fx = clamp(s.x, 0, simW-1);
-    fy = clamp(s.y, 0, simH-1);
+    if (!started) {
+      started = true;
+      startAt = performance.now();
+      absorption = 0;
+      // first “shock” ink so the X begins to appear
+      inkXLine(0.55);
+      // also drop a strong food at click point (snapped to X)
+      addMouseFood(e.clientX, e.clientY, true);
+    } else {
+      // later clicks = strong food (still snapped to X)
+      addMouseFood(e.clientX, e.clientY, true);
+    }
+  }
 
-    foods.push({ x: fx, y: fy, life: CFG.foodLifeMs * 1.8, amp: 1.0 });
-    depositAt(trailA, fx, fy, 0.9);
+  window.addEventListener("pointerdown", startOnFirstClick, { passive:true });
+  window.addEventListener("pointermove", (e) => {
+    if (!started) return;
+    addMouseFood(e.clientX, e.clientY, false);
   }, { passive:true });
 
-  function stepSim(dtMs) {
-    // age foods
-    for (let i=foods.length-1; i>=0; i--) {
+  // Pre-phase: particles drifting, then attracted/absorbed into X after start
+  function stepParticles(dt){
+    const sp = CFG.particleSpeed;
+    const jit = CFG.particleJitter;
+
+    // ramp absorption 0..1 after start
+    if (started) {
+      const t = performance.now() - startAt;
+      absorption = clamp(t / CFG.absorbRampMs, 0, 1);
+    }
+
+    for (let i=0; i<particles.length; i++){
+      const p = particles[i];
+
+      // mild random drift
+      p.vx += (Math.random()-0.5)*jit*0.02;
+      p.vy += (Math.random()-0.5)*jit*0.02;
+
+      // cap speed
+      const v = Math.hypot(p.vx, p.vy) || 1;
+      const cap = sp;
+      if (v > cap) { p.vx = (p.vx/v)*cap; p.vy = (p.vy/v)*cap; }
+
+      // attraction to X after start
+      if (absorption > 0) {
+        // convert screen -> sim
+        const sx = (p.x / W) * simW;
+        const sy = (p.y / H) * simH;
+        const s = snapToX_sim(sx, sy);
+
+        // target in screen coords
+        const tx = (s.x / simW) * W;
+        const ty = (s.y / simH) * H;
+
+        const dx = tx - p.x;
+        const dy = ty - p.y;
+
+        // stronger pull as absorption rises
+        const pull = 0.0025 + 0.0085*absorption;
+        p.vx += dx * pull;
+        p.vy += dy * pull;
+
+        // deposit trail while being absorbed (this is the “particles absorbed into X” effect)
+        const dep = 0.08 + 0.22*absorption;
+        depositAt(trailA, s.x, s.y, dep);
+      }
+
+      p.x += p.vx * dt * 0.06;
+      p.y += p.vy * dt * 0.06;
+
+      // wrap
+      if (p.x < 0) p.x += W; else if (p.x >= W) p.x -= W;
+      if (p.y < 0) p.y += H; else if (p.y >= H) p.y -= H;
+    }
+  }
+
+  // Score how “formed” the X is by sampling along both diagonals in trailA
+  function computeXCompleteness(){
+    const samples = IS_MOBILE ? 80 : 120;
+    let acc = 0;
+    for (let i=0; i<samples; i++){
+      const t = i/(samples-1);
+      const x = t*(simW-1);
+      const y1 = t*(simH-1);
+      const y2 = (simH-1) - y1;
+
+      // sample a tiny band using xField as weight
+      const k1 = idx(x|0, y1|0);
+      const k2 = idx(x|0, y2|0);
+
+      const v1 = trailA[k1] * (0.6 + 0.4*xField[k1]);
+      const v2 = trailA[k2] * (0.6 + 0.4*xField[k2]);
+
+      acc += clamp(v1, 0, 1);
+      acc += clamp(v2, 0, 1);
+    }
+    const raw = acc / (samples*2);
+    // smooth
+    xComplete = lerp(xComplete, clamp(raw*1.35, 0, 1), CFG.xScoreSmoothing);
+  }
+
+  // Slime sim
+  function stepSlime(dtMs){
+    // foods aging
+    for (let i=foods.length-1; i>=0; i--){
       foods[i].life -= dtMs;
       if (foods[i].life <= 0) foods.splice(i, 1);
-      else foods[i].amp = foods[i].life / (CFG.foodLifeMs * 1.0);
+      else foods[i].amp = foods[i].life / (CFG.foodLifeMs*1.0);
     }
 
     const step = CFG.step;
@@ -381,31 +449,34 @@
     const xBias = CFG.xBias;
     const foodStr = CFG.foodStrength;
 
-    for (let i=0; i<agents.length; i++) {
+    for (let i=0; i<agents.length; i++){
       const p = agents[i];
 
-      const ca = Math.cos(p.a), sa = Math.sin(p.a);
-      const la = p.a - sAng, ra = p.a + sAng;
+      const la = p.a - sAng;
+      const ra = p.a + sAng;
 
-      const fx = p.x + ca * sDist, fy = p.y + sa * sDist;
-      const lx = p.x + Math.cos(la) * sDist, ly = p.y + Math.sin(la) * sDist;
-      const rx = p.x + Math.cos(ra) * sDist, ry = p.y + Math.sin(ra) * sDist;
+      const fx = p.x + Math.cos(p.a)*sDist;
+      const fy = p.y + Math.sin(p.a)*sDist;
+      const lx = p.x + Math.cos(la)*sDist;
+      const ly = p.y + Math.sin(la)*sDist;
+      const rx = p.x + Math.cos(ra)*sDist;
+      const ry = p.y + Math.sin(ra)*sDist;
 
       let fF = sampleField(trailA, fx, fy);
       let fL = sampleField(trailA, lx, ly);
       let fR = sampleField(trailA, rx, ry);
 
-      // X attractor stronger
+      // X bias
       fF += xBias * sampleField(xField, fx, fy);
       fL += xBias * sampleField(xField, lx, ly);
       fR += xBias * sampleField(xField, rx, ry);
 
       // foods
-      if (foods.length) {
+      if (foods.length){
         let addF=0, addL=0, addR=0;
         const rr = CFG.foodRadius;
         const rr2 = 2*rr*rr;
-        for (let j=0; j<foods.length; j++) {
+        for (let j=0; j<foods.length; j++){
           const fd = foods[j];
           const amp = fd.amp;
 
@@ -429,11 +500,11 @@
       } else if (fR > fL) {
         p.a += turn;
       } else {
-        p.a += (Math.random() - 0.5) * 0.15;
+        p.a += (Math.random()-0.5)*0.15;
       }
 
-      p.x += Math.cos(p.a) * step;
-      p.y += Math.sin(p.a) * step;
+      p.x += Math.cos(p.a)*step;
+      p.y += Math.sin(p.a)*step;
 
       if (p.x < 0) p.x += simW; else if (p.x >= simW) p.x -= simW;
       if (p.y < 0) p.y += simH; else if (p.y >= simH) p.y -= simH;
@@ -441,181 +512,206 @@
       depositAt(trailA, p.x, p.y, CFG.deposit);
     }
 
-    // decay
+    // decay + diffuse
     const d = CFG.decay;
     for (let k=0; k<trailA.length; k++) trailA[k] *= d;
 
-    // diffusion
     if ((frame % CFG.diffuseEvery) === 0) {
       diffuse(trailA, trailB, CFG.diffuseMix);
       const tmp = trailA; trailA = trailB; trailB = tmp;
     }
-
-    frame++;
   }
 
+  // Draw a fat neon X overlay (only as “body” layer, still driven by xComplete)
+  function drawXBodyOverlay(alpha, hueShift01){
+    // hueShift01: 0=cian, 1=rosa
+    // We’ll mix via RGB rather than HSL to keep it simple and fast.
+    const cCyan = { r: 140, g: 255, b: 255 = 255; // (we'll not use b variable like this)
+  }
+
+  // Render trails with palette controlled by xComplete: cyan -> pink
   function renderMaze() {
     const n = simW * simH;
+
+    // palette endpoints
+    // cyan: (90, 255, 255)
+    // pink: (255, 120, 230)
+    const pr0 = 90,  pg0 = 255, pb0 = 255;
+    const pr1 = 255, pg1 = 120, pb1 = 230;
+
+    // ease color change so it “earns” the pink
+    const cMix = ease(clamp(xComplete, 0, 1));
+
+    const R0 = lerp(pr0, pr1, cMix);
+    const G0 = lerp(pg0, pg1, cMix);
+    const B0 = lerp(pb0, pb1, cMix);
 
     for (let k=0, p=0; k<n; k++, p+=4) {
       const t = trailA[k];
       const v = t <= 0 ? 0 : Math.pow(clamp(t, 0, 1), 0.62);
 
-      // subtle shimmer on X rail
+      // emphasize the X band
       const xf = xField[k];
-      const c = clamp(v * (0.92 + 0.22*xf), 0, 1);
+      const c = clamp(v * (0.86 + 0.32*xf), 0, 1);
 
-      // palette: cyan core + magenta tint
-      const r = clamp(  10 + c*255*0.92 + (xf*c*70), 0, 255) | 0;
-      const g = clamp(   8 + c*255*0.76, 0, 255) | 0;
-      const b = clamp(  14 + c*255*1.00, 0, 255) | 0;
+      // build neon: bright core + slight white-hot
+      const core = c;
+      const hot  = Math.pow(c, 0.45);
 
-      const crush = c < CFG.crush ? 0 : 1;
-      img8[p+0] = crush ? r : 0;
-      img8[p+1] = crush ? g : 0;
-      img8[p+2] = crush ? b : 0;
+      let r = (R0 * core + 255 * 0.16 * hot);
+      let g = (G0 * core + 255 * 0.10 * hot);
+      let b = (B0 * core + 255 * 0.18 * hot);
+
+      // crush blacks
+      const on = c < CFG.crush ? 0 : 1;
+      img8[p+0] = on ? clamp(r,0,255)|0 : 0;
+      img8[p+1] = on ? clamp(g,0,255)|0 : 0;
+      img8[p+2] = on ? clamp(b,0,255)|0 : 0;
       img8[p+3] = 255;
     }
 
     sctx.putImageData(imgData, 0, 0);
 
-    // draw to view: NO crazy zoom, just fit-to-screen
+    // draw to full view (no zoom madness)
+    vctx.fillStyle = "#000";
+    vctx.fillRect(0,0,W,H);
     vctx.imageSmoothingEnabled = true;
-    vctx.fillStyle = "#000";
-    vctx.fillRect(0,0,W,H);
-    vctx.drawImage(simCanvas, 0, 0, simW, simH, 0, 0, W, H);
+    vctx.drawImage(simCanvas, 0,0,simW,simH, 0,0,W,H);
+
+    // X "body" overlay (screen space) - stronger when xComplete grows
+    const a = clamp(0.12 + 0.55*xComplete, 0, 0.75);
+    const mix = ease(clamp(xComplete, 0, 1));
+    const coreR = lerp(120, 255, mix);
+    const coreG = lerp(255, 140, mix);
+    const coreB = lerp(255, 230, mix);
+
+    // glow stroke
+    vctx.save();
+    vctx.globalCompositeOperation = "lighter";
+    vctx.lineCap = "round";
+
+    vctx.strokeStyle = `rgba(${coreR|0},${coreG|0},${coreB|0},${a*0.38})`;
+    vctx.lineWidth = CFG.xStrokeGlow;
+    vctx.beginPath();
+    vctx.moveTo(0,0); vctx.lineTo(W,H);
+    vctx.moveTo(W,0); vctx.lineTo(0,H);
+    vctx.stroke();
+
+    // core stroke
+    vctx.strokeStyle = `rgba(${coreR|0},${coreG|0},${coreB|0},${a})`;
+    vctx.lineWidth = CFG.xStrokeCore;
+    vctx.beginPath();
+    vctx.moveTo(0,0); vctx.lineTo(W,H);
+    vctx.moveTo(W,0); vctx.lineTo(0,H);
+    vctx.stroke();
+
+    // center “knot” bloom
+    const cx=W/2, cy=H/2;
+    const rr = Math.min(W,H) * 0.18;
+    const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
+    g.addColorStop(0, `rgba(${coreR|0},${coreG|0},${coreB|0},${a*0.42})`);
+    g.addColorStop(0.35, `rgba(${coreR|0},${coreG|0},${coreB|0},${a*0.12})`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    vctx.fillStyle = g;
+    vctx.beginPath(); vctx.arc(cx,cy,rr,0,Math.PI*2); vctx.fill();
+
+    vctx.restore();
   }
 
-  // ---- Intro sweep in WHITE (X thick, then maze starts) ----
-  function drawIntro(now) {
-    const t = now - INTRO.start;
-    const T1 = INTRO.durIn;
-    const T2 = INTRO.durFlash;
-    const T3 = INTRO.durOut;
-
-    // base black
+  function renderParticles() {
+    // cian pre-phase (solo puntos + micro glow)
     vctx.fillStyle = "#000";
     vctx.fillRect(0,0,W,H);
 
-    const cx = W/2, cy = H/2;
+    vctx.save();
+    vctx.globalCompositeOperation = "lighter";
+    for (let i=0; i<particles.length; i++){
+      const p = particles[i];
+      const r = 1.0 + (absorption*0.7);
+      const a = 0.35 + absorption*0.35;
+      vctx.fillStyle = `rgba(120,255,255,${a})`;
+      vctx.beginPath();
+      vctx.arc(p.x, p.y, r, 0, Math.PI*2);
+      vctx.fill();
+    }
 
-    // thick X strokes
-    function strokeX(alpha, w1, w2) {
-      vctx.save();
-      vctx.globalCompositeOperation = "lighter";
-      vctx.lineCap = "round";
-
-      // outer glow-ish white
-      vctx.strokeStyle = `rgba(255,255,255,${alpha*0.45})`;
-      vctx.lineWidth = w2;
+    // tiny hint of X when absorption starts (but still mainly particles)
+    if (absorption > 0.03) {
+      const hint = clamp(absorption*0.20, 0, 0.18);
+      vctx.strokeStyle = `rgba(120,255,255,${hint})`;
+      vctx.lineWidth = IS_MOBILE ? 2.2 : 2.8;
       vctx.beginPath();
       vctx.moveTo(0,0); vctx.lineTo(W,H);
       vctx.moveTo(W,0); vctx.lineTo(0,H);
       vctx.stroke();
-
-      // core white
-      vctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-      vctx.lineWidth = w1;
-      vctx.beginPath();
-      vctx.moveTo(0,0); vctx.lineTo(W,H);
-      vctx.moveTo(W,0); vctx.lineTo(0,H);
-      vctx.stroke();
-      vctx.restore();
     }
 
-    // sweeping heads from corners to center
-    const corners = [
-      {x:0,y:0}, {x:W,y:0}, {x:0,y:H}, {x:W,y:H}
-    ];
+    vctx.restore();
 
-    if (t < T1) {
-      const p = ease(t / T1);
-
-      // draw partial sweep (segment from corner to moving head)
+    // “Click to start” ultra sutil (solo antes de start)
+    if (!started) {
       vctx.save();
-      vctx.globalCompositeOperation = "lighter";
-      vctx.lineCap = "round";
-
-      for (let i=0;i<corners.length;i++){
-        const o = corners[i];
-        const hx = lerp(o.x, cx, p);
-        const hy = lerp(o.y, cy, p);
-
-        // segment
-        vctx.strokeStyle = `rgba(255,255,255,${0.65})`;
-        vctx.lineWidth = IS_MOBILE ? 2.4 : 2.8;
-        vctx.beginPath(); vctx.moveTo(o.x,o.y); vctx.lineTo(hx,hy); vctx.stroke();
-
-        // head glow
-        const r = Math.min(W,H) * 0.06;
-        const g = vctx.createRadialGradient(hx,hy,0,hx,hy,r);
-        g.addColorStop(0, "rgba(255,255,255,0.85)");
-        g.addColorStop(0.35, "rgba(255,255,255,0.25)");
-        g.addColorStop(1, "rgba(0,0,0,0)");
-        vctx.fillStyle = g;
-        vctx.beginPath(); vctx.arc(hx,hy,r,0,Math.PI*2); vctx.fill();
-      }
+      vctx.globalCompositeOperation = "source-over";
+      vctx.fillStyle = "rgba(255,255,255,0.14)";
+      vctx.font = "600 10px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+      vctx.textAlign = "center";
+      vctx.fillText("CLICK", W/2, H/2 + 4);
       vctx.restore();
-
-      // hint the full X thick under the sweep
-      strokeX(0.10 + 0.22*p, IS_MOBILE ? 2.6 : 3.2, IS_MOBILE ? 7.2 : 9.0);
-
-      return;
-    }
-
-    const t2 = t - T1;
-    if (t2 < T2) {
-      const p = 1 - ease(t2 / T2);
-
-      strokeX(0.55, IS_MOBILE ? 3.2 : 4.0, IS_MOBILE ? 10.0 : 12.0);
-
-      // center flash (tight)
-      vctx.save();
-      vctx.globalCompositeOperation = "lighter";
-      const rr = Math.min(W,H) * 0.22;
-      const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
-      g.addColorStop(0, `rgba(255,255,255,${0.55*(1-p)})`);
-      g.addColorStop(0.35, `rgba(255,255,255,${0.14*(1-p)})`);
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      vctx.fillStyle = g;
-      vctx.beginPath(); vctx.arc(cx,cy,rr,0,Math.PI*2); vctx.fill();
-      vctx.restore();
-
-      // during flash, force a stronger ink on X
-      inkXLine(0.55);
-
-      return;
-    }
-
-    const t3 = t2 - T2;
-    const p3 = ease(clamp(t3 / T3, 0, 1));
-
-    // fade from white X into maze render
-    renderMaze();
-    strokeX((1 - p3) * 0.25, IS_MOBILE ? 3.0 : 3.8, IS_MOBILE ? 9.5 : 11.5);
-
-    // slightly damp trails early so maze is clean
-    if (p3 < 0.2) {
-      for (let k=0; k<trailA.length; k++) trailA[k] *= 0.985;
     }
   }
 
-  function loop(now) {
-    const dt = clamp(now - tPrev, 8, 40);
-    tPrev = now;
+  function loop(now){
+    const dt = clamp(now - lastFrame, 8, 40);
+    lastFrame = now;
 
-    // run sim always so when intro ends the maze is already alive
-    stepSim(dt);
+    // always step particles (pre-phase and during absorption)
+    stepParticles(dt);
 
-    if (INTRO.active) drawIntro(now);
-    else renderMaze();
+    if (!started) {
+      renderParticles();
+      requestAnimationFrame(loop);
+      return;
+    }
 
+    // After start: slime begins to emerge progressively
+    const t = now - startAt;
+
+    // keep “feeding” the X in early seconds so it locks in as a thick band
+    if (t < 1100) inkXLine(CFG.xInk);
+
+    // run slime sim always after start (it’s what forms the maze)
+    stepSlime(dt);
+
+    // compute completeness after warmup
+    if (t > CFG.xScoreWarmupMs) computeXCompleteness();
+
+    // blend between particles view and maze view in early stage
+    const mazeMix = clamp((t - CFG.mazeEnableMs) / 900, 0, 1);
+    if (mazeMix < 1) {
+      // draw particles then fade in maze on top
+      renderParticles();
+      vctx.save();
+      vctx.globalAlpha = ease(mazeMix);
+      renderMaze();
+      vctx.restore();
+    } else {
+      renderMaze();
+    }
+
+    frame++;
     requestAnimationFrame(loop);
   }
 
-  // quick dev keys
+  // dev: reseed
   window.addEventListener("keydown", (e) => {
-    if (e.key === "r" || e.key === "R") { seedAgents(true); inkXLine(CFG.xInk); }
+    if (e.key === "r" || e.key === "R") {
+      started = false;
+      absorption = 0;
+      xComplete = 0;
+      foods.length = 0;
+      seedAgents(true);
+      seedParticles(true);
+    }
   });
 
   resize();
