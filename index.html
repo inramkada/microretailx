@@ -133,9 +133,9 @@
 
   const INTRO = {
     start: performance.now(),
-    durIn: 1800,      // barrido LENTO
-    durFlash: 320,    // flash dramático
-    durOut: 650,      // settle suave
+    durIn: 1800,
+    durFlash: 320,
+    durOut: 650,
     get active() {
       const t = performance.now() - this.start;
       return t < (this.durIn + this.durFlash + this.durOut);
@@ -471,19 +471,17 @@
 
     const cx = W/2, cy = H/2;
 
-    function strokeX(alpha, w1, w2, glow=true) {
+    function strokeX(alpha, w1, w2) {
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
       vctx.lineCap = "round";
 
-      if (glow) {
-        vctx.strokeStyle = `rgba(255,255,255,${alpha*0.35})`;
-        vctx.lineWidth = w2;
-        vctx.beginPath();
-        vctx.moveTo(0,0); vctx.lineTo(W,H);
-        vctx.moveTo(W,0); vctx.lineTo(0,H);
-        vctx.stroke();
-      }
+      vctx.strokeStyle = `rgba(255,255,255,${alpha*0.35})`;
+      vctx.lineWidth = w2;
+      vctx.beginPath();
+      vctx.moveTo(0,0); vctx.lineTo(W,H);
+      vctx.moveTo(W,0); vctx.lineTo(0,H);
+      vctx.stroke();
 
       vctx.strokeStyle = `rgba(255,255,255,${alpha})`;
       vctx.lineWidth = w1;
@@ -505,7 +503,7 @@
       vctx.globalCompositeOperation = "lighter";
       vctx.lineCap = "round";
 
-      // X fantasma
+      // X fantasma sutil
       const ghostAlpha = 0.04 + 0.08*p;
       vctx.strokeStyle = `rgba(255,255,255,${ghostAlpha})`;
       vctx.lineWidth = IS_MOBILE ? 3.2 : 4.0;
@@ -514,12 +512,12 @@
       vctx.moveTo(W,0); vctx.lineTo(0,H);
       vctx.stroke();
 
+      // Segmentos barridos - SOLO LÍNEAS
       for (let i=0;i<corners.length;i++){
         const o = corners[i];
         const hx = lerp(o.x, cx, p);
         const hy = lerp(o.y, cy, p);
 
-        // Trail con gradiente
         const grad = vctx.createLinearGradient(o.x, o.y, hx, hy);
         grad.addColorStop(0, `rgba(255,255,255,${0.15*p})`);
         grad.addColorStop(0.7, `rgba(255,255,255,${0.45*p})`);
@@ -531,38 +529,6 @@
         vctx.moveTo(o.x,o.y); 
         vctx.lineTo(hx,hy); 
         vctx.stroke();
-
-        // Head glow
-        const r = Math.min(W,H) * (0.08 + 0.04*p);
-        const g = vctx.createRadialGradient(hx,hy,0,hx,hy,r);
-        g.addColorStop(0, "rgba(255,255,255,0.95)");
-        g.addColorStop(0.25, "rgba(255,255,255,0.55)");
-        g.addColorStop(0.55, "rgba(255,255,255,0.15)");
-        g.addColorStop(1, "rgba(0,0,0,0)");
-        vctx.fillStyle = g;
-        vctx.beginPath(); 
-        vctx.arc(hx,hy,r,0,Math.PI*2); 
-        vctx.fill();
-
-        // Sparkles
-        if (p > 0.2) {
-          for (let s=0; s<3; s++) {
-            const angle = (i*Math.PI/2) + (s*Math.PI/6) + (p*Math.PI*4);
-            const dist = r * 0.4;
-            const sx = hx + Math.cos(angle) * dist;
-            const sy = hy + Math.sin(angle) * dist;
-            const sparkR = Math.min(W,H) * 0.012;
-            
-            const sg = vctx.createRadialGradient(sx,sy,0,sx,sy,sparkR);
-            sg.addColorStop(0, `rgba(255,255,255,${0.85*p})`);
-            sg.addColorStop(0.5, `rgba(255,255,255,${0.25*p})`);
-            sg.addColorStop(1, "rgba(0,0,0,0)");
-            vctx.fillStyle = sg;
-            vctx.beginPath(); 
-            vctx.arc(sx,sy,sparkR,0,Math.PI*2); 
-            vctx.fill();
-          }
-        }
       }
       vctx.restore();
 
@@ -592,23 +558,19 @@
       vctx.arc(cx,cy,rr,0,Math.PI*2); 
       vctx.fill();
 
-      // Rayos radiales
-      for (let i=0; i<8; i++) {
-        const angle = (i * Math.PI / 4);
-        const len = Math.max(W,H) * 0.6 * intensity;
-        const ex = cx + Math.cos(angle) * len;
-        const ey = cy + Math.sin(angle) * len;
-
-        const rayGrad = vctx.createLinearGradient(cx, cy, ex, ey);
+      // Rayos siguiendo las diagonales de la X
+      for (let i=0; i<4; i++) {
+        const corner = corners[i];
+        const rayGrad = vctx.createLinearGradient(cx, cy, corner.x, corner.y);
         rayGrad.addColorStop(0, `rgba(255,255,255,${0.65*intensity})`);
         rayGrad.addColorStop(0.5, `rgba(255,255,255,${0.25*intensity})`);
         rayGrad.addColorStop(1, "rgba(255,255,255,0)");
         
         vctx.strokeStyle = rayGrad;
-        vctx.lineWidth = (IS_MOBILE ? 1.8 : 2.5) * intensity;
+        vctx.lineWidth = (IS_MOBILE ? 2.0 : 2.8) * intensity;
         vctx.beginPath();
         vctx.moveTo(cx, cy);
-        vctx.lineTo(ex, ey);
+        vctx.lineTo(corner.x, corner.y);
         vctx.stroke();
       }
 
@@ -625,7 +587,7 @@
     renderMaze();
     
     const fadeAlpha = (1 - p3);
-    strokeX(fadeAlpha * 0.35, IS_MOBILE ? 3.4 : 4.2, IS_MOBILE ? 11.0 : 14.0, true);
+    strokeX(fadeAlpha * 0.35, IS_MOBILE ? 3.4 : 4.2, IS_MOBILE ? 11.0 : 14.0);
 
     if (p3 < 0.6) {
       vctx.save();
