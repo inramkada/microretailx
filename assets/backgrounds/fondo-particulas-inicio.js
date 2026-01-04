@@ -4,7 +4,7 @@ export function init(canvasId = "canvas") {
 
   const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
   let w = 0, h = 0, dpr = 1, raf = 0;
-
+ 
   const CFG = {
     density: 0.00009,
     maxNodes: 180,
