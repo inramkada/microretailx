@@ -6,7 +6,8 @@
   <title>UNDER MAINTENANCE</title>
 
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
+  <meta http-equiv="Permissions-Policy"
+        content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
 
   <style>
     html, body {
@@ -81,7 +82,7 @@
 
   <div class="ui-layer">
     <div class="top-bar">
-      <div class="brand">MICRORETAILX WEBSITE IS UNDER MAINTENANCE</div>
+      <div class="brand">UNDER MAINTENANCE</div>
     </div>
 
     <div class="footer-bar">
@@ -132,12 +133,13 @@
 
   const INTRO = {
     start: performance.now(),
-    durIn: 2200,
-    durFlash: 360,
-    durOut: 780,
-    get total() { return this.durIn + this.durFlash + this.durOut; },
-    get t() { return performance.now() - this.start; },
-    get active() { return this.t < this.total; }
+    durIn: 1800,      // barrido lento
+    durFlash: 320,    // flash
+    durOut: 900,      // fade MÁS LENTO (era 650)
+    get active() {
+      const t = performance.now() - this.start;
+      return t < (this.durIn + this.durFlash + this.durOut);
+    }
   };
 
   let lastMouseFoodAt = 0;
@@ -168,9 +170,6 @@
     xInk: 0.42,
 
     crush: 0.030,
-
-    introSeed: IS_MOBILE ? 0.42 : 0.55,
-    introSeedRadiusPx: IS_MOBILE ? 10 : 12
   };
 
   function resize() {
@@ -228,7 +227,8 @@
         const d1 = Math.abs(a*x - y) * inv;
         const d2 = Math.abs(a*x + y - (h - 1)) * inv;
         const d = Math.min(d1, d2);
-        xField[idx(x,y)] = Math.exp(-(d*d) / (2*sigma2));
+        const v = Math.exp(-(d*d) / (2*sigma2));
+        xField[idx(x,y)] = v;
       }
     }
   }
@@ -306,38 +306,9 @@
     return { x, y: y2 };
   }
 
-  function screenToSim(x, y) {
-    return { x: (x / W) * simW, y: (y / H) * simH };
-  }
-
-  function introSeedAtScreen(x, y, strength) {
-    const s = screenToSim(x, y);
-    const sn = snapToX(clamp(s.x,0,simW-1), clamp(s.y,0,simH-1));
-
-    const rr = CFG.introSeedRadiusPx;
-    const rr2 = 2*rr*rr;
-
-    const cx = sn.x, cy = sn.y;
-    const xmin = clamp((cx-rr)|0, 0, simW-1);
-    const xmax = clamp((cx+rr)|0, 0, simW-1);
-    const ymin = clamp((cy-rr)|0, 0, simH-1);
-    const ymax = clamp((cy+rr)|0, 0, simH-1);
-
-    for (let yy=ymin; yy<=ymax; yy++){
-      for (let xx=xmin; xx<=xmax; xx++){
-        const dx = xx - cx, dy = yy - cy;
-        const w = Math.exp(-(dx*dx + dy*dy)/rr2);
-        depositAt(trailA, xx, yy, strength * w);
-      }
-    }
-  }
-
-  function addMouseFood(clientX, clientY, outFactor) {
+  function addMouseFood(clientX, clientY) {
     const now = performance.now();
-    const gate = clamp(outFactor, 0, 1);
-    if (gate <= 0) return;
-    const every = CFG.mouseFoodEveryMs + (1-gate)*70;
-    if (now - lastMouseFoodAt < every) return;
+    if (now - lastMouseFoodAt < CFG.mouseFoodEveryMs) return;
     lastMouseFoodAt = now;
 
     const el = document.elementFromPoint(clientX, clientY);
@@ -352,14 +323,12 @@
     fy = clamp(s.y, 0, simH-1);
 
     foods.push({ x: fx, y: fy, life: CFG.foodLifeMs, amp: 1.0 });
-    depositAt(trailA, fx, fy, 0.55 * gate);
+
+    depositAt(trailA, fx, fy, 0.55);
   }
 
   window.addEventListener("pointermove", (e) => {
-    const t = INTRO.t;
-    const outT = (t - (INTRO.durIn + INTRO.durFlash)) / INTRO.durOut;
-    const outFactor = clamp(ease(clamp(outT,0,1)), 0, 1);
-    addMouseFood(e.clientX, e.clientY, outFactor);
+    addMouseFood(e.clientX, e.clientY);
   }, { passive:true });
 
   window.addEventListener("pointerdown", (e) => {
@@ -377,16 +346,14 @@
     depositAt(trailA, fx, fy, 0.9);
   }, { passive:true });
 
-  function stepSim(dtMs, simFactor) {
-    const dt = dtMs * simFactor;
-
+  function stepSim(dtMs) {
     for (let i=foods.length-1; i>=0; i--) {
-      foods[i].life -= dt;
+      foods[i].life -= dtMs;
       if (foods[i].life <= 0) foods.splice(i, 1);
       else foods[i].amp = foods[i].life / (CFG.foodLifeMs * 1.0);
     }
 
-    const step = CFG.step * simFactor;
+    const step = CFG.step;
     const sDist = CFG.sensorDist;
     const sAng  = CFG.sensorAngle;
     const turn  = CFG.turnSpeed;
@@ -397,9 +364,10 @@
     for (let i=0; i<agents.length; i++) {
       const p = agents[i];
 
+      const ca = Math.cos(p.a), sa = Math.sin(p.a);
       const la = p.a - sAng, ra = p.a + sAng;
 
-      const fx = p.x + Math.cos(p.a) * sDist, fy = p.y + Math.sin(p.a) * sDist;
+      const fx = p.x + ca * sDist, fy = p.y + sa * sDist;
       const lx = p.x + Math.cos(la) * sDist, ly = p.y + Math.sin(la) * sDist;
       const rx = p.x + Math.cos(ra) * sDist, ry = p.y + Math.sin(ra) * sDist;
 
@@ -433,6 +401,7 @@
       }
 
       if (fF > fL && fF > fR) {
+        // straight
       } else if (fL > fR) {
         p.a -= turn;
       } else if (fR > fL) {
@@ -447,10 +416,10 @@
       if (p.x < 0) p.x += simW; else if (p.x >= simW) p.x -= simW;
       if (p.y < 0) p.y += simH; else if (p.y >= simH) p.y -= simH;
 
-      depositAt(trailA, p.x, p.y, CFG.deposit * simFactor);
+      depositAt(trailA, p.x, p.y, CFG.deposit);
     }
 
-    const d = 1 - (1 - CFG.decay) * simFactor;
+    const d = CFG.decay;
     for (let k=0; k<trailA.length; k++) trailA[k] *= d;
 
     if ((frame % CFG.diffuseEvery) === 0) {
@@ -471,9 +440,10 @@
       const xf = xField[k];
       const c = clamp(v * (0.92 + 0.22*xf), 0, 1);
 
-      const r = clamp(  10 + c*100*0.75, 0, 255) | 0;
-      const g = clamp(  40 + c*240*1.00, 0, 255) | 0;
-      const b = clamp(  60 + c*255*1.10, 0, 255) | 0;
+      // AZUL CIAN MÁS INTENSO
+      const r = clamp(  8 + c*110*0.80, 0, 255) | 0;
+      const g = clamp( 35 + c*250*1.05, 0, 255) | 0;
+      const b = clamp( 55 + c*255*1.15, 0, 255) | 0;
 
       const crush = c < CFG.crush ? 0 : 1;
       img8[p+0] = crush ? r : 0;
@@ -519,7 +489,6 @@
       vctx.moveTo(0,0); vctx.lineTo(W,H);
       vctx.moveTo(W,0); vctx.lineTo(0,H);
       vctx.stroke();
-
       vctx.restore();
     }
 
@@ -528,56 +497,40 @@
     ];
 
     if (t < T1) {
-      const base = t / T1;
-      const ghost = 0.04 + 0.08*ease(base);
+      const p = easeInOut(t / T1);
 
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
       vctx.lineCap = "round";
 
-      vctx.strokeStyle = `rgba(255,255,255,${ghost})`;
+      // X fantasma sutil
+      const ghostAlpha = 0.04 + 0.08*p;
+      vctx.strokeStyle = `rgba(255,255,255,${ghostAlpha})`;
       vctx.lineWidth = IS_MOBILE ? 3.2 : 4.0;
       vctx.beginPath();
       vctx.moveTo(0,0); vctx.lineTo(W,H);
       vctx.moveTo(W,0); vctx.lineTo(0,H);
       vctx.stroke();
 
+      // Segmentos barridos
       for (let i=0;i<corners.length;i++){
         const o = corners[i];
-
-        const p0 = clamp(base - i*0.07, 0, 1);
-        const p = easeInOut(p0);
-
-        const dirx = cx - o.x, diry = cy - o.y;
-        const len = Math.hypot(dirx, diry) || 1;
-        const nx = -diry / len, ny = dirx / len;
-
-        const wobAmp = (1 - p) * (Math.min(W,H) * 0.020);
-        const w = Math.sin(p*8 + i*1.6) + 0.55*Math.sin(p*17 + i*2.2);
-
-        const hx = lerp(o.x, cx, p) + nx * wobAmp * w;
-        const hy = lerp(o.y, cy, p) + ny * wobAmp * w;
+        const hx = lerp(o.x, cx, p);
+        const hy = lerp(o.y, cy, p);
 
         const grad = vctx.createLinearGradient(o.x, o.y, hx, hy);
-        grad.addColorStop(0, `rgba(255,255,255,${0.10*p})`);
-        grad.addColorStop(0.7, `rgba(255,255,255,${0.42*p})`);
-        grad.addColorStop(1, `rgba(255,255,255,${0.80})`);
-
+        grad.addColorStop(0, `rgba(255,255,255,${0.15*p})`);
+        grad.addColorStop(0.7, `rgba(255,255,255,${0.45*p})`);
+        grad.addColorStop(1, `rgba(255,255,255,${0.75})`);
+        
         vctx.strokeStyle = grad;
-        vctx.lineWidth = (IS_MOBILE ? 2.6 : 3.2) + 1.2*p;
-        vctx.beginPath();
-        vctx.moveTo(o.x, o.y);
-        vctx.lineTo(hx, hy);
+        vctx.lineWidth = IS_MOBILE ? 2.8 : 3.4;
+        vctx.beginPath(); 
+        vctx.moveTo(o.x,o.y); 
+        vctx.lineTo(hx,hy); 
         vctx.stroke();
-
-        const seed = CFG.introSeed * (0.35 + 0.65*p) * (i === 0 ? 1.0 : 0.92);
-        introSeedAtScreen(hx, hy, seed);
       }
-
       vctx.restore();
-
-      strokeX(0.12 + 0.16*ease(base), IS_MOBILE ? 2.4 : 2.8, IS_MOBILE ? 10 : 12);
-      inkXLine(0.22 + 0.10*ease(base));
 
       return;
     }
@@ -592,6 +545,7 @@
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
 
+      // Explosión central
       const rr = Math.min(W,H) * (0.35 + 0.25*intensity);
       const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
       g.addColorStop(0, `rgba(255,255,255,${0.95*intensity})`);
@@ -600,15 +554,30 @@
       g.addColorStop(0.65, `rgba(255,255,255,${0.15*intensity})`);
       g.addColorStop(1, "rgba(0,0,0,0)");
       vctx.fillStyle = g;
-      vctx.beginPath();
-      vctx.arc(cx,cy,rr,0,Math.PI*2);
+      vctx.beginPath(); 
+      vctx.arc(cx,cy,rr,0,Math.PI*2); 
       vctx.fill();
+
+      // Rayos siguiendo las diagonales de la X
+      for (let i=0; i<4; i++) {
+        const corner = corners[i];
+        const rayGrad = vctx.createLinearGradient(cx, cy, corner.x, corner.y);
+        rayGrad.addColorStop(0, `rgba(255,255,255,${0.65*intensity})`);
+        rayGrad.addColorStop(0.5, `rgba(255,255,255,${0.25*intensity})`);
+        rayGrad.addColorStop(1, "rgba(255,255,255,0)");
+        
+        vctx.strokeStyle = rayGrad;
+        vctx.lineWidth = (IS_MOBILE ? 2.0 : 2.8) * intensity;
+        vctx.beginPath();
+        vctx.moveTo(cx, cy);
+        vctx.lineTo(corner.x, corner.y);
+        vctx.stroke();
+      }
 
       vctx.restore();
 
-      inkXLine(0.95 * intensity);
+      inkXLine(0.75 * intensity);
 
-      introSeedAtScreen(cx, cy, 0.90 * intensity);
       return;
     }
 
@@ -616,11 +585,28 @@
     const p3 = ease(clamp(t3 / T3, 0, 1));
 
     renderMaze();
-
+    
+    // Fade MÁS LENTO con más presencia
     const fadeAlpha = (1 - p3);
-    strokeX(fadeAlpha * 0.30, IS_MOBILE ? 3.4 : 4.2, IS_MOBILE ? 11.0 : 14.0);
+    strokeX(fadeAlpha * 0.40, IS_MOBILE ? 3.6 : 4.4, IS_MOBILE ? 11.5 : 15.0);
 
-    if (p3 < 0.25) {
+    // Brillo residual más persistente
+    if (p3 < 0.75) {
+      vctx.save();
+      vctx.globalCompositeOperation = "lighter";
+      const rr = Math.min(W,H) * 0.18 * (1-p3);
+      const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
+      g.addColorStop(0, `rgba(255,255,255,${0.30*(1-p3)})`);
+      g.addColorStop(0.5, `rgba(255,255,255,${0.10*(1-p3)})`);
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      vctx.fillStyle = g;
+      vctx.beginPath(); 
+      vctx.arc(cx,cy,rr,0,Math.PI*2); 
+      vctx.fill();
+      vctx.restore();
+    }
+
+    if (p3 < 0.30) {
       for (let k=0; k<trailA.length; k++) trailA[k] *= 0.985;
     }
   }
@@ -629,21 +615,7 @@
     const dt = clamp(now - tPrev, 8, 40);
     tPrev = now;
 
-    const t = INTRO.t;
-    let simFactor = 1;
-
-    if (t < INTRO.durIn) {
-      const p = ease(clamp(t / INTRO.durIn, 0, 1));
-      simFactor = 0.45 + 0.55*p;
-    } else if (t < INTRO.durIn + INTRO.durFlash) {
-      const p = Math.sin(((t - INTRO.durIn) / INTRO.durFlash) * Math.PI);
-      simFactor = 0.95 + 0.35*p;
-    } else if (t < INTRO.total) {
-      const p = ease(clamp((t - (INTRO.durIn + INTRO.durFlash)) / INTRO.durOut, 0, 1));
-      simFactor = 0.75 + 0.25*p;
-    }
-
-    stepSim(dt, simFactor);
+    stepSim(dt);
 
     if (INTRO.active) drawIntro(now);
     else renderMaze();
@@ -652,12 +624,7 @@
   }
 
   window.addEventListener("keydown", (e) => {
-    if (e.key === "r" || e.key === "R") {
-      foods.length = 0;
-      seedAgents(true);
-      inkXLine(CFG.xInk);
-      INTRO.start = performance.now();
-    }
+    if (e.key === "r" || e.key === "R") { seedAgents(true); inkXLine(CFG.xInk); }
   });
 
   resize();
