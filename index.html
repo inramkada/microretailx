@@ -40,11 +40,11 @@
       backdrop-filter: blur(10px);
     }
 
-    /* Body + “transparent RGB to backgrounds” */
+    /* Brand: cuerpo, sin “efecto propio”, pero se mezcla con lo de atrás */
     .brand {
       font-size: 12px;
       letter-spacing: 4px;
-      font-weight: 800;
+      font-weight: 900;
       opacity: 0.92;
       color: rgba(255,255,255,0.92);
       mix-blend-mode: difference;
@@ -119,6 +119,13 @@
 (() => {
   "use strict";
 
+  // ---------------------------
+  //  Physarum / slime-mold sim
+  //  - agent trails + diffusion + decay
+  //  - X is an invisible “nutrient rail” attractor (two diagonals)
+  //  - click drops “food” points
+  // ---------------------------
+
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d", { alpha: false });
 
@@ -128,298 +135,412 @@
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(UA);
 
+  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+  const lerp  = (a,b,t)=> a + (b-a)*t;
+
   const DPR_CAP = IS_IOS ? 1.6 : 2;
   let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
 
-  let W = 0, H = 0;
+  let W=0, H=0;
+  let simW=0, simH=0, scale=1;
+
+  // simulation fields
+  let trailA, trailB;      // Float32Array
+  let xField;              // Float32Array (static attractor: the X)
+  let imgData, img8;       // ImageData / Uint8ClampedArray
+  let agents = [];
+  let foods = [];          // {x,y,life,amp}
+  let tPrev = performance.now();
+
+  // --- Tunables (balanced for “maze” look) ---
+  const CFG = {
+    // grid resolution target (smaller = faster, more chunky)
+    gridMax: IS_MOBILE ? 520 : 760,
+
+    agentCount: IS_MOBILE ? 5200 : 11000,
+    step: IS_MOBILE ? 0.85 : 1.05,
+
+    // sensing
+    sensorDist: IS_MOBILE ? 6.0 : 7.5,
+    sensorAngle: 0.55,         // radians
+    turnSpeed: 0.35,           // radians per step
+
+    // deposition / diffusion / decay
+    deposit: 0.92,
+    decay: IS_MOBILE ? 0.972 : 0.978,  // closer to 1 = longer persistence
+    diffuseEvery: 2,                   // blur pass every N frames
+    diffuseMix: 0.40,
+
+    // X attractor influence
+    xBias: 0.65,
+    xWidthPx: IS_MOBILE ? 2.2 : 2.8,   // thickness of the “rail” (in sim pixels)
+
+    // food attractors
+    foodRadius: IS_MOBILE ? 18 : 22,
+    foodStrength: 1.4,
+    foodLifeMs: 2200,
+
+    // subtle center flash on click
+    flashMs: 260,
+    flashAmp: 0.55
+  };
+
+  let frame = 0;
+  let lastFlashAt = 0;
+  let flashX = 0, flashY = 0;
 
   function resize() {
     dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
     W = window.innerWidth | 0;
     H = window.innerHeight | 0;
-    canvas.width = (W * dpr) | 0;
+
+    canvas.width  = (W * dpr) | 0;
     canvas.height = (H * dpr) | 0;
-    canvas.style.width = W + "px";
+    canvas.style.width  = W + "px";
     canvas.style.height = H + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  addEventListener("resize", resize);
 
-  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
-  const lerp  = (a,b,t)=> a + (b-a)*t;
-  const ease  = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+    // pick sim grid size maintaining aspect
+    const maxSide = CFG.gridMax;
+    const aspect = W / Math.max(1, H);
+    if (W >= H) {
+      simW = maxSide;
+      simH = Math.max(120, (maxSide / aspect) | 0);
+    } else {
+      simH = maxSide;
+      simW = Math.max(120, (maxSide * aspect) | 0);
+    }
 
-  function hash01(x, y){
-    // deterministic "random" in [0,1)
-    const s = Math.sin(x*12.9898 + y*78.233) * 43758.5453;
-    return s - Math.floor(s);
-  }
+    scale = W / simW;
 
-  function glow(x, y, r, a, rgb) {
-    if (a <= 0) return;
-    const c = rgb || { r:0, g:234, b:255 };
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${a})`);
-    g.addColorStop(0.35, `rgba(${c.r},${c.g},${c.b},${a*0.35})`);
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-  }
+    const n = simW * simH;
+    trailA = new Float32Array(n);
+    trailB = new Float32Array(n);
+    xField = new Float32Array(n);
 
-  function drawX(alpha){
-    ctx.save();
-    ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
-    ctx.lineWidth = 1.7;
-    ctx.beginPath();
-    ctx.moveTo(0, 0); ctx.lineTo(W, H);
-    ctx.moveTo(W, 0); ctx.lineTo(0, H);
-    ctx.stroke();
+    imgData = ctx.createImageData(simW, simH);
+    img8 = imgData.data;
 
-    ctx.strokeStyle = `rgba(0,234,255,${alpha * 0.55})`;
-    ctx.lineWidth = 3.2;
-    ctx.beginPath();
-    ctx.moveTo(0, 0); ctx.lineTo(W, H);
-    ctx.moveTo(W, 0); ctx.lineTo(0, H);
-    ctx.stroke();
-    ctx.restore();
+    buildXField();
+    seedAgents(true);
   }
 
-  function drawFiber(x1, y1, x2, y2, a, amp){
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.lineCap = "round";
-    ctx.lineWidth = 1.1 + 1.4 * amp;
-    ctx.strokeStyle = `rgba(0,234,255,${a * 0.10 * amp})`;
-    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  window.addEventListener("resize", resize);
 
-    ctx.lineWidth = 0.75;
-    ctx.strokeStyle = `rgba(255,255,255,${a * 0.05 * amp})`;
-    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-    ctx.restore();
+  function idx(x, y) { return x + y * simW; }
+
+  function buildXField() {
+    // Invisible attractor along both diagonals.
+    // We precompute “closeness to diagonal” as [0..1].
+    // For each pixel: d = min( distance to y = (H/W)x , distance to y = H - (H/W)x )
+    // Using sim coordinates (0..simW-1, 0..simH-1).
+    const w = simW, h = simH;
+    const a = (h - 1) / Math.max(1, (w - 1)); // slope
+    const inv = 1 / Math.sqrt(1 + a*a);
+
+    // thickness in sim pixels
+    const sigma = CFG.xWidthPx;
+    const sigma2 = sigma * sigma;
+
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        // Distance point to line y = a x   => |ax - y| / sqrt(a^2 + 1)
+        const d1 = Math.abs(a*x - y) * inv;
+        // Distance to line y = -a x + (h-1)  => |a x + y - (h-1)| / sqrt(a^2 + 1)
+        const d2 = Math.abs(a*x + y - (h - 1)) * inv;
+        const d = Math.min(d1, d2);
+
+        // gaussian-ish bump -> [0..1]
+        const v = Math.exp(-(d*d) / (2*sigma2));
+        xField[idx(x,y)] = v;
+      }
+    }
   }
 
-  function drawCloudHead(x, y, a, amp, bias){
-    // big soft cloud
-    glow(x, y, (IS_MOBILE? 84: 96) * (0.85 + 0.35*amp), a * 0.14 * amp, { r:0, g:234, b:255 });
-    // secondary purple tint (bias controls how much)
-    glow(x, y, (IS_MOBILE? 60: 70) * (0.9 + 0.4*amp), a * 0.08 * amp * bias, { r:120, g:0, b:255 });
-    // inner hot point
-    glow(x, y, (IS_MOBILE? 22: 26) * (0.85 + 0.5*amp), a * 0.14 * amp, { r:255, g:255, b:255 });
-    // tiny magenta rim occasionally
-    glow(x, y, (IS_MOBILE? 38: 44) * (0.85 + 0.4*amp), a * 0.05 * amp * bias, { r:255, g:20, b:90 });
+  function seedAgents(resetTrails=false) {
+    if (resetTrails) {
+      trailA.fill(0); trailB.fill(0);
+    }
+    agents.length = 0;
+
+    // Seed agents preferentially near the X “rails”
+    // so the system self-organizes as an X-maze network.
+    const n = CFG.agentCount;
+    for (let i=0; i<n; i++) {
+      // rejection sample to bias to higher xField
+      let x, y, tries=0;
+      while (true) {
+        x = (Math.random() * simW) | 0;
+        y = (Math.random() * simH) | 0;
+        const xf = xField[idx(x,y)];
+        if (Math.random() < 0.20 + 0.80*xf || tries++ > 8) break;
+      }
+
+      agents.push({
+        x: x + Math.random(),
+        y: y + Math.random(),
+        a: Math.random() * Math.PI * 2
+      });
+    }
   }
 
-  // ---- Sequence state ----
-  const seq = {
-    active: false,
-    t0: 0,
-    amp: 0.0,
-    phi: 0.0,
-    mode: 0,
-    spin: 0.0,
-    skew: 0.0,
-    burst: 0.0
-  };
+  // --- Food drop (click attractor) ---
+  function addFood(px, py) {
+    // ignore clicks on legal links
+    const el = document.elementFromPoint(px, py);
+    const a = el && el.closest ? el.closest("a") : null;
+    if (a) return;
 
-  const COOLDOWN_MS = 900;
-  let nextAllowed = 0;
+    const fx = clamp((px / W) * simW, 0, simW-1);
+    const fy = clamp((py / H) * simH, 0, simH-1);
 
-  // timings (seconds)
-  const BASE_IN   = IS_MOBILE ? 0.78 : 0.72;
-  const BASE_FLASH= 0.18;
-  const BASE_HOLD = 0.22;
-  const BASE_OUT  = IS_MOBILE ? 0.62 : 0.56;
+    foods.push({
+      x: fx,
+      y: fy,
+      life: CFG.foodLifeMs,
+      amp: 1.0
+    });
 
-  function startSequence(x, y) {
-    const now = performance.now();
-    if (now < nextAllowed) return;
-    nextAllowed = now + COOLDOWN_MS;
-
-    const cx = W/2, cy = H/2;
-    const dx = x - cx, dy = y - cy;
-    const d = Math.sqrt(dx*dx + dy*dy);
-    const maxD = Math.min(W, H) * 0.55;
-    const near = clamp(1 - d / maxD, 0, 1);
-    const amp = 0.35 + 0.65 * (near * near);
-
-    const h = hash01(x, y);
-    const mode = (h * 3) | 0;          // 0..2
-    const spin = (hash01(y, x) * 2 - 1) * (IS_MOBILE ? 0.12 : 0.16); // subtle curvature
-    const skew = (hash01(x+13, y+7) * 2 - 1) * 0.08;                 // asymmetry
-    const burst = (hash01(x+101, y+17) < 0.35) ? (0.15 + 0.35*hash01(x+5,y+9)) : 0.0;
-
-    const phi = (x * 0.017 + y * 0.013) % (Math.PI * 2);
-
-    seq.active = true;
-    seq.t0 = now;
-    seq.amp = amp;
-    seq.phi = phi;
-    seq.mode = mode;
-    seq.spin = spin;
-    seq.skew = skew;
-    seq.burst = burst;
+    lastFlashAt = performance.now();
+    flashX = fx; flashY = fy;
   }
 
   window.addEventListener("pointerdown", (e) => {
-    const a = e.target && e.target.closest && e.target.closest("a");
-    if (a) return;
-    startSequence(e.clientX, e.clientY);
-  }, { passive: true });
+    addFood(e.clientX, e.clientY);
+  }, { passive:true });
 
-  function renderSequence(now) {
-    if (!seq.active) return;
+  // --- Sampling helpers ---
+  function sampleField(f, x, y) {
+    const xi = x | 0, yi = y | 0;
+    if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return 0;
+    return f[idx(xi, yi)];
+  }
 
-    // mode shapes timings slightly, so it doesn't repeat
-    const IN_DUR    = BASE_IN   * (seq.mode === 0 ? 1.00 : seq.mode === 1 ? 0.92 : 1.06);
-    const FLASH_DUR = BASE_FLASH* (seq.mode === 2 ? 1.08 : 1.00);
-    const HOLD_DUR  = BASE_HOLD * (seq.mode === 1 ? 0.85 : 1.00);
-    const OUT_DUR   = BASE_OUT  * (seq.mode === 0 ? 1.00 : seq.mode === 2 ? 0.92 : 1.05);
-    const total = IN_DUR + FLASH_DUR + HOLD_DUR + OUT_DUR;
+  function depositAt(f, x, y, amt) {
+    const xi = x | 0, yi = y | 0;
+    if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return;
+    const k = idx(xi, yi);
+    f[k] = Math.min(1.0, f[k] + amt);
+  }
 
-    const t = (now - seq.t0) / 1000;
-    if (t >= total) { seq.active = false; return; }
+  // --- One diffusion pass (cheap 3x3 box blur) ---
+  function diffuse(src, dst, mix) {
+    const w=simW, h=simH;
+    // edges: keep simple
+    for (let y=1; y<h-1; y++) {
+      let row = y*w;
+      for (let x=1; x<w-1; x++) {
+        const k = row + x;
+        const v =
+          src[k] +
+          src[k-1] + src[k+1] +
+          src[k-w] + src[k+w] +
+          src[k-w-1] + src[k-w+1] +
+          src[k+w-1] + src[k+w+1];
 
-    // subtle persistence while active = volumetric "nube"
-    ctx.save();
-    ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = `rgba(0,0,0,${IS_MOBILE ? 0.20 : 0.16})`;
-    ctx.fillRect(0,0,W,H);
-    ctx.restore();
-
-    const cx = W/2, cy = H/2;
-    const corners = [
-      { x:0, y:0 },
-      { x:W, y:0 },
-      { x:0, y:H },
-      { x:W, y:H }
-    ];
-
-    const amp = seq.amp;
-    const bias = 0.55 + 0.45 * (0.5 - 0.5 * Math.cos(seq.phi + now*0.001));
-
-    // Inbound
-    if (t < IN_DUR) {
-      const p = ease(t / IN_DUR);
-
-      for (let i=0;i<corners.length;i++){
-        const o = corners[i];
-
-        // curvature: bend towards diagonal based on spin & corner id
-        const bend = seq.spin * (i%2===0 ? 1 : -1);
-        const midx = lerp(o.x, cx, p) + bend * (H*0.12) * Math.sin(p*Math.PI);
-        const midy = lerp(o.y, cy, p) - bend * (W*0.12) * Math.sin(p*Math.PI);
-
-        // asymmetry: skew cloud size slightly
-        const skew = 1 + seq.skew * (i<2 ? 1 : -1);
-
-        // trail: multiple ghost heads
-        const steps = IS_MOBILE ? 12 : 18;
-        const span = 0.20;
-        for (let k=0;k<steps;k++){
-          const kk = k / steps;
-          const tt = clamp(p - kk*span, 0, 1);
-          const q = ease(tt);
-
-          const tx = lerp(o.x, cx, q) + bend * (H*0.12) * Math.sin(q*Math.PI);
-          const ty = lerp(o.y, cy, q) - bend * (W*0.12) * Math.sin(q*Math.PI);
-
-          const fade = (1 - kk);
-          drawCloudHead(tx, ty, 0.80 * fade, amp * skew, bias);
-        }
-
-        // fiber from origin to head (thin, premium)
-        drawFiber(o.x, o.y, midx, midy, 0.9, amp);
-
-        // head
-        drawCloudHead(midx, midy, 1.0, amp * skew, bias);
+        const blur = v / 9;
+        dst[k] = src[k]*(1-mix) + blur*mix;
       }
-      return;
     }
-
-    // Center flash
-    const t1 = t - IN_DUR;
-    if (t1 < FLASH_DUR) {
-      const u = t1 / FLASH_DUR;
-      const p = 1 - ease(u); // strong at start then down
-
-      const flashA = (0.24 * amp) * (1 - p);
-      glow(cx, cy, Math.min(W,H) * 0.26, flashA * 0.20, { r:0, g:234, b:255 });
-      glow(cx, cy, Math.min(W,H) * 0.16, flashA * 0.14, { r:120, g:0, b:255 });
-      glow(cx, cy, Math.min(W,H) * 0.09, flashA * 0.10, { r:255, g:255, b:255 });
-
-      // optional burst (not always)
-      if (seq.burst > 0.0 && u < 0.5) {
-        glow(cx, cy, Math.min(W,H) * 0.34, flashA * 0.10 * seq.burst, { r:255, g:20, b:90 });
-      }
-
-      // hint X briefly
-      drawX(0.07 * amp * (1 - p));
-      return;
+    // copy border
+    for (let x=0; x<w; x++) {
+      dst[x] = src[x];
+      dst[x + (h-1)*w] = src[x + (h-1)*w];
     }
-
-    // Hold X
-    const t2 = t1 - FLASH_DUR;
-    if (t2 < HOLD_DUR) {
-      const holdP = t2 / HOLD_DUR;
-      const a = 0.18 * amp * (1 - 0.62*holdP);
-      glow(cx, cy, Math.min(W,H) * 0.18, 0.07 * amp);
-      drawX(a);
-      return;
-    }
-
-    // Outbound release
-    const t3 = t2 - HOLD_DUR;
-    const pOut = ease(t3 / OUT_DUR);
-    const p = 1 - pOut;
-
-    for (let i=0;i<corners.length;i++){
-      const o = corners[i];
-
-      const bend = seq.spin * (i%2===0 ? 1 : -1);
-      const x = lerp(o.x, cx, p) + bend * (H*0.12) * Math.sin(p*Math.PI);
-      const y = lerp(o.y, cy, p) - bend * (W*0.12) * Math.sin(p*Math.PI);
-
-      const fadeA = (1 - pOut);
-      const skew = 1 + seq.skew * (i<2 ? 1 : -1);
-
-      // trail
-      const steps = IS_MOBILE ? 10 : 14;
-      const span = 0.18;
-      for (let k=0;k<steps;k++){
-        const kk = k / steps;
-        const tt = clamp(p - kk*span, 0, 1);
-        const q = ease(tt);
-
-        const tx = lerp(o.x, cx, q) + bend * (H*0.12) * Math.sin(q*Math.PI);
-        const ty = lerp(o.y, cy, q) - bend * (W*0.12) * Math.sin(q*Math.PI);
-
-        const fade = (1 - kk) * fadeA;
-        drawCloudHead(tx, ty, 0.55 * fade, amp * skew, bias);
-      }
-
-      // fiber from head to center
-      drawFiber(x, y, cx, cy, 0.65 * fadeA, amp);
-
-      drawCloudHead(x, y, 0.85 * fadeA, amp * skew, bias);
+    for (let y=0; y<h; y++) {
+      dst[y*w] = src[y*w];
+      dst[(w-1) + y*w] = src[(w-1) + y*w];
     }
   }
 
-  function loop(now){
-    if (!seq.active) {
-      // absolute black idle
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0,0,W,H);
-    } else {
-      renderSequence(now);
+  function stepSim(dtMs) {
+    // age foods + create a “food field” on the fly when sampling
+    for (let i=foods.length-1; i>=0; i--) {
+      foods[i].life -= dtMs;
+      if (foods[i].life <= 0) foods.splice(i, 1);
+      else foods[i].amp = foods[i].life / CFG.foodLifeMs;
     }
+
+    const step = CFG.step;
+    const sDist = CFG.sensorDist;
+    const sAng  = CFG.sensorAngle;
+    const turn  = CFG.turnSpeed;
+
+    // precompute for speed
+    const xBias = CFG.xBias;
+    const foodStr = CFG.foodStrength;
+
+    // update agents
+    for (let i=0; i<agents.length; i++) {
+      const p = agents[i];
+
+      // sensor positions
+      const ca = Math.cos(p.a), sa = Math.sin(p.a);
+      const la = p.a - sAng, ra = p.a + sAng;
+
+      const fx = p.x + ca * sDist, fy = p.y + sa * sDist;
+      const lx = p.x + Math.cos(la) * sDist, ly = p.y + Math.sin(la) * sDist;
+      const rx = p.x + Math.cos(ra) * sDist, ry = p.y + Math.sin(ra) * sDist;
+
+      // base trail sensing
+      let fF = sampleField(trailA, fx, fy);
+      let fL = sampleField(trailA, lx, ly);
+      let fR = sampleField(trailA, rx, ry);
+
+      // add X attractor (static)
+      fF += xBias * sampleField(xField, fx, fy);
+      fL += xBias * sampleField(xField, lx, ly);
+      fR += xBias * sampleField(xField, rx, ry);
+
+      // add food attractors (dynamic, radial)
+      if (foods.length) {
+        let addF=0, addL=0, addR=0;
+        for (let j=0; j<foods.length; j++) {
+          const fd = foods[j];
+          const amp = fd.amp;
+          const rr = CFG.foodRadius;
+
+          const dxF = fx - fd.x, dyF = fy - fd.y;
+          const dxL = lx - fd.x, dyL = ly - fd.y;
+          const dxR = rx - fd.x, dyR = ry - fd.y;
+
+          const d2F = dxF*dxF + dyF*dyF;
+          const d2L = dxL*dxL + dyL*dyL;
+          const d2R = dxR*dxR + dyR*dyR;
+
+          const gF = Math.exp(-d2F / (2*rr*rr)) * amp;
+          const gL = Math.exp(-d2L / (2*rr*rr)) * amp;
+          const gR = Math.exp(-d2R / (2*rr*rr)) * amp;
+
+          addF += gF; addL += gL; addR += gR;
+        }
+        fF += foodStr * addF;
+        fL += foodStr * addL;
+        fR += foodStr * addR;
+      }
+
+      // decide turn
+      if (fF > fL && fF > fR) {
+        // straight
+      } else if (fL > fR) {
+        p.a -= turn;
+      } else if (fR > fL) {
+        p.a += turn;
+      } else {
+        // tie-break noise
+        p.a += (Math.random() - 0.5) * 0.15;
+      }
+
+      // move
+      p.x += Math.cos(p.a) * step;
+      p.y += Math.sin(p.a) * step;
+
+      // wrap around (torus)
+      if (p.x < 0) p.x += simW;
+      else if (p.x >= simW) p.x -= simW;
+      if (p.y < 0) p.y += simH;
+      else if (p.y >= simH) p.y -= simH;
+
+      // deposit
+      depositAt(trailA, p.x, p.y, CFG.deposit);
+    }
+
+    // decay
+    const d = CFG.decay;
+    for (let k=0; k<trailA.length; k++) trailA[k] *= d;
+
+    // diffuse (every N frames)
+    if ((frame % CFG.diffuseEvery) === 0) {
+      diffuse(trailA, trailB, CFG.diffuseMix);
+      // swap
+      const tmp = trailA; trailA = trailB; trailB = tmp;
+    }
+  }
+
+  function render(now) {
+    // map trail intensity to a premium cyan/magenta “bioelectric” palette
+    // without drawing a literal X: the X only appears if the network forms there.
+    const n = simW * simH;
+
+    // center flash after clicks (subtle)
+    const fdt = now - lastFlashAt;
+    const flash = (fdt >= 0 && fdt < CFG.flashMs)
+      ? (1 - (fdt / CFG.flashMs)) * CFG.flashAmp
+      : 0;
+
+    for (let k=0, p=0; k<n; k++, p+=4) {
+      const t = trailA[k];
+
+      // non-linear curve: enhances filaments, keeps background black-black
+      const v = t <= 0 ? 0 : Math.pow(clamp(t, 0, 1), 0.62);
+
+      // tiny chroma wobble driven by xField to give “maze intelligence” shimmer
+      const xf = xField[k]; // 0..1
+      const c = clamp(v * (0.95 + 0.18*xf), 0, 1);
+
+      // add flash as radial light in render-space
+      let add = 0;
+      if (flash > 0) {
+        const x = (k % simW), y = (k / simW) | 0;
+        const dx = x - flashX, dy = y - flashY;
+        const r2 = dx*dx + dy*dy;
+        add = flash * Math.exp(-r2 / (2 * (CFG.foodRadius*1.4) * (CFG.foodRadius*1.4)));
+      }
+
+      const lum = clamp(c + add, 0, 1);
+
+      // “bioelectric” palette:
+      // cyan core + faint magenta fringe, still looks good over pure black.
+      const r = clamp(  14 + lum*255*0.95 + (xf*lum*55), 0, 255) | 0;
+      const g = clamp(  10 + lum*255*0.78, 0, 255) | 0;
+      const b = clamp(  18 + lum*255*1.00, 0, 255) | 0;
+
+      // deepen blacks aggressively
+      const crush = lum < 0.03 ? 0 : 1;
+      img8[p+0] = crush ? r : 0;
+      img8[p+1] = crush ? g : 0;
+      img8[p+2] = crush ? b : 0;
+      img8[p+3] = 255;
+    }
+
+    // draw sim texture scaled to full canvas
+    ctx.putImageData(imgData, 0, 0);
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(canvas, 0, 0, simW, simH, 0, 0, W, H);
+    ctx.restore();
+
+    // hard black letterbox cleanup (ensures “absolute black” background)
+    // (in case rounding leaves a 1px edge on some GPUs)
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = "#000";
+    // if aspect mismatch causes small uncovered strips, cover them:
+    // (safe no-op most of the time)
+    ctx.fillRect(W-1, 0, 2, H);
+    ctx.fillRect(0, H-1, W, 2);
+    ctx.restore();
+  }
+
+  function loop(now) {
+    const dt = clamp(now - tPrev, 8, 40);
+    tPrev = now;
+
+    stepSim(dt);
+    render(now);
+
+    frame++;
     requestAnimationFrame(loop);
   }
 
   resize();
   requestAnimationFrame(loop);
+
+  // Optional: keyboard nuke / reseed for quick iterations
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "r" || e.key === "R") seedAgents(true);
+  });
 })();
 </script>
 </body>
