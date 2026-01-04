@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MICRORETAILX</title>
+  <title>microretailX</title>
 
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Permissions-Policy"
@@ -133,9 +133,9 @@
 
   const INTRO = {
     start: performance.now(),
-    durIn: 1800,
-    durFlash: 320,
-    durOut: 650,
+    durIn: 1800,      // barrido lento
+    durFlash: 320,    // flash
+    durOut: 900,      // fade MÁS LENTO (era 650)
     get active() {
       const t = performance.now() - this.start;
       return t < (this.durIn + this.durFlash + this.durOut);
@@ -440,10 +440,10 @@
       const xf = xField[k];
       const c = clamp(v * (0.92 + 0.22*xf), 0, 1);
 
-      // AZUL CIAN ELÉCTRICO
-      const r = clamp(  10 + c*100*0.75, 0, 255) | 0;
-      const g = clamp(  40 + c*240*1.00, 0, 255) | 0;
-      const b = clamp(  60 + c*255*1.10, 0, 255) | 0;
+      // AZUL CIAN MÁS INTENSO
+      const r = clamp(  8 + c*110*0.80, 0, 255) | 0;
+      const g = clamp( 35 + c*250*1.05, 0, 255) | 0;
+      const b = clamp( 55 + c*255*1.15, 0, 255) | 0;
 
       const crush = c < CFG.crush ? 0 : 1;
       img8[p+0] = crush ? r : 0;
@@ -512,7 +512,7 @@
       vctx.moveTo(W,0); vctx.lineTo(0,H);
       vctx.stroke();
 
-      // Segmentos barridos - SOLO LÍNEAS
+      // Segmentos barridos
       for (let i=0;i<corners.length;i++){
         const o = corners[i];
         const hx = lerp(o.x, cx, p);
@@ -586,16 +586,18 @@
 
     renderMaze();
     
+    // Fade MÁS LENTO con más presencia
     const fadeAlpha = (1 - p3);
-    strokeX(fadeAlpha * 0.35, IS_MOBILE ? 3.4 : 4.2, IS_MOBILE ? 11.0 : 14.0);
+    strokeX(fadeAlpha * 0.40, IS_MOBILE ? 3.6 : 4.4, IS_MOBILE ? 11.5 : 15.0);
 
-    if (p3 < 0.6) {
+    // Brillo residual más persistente
+    if (p3 < 0.75) {
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
-      const rr = Math.min(W,H) * 0.15 * (1-p3);
+      const rr = Math.min(W,H) * 0.18 * (1-p3);
       const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
-      g.addColorStop(0, `rgba(255,255,255,${0.25*(1-p3)})`);
-      g.addColorStop(0.5, `rgba(255,255,255,${0.08*(1-p3)})`);
+      g.addColorStop(0, `rgba(255,255,255,${0.30*(1-p3)})`);
+      g.addColorStop(0.5, `rgba(255,255,255,${0.10*(1-p3)})`);
       g.addColorStop(1, "rgba(0,0,0,0)");
       vctx.fillStyle = g;
       vctx.beginPath(); 
@@ -604,7 +606,7 @@
       vctx.restore();
     }
 
-    if (p3 < 0.25) {
+    if (p3 < 0.30) {
       for (let k=0; k<trailA.length; k++) trailA[k] *= 0.985;
     }
   }
