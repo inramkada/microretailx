@@ -505,15 +505,6 @@
       vctx.globalCompositeOperation = "lighter";
       vctx.lineCap = "round";
 
-      // X fantasma sutil
-      const ghostAlpha = 0.04 + 0.08*p;
-      vctx.strokeStyle = `rgba(255,255,255,${ghostAlpha})`;
-      vctx.lineWidth = IS_MOBILE ? 3.2 : 4.0;
-      vctx.beginPath();
-      vctx.moveTo(0,0); vctx.lineTo(W,H);
-      vctx.moveTo(W,0); vctx.lineTo(0,H);
-      vctx.stroke();
-
       // Segmentos barridos
       for (let i=0;i<corners.length;i++){
         const o = corners[i];
