@@ -35,7 +35,6 @@
       z-index: 10;
     }
 
-    /* TOP BAR */
     .top-bar {
       position: absolute;
       top: 0;
@@ -49,33 +48,15 @@
       backdrop-filter: blur(10px);
     }
 
-    /* Brand: más cuerpo, sin “efecto”, pero mezclándose con el fondo.
-       Con video/canvas debajo, el texto “cambia” con el contenido por blending. */
     .brand {
       font-size: 12px;
       letter-spacing: 4px;
       font-weight: 800;
       opacity: 0.92;
-
-      /* Importante: sin sombras, sin animación */
-      text-shadow: none;
-
-      /* “Transparente RGB a fondos”: el color se define por mezcla con lo de atrás */
       color: rgba(255,255,255,0.92);
-      mix-blend-mode: difference; /* hace que el texto se adapte al fondo (video/canvas) */
+      mix-blend-mode: difference;
     }
 
-    /* CENTER (vacío, solo estructura) */
-    .center {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      pointer-events: none;
-    }
-
-    /* FOOTER */
     .footer-bar {
       position: absolute;
       bottom: 0;
@@ -117,43 +98,29 @@
       opacity: 0.45;
       text-align: center;
     }
-
-    @media (max-width: 600px) {
-      .brand {
-        font-size: 11px;
-        letter-spacing: 3px;
-      }
-      .footer-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 14px;
-      }
-    }
   </style>
 </head>
 
 <body>
-  <canvas id="canvas"></canvas>
+<canvas id="canvas"></canvas>
 
-  <div class="ui-layer">
-    <div class="top-bar">
-      <div class="brand">MICRORETAILX</div>
+<div class="ui-layer">
+  <div class="top-bar">
+    <div class="brand">MICRORETAILX</div>
+  </div>
+
+  <div class="footer-bar">
+    <div class="footer-links">
+      <a href="terms.html">TERMS</a>
+      <a href="privacy.html">PRIVACY</a>
+      <a href="cookies.html">COOKIES</a>
+      <a href="legal.html">LEGAL</a>
     </div>
-
-    <div class="center"></div>
-
-    <div class="footer-bar">
-      <div class="footer-links">
-        <a href="terms.html">TERMS</a>
-        <a href="privacy.html">PRIVACY</a>
-        <a href="cookies.html">COOKIES</a>
-        <a href="legal.html">LEGAL</a>
-      </div>
-      <div class="copyright">
-        © 2023–2026 MICRORETAILX LLC. ALL RIGHTS RESERVED.
-      </div>
+    <div class="copyright">
+      © 2023–2026 MICRORETAILX LLC. ALL RIGHTS RESERVED.
     </div>
   </div>
+</div>
 
 <script>
 (() => {
@@ -162,206 +129,94 @@
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d", { alpha: false });
 
-  const UA = navigator.userAgent || "";
-  const IS_IOS =
-    /iPhone|iPad|iPod/i.test(UA) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-  const DPR_CAP = IS_IOS ? 1.6 : 2;
-
-  let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
   let W = 0, H = 0;
-
-  function resize() {
-    dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
-    W = window.innerWidth | 0;
-    H = window.innerHeight | 0;
-
-    canvas.width = (W * dpr) | 0;
-    canvas.height = (H * dpr) | 0;
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  function resize(){
+    W = innerWidth; H = innerHeight;
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W+"px";
+    canvas.style.height = H+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   }
-  window.addEventListener("resize", resize);
+  addEventListener("resize", resize);
 
-  // =========================================================
-  // X: invisible by default. Appears only from click impulses.
-  // =========================================================
+  // === Sweep state ===
+  let active = false;
+  let t0 = 0;
+  let cooldown = 0;
 
-  // Store a few recent impulses (position-based + phase)
-  const impulses = [];
-  const MAX_IMPULSES = 14;
+  const SWEEP_IN = 0.9;   // seconds inward
+  const HOLD    = 0.25;  // flash duration
+  const SWEEP_OUT= 0.7;  // seconds outward
 
-  // distance point -> nearest diagonal line
-  function distToDiag1(x, y) { // y = (H/W)x
-    const m = H / Math.max(1, W);
-    return Math.abs(y - m * x);
-  }
-  function distToDiag2(x, y) { // y = H - (H/W)x
-    const m = H / Math.max(1, W);
-    return Math.abs(y - (H - m * x));
-  }
-
-  function addImpulse(x, y) {
-    // “matemática”: intensidad depende de cercanía a la X + una fase derivada del punto
-    const d = Math.min(distToDiag1(x, y), distToDiag2(x, y));
-    const maxD = Math.min(W, H) * 0.35; // zona de influencia
-    const near = Math.max(0, 1 - d / maxD);
-    const amp = near * near; // curva más “quirúrgica”
-
-    // fase pseudo “phi-like” (sin random puro)
-    const phi = ((x * 0.017 + y * 0.013) % (Math.PI * 2));
-
-    impulses.push({
-      t0: performance.now(),
-      amp: amp,
-      phi: phi,
-      x, y
-    });
-
-    if (impulses.length > MAX_IMPULSES) impulses.shift();
-  }
-
-  // drawing helpers
-  function glow(x, y, r, a, rgb) {
-    if (a <= 0) return;
-    const c = rgb || { r: 0, g: 234, b: 255 };
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${a})`);
-    g.addColorStop(0.35, `rgba(${c.r},${c.g},${c.b},${a * 0.35})`);
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function drawX(alpha, fringe) {
-    ctx.save();
-
-    // base
+  function drawX(alpha){
     ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
-    ctx.lineWidth = 1.6;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(W, H);
-    ctx.moveTo(W, 0);
-    ctx.lineTo(0, H);
+    ctx.moveTo(0,0); ctx.lineTo(W,H);
+    ctx.moveTo(W,0); ctx.lineTo(0,H);
     ctx.stroke();
+  }
 
-    ctx.strokeStyle = `rgba(0,234,255,${alpha * 0.55})`;
+  function sweepLine(progress){
+    ctx.strokeStyle = `rgba(0,234,255,${0.25 * (1-progress)})`;
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(W, H);
-    ctx.moveTo(W, 0);
-    ctx.lineTo(0, H);
+
+    ctx.moveTo(0,0);
+    ctx.lineTo(W*progress, H*progress);
+
+    ctx.moveTo(W,0);
+    ctx.lineTo(W*(1-progress), H*progress);
+
+    ctx.moveTo(0,H);
+    ctx.lineTo(W*progress, H*(1-progress));
+
+    ctx.moveTo(W,H);
+    ctx.lineTo(W*(1-progress), H*(1-progress));
+
     ctx.stroke();
-
-    // optional tiny RGB fringe driven by click math (still subtle)
-    if (fringe > 0.06) {
-      ctx.globalCompositeOperation = "lighter";
-      const f = fringe;
-
-      ctx.strokeStyle = `rgba(255,0,80,${alpha * 0.35 * f})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(-1, 1);
-      ctx.lineTo(W - 1, H + 1);
-      ctx.moveTo(W + 1, 1);
-      ctx.lineTo(1, H - 1);
-      ctx.stroke();
-
-      ctx.strokeStyle = `rgba(0,180,255,${alpha * 0.35 * f})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(1, -1);
-      ctx.lineTo(W + 1, H - 1);
-      ctx.moveTo(W - 1, -1);
-      ctx.lineTo(-1, H + 1);
-      ctx.stroke();
-    }
-
-    ctx.restore();
   }
 
-  // input
-  canvas.addEventListener("pointerdown", (e) => {
-    // capture click in CSS pixels
-    addImpulse(e.clientX, e.clientY);
-  }, { passive: true });
-
-  // also allow taps anywhere (if canvas doesn’t get it for some reason)
-  window.addEventListener("pointerdown", (e) => {
-    // ignore clicks on footer links (so clicking terms doesn’t flash X)
-    const a = e.target && e.target.closest && e.target.closest("a");
+  canvas.addEventListener("pointerdown", e=>{
+    const a = e.target.closest && e.target.closest("a");
     if (a) return;
-    addImpulse(e.clientX, e.clientY);
-  }, { passive: true });
 
-  // =========================================================
-  // Render loop
-  // =========================================================
-  function loop(now) {
-    // pure black background always
+    const now = performance.now();
+    if (now < cooldown) return;
+
+    active = true;
+    t0 = now;
+    cooldown = now + 900; // coherence cooldown
+  }, { passive:true });
+
+  function loop(now){
     ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0,0,W,H);
 
-    // compute visibility from impulses only
-    let energy = 0;
-    let fringe = 0;
-    let centerBoost = 0;
+    if (active){
+      const t = (now - t0) / 1000;
 
-    const cx = W / 2, cy = H / 2;
-
-    for (let i = 0; i < impulses.length; i++) {
-      const im = impulses[i];
-      const age = (now - im.t0) / 1000;
-
-      // decay (fast enough to vanish back to full black)
-      const decay = Math.exp(-age * 1.25);
-
-      // oscillation derived from the click phase (mathy)
-      const w = 2.4 + 0.8 * Math.sin(im.phi);
-      const osc = 0.5 - 0.5 * Math.cos(w * age * Math.PI * 2 + im.phi);
-
-      const v = im.amp * decay * osc;
-
-      energy += v;
-      fringe += v * 0.6;
-
-      // center glow reacts to impulses with distance weighting
-      const dx = (im.x - cx), dy = (im.y - cy);
-      const dd = Math.sqrt(dx*dx + dy*dy) / Math.max(1, Math.min(W, H));
-      centerBoost += v * (1 - clamp(dd * 1.6, 0, 1));
+      if (t < SWEEP_IN){
+        const p = t / SWEEP_IN;
+        sweepLine(p);
+      }
+      else if (t < SWEEP_IN + HOLD){
+        const k = 1 - (t - SWEEP_IN)/HOLD;
+        drawX(0.35 * k);
+      }
+      else if (t < SWEEP_IN + HOLD + SWEEP_OUT){
+        const p = 1 - (t - SWEEP_IN - HOLD)/SWEEP_OUT;
+        sweepLine(p);
+      }
+      else{
+        active = false;
+      }
     }
-
-    // clamp & curve for a premium response (no blow-out)
-    energy = clamp(energy, 0, 1.1);
-    const alpha = 0.0 + 0.16 * (energy ** 0.85); // invisible if no energy
-    fringe = clamp(fringe, 0, 1);
-    centerBoost = clamp(centerBoost, 0, 1);
-
-    // draw X only if visible
-    if (alpha > 0.001) {
-      // subtle center glow
-      glow(cx, cy, Math.min(W, H) * 0.34, 0.06 * (centerBoost ** 0.9));
-      glow(cx, cy, Math.min(W, H) * 0.18, 0.08 * (centerBoost ** 0.85), { r: 120, g: 0, b: 255 });
-
-      drawX(alpha, fringe);
-    }
-
-    // cleanup old impulses
-    while (impulses.length && (now - impulses[0].t0) > 5000) impulses.shift();
 
     requestAnimationFrame(loop);
   }
-
-  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
   resize();
   requestAnimationFrame(loop);
