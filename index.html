@@ -1,230 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Permissions-Policy"
-        content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
-  <title>microretailX</title>
-
-  <link rel="stylesheet" href="assets/app.css">
-  <link rel="stylesheet" href="assets/legal-terms.css">
+  <meta charset="utf-8" />
+  <title>MicroRetailX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    /* CONSENT+CANVAS FIX */
-    #canvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;}
-    .ui-layer, .menu, .hero, .terms-wrap{position:relative;z-index:2;}
-  </style>
-
-  <style>
-    /* FOOTER FIX */
-    body{min-height:100vh;}
-    .footer-bar{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      z-index:3;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-    .page-content{padding-bottom:72px;}
-  </style>
 
-  <style>
-    /* PARTICLES BACKGROUND FIX */
-    #canvas{
-      position:fixed;
-      inset:0;
-      width:100vw;
-      height:100vh;
-      z-index:0;
-      pointer-events:none;
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
     }
-  </style>
 
-  <style>
-    /* CONSENT LOCK (index) */
-    body.consent-locked .footer-links a{
-      pointer-events:none;
-      opacity:0.55;
+    #app {
+      position: relative;
+      z-index: 2;
+      padding: 32px;
     }
-    body.consent-locked #backToTop{
-      pointer-events:none;
-      opacity:0.55;
+
+    html.consent-locked,
+    body.consent-locked {
+      overflow: hidden;
+    }
+
+    #consentLock {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99990;
+      pointer-events: all;
+      background: rgba(0,0,0,0.70);
+      backdrop-filter: blur(6px);
+    }
+
+    html.consent-locked #consentLock,
+    body.consent-locked #consentLock {
+      display: block;
+    }
+
+    /* Efecto visual mientras está bloqueado */
+    html.consent-locked canvas {
+      filter: grayscale(1) brightness(0.72) contrast(1.1);
+      opacity: 0.85;
+      transition: filter 1.1s ease, opacity 1.1s ease;
+    }
+
+    html.consent-decided canvas {
+      filter: none;
+      opacity: 1;
+    }
+
+    a { color: #8ff; }
+    button {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      cursor: pointer;
     }
   </style>
 </head>
 
-
-
-
 <body>
+
+  <!-- Fondo -->
   <canvas id="canvas"></canvas>
 
-  <!-- TOP BAR -->
-  <div class="ui-layer top-bar">
-    <div class="menu">
-      <div class="menu-dot"
-           id="menuToggle"
-           role="button"
-           tabindex="0"
-           aria-label="Open menu"
-           aria-expanded="false"
-           aria-controls="menuDropdown"></div>
+  <!-- Lock total -->
+  <div id="consentLock" aria-hidden="true"></div>
 
-      <div class="menu-dropdown" id="menuDropdown" role="menu" aria-hidden="true">
-        <a href="javascript:void(0)" class="locations-link" id="verticalsLink"
-           role="menuitem" aria-haspopup="true" aria-expanded="false">VERTICALS</a>
-        <a href="/contact.html" id="contactLink" role="menuitem">CONTACT</a>
-      </div>
+  <!-- Contenido -->
+  <div id="app">
+    <h1>MicroRetailX</h1>
+    <p>
+      Si puedes interactuar con esto antes de aceptar o rechazar cookies,
+      entonces algo está mal.
+    </p>
 
-      <div class="menu-dropdown-sub" id="verticalsSubmenu" aria-hidden="true">
-        <div class="submenu-group">
-          <div class="submenu-label">BIOTECH</div>
-          <a class="submenu-link" href="https://www.microlabsx.com"
-             target="_blank" rel="noopener">microlabsX</a>
-          <div class="submenu-label">CREATIVE STUDIO</div>
-          <a class="submenu-link" href="https://www.microstudiox.com"
-             target="_blank" rel="noopener">microstudioX</a>
-        </div>
-      </div>
-    </div>
+    <button onclick="alert('Esto solo funciona tras decidir')">
+      Botón de prueba
+    </button>
+
+    <p>
+      <a href="#">Link de prueba</a>
+    </p>
   </div>
 
-  <!-- FOOTER -->
-  <div class="ui-layer footer-bar">
-    <div class="footer-links">
-      <a class="legal-link" data-legal-link="terms" href="legal/terms.html">Terms</a>
-      <a class="legal-link" data-legal-link="privacy" href="legal/privacy.html">Privacy</a>
-      <a class="legal-link" data-legal-link="cookies" href="legal/cookies.html">Cookies</a>
-      <a class="legal-link" data-legal-link="prefs" href="#" id="cookiePreferencesLink">Cookie Preferences</a>
-      <a class="legal-link" data-legal-link="legal" href="legal/legal.html">Legal</a>
-    </div>
+  <!-- Boot -->
+  <script type="module">
+    import { applyInitialLock, isDecided, onDecided } from "./assets/consent/consent-core.js";
+    import { maybeMountConsentUI } from "./assets/consent/consent-ui.js";
+    import { init as initInicioBg } from "./assets/backgrounds/fondo-particulas-inicio.js";
 
-    <div class="copyright">
-      © 2023-2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
-    </div>
-  </div>
+    applyInitialLock();
 
-  <div class="privacy-toast" id="privacyToast" role="status" aria-live="polite"></div>
+    if (!isDecided()) {
+      maybeMountConsentUI();   // bloquea TODO y obliga a decidir
+    }
 
-  <!-- CONSENT BANNER -->
-  <div class="consent-banner" id="consentBanner" aria-live="polite">
-    <div class="consent-row">
-      <div class="consent-text">
-        We use necessary cookies to operate this site. With your consent, we may also use analytics and marketing cookies.
-        You can change your choice anytime via
-        <a href="#" id="cookiePreferencesInline">Cookie Preferences</a>.
-      </div>
-      <div class="consent-actions">
-        <button class="consent-btn" id="consentReject">Reject</button>
-        <button class="consent-btn" id="consentManage">Preferences</button>
-        <button class="consent-btn primary" id="consentAccept">Accept</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CONSENT MODAL -->
-  <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true">
-    <div class="consent-modal" role="dialog" aria-modal="true" aria-label="Cookie Preferences">
-      <div class="consent-modal-header">
-        <div class="consent-modal-title">COOKIE PREFERENCES</div>
-        <button class="consent-modal-close" id="consentModalClose" aria-label="Close">×</button>
-      </div>
-
-      <div class="consent-modal-body">
-        Choose which optional categories you would allow if such technologies are implemented in the future. Strictly necessary technologies are always enabled and do not require consent.
-        <div class="consent-cats">
-          <div class="consent-cat">
-            <div>
-              <strong>Necessary</strong>
-              <p>Required for basic functionality, security and page delivery. Always on.</p>
-            </div>
-            <div class="toggle on locked" aria-label="Necessary cookies (always on)"></div>
-          </div>
-
-          <div class="consent-cat">
-            <div>
-              <strong>Analytics (future use)</strong>
-              <p>
-                No analytics technologies are currently active on this Website.
-                If implemented in the future, they would only be loaded after your explicit consent.
-              </p>
-            </div>
-            <div class="toggle" id="toggleAnalytics" role="switch" aria-checked="false" tabindex="0" aria-label="Analytics cookies"></div>
-          </div>
-
-          <div class="consent-cat">
-            <div>
-              <strong>Marketing (future use)</strong>
-              <p>
-                No marketing or tracking technologies are currently active.
-                If implemented in the future, they would only be loaded after your explicit consent.
-              </p>
-            </div>
-            <div class="toggle" id="toggleMarketing" role="switch" aria-checked="false" tabindex="0" aria-label="Marketing cookies"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="consent-modal-footer">
-        <button class="consent-btn" id="consentSave">Save</button>
-        <button class="consent-btn primary" id="consentAcceptAll">Accept All</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- JS único (cache-buster) -->
-<script src="assets/legal-terms.js" defer></script>
-  <script src="assets/app.js" defer></script>
-
-  <script>
-    (function(){
-      var STORAGE_FLAG = "mrx_consent_decided_v1";
-
-      function hasAnyConsentKey(){
-        try{
-          if (localStorage.getItem(STORAGE_FLAG)) return true;
-          // If legal-terms.js uses its own keys, detect any key containing 'consent'
-          for (var i=0; i<localStorage.length; i++){
-            var k = localStorage.key(i);
-            if (!k) continue;
-            if (k.toLowerCase().includes("consent")) return true;
-          }
-        }catch(e){}
-        return false;
-      }
-
-      function setLocked(isLocked){
-        document.body.classList.toggle("consent-locked", !!isLocked);
-      }
-
-      function markDecided(){
-        try{ localStorage.setItem(STORAGE_FLAG, "1"); }catch(e){}
-        setLocked(false);
-      }
-
-      // Initial state
-      setLocked(!hasAnyConsentKey());
-
-      // Unlock on any explicit choice
-      ["consentAccept","consentReject","consentSave","consentAcceptAll"].forEach(function(id){
-        var el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener("click", markDecided, true);
-      });
-
-      // Also unlock once banner disappears (fallback)
-      var banner = document.getElementById("consentBanner");
-      if (banner && window.MutationObserver){
-        var obs = new MutationObserver(function(){
-          // If banner is hidden by JS, consider it decided
-          var style = window.getComputedStyle(banner);
-          if (style.display === "none" || banner.getAttribute("aria-hidden") === "true" || banner.classList.contains("hidden")){
-            markDecided();
-          }
-        });
-        obs.observe(banner, {attributes:true, attributeFilter:["style","class","aria-hidden"]});
-      }
-    })();
+    onDecided(() => {
+      initInicioBg("canvas");  // el fondo solo arranca tras decidir
+      console.log("Consent decided → app unlocked");
+    });
   </script>
+
 </body>
 </html>
