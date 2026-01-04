@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="assets/legal-terms.css">
 
   <style>
-    /* CANVAS BACKGROUND */
     #canvas {
       position: fixed;
       inset: 0;
@@ -23,13 +22,11 @@
       pointer-events: none;
     }
 
-    /* UI LAYERS */
     .ui-layer, .menu, .hero, .terms-wrap {
       position: relative;
       z-index: 2;
     }
 
-    /* FOOTER */
     body {
       min-height: 100vh;
     }
@@ -46,46 +43,61 @@
       padding-bottom: 72px;
     }
 
-    /* CONSENT LOCK - Bloquea interacción hasta decisión */
     html.consent-locked,
     body.consent-locked {
       overflow: hidden !important;
       height: 100vh;
     }
 
-    body.consent-locked .footer-links a {
-      pointer-events: none;
-      opacity: 0.55;
+    /* BLOQUEO TOTAL DE INTERACCIÓN (sin ocultar nada) */
+    body.consent-locked * {
+      pointer-events: none !important;
     }
 
-    body.consent-locked #backToTop {
-      pointer-events: none;
-      opacity: 0.55;
+    /* PERMITIR SOLO EL UI DE CONSENT */
+    body.consent-locked #mrxConsentUI,
+    body.consent-locked #mrxConsentUI * {
+      pointer-events: all !important;
     }
 
-    /* Capa de bloqueo visual */
+    /* Velo visual (NO tapa la UI, solo oscurece) */
     #consentLock {
+      display: none;
       position: fixed;
       inset: 0;
-      z-index: 998;
+      z-index: 1;
       background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(3px);
-      pointer-events: all;
+      pointer-events: none;
     }
 
-    html.consent-decided #consentLock {
-      display: none;
+    html.consent-locked #consentLock,
+    body.consent-locked #consentLock {
+      display: block;
     }
 
-    /* MRX CONSENT UI - Mayor z-index que el lock */
+    /* MRX CONSENT UI por encima de todo */
     #mrxConsentUI {
       z-index: 999;
+    }
+
+    /* Efecto visual en el canvas mientras locked */
+    html.consent-locked #canvas {
+      filter: grayscale(1) brightness(0.72) contrast(1.10);
+      opacity: 0.85;
+      transition: filter 1.1s ease, opacity 1.1s ease;
+    }
+
+    html.consent-decided #canvas {
+      filter: none;
+      opacity: 1;
     }
   </style>
 </head>
 
 <body>
   <canvas id="canvas"></canvas>
+  <div id="consentLock" aria-hidden="true"></div>
 
   <!-- TOP BAR -->
   <div class="ui-layer top-bar">
@@ -134,44 +146,36 @@
 
   <div class="privacy-toast" id="privacyToast" role="status" aria-live="polite"></div>
 
-  <!-- Legacy app.js & legal-terms.js -->
   <script src="assets/legal-terms.js" defer></script>
   <script src="assets/app.js" defer></script>
 
-  <!-- NUEVO SISTEMA MODULAR DE CONSENT -->
   <script type="module">
-    import { applyInitialLock, onDecided, clearConsent } from './assets/consent-core.js';
+    import { applyInitialLock, onDecided, isDecided } from './assets/consent-core.js';
     import { maybeMountConsentUI } from './assets/consent-ui.js';
     import { init as initParticles } from './assets/fondo-particulas-inicio.js';
 
-    // 1. Aplicar lock inicial basado en localStorage
     applyInitialLock();
 
-    // 2. Montar UI de consent si no hay decisión
-    maybeMountConsentUI();
+    if (!isDecided()) {
+      maybeMountConsentUI();
+    }
 
-    // 3. Iniciar background de partículas
     const destroyParticles = initParticles('canvas');
 
-    // 4. Escuchar decisión de consent para unlock
     onDecided((consent) => {
       console.log('[MRX] Consent decided:', consent);
-      // El unlock ya se aplica automáticamente en consent-core.js via setHtmlLock(false)
     });
 
-    // 5. Link para reabrir preferencias
     const prefLink = document.getElementById('cookiePreferencesLink');
     if (prefLink) {
       prefLink.addEventListener('click', (e) => {
         e.preventDefault();
-        // Reimportar y montar UI
         import('./assets/consent-ui.js').then(({ mountConsentUI }) => {
           mountConsentUI();
         });
       });
     }
 
-    // 6. Cleanup on page unload (opcional)
     window.addEventListener('beforeunload', () => {
       if (destroyParticles) destroyParticles();
     });
