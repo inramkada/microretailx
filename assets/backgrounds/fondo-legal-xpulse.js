@@ -169,6 +169,7 @@ export function init(canvasId = "canvas") {
     rafId = null;
     window.removeEventListener("resize", resize);
     document.removeEventListener("visibilitychange", onVis);
+    ctx.globalCompositeOperation = "source-over";
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
