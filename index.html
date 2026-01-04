@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>microretailX</title>
+  <title>microretailX — Life</title>
 
-  <!-- Security (GitHub Pages friendly) -->
+  <!-- If you set CSP in Cloudflare, REMOVE this meta CSP to avoid conflicts -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self';
                  script-src 'self' 'unsafe-inline';
@@ -21,543 +21,431 @@
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
 
   <style>
-    :root{
-      --bg:#000;
-      --fg:#fff;
-      --cyan: 0,234,255;
-      --white: 255,255,255;
-    }
-
     html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--fg);
+      margin: 0; padding: 0;
       height: 100%;
+      background: #000;
       overflow: hidden;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #fff;
     }
 
-    canvas{ display:block; width:100vw; height:100vh; }
+    canvas { display:block; width:100vw; height:100vh; }
 
-    /* UI */
-    .ui-layer{ position:absolute; z-index:10; color:#fff; user-select:none; }
-    .top-bar{
-      top:0; right:0; width:100%;
-      background: rgba(0,0,0,0.92);
-      display:flex; justify-content:flex-end;
-      padding:12px 26px; box-sizing:border-box;
-    }
-    .menu-dot{
-      width:15px; height:15px; border-radius:50%;
-      background:#fff; opacity:.85;
+    .ui {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
     }
 
-    .footer-bar{
-      bottom:0; left:0; width:100%;
-      background: rgba(0,0,0,.92);
-      display:flex; flex-direction:column; align-items:center;
-      padding:10px 0 8px; box-sizing:border-box;
-    }
-    .footer-links{
-      display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
-      font-size:15px; margin-bottom:6px; line-height:1.9;
-    }
-    .footer-links a{
-      color:#fff; text-decoration:none;
-      margin:4px 0; padding:0 10px; opacity:.85; cursor:pointer;
-      position:relative;
-    }
-    .footer-links a:hover{ opacity:1; text-decoration:underline; }
-    .footer-links a:not(:last-child)::after{
-      content:"·"; position:absolute; right:-2px; top:50%;
-      transform:translateY(-52%); opacity:.38;
-    }
-    .copyright{
-      font-size:9px; letter-spacing:1px; opacity:.45;
-      text-align:center; padding:0 14px; line-height:1.35;
-    }
-
-    @media (max-width: 600px){
-      .menu-dot{ width:12px; height:12px; }
-      .footer-links{ font-size:13px; padding:0 12px; }
-      .footer-links a{ padding:0 10px; }
-      .footer-links a:not(:last-child)::after{ right:-3px; }
-      .copyright{ font-size:8px; }
-    }
-
-    /* Consent lock: blocks site interaction until decision */
-    body.consent-locked .ui-layer,
-    body.consent-locked canvas{
-      pointer-events:none !important;
-      filter: grayscale(1) brightness(0.72) contrast(1.08);
-      opacity: 0.92;
-      transition: filter 0.8s ease, opacity 0.8s ease;
-    }
-    body.consent-waking .ui-layer,
-    body.consent-waking canvas{
-      filter:none; opacity:1;
-    }
-    body.consent-locked #consentBanner,
-    body.consent-locked #consentModalBackdrop{
-      pointer-events:auto !important;
-      filter:none !important;
-      opacity:1 !important;
-    }
-
-    /* Consent banner */
-    .consent-banner{
-      position:fixed; left:0; right:0; bottom:0;
-      z-index:9999;
-      background: rgba(0,0,0,.92);
-      border-top:1px solid rgba(255,255,255,.15);
-      box-shadow: 0 -10px 34px rgba(0,0,0,.65);
+    .top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.78);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(10px);
-      padding:14px 18px; box-sizing:border-box;
-      display:none;
     }
-    body.consent-locked .consent-banner{
-      left:50%; right:auto; bottom:auto; top:50%;
-      transform: translate(-50%,-50%);
-      width: min(920px, calc(100% - 36px));
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow: 0 0 40px rgba(255,255,255,.10), 0 0 100px rgba(255,255,255,.04);
+
+    .brand {
+      letter-spacing: 3px;
+      font-size: 12px;
+      opacity: .9;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
-    .consent-banner.open{ display:block; }
 
-    .consent-row{ display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
-    .consent-text{ color:#e8ffff; opacity:.92; font-size:13px; line-height:1.4; max-width:860px; }
-    .consent-text a{ color:#fff; text-decoration:none; opacity:.95; }
-    .consent-text a:hover{ text-decoration:underline; opacity:1; }
+    .status {
+      font-size: 11px;
+      letter-spacing: 1px;
+      opacity: .65;
+      text-align: right;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
 
-    .consent-actions{ display:flex; gap:10px; flex-wrap:wrap; }
-    .consent-btn{
-      appearance:none;
-      border:1px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.06);
-      color:#fff;
-      padding:9px 12px; border-radius:10px;
-      cursor:pointer;
+    .footer {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 10px 18px 12px;
+      display:flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      background: rgba(0,0,0,0.78);
+      border-top: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(10px);
+      gap: 14px;
+    }
+
+    .help {
+      font-size: 10px;
+      letter-spacing: 1px;
+      opacity: .55;
+      line-height: 1.5;
+    }
+
+    .pill {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.06);
+      padding: 8px 10px;
+      border-radius: 14px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.06);
+    }
+
+    .btn {
+      pointer-events: auto;
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      padding: 7px 10px;
+      border-radius: 12px;
       font-family: inherit;
-      letter-spacing:.5px; font-size:12px;
-      opacity:.95;
+      font-size: 11px;
+      letter-spacing: .6px;
+      cursor: pointer;
+      opacity: .92;
     }
-    .consent-btn:hover{ opacity:1; box-shadow:0 0 18px rgba(255,255,255,.12); }
-    .consent-btn.primary{
-      border-color: rgba(255,255,255,.42);
-      background: rgba(255,255,255,.12);
-      box-shadow:0 0 22px rgba(255,255,255,.18);
+    .btn:hover { opacity: 1; box-shadow: 0 0 18px rgba(255,255,255,0.10); }
+
+    .kbd {
+      display:inline-block;
+      padding: 1px 6px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-bottom-color: rgba(255,255,255,0.28);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      opacity: .9;
+      margin: 0 2px;
     }
 
-    /* Modal */
-    .consent-modal-backdrop{
-      position:fixed; inset:0; z-index:10000;
-      background: rgba(0,0,0,.74);
-      display:none;
-      align-items:center; justify-content:center;
-      padding:18px; box-sizing:border-box;
-    }
-    .consent-modal-backdrop.open{ display:flex; }
-
-    .consent-modal{
-      width:min(720px,100%);
-      border-radius:16px;
-      background: rgba(0,8,18,.94);
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow: 0 0 40px rgba(255,255,255,.10);
-      backdrop-filter: blur(14px);
-      overflow:hidden;
-    }
-    .consent-modal-header{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px;
-      border-bottom:1px solid rgba(255,255,255,.12);
-    }
-    .consent-modal-title{ font-size:13px; letter-spacing:1px; color:#fff; opacity:.95; }
-    .consent-modal-close{
-      width:30px; height:30px; border-radius:10px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-      color:#fff; cursor:pointer; font-family: inherit; font-size:14px; opacity:.9;
-    }
-    .consent-modal-close:hover{ opacity:1; }
-    .consent-modal-body{
-      padding:14px 16px 8px;
-      color:#e8ffff; font-size:13px; line-height:1.45; opacity:.93;
-    }
-    .consent-cats{ display:grid; gap:10px; margin-top:10px; }
-    .consent-cat{
-      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
-      padding:10px 12px;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-      background: rgba(255,255,255,.03);
-    }
-    .consent-cat strong{ display:block; font-size:12px; letter-spacing:.7px; color:#fff; opacity:.95; margin-bottom:4px; }
-    .consent-cat p{ margin:0; font-size:12px; opacity:.86; max-width:520px; }
-
-    .toggle{
-      position:relative; width:44px; height:24px; flex:0 0 auto;
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.07);
-      cursor:pointer; margin-top:2px;
-    }
-    .toggle::after{
-      content:""; position:absolute; top:2px; left:2px;
-      width:18px; height:18px; border-radius:50%;
-      background: rgba(255,255,255,.92);
-      transition: transform .18s ease;
-    }
-    .toggle.on{
-      border-color: rgba(255,255,255,.35);
-      background: rgba(255,255,255,.14);
-      box-shadow:0 0 18px rgba(255,255,255,.10);
-    }
-    .toggle.on::after{ transform: translateX(20px); }
-    .toggle.locked{ opacity:.6; cursor:not-allowed; }
-
-    .consent-modal-footer{
-      display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
-      padding:12px 16px 14px;
-      border-top:1px solid rgba(255,255,255,.12);
+    @media (max-width: 720px){
+      .footer { flex-direction: column; align-items: stretch; }
+      .pill { justify-content: space-between; }
+      .status { display:none; }
     }
 
     @media (prefers-reduced-motion: reduce){
-      canvas{ opacity:1 !important; filter:none !important; }
-      *{ transition:none !important; animation:none !important; }
+      .help { opacity: .8; }
     }
   </style>
 </head>
 
 <body>
-  <canvas id="canvas"></canvas>
+  <canvas id="c"></canvas>
 
-  <div class="ui-layer top-bar">
-    <div class="menu-dot" aria-hidden="true"></div>
-  </div>
-
-  <div class="ui-layer footer-bar">
-    <div class="footer-links" id="footerLinks">
-      <a href="terms.html" id="linkTerms">Terms</a>
-      <a href="privacy.html" id="linkPrivacy">Privacy</a>
-      <a href="cookies.html" id="linkCookies">Cookies</a>
-      <a href="javascript:void(0)" id="cookiePreferencesLink">Cookie Preferences</a>
-      <a href="legal.html" id="linkLegal">Legal</a>
-    </div>
-    <div class="copyright">© 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED</div>
-  </div>
-
-  <!-- Consent Banner -->
-  <div class="consent-banner" id="consentBanner" aria-live="polite">
-    <div class="consent-row">
-      <div class="consent-text">
-        We use strictly necessary technologies to operate this site and store your preferences locally in your browser.
-        Optional categories (Analytics / Marketing) are not active and would only apply if implemented in the future and you explicitly enable them.
-        You can review or change your choice anytime via <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
+  <div class="ui">
+    <div class="top">
+      <div class="brand">microretailX / LIFE</div>
+      <div class="status" id="status">
+        RUNNING · speed: 12/s<br/>
+        cells: —
       </div>
-      <div class="consent-actions">
-        <button class="consent-btn" id="consentReject">Reject</button>
-        <button class="consent-btn" id="consentManage">Preferences</button>
-        <button class="consent-btn primary" id="consentAccept">Accept</button>
+    </div>
+
+    <div class="footer">
+      <div class="help">
+        Paint: click/drag · Toggle pause: <span class="kbd">Space</span> · Random: <span class="kbd">R</span> · Clear: <span class="kbd">C</span><br/>
+        Speed: <span class="kbd">+</span>/<span class="kbd">-</span> · Brush: <span class="kbd">1</span>/<span class="kbd">2</span>/<span class="kbd">3</span>
+      </div>
+
+      <div class="pill">
+        <button class="btn" id="btnPause">Pause</button>
+        <button class="btn" id="btnRandom">Random</button>
+        <button class="btn" id="btnClear">Clear</button>
       </div>
     </div>
   </div>
 
-  <!-- Consent Modal -->
-  <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true">
-    <div class="consent-modal" role="dialog" aria-modal="true" aria-label="Cookie Preferences">
-      <div class="consent-modal-header">
-        <div class="consent-modal-title">COOKIE PREFERENCES</div>
-        <button class="consent-modal-close" id="consentModalClose" aria-label="Close">×</button>
-      </div>
-      <div class="consent-modal-body">
-        Choose which optional categories you would allow if such technologies are implemented in the future.
-        Strictly necessary technologies are always enabled and do not require consent.
-        <div class="consent-cats">
-          <div class="consent-cat">
-            <div>
-              <strong>Necessary</strong>
-              <p>Required for basic functionality, security and page delivery. Always on.</p>
-            </div>
-            <div class="toggle on locked" aria-label="Necessary cookies (always on)"></div>
-          </div>
+<script>
+(() => {
+  "use strict";
 
-          <div class="consent-cat">
-            <div>
-              <strong>Analytics (future use)</strong>
-              <p>No analytics technologies are currently active. If implemented, they would only load after your consent.</p>
-            </div>
-            <div class="toggle" id="toggleAnalytics" role="switch" aria-checked="false" tabindex="0" aria-label="Analytics cookies"></div>
-          </div>
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d", { alpha: false });
 
-          <div class="consent-cat">
-            <div>
-              <strong>Marketing (future use)</strong>
-              <p>No marketing/tracking technologies are currently active. If implemented, they would only load after your consent.</p>
-            </div>
-            <div class="toggle" id="toggleMarketing" role="switch" aria-checked="false" tabindex="0" aria-label="Marketing cookies"></div>
-          </div>
-        </div>
-      </div>
-      <div class="consent-modal-footer">
-        <button class="consent-btn" id="consentSave">Save</button>
-        <button class="consent-btn primary" id="consentAcceptAll">Accept All</button>
-      </div>
-    </div>
-  </div>
+  const statusEl = document.getElementById("status");
+  const btnPause = document.getElementById("btnPause");
+  const btnRandom = document.getElementById("btnRandom");
+  const btnClear  = document.getElementById("btnClear");
 
-  <script>
-    "use strict";
+  const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const DPR_CAP = 2;
+  let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
 
-    // ========= Consent (hard lock until decision) =========
-    const CONSENT_KEY = "mrxx_consent_v1";
+  // Visual tuning
+  const BG = "#000";
+  const GRID_FADE = 0.06;
+  const GLOW_A = 0.28;
+  const CELL_A = 0.9;
 
-    const consentBanner = document.getElementById("consentBanner");
-    const consentModalBackdrop = document.getElementById("consentModalBackdrop");
+  // Simulation
+  let running = true;
+  let stepsPerSecond = REDUCED ? 6 : 12;
+  let brush = 1;
 
-    const cookiePreferencesLink = document.getElementById("cookiePreferencesLink");
-    const cookiePreferencesInline = document.getElementById("cookiePreferencesInline");
+  // Grid sizing (auto)
+  let cellSize = 8;          // px (logical)
+  let cols = 0, rows = 0;    // grid dims
+  let a = null, b = null;    // double buffer Uint8Array
 
-    const consentReject = document.getElementById("consentReject");
-    const consentManage = document.getElementById("consentManage");
-    const consentAccept = document.getElementById("consentAccept");
+  // Pointer
+  const pointer = { down:false, x:-1, y:-1 };
 
-    const consentModalClose = document.getElementById("consentModalClose");
-    const consentSave = document.getElementById("consentSave");
-    const consentAcceptAll = document.getElementById("consentAcceptAll");
+  function resize() {
+    dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+    const W = Math.floor(window.innerWidth);
+    const H = Math.floor(window.innerHeight);
 
-    const toggleAnalytics = document.getElementById("toggleAnalytics");
-    const toggleMarketing = document.getElementById("toggleMarketing");
+    canvas.width  = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    function persistConsent(state){
-      localStorage.setItem(CONSENT_KEY, JSON.stringify(state));
-    }
-    function loadConsent(){
-      const ls = localStorage.getItem(CONSENT_KEY);
-      if (!ls) return null;
-      try { return JSON.parse(ls); } catch { return null; }
-    }
+    // Choose cellSize based on viewport
+    const minDim = Math.min(W, H);
+    cellSize = minDim < 520 ? 9 : 8;
+    if (minDim < 380) cellSize = 10;
 
-    function lockSite(){
-      document.body.classList.add("consent-locked");
-      document.documentElement.style.overflow = "hidden";
-    }
-    function wakeSite(){
-      document.body.classList.remove("consent-locked");
-      document.documentElement.style.overflow = "";
-      // small wake effect
-      document.body.classList.add("consent-waking");
-      setTimeout(() => document.body.classList.remove("consent-waking"), 900);
-    }
+    const newCols = Math.max(40, Math.floor(W / cellSize));
+    const newRows = Math.max(30, Math.floor(H / cellSize));
 
-    function setToggle(el, on){
-      el.classList.toggle("on", !!on);
-      el.setAttribute("aria-checked", String(!!on));
-    }
-    function toggleSwitch(el){
-      setToggle(el, !el.classList.contains("on"));
-    }
-    function handleSwitchKey(el, e){
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSwitch(el); }
-    }
+    // Reinit buffers
+    cols = newCols;
+    rows = newRows;
+    a = new Uint8Array(cols * rows);
+    b = new Uint8Array(cols * rows);
 
-    function openConsentPanel(){
-      const current = loadConsent() || { necessary:true, analytics:false, marketing:false, ts:Date.now(), decision:null };
-      setToggle(toggleAnalytics, !!current.analytics);
-      setToggle(toggleMarketing, !!current.marketing);
-      consentModalBackdrop.classList.add("open");
-      consentModalBackdrop.setAttribute("aria-hidden", "false");
-    }
-    function closeConsentPanel(){
-      consentModalBackdrop.classList.remove("open");
-      consentModalBackdrop.setAttribute("aria-hidden", "true");
-    }
-    function showBanner(){
-      consentBanner.classList.add("open");
-    }
-    function hideBanner(){
-      consentBanner.classList.remove("open");
-    }
+    seedNice();
+    draw(true);
+  }
 
-    // Decision = ANY of Reject / Accept / Save / AcceptAll
-    function finalize(consent){
-      persistConsent(consent);
-      hideBanner();
-      closeConsentPanel();
-      wakeSite();
-    }
+  function idx(x, y) { return y * cols + x; }
 
-    function setAllConsent(granted){
-      finalize({
-        necessary: true,
-        analytics: !!granted,
-        marketing: !!granted,
-        ts: Date.now(),
-        decision: granted ? "accepted" : "rejected"
-      });
-    }
+  function seedNice() {
+    // balanced seed, with a few clusters + noise
+    a.fill(0);
+    const noise = 0.09;
+    for (let i = 0; i < a.length; i++) a[i] = (Math.random() < noise) ? 1 : 0;
 
-    function saveFromPanel(){
-      const analytics = toggleAnalytics.classList.contains("on");
-      const marketing = toggleMarketing.classList.contains("on");
-      finalize({
-        necessary: true,
-        analytics, marketing,
-        ts: Date.now(),
-        decision: (analytics || marketing) ? "accepted" : "rejected"
-      });
-    }
-
-    // Wire
-    cookiePreferencesLink.addEventListener("click", (e)=>{ e.preventDefault(); openConsentPanel(); });
-    cookiePreferencesInline.addEventListener("click", (e)=>{ e.preventDefault(); openConsentPanel(); });
-
-    consentManage.addEventListener("click", ()=> openConsentPanel());
-    consentReject.addEventListener("click", ()=> setAllConsent(false));
-    consentAccept.addEventListener("click", ()=> setAllConsent(true));
-
-    consentModalClose.addEventListener("click", ()=> closeConsentPanel());
-    consentSave.addEventListener("click", ()=> saveFromPanel());
-    consentAcceptAll.addEventListener("click", ()=> setAllConsent(true));
-
-    consentModalBackdrop.addEventListener("click", (e)=>{ if (e.target === consentModalBackdrop) closeConsentPanel(); });
-    document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closeConsentPanel(); });
-
-    toggleAnalytics.addEventListener("click", ()=> toggleSwitch(toggleAnalytics));
-    toggleMarketing.addEventListener("click", ()=> toggleSwitch(toggleMarketing));
-    toggleAnalytics.addEventListener("keydown", (e)=> handleSwitchKey(toggleAnalytics, e));
-    toggleMarketing.addEventListener("keydown", (e)=> handleSwitchKey(toggleMarketing, e));
-
-    const existing = loadConsent();
-    if (existing && existing.decision) {
-      wakeSite();
-    } else {
-      lockSite();
-      showBanner();
-    }
-
-    // ========= Particles background (lightweight, single-file) =========
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d", { alpha: false });
-
-    let W = canvas.width = window.innerWidth;
-    let H = canvas.height = window.innerHeight;
-
-    const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
-    const COUNT = REDUCED ? (isMobile ? 90 : 140) : (isMobile ? 180 : 750);
-    const MAX_LINK = isMobile ? 4 : 9;
-    const SPEED = REDUCED ? 0.22 : (isMobile ? 0.32 : 0.42);
-
-    const mouse = { x: -9999, y: -9999 };
-
-    function resize(){
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resize);
-
-    window.addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive:true });
-    window.addEventListener("touchmove", e => {
-      if (!e.touches || !e.touches[0]) return;
-      mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY;
-    }, { passive:true });
-
-    function rand(min, max){ return min + Math.random() * (max - min); }
-
-    const particles = [];
-    for (let i=0;i<COUNT;i++){
-      particles.push({
-        x: Math.random()*W,
-        y: Math.random()*H,
-        vx: rand(-SPEED, SPEED),
-        vy: rand(-SPEED, SPEED),
-        r: rand(1.1, isMobile ? 1.9 : 2.1)
-      });
-    }
-
-    function draw(){
-      // background
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0,0,W,H);
-
-      // subtle X lines
-      ctx.save();
-      ctx.strokeStyle = "rgba(0,255,255,0.06)";
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.moveTo(0,0); ctx.lineTo(W,H);
-      ctx.moveTo(W,0); ctx.lineTo(0,H);
-      ctx.stroke();
-      ctx.restore();
-
-      // connections
-      const MAX_DIST = isMobile ? 90 : 110;
-      const MAX_D2 = MAX_DIST * MAX_DIST;
-
-      for (let i=0;i<particles.length;i++){
-        const a = particles[i];
-        let links = 0;
-        for (let j=i+1;j<particles.length && links<MAX_LINK;j++){
-          const b = particles[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
-          const d2 = dx*dx + dy*dy;
-          if (d2 < MAX_D2){
-            const d = Math.sqrt(d2);
-            const alpha = (1 - d / MAX_DIST) * (isMobile ? 0.65 : 0.85);
-            ctx.strokeStyle = `rgba(0,255,255,${alpha})`;
-            ctx.beginPath();
-            ctx.moveTo(a.x,a.y);
-            ctx.lineTo(b.x,b.y);
-            ctx.stroke();
-            links++;
-          }
-        }
+    // a couple of denser blobs
+    for (let k = 0; k < 4; k++) {
+      const cx = (Math.random() * cols) | 0;
+      const cy = (Math.random() * rows) | 0;
+      const r = 6 + ((Math.random() * 10) | 0);
+      for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
+        const xx = cx + x, yy = cy + y;
+        if (xx < 1 || yy < 1 || xx >= cols - 1 || yy >= rows - 1) continue;
+        if (x*x + y*y <= r*r && Math.random() < 0.35) a[idx(xx, yy)] = 1;
       }
+    }
+  }
 
-      // particles
-      for (const p of particles){
-        // mouse repulsion
-        const dxm = p.x - mouse.x, dym = p.y - mouse.y;
-        const dm2 = dxm*dxm + dym*dym;
-        if (dm2 < 12000 && dm2 > 0.0001){
-          const dm = Math.sqrt(dm2);
-          const f = (110 - dm) * 0.006;
-          p.vx += (dxm / dm) * f;
-          p.vy += (dym / dm) * f;
-        }
+  function clear() {
+    a.fill(0);
+  }
 
-        // move
-        p.x += p.vx;
-        p.y += p.vy;
+  function randomize() {
+    const p = 0.14;
+    for (let i = 0; i < a.length; i++) a[i] = (Math.random() < p) ? 1 : 0;
+  }
 
-        // friction
-        p.vx *= 0.985;
-        p.vy *= 0.985;
+  function step() {
+    // Conway: B3/S23
+    // wrap edges (toroidal)
+    const w = cols, h = rows;
+    let alive = 0;
 
-        // soft noise
-        if (!REDUCED){
-          p.vx += (Math.random()-0.5)*0.02;
-          p.vy += (Math.random()-0.5)*0.02;
-        }
+    for (let y = 0; y < h; y++) {
+      const ym1 = (y - 1 + h) % h;
+      const yp1 = (y + 1) % h;
 
-        // bounce
-        if (p.x < 0 || p.x > W) p.vx *= -1;
-        if (p.y < 0 || p.y > H) p.vy *= -1;
+      for (let x = 0; x < w; x++) {
+        const xm1 = (x - 1 + w) % w;
+        const xp1 = (x + 1) % w;
 
-        // draw
-        ctx.fillStyle = "white";
+        const n =
+          a[idx(xm1, ym1)] + a[idx(x, ym1)] + a[idx(xp1, ym1)] +
+          a[idx(xm1, y)]                 +     a[idx(xp1, y)] +
+          a[idx(xm1, yp1)] + a[idx(x, yp1)] + a[idx(xp1, yp1)];
+
+        const here = a[idx(x, y)];
+        const next = (here === 1)
+          ? (n === 2 || n === 3 ? 1 : 0)
+          : (n === 3 ? 1 : 0);
+
+        b[idx(x, y)] = next;
+        alive += next;
+      }
+    }
+
+    // swap
+    const tmp = a; a = b; b = tmp;
+    return alive;
+  }
+
+  function draw(forceGrid=false) {
+    const W = window.innerWidth, H = window.innerHeight;
+
+    // background
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+
+    // subtle diagonals (signature)
+    ctx.save();
+    ctx.strokeStyle = `rgba(0,255,255,${GRID_FADE})`;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(W, H);
+    ctx.moveTo(W, 0); ctx.lineTo(0, H);
+    ctx.stroke();
+    ctx.restore();
+
+    // draw cells with glow
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+
+    let alive = 0;
+    for (let y = 0; y < rows; y++) {
+      const py = y * cellSize;
+      for (let x = 0; x < cols; x++) {
+        if (!a[idx(x, y)]) continue;
+        alive++;
+
+        const px = x * cellSize;
+        const cx = px + cellSize * 0.5;
+        const cy = py + cellSize * 0.5;
+
+        // glow
+        const r = cellSize * 1.8;
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, `rgba(0,234,255,${GLOW_A})`);
+        g.addColorStop(0.35, `rgba(0,234,255,${GLOW_A * 0.35})`);
+        g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fill();
-      }
 
-      requestAnimationFrame(draw);
+        // core
+        ctx.fillStyle = `rgba(255,255,255,${CELL_A})`;
+        ctx.fillRect(px + 1, py + 1, Math.max(1, cellSize - 2), Math.max(1, cellSize - 2));
+      }
     }
-    requestAnimationFrame(draw);
-  </script>
+    ctx.restore();
+
+    if (statusEl) {
+      statusEl.textContent =
+        `${running ? "RUNNING" : "PAUSED"} · speed: ${stepsPerSecond}/s\ncells: ${alive.toLocaleString()}`;
+    }
+  }
+
+  function paintAt(clientX, clientY, val=1) {
+    const x = Math.floor(clientX / cellSize);
+    const y = Math.floor(clientY / cellSize);
+    if (x < 0 || y < 0 || x >= cols || y >= rows) return;
+
+    for (let yy = -brush; yy <= brush; yy++) for (let xx = -brush; xx <= brush; xx++) {
+      const nx = x + xx, ny = y + yy;
+      if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+      if (xx*xx + yy*yy <= brush*brush) a[idx(nx, ny)] = val;
+    }
+  }
+
+  // Input
+  canvas.addEventListener("mousedown", (e) => {
+    pointer.down = true;
+    paintAt(e.clientX, e.clientY, 1);
+    draw();
+  });
+  window.addEventListener("mouseup", () => { pointer.down = false; });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!pointer.down) return;
+    paintAt(e.clientX, e.clientY, 1);
+    draw();
+  }, { passive: true });
+
+  canvas.addEventListener("touchstart", (e) => {
+    pointer.down = true;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    paintAt(t.clientX, t.clientY, 1);
+    draw();
+  }, { passive: true });
+
+  window.addEventListener("touchend", () => { pointer.down = false; }, { passive:true });
+  window.addEventListener("touchmove", (e) => {
+    if (!pointer.down) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    paintAt(t.clientX, t.clientY, 1);
+    draw();
+  }, { passive:true });
+
+  // Keyboard
+  window.addEventListener("keydown", (e) => {
+    if (e.key === " "){ e.preventDefault(); toggleRun(); }
+    if (e.key === "r" || e.key === "R"){ randomize(); draw(); }
+    if (e.key === "c" || e.key === "C"){ clear(); draw(); }
+    if (e.key === "+" || e.key === "="){ stepsPerSecond = Math.min(60, stepsPerSecond + 2); }
+    if (e.key === "-" || e.key === "_"){ stepsPerSecond = Math.max(1, stepsPerSecond - 2); }
+    if (e.key === "1") brush = 1;
+    if (e.key === "2") brush = 2;
+    if (e.key === "3") brush = 3;
+  });
+
+  // UI buttons
+  function toggleRun() {
+    running = !running;
+    btnPause.textContent = running ? "Pause" : "Run";
+  }
+  btnPause.addEventListener("click", toggleRun);
+  btnRandom.addEventListener("click", () => { randomize(); draw(); });
+  btnClear.addEventListener("click", () => { clear(); draw(); });
+
+  // Timing loop
+  let acc = 0;
+  let last = performance.now();
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+
+    if (running) {
+      acc += dt;
+      const stepDt = 1 / Math.max(1, stepsPerSecond);
+
+      // avoid spiral of death
+      let steps = 0;
+      while (acc >= stepDt && steps < 4) {
+        step();
+        acc -= stepDt;
+        steps++;
+      }
+      draw();
+    } else {
+      // still redraw occasionally for crisp UI feel
+      if (Math.random() < 0.04) draw();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
+
 </body>
 </html>
