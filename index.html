@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>microretailX</title>
+  <title>MICRORETAILX</title>
 
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Permissions-Policy"
@@ -20,14 +20,8 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
                    "Liberation Mono", "Courier New", monospace;
     }
+    canvas { display:block; width:100vw; height:100vh; }
 
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    /* === UI LAYER === */
     .ui-layer {
       position: fixed;
       inset: 0;
@@ -37,9 +31,7 @@
 
     .top-bar {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       padding: 14px 18px;
       display: flex;
       justify-content: flex-start;
@@ -48,6 +40,7 @@
       backdrop-filter: blur(10px);
     }
 
+    /* Brand: cuerpo, sin efecto propio, pero se mezcla con lo de atrás */
     .brand {
       font-size: 12px;
       letter-spacing: 4px;
@@ -55,13 +48,12 @@
       opacity: 0.92;
       color: rgba(255,255,255,0.92);
       mix-blend-mode: difference;
+      text-shadow: none;
     }
 
     .footer-bar {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       padding: 14px 18px 12px;
       display: flex;
       flex-direction: column;
@@ -80,17 +72,13 @@
       letter-spacing: 2px;
       opacity: 0.65;
     }
-
     .footer-links a {
-      color: #fff;
-      text-decoration: none;
-      opacity: 0.75;
+      color:#fff;
+      text-decoration:none;
+      opacity:0.75;
+      pointer-events:auto;
     }
-
-    .footer-links a:hover {
-      opacity: 1;
-      text-decoration: underline;
-    }
+    .footer-links a:hover { opacity:1; text-decoration: underline; }
 
     .copyright {
       font-size: 9px;
@@ -98,29 +86,34 @@
       opacity: 0.45;
       text-align: center;
     }
+
+    @media (max-width: 600px) {
+      .brand { font-size: 11px; letter-spacing: 3px; }
+      .footer-links { flex-wrap: wrap; justify-content:center; gap: 14px; }
+    }
   </style>
 </head>
 
 <body>
-<canvas id="canvas"></canvas>
+  <canvas id="canvas"></canvas>
 
-<div class="ui-layer">
-  <div class="top-bar">
-    <div class="brand">MICRORETAILX</div>
-  </div>
+  <div class="ui-layer">
+    <div class="top-bar">
+      <div class="brand">MICRORETAILX</div>
+    </div>
 
-  <div class="footer-bar">
-    <div class="footer-links">
-      <a href="terms.html">TERMS</a>
-      <a href="privacy.html">PRIVACY</a>
-      <a href="cookies.html">COOKIES</a>
-      <a href="legal.html">LEGAL</a>
-    </div>
-    <div class="copyright">
-      © 2023–2026 MICRORETAILX LLC. ALL RIGHTS RESERVED.
+    <div class="footer-bar">
+      <div class="footer-links">
+        <a href="terms.html">TERMS</a>
+        <a href="privacy.html">PRIVACY</a>
+        <a href="cookies.html">COOKIES</a>
+        <a href="legal.html">LEGAL</a>
+      </div>
+      <div class="copyright">
+        © 2023–2026 MICRORETAILX LLC. ALL RIGHTS RESERVED.
+      </div>
     </div>
   </div>
-</div>
 
 <script>
 (() => {
@@ -129,90 +122,277 @@
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d", { alpha: false });
 
+  const UA = navigator.userAgent || "";
+  const IS_IOS =
+    /iPhone|iPad|iPod/i.test(UA) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(UA);
+
+  const DPR_CAP = IS_IOS ? 1.6 : 2;
+  let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+
   let W = 0, H = 0;
-  function resize(){
-    W = innerWidth; H = innerHeight;
-    const dpr = Math.min(2, devicePixelRatio || 1);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width = W+"px";
-    canvas.style.height = H+"px";
-    ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  function resize() {
+    dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+    W = window.innerWidth | 0;
+    H = window.innerHeight | 0;
+    canvas.width = (W * dpr) | 0;
+    canvas.height = (H * dpr) | 0;
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  addEventListener("resize", resize);
+  window.addEventListener("resize", resize);
 
-  // === Sweep state ===
-  let active = false;
-  let t0 = 0;
-  let cooldown = 0;
+  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+  const lerp = (a,b,t)=> a + (b-a)*t;
+  const ease = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
 
-  const SWEEP_IN = 0.9;   // seconds inward
-  const HOLD    = 0.25;  // flash duration
-  const SWEEP_OUT= 0.7;  // seconds outward
-
-  function drawX(alpha){
-    ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0,0); ctx.lineTo(W,H);
-    ctx.moveTo(W,0); ctx.lineTo(0,H);
-    ctx.stroke();
-  }
-
-  function sweepLine(progress){
-    ctx.strokeStyle = `rgba(0,234,255,${0.25 * (1-progress)})`;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-
-    ctx.moveTo(0,0);
-    ctx.lineTo(W*progress, H*progress);
-
-    ctx.moveTo(W,0);
-    ctx.lineTo(W*(1-progress), H*progress);
-
-    ctx.moveTo(0,H);
-    ctx.lineTo(W*progress, H*(1-progress));
-
-    ctx.moveTo(W,H);
-    ctx.lineTo(W*(1-progress), H*(1-progress));
-
-    ctx.stroke();
+  function glow(x, y, r, a, rgb) {
+    if (a <= 0) return;
+    const c = rgb || { r:0, g:234, b:255 };
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${a})`);
+    g.addColorStop(0.35, `rgba(${c.r},${c.g},${c.b},${a*0.35})`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
   }
 
-  canvas.addEventListener("pointerdown", e=>{
-    const a = e.target.closest && e.target.closest("a");
-    if (a) return;
+  // ---- Event system ----
+  // We keep a short "sequence": inbound sweep -> center flash -> X hold -> outbound -> black.
+  const seq = {
+    active: false,
+    t0: 0,
+    amp: 0.0,
+    phi: 0.0
+  };
 
+  const COOLDOWN_MS = 900;
+  let nextAllowed = 0;
+
+  // timings (seconds)
+  const IN_DUR   = IS_MOBILE ? 0.75 : 0.70;  // inward sweep
+  const FLASH_DUR= 0.18;                     // center flash
+  const HOLD_DUR = 0.22;                     // X visible
+  const OUT_DUR  = IS_MOBILE ? 0.60 : 0.55;  // outward release
+
+  function startSequence(x, y) {
     const now = performance.now();
-    if (now < cooldown) return;
+    if (now < nextAllowed) return;
+    nextAllowed = now + COOLDOWN_MS;
 
-    active = true;
-    t0 = now;
-    cooldown = now + 900; // coherence cooldown
-  }, { passive:true });
+    // amplitude based on how close click is to center (coherent, not random)
+    const cx = W/2, cy = H/2;
+    const dx = x - cx, dy = y - cy;
+    const d = Math.sqrt(dx*dx + dy*dy);
+    const maxD = Math.min(W, H) * 0.55;
+    const near = clamp(1 - d / maxD, 0, 1);
+    const amp = 0.35 + 0.65 * (near * near); // never zero, but rewards closer clicks
 
-  function loop(now){
-    ctx.fillStyle = "#000";
+    // phase depends on click coordinates (mathy, deterministic)
+    const phi = (x * 0.017 + y * 0.013) % (Math.PI * 2);
+
+    seq.active = true;
+    seq.t0 = now;
+    seq.amp = amp;
+    seq.phi = phi;
+  }
+
+  // ignore clicks on legal links
+  window.addEventListener("pointerdown", (e) => {
+    const a = e.target && e.target.closest && e.target.closest("a");
+    if (a) return;
+    startSequence(e.clientX, e.clientY);
+  }, { passive: true });
+
+  function drawX(alpha) {
+    ctx.save();
+    ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(W, H);
+    ctx.moveTo(W, 0); ctx.lineTo(0, H);
+    ctx.stroke();
+
+    ctx.strokeStyle = `rgba(0,234,255,${alpha * 0.55})`;
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(W, H);
+    ctx.moveTo(W, 0); ctx.lineTo(0, H);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawEnergyHead(x, y, a, amp, tintPhase) {
+    // core cyan
+    glow(x, y, IS_MOBILE ? 58 : 66, a * 0.22 * amp, { r:0, g:234, b:255 });
+    // magenta-ish rim (very subtle, gives “premium”)
+    const mag = 0.35 + 0.65 * (0.5 - 0.5 * Math.cos(tintPhase));
+    glow(x, y, IS_MOBILE ? 42 : 48, a * 0.10 * amp * mag, { r:255, g:20, b:90 });
+    // inner hot point
+    glow(x, y, IS_MOBILE ? 18 : 20, a * 0.18 * amp, { r:255, g:255, b:255 });
+  }
+
+  function drawEnergyTrail(x1, y1, x2, y2, a, amp) {
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.lineCap = "round";
+    ctx.lineWidth = 1.0 + 1.2 * amp;
+    ctx.strokeStyle = `rgba(0,234,255,${a * 0.12 * amp})`;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    // thin white fiber inside
+    ctx.lineWidth = 0.7;
+    ctx.strokeStyle = `rgba(255,255,255,${a * 0.06 * amp})`;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function renderSequence(now) {
+    if (!seq.active) return;
+
+    const t = (now - seq.t0) / 1000;
+    const T_IN = IN_DUR, T_FLASH = FLASH_DUR, T_HOLD = HOLD_DUR, T_OUT = OUT_DUR;
+    const total = T_IN + T_FLASH + T_HOLD + T_OUT;
+
+    if (t >= total) {
+      seq.active = false;
+      return;
+    }
+
+    const cx = W/2, cy = H/2;
+
+    // corners (four sources)
+    const corners = [
+      { x:0, y:0 },
+      { x:W, y:0 },
+      { x:0, y:H },
+      { x:W, y:H }
+    ];
+
+    // Use afterimage only when active: keeps black absolute otherwise.
+    // (Very subtle so it feels volumetric, not smeary.)
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = `rgba(0,0,0,${IS_MOBILE ? 0.22 : 0.18})`;
     ctx.fillRect(0,0,W,H);
+    ctx.restore();
 
-    if (active){
-      const t = (now - t0) / 1000;
+    const amp = seq.amp;
 
-      if (t < SWEEP_IN){
-        const p = t / SWEEP_IN;
-        sweepLine(p);
+    // Inbound: 4 heads travel to center
+    if (t < T_IN) {
+      const p = ease(t / T_IN);
+
+      for (let i=0;i<corners.length;i++) {
+        const o = corners[i];
+
+        // head position
+        const hx = lerp(o.x, cx, p);
+        const hy = lerp(o.y, cy, p);
+
+        // trail: draw several ghost positions behind head
+        const steps = IS_MOBILE ? 10 : 14;
+        const span = 0.16;
+        for (let k=0;k<steps;k++){
+          const kk = k / steps;
+          const tt = clamp(p - kk*span, 0, 1);
+          const q = ease(tt);
+          const tx = lerp(o.x, cx, q);
+          const ty = lerp(o.y, cy, q);
+          const fade = (1 - kk);
+          drawEnergyHead(tx, ty, 0.75 * fade, amp, seq.phi + i*1.1 + now*0.0012);
+        }
+
+        // fiber line from corner to head (gives the “barrido” feeling)
+        drawEnergyTrail(o.x, o.y, hx, hy, 0.9, amp);
+
+        // head
+        drawEnergyHead(hx, hy, 1.0, amp, seq.phi + i*1.1 + now*0.0012);
       }
-      else if (t < SWEEP_IN + HOLD){
-        const k = 1 - (t - SWEEP_IN)/HOLD;
-        drawX(0.35 * k);
+
+      return;
+    }
+
+    // Center flash
+    const t1 = t - T_IN;
+    if (t1 < T_FLASH) {
+      const p = 1 - ease(t1 / T_FLASH);
+      const a = 0.35 * amp * (1 - p);
+
+      // tight flash (not a screen nuke)
+      glow(cx, cy, Math.min(W,H) * 0.22, a * 0.22, { r:0, g:234, b:255 });
+      glow(cx, cy, Math.min(W,H) * 0.14, a * 0.18, { r:120, g:0, b:255 });
+      glow(cx, cy, Math.min(W,H) * 0.08, a * 0.14, { r:255, g:255, b:255 });
+
+      // a tiny “spark” cross to hint the X without fully drawing it yet
+      drawX(0.08 * amp * (1 - p));
+      return;
+    }
+
+    // Hold X visible briefly
+    const t2 = t1 - T_FLASH;
+    if (t2 < T_HOLD) {
+      const holdP = t2 / T_HOLD;
+      const a = 0.20 * amp * (1 - 0.55*holdP);
+      glow(cx, cy, Math.min(W,H) * 0.18, 0.08 * amp);
+      drawX(a);
+      return;
+    }
+
+    // Outbound release: heads go back out a bit and vanish
+    const t3 = t2 - T_HOLD;
+    const pOut = ease(t3 / T_OUT); // 0..1
+    const p = 1 - pOut;
+
+    for (let i=0;i<corners.length;i++) {
+      const o = corners[i];
+
+      // start at center, go outward a bit, fade
+      const hx = lerp(o.x, cx, p);
+      const hy = lerp(o.y, cy, p);
+      const fadeA = (1 - pOut);
+
+      // trail
+      const steps = IS_MOBILE ? 9 : 12;
+      const span = 0.14;
+      for (let k=0;k<steps;k++){
+        const kk = k / steps;
+        const tt = clamp(p - kk*span, 0, 1);
+        const q = ease(tt);
+        const tx = lerp(o.x, cx, q);
+        const ty = lerp(o.y, cy, q);
+        const fade = (1 - kk) * fadeA;
+        drawEnergyHead(tx, ty, 0.55 * fade, amp, seq.phi + i*1.1 + now*0.0012);
       }
-      else if (t < SWEEP_IN + HOLD + SWEEP_OUT){
-        const p = 1 - (t - SWEEP_IN - HOLD)/SWEEP_OUT;
-        sweepLine(p);
-      }
-      else{
-        active = false;
-      }
+
+      // fiber line from center towards corner
+      drawEnergyTrail(hx, hy, cx, cy, 0.65 * fadeA, amp);
+
+      drawEnergyHead(hx, hy, 0.85 * fadeA, amp, seq.phi + i*1.1 + now*0.0012);
+    }
+  }
+
+  // ---- Main loop ----
+  function loop(now) {
+    // absolute black when idle
+    if (!seq.active) {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, W, H);
+    } else {
+      // renderSequence handles its own subtle fade
+      renderSequence(now);
     }
 
     requestAnimationFrame(loop);
