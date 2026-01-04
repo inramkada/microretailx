@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>microretailX</title>
+  <title>MICRORETAILX</title>
 
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Permissions-Policy"
@@ -52,10 +52,17 @@
     .brand {
       font-size: 12px;
       letter-spacing: 4px;
-      opacity: 0.9;
+      font-weight: 700;
+      opacity: 0.95;
+      mix-blend-mode: screen;
+      position: relative;
+      text-shadow:
+        0 0 6px rgba(255,0,80,0.35),
+        0 0 6px rgba(0,180,255,0.35),
+        0 0 10px rgba(255,255,255,0.25);
     }
 
-    /* CENTER (solo espacio visual, sin texto ahora) */
+    /* CENTER (vacío, solo estructura) */
     .center {
       position: absolute;
       inset: 0;
@@ -175,12 +182,36 @@
   }
   window.addEventListener("resize", resize);
 
-  /* === SIMPLE X PULSE === */
+  /* === X EFFECT === */
   let t = 0;
   let last = performance.now();
 
-  function drawX(alpha) {
+  function drawXGlow(strength) {
+    const cx = W / 2;
+    const cy = H / 2;
+
     ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+
+    const r = Math.min(W, H) * 0.35;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+
+    g.addColorStop(0, `rgba(0,234,255,${0.08 * strength})`);
+    g.addColorStop(0.4, `rgba(120,0,255,${0.04 * strength})`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawX(alpha, pulse) {
+    ctx.save();
+
+    // Base cyan
     ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
     ctx.lineWidth = 1.6;
     ctx.beginPath();
@@ -190,6 +221,7 @@
     ctx.lineTo(0, H);
     ctx.stroke();
 
+    // Thicker layer
     ctx.strokeStyle = `rgba(0,234,255,${alpha * 0.55})`;
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -198,6 +230,30 @@
     ctx.moveTo(W, 0);
     ctx.lineTo(0, H);
     ctx.stroke();
+
+    // RGB fringe (only when pulsing)
+    if (pulse > 0.2) {
+      ctx.globalCompositeOperation = "lighter";
+
+      ctx.strokeStyle = `rgba(255,0,80,${alpha * 0.35 * pulse})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-1, 1);
+      ctx.lineTo(W - 1, H + 1);
+      ctx.moveTo(W + 1, 1);
+      ctx.lineTo(1, H - 1);
+      ctx.stroke();
+
+      ctx.strokeStyle = `rgba(0,180,255,${alpha * 0.35 * pulse})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(1, -1);
+      ctx.lineTo(W + 1, H - 1);
+      ctx.moveTo(W - 1, -1);
+      ctx.lineTo(-1, H + 1);
+      ctx.stroke();
+    }
+
     ctx.restore();
   }
 
@@ -212,7 +268,22 @@
     const pulse = 0.5 - 0.5 * Math.cos(t * 1.2);
     const alpha = 0.05 + 0.08 * pulse;
 
-    drawX(alpha);
+    // background energy
+    drawXGlow(pulse);
+
+    // main X
+    drawX(alpha, pulse);
+
+    // sync brand RGB with pulse
+    const brand = document.querySelector(".brand");
+    if (brand) {
+      const k = 0.35 + pulse * 0.65;
+      brand.style.textShadow = `
+        ${2 * k}px 0 rgba(255,0,80,${0.4 * k}),
+        ${-2 * k}px 0 rgba(0,180,255,${0.4 * k}),
+        0 0 ${8 + 10 * k}px rgba(255,255,255,${0.25 * k})
+      `;
+    }
 
     requestAnimationFrame(loop);
   }
