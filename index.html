@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>microretailX — Filament</title>
+
+  <!-- If you already set CSP in Cloudflare RESPONSE HEADERS, remove this meta CSP to avoid conflicts -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self' 'unsafe-inline';
+                 style-src 'self' 'unsafe-inline';
+                 img-src 'self' data:;
+                 font-src 'self';
+                 connect-src 'self';
+                 base-uri 'self';
+                 frame-ancestors 'none';
+                 form-action 'self'">
+
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
+
+  <style>
+    html,body{
+      margin:0;padding:0;height:100%;
+      background:#000;color:#fff;
+      overflow:hidden;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    }
+    canvas{display:block;width:100vw;height:100vh}
+
+    .ui{position:fixed;inset:0;pointer-events:none;z-index:10}
+    .top{
+      position:absolute;top:0;left:0;right:0;
+      padding:14px 18px;
+      display:flex;justify-content:space-between;align-items:center;
+      background:rgba(0,0,0,.78);
+      border-bottom:1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(10px);
+    }
+    .brand{
+      letter-spacing:3px;font-size:12px;opacity:.9;text-transform:uppercase;white-space:nowrap;
+    }
+    .status{
+      font-size:11px;letter-spacing:1px;opacity:.65;text-align:right;line-height:1.35;white-space:nowrap;
+    }
+    .footer{
+      position:absolute;left:0;right:0;bottom:0;
+      padding:10px 18px 12px;
+      display:flex;justify-content:space-between;align-items:flex-end;
+      background:rgba(0,0,0,.78);
+      border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(10px);
+      gap:14px;
+      pointer-events:auto;
+    }
+    .help{
+      font-size:10px;letter-spacing:1px;opacity:.55;line-height:1.5;
+      pointer-events:none;
+    }
+    .kbd{
+      display:inline-block;padding:1px 6px;border:1px solid rgba(255,255,255,.18);
+      border-bottom-color:rgba(255,255,255,.28);
+      border-radius:8px;background:rgba(255,255,255,.06);
+      opacity:.9;margin:0 2px;
+    }
+    .links{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;letter-spacing:1px;opacity:.85;text-transform:uppercase}
+    .links a{
+      pointer-events:auto;
+      color:#fff;text-decoration:none;opacity:.85;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      padding:7px 10px;border-radius:12px;
+    }
+    .links a:hover{opacity:1;box-shadow:0 0 18px rgba(255,255,255,.10)}
+
+    @media (max-width:720px){
+      .status{display:none}
+      .footer{flex-direction:column;align-items:stretch}
+      .links{justify-content:center}
+      .help{text-align:center}
+    }
+  </style>
+</head>
+
+<body>
+<canvas id="c"></canvas>
+
+<div class="ui">
+  <div class="top">
+    <div class="brand">microretailX / filament → X</div>
+    <div class="status" id="st">RUNNING<br/>filaments: —</div>
+  </div>
+  <div class="footer">
+    <div class="help">
+      Toggle pause: <span class="kbd">Space</span> · Rebuild text: <span class="kbd">R</span> · Clear trails: <span class="kbd">C</span><br/>
+      More/less filaments: <span class="kbd">+</span>/<span class="kbd">-</span> · Mouse: disturb / pull
+    </div>
+    <div class="links">
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="legal.html">Legal</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d", { alpha: false });
+  const st = document.getElementById("st");
+
+  const UA = navigator.userAgent || "";
+  const IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(UA);
+  const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const DPR_CAP = IS_IOS ? 1.6 : 2;
+  let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+
+  const TARGET_FPS = (IS_IOS || IS_MOBILE) ? 30 : 60;
+  let lastFrameMs = 0;
+
+  let W = 0, H = 0;
+
+  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+  const lerp = (a,b,t)=> a + (b-a)*t;
+  const ease = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+  const pulse = t => 0.5 - 0.5 * Math.cos(Math.PI * clamp(t,0,1));
+
+  const mouse = { x: -9999, y: -9999, down:false };
+  window.addEventListener("mousemove", (e)=>{ mouse.x = e.clientX; mouse.y = e.clientY; }, { passive:true });
+  window.addEventListener("mousedown", ()=> mouse.down=true);
+  window.addEventListener("mouseup", ()=> mouse.down=false);
+  window.addEventListener("touchmove", (e)=>{
+    if (!e.touches || !e.touches[0]) return;
+    mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY;
+  }, { passive:true });
+
+  // ===== X pulse (compact, original-style) =====
+  let xt = 0;
+  let xLast = performance.now();
+  const X_IN = 2.6, X_HOLD = 1.1, X_OUT = 2.1, X_REST = 0.55;
+  const X_CYCLE = X_IN + X_HOLD + X_OUT + X_REST;
+
+  let xEnergy = 0; // fed by filament absorption
+  function feedX(amount){ xEnergy = clamp(xEnergy + amount, 0, 1.25); }
+
+  function glow(x,y,r,a, rgb){
+    if (a <= 0) return;
+    const c = rgb || {r:0,g:234,b:255};
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${a})`);
+    g.addColorStop(0.35, `rgba(${c.r},${c.g},${c.b},${a*0.35})`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawXLines(alpha){
+    ctx.save();
+    ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.moveTo(0,0); ctx.lineTo(W,H);
+    ctx.moveTo(W,0); ctx.lineTo(0,H);
+    ctx.stroke();
+
+    ctx.strokeStyle = `rgba(0,234,255,${alpha*0.55})`;
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    ctx.moveTo(0,0); ctx.lineTo(W,H);
+    ctx.moveTo(W,0); ctx.lineTo(0,H);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function renderXPulse(now){
+    const dt = Math.min(0.05, (now - xLast) / 1000);
+    xLast = now;
+    xt = (xt + dt) % X_CYCLE;
+    xEnergy *= 0.985;
+
+    const cx = W/2, cy = H/2;
+    const tin = clamp(xt / X_IN, 0, 1);
+    const th  = clamp((xt - X_IN) / X_HOLD, 0, 1);
+    const tout= clamp((xt - X_IN - X_HOLD) / X_OUT, 0, 1);
+
+    const inA = xt < X_IN;
+    const holdA = xt >= X_IN && xt < X_IN + X_HOLD;
+    const outA = xt >= X_IN + X_HOLD && xt < X_IN + X_HOLD + X_OUT;
+
+    const baseA = 0.035;
+    let lineA = baseA;
+    if (inA) lineA += 0.08 * pulse(tin);
+    if (holdA) lineA += 0.18 * pulse(th);
+    if (outA) lineA += 0.14 * (1 - pulse(tout));
+    lineA += 0.12 * xEnergy;
+
+    drawXLines(lineA);
+
+    if (REDUCED){
+      glow(cx,cy, IS_MOBILE?58:66, 0.02 + 0.08*xEnergy);
+      return;
+    }
+
+    // center charge
+    if (holdA){
+      const c = 0.25 + 0.7*pulse(th);
+      const boost = 1 + 0.9*xEnergy;
+      glow(cx,cy, IS_MOBILE?110:130, c*0.28*boost);
+      glow(cx,cy, IS_MOBILE?72:86,  c*0.52*boost);
+      glow(cx,cy, IS_MOBILE?40:48,  c*0.75*boost);
+      if (pulse(th) > 0.55){
+        glow(cx,cy, IS_MOBILE?150:175, 0.18*boost, {r:255,g:35,b:90});
+      }
+    } else {
+      glow(cx,cy, IS_MOBILE?62:74, 0.02 + 0.10*xEnergy);
+    }
+  }
+
+  // ===== Filament system sourced from text =====
+  let running = true;
+  let filamentDensity = REDUCED ? 0.65 : 1.0;
+
+  const off = document.createElement("canvas");
+  const ofc = off.getContext("2d");
+
+  /** Seeds sampled from "MICRORETAIL" */
+  let seeds = [];
+  /** Filaments: each filament is a moving head that draws a trail */
+  let filaments = [];
+
+  function resize(){
+    dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+    W = Math.floor(window.innerWidth);
+    H = Math.floor(window.innerHeight);
+    canvas.width = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+
+    buildTextSeeds();
+    buildFilaments();
+    // clear hard
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0,0,W,H);
+  }
+  window.addEventListener("resize", resize);
+
+  function buildTextSeeds(){
+    off.width = W;
+    off.height = H;
+    ofc.clearRect(0,0,W,H);
+
+    const text = "MICRORETAIL";
+    const size = Math.floor(Math.min(W, H) * (IS_MOBILE ? 0.14 : 0.16));
+    ofc.font = `700 ${size}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+    ofc.textAlign = "center";
+    ofc.textBaseline = "middle";
+    ofc.fillStyle = "#fff";
+
+    // position a bit above center so X remains visible
+    const tx = W * 0.5;
+    const ty = H * 0.46;
+
+    // crisp text
+    ofc.fillText(text, tx, ty);
+
+    const img = ofc.getImageData(0,0,W,H).data;
+
+    // sampling step: adaptive
+    const step = Math.max(3, Math.floor((IS_MOBILE ? 7 : 6) / filamentDensity));
+    const pts = [];
+    for (let y = 0; y < H; y += step){
+      for (let x = 0; x < W; x += step){
+        const a = img[(y*W + x)*4 + 3];
+        if (a > 20){
+          // keep some randomness to avoid grid feel
+          if (Math.random() < (IS_MOBILE ? 0.55 : 0.62)){
+            pts.push({x, y});
+          }
+        }
+      }
+    }
+
+    // downsample to a safe max
+    const maxSeeds = REDUCED ? (IS_MOBILE ? 650 : 900) : (IS_MOBILE ? 1100 : 1800);
+    // shuffle-ish by random pick
+    seeds = [];
+    if (pts.length <= maxSeeds){
+      seeds = pts;
+    } else {
+      for (let i=0;i<maxSeeds;i++){
+        seeds.push(pts[(Math.random()*pts.length)|0]);
+      }
+    }
+  }
+
+  function buildFilaments(){
+    const baseCount = seeds.length;
+    const count = Math.floor(baseCount * filamentDensity);
+
+    filaments = new Array(count);
+    for (let i=0;i<count;i++){
+      const s = seeds[i % seeds.length];
+      filaments[i] = {
+        // start near text seed with tiny jitter
+        x: s.x + (Math.random()-0.5)*2,
+        y: s.y + (Math.random()-0.5)*2,
+        px: s.x, py: s.y,
+        vx: (Math.random()-0.5)*0.15,
+        vy: (Math.random()-0.5)*0.15,
+        seed: Math.random()*1000,
+        life: 0
+      };
+    }
+  }
+
+  // distance to diagonals (for absorption)
+  function distToDiag1(x,y){ const m = H / W; return Math.abs(y - m*x); }
+  function distToDiag2(x,y){ const m = H / W; return Math.abs(y - (H - m*x)); }
+
+  function projectToDiag1(x,y){
+    const m = H / W;
+    const inv = 1 / Math.sqrt(1 + m*m);
+    const ux = inv, uy = m*inv;
+    const dot = x*ux + y*uy;
+    return {x: dot*ux, y: dot*uy};
+  }
+  function projectToDiag2(x,y){
+    const m = H / W;
+    const yy = y - H;
+    const inv = 1 / Math.sqrt(1 + m*m);
+    const ux = inv, uy = -m*inv;
+    const dot = x*ux + yy*uy;
+    return {x: dot*ux, y: dot*uy + H};
+  }
+
+  function filamentColor(f, nearT){
+    // iog-ish: magenta → cyan, with slight position modulation
+    const tpos = (f.x / Math.max(1, W-1)) * 0.7 + (f.y / Math.max(1, H-1)) * 0.3;
+    const r = Math.floor(lerp(255, 0, nearT));
+    const g = Math.floor(lerp(55, 234, nearT));
+    const b = Math.floor(lerp(140 + 70*tpos, 255, nearT));
+    return {r,g,b};
+  }
+
+  function tickAndDrawFilaments(now){
+    const absorbPx = IS_MOBILE ? 18 : 24; // distance to X to "absorb"
+    const NEAR = IS_MOBILE ? 44 : 56;     // near-X region
+
+    // field strengths (safe)
+    const ATTRACT = IS_MOBILE ? 0.042 : 0.052;
+    const SWIRL   = IS_MOBILE ? 0.020 : 0.026;
+    const DAMP    = 0.988;
+    const JITTER  = REDUCED ? 0 : (IS_MOBILE ? 0.004 : 0.006);
+
+    // mouse disturb
+    const repelR = IS_MOBILE ? 90 : 120;
+    const repelR2 = repelR*repelR;
+
+    // draw mode: lace trails
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.lineCap = "round";
+
+    let absorbedThisFrame = 0;
+
+    for (let i=0;i<filaments.length;i++){
+      const f = filaments[i];
+      f.life += 1;
+
+      // nearest diagonal
+      const d1 = distToDiag1(f.x, f.y);
+      const d2 = distToDiag2(f.x, f.y);
+      const use1 = d1 <= d2;
+      const d = Math.min(d1, d2);
+
+      // absorb: if very near X, snap and respawn from text
+      if (d < absorbPx){
+        absorbedThisFrame++;
+        // snap on the diagonal projection (looks like soldering)
+        const pr = use1 ? projectToDiag1(f.x,f.y) : projectToDiag2(f.x,f.y);
+        // bright "solder" dot
+        glow(pr.x, pr.y, IS_MOBILE?18:22, 0.14, {r:0,g:234,b:255});
+        // feed X energy
+        feedX(IS_MOBILE ? 0.0022 : 0.0017);
+
+        // respawn from a random text seed to keep generating
+        const s = seeds[(Math.random()*seeds.length)|0] || {x:W*0.5,y:H*0.5};
+        f.x = s.x + (Math.random()-0.5)*2;
+        f.y = s.y + (Math.random()-0.5)*2;
+        f.px = f.x; f.py = f.y;
+        f.vx = (Math.random()-0.5)*0.15;
+        f.vy = (Math.random()-0.5)*0.15;
+        f.seed = Math.random()*1000;
+        continue;
+      }
+
+      // target direction to diagonal
+      const target = use1 ? projectToDiag1(f.x,f.y) : projectToDiag2(f.x,f.y);
+      let dx = target.x - f.x;
+      let dy = target.y - f.y;
+      const dd = dx*dx + dy*dy + 1e-6;
+      const inv = 1 / Math.sqrt(dd);
+      dx *= inv; dy *= inv;
+
+      const nearT = clamp(1 - (d / NEAR), 0, 1);
+
+      // tangent swirl (perp)
+      const tx = -dy, ty = dx;
+      const sgn = (Math.sin(f.seed + now*0.00065) > 0 ? 1 : -1);
+
+      // apply field
+      f.vx += dx * ATTRACT;
+      f.vy += dy * ATTRACT;
+      f.vx += tx * SWIRL * nearT * sgn;
+      f.vy += ty * SWIRL * nearT * sgn;
+
+      // mouse interaction (subtle)
+      const mx = f.x - mouse.x;
+      const my = f.y - mouse.y;
+      const md2 = mx*mx + my*my;
+      if (md2 < repelR2 && md2 > 1e-6){
+        const md = Math.sqrt(md2);
+        const fmag = (repelR - md) * (mouse.down ? 0.0016 : 0.0008);
+        f.vx += (mx/md) * fmag * 60;
+        f.vy += (my/md) * fmag * 60;
+      }
+
+      // micro noise
+      if (JITTER){
+        f.vx += Math.sin(now*0.0012 + f.seed) * JITTER;
+        f.vy += Math.cos(now*0.0011 + f.seed) * JITTER;
+      }
+
+      // integrate
+      f.px = f.x; f.py = f.y;
+      f.x += f.vx; f.y += f.vy;
+      f.vx *= DAMP; f.vy *= DAMP;
+
+      // wrap edges softly
+      if (f.x < -20) f.x = W + 20;
+      if (f.x > W + 20) f.x = -20;
+      if (f.y < -20) f.y = H + 20;
+      if (f.y > H + 20) f.y = -20;
+
+      // filament stroke
+      const col = filamentColor(f, nearT);
+      const a = (IS_MOBILE ? 0.12 : 0.14) + 0.10 * nearT;
+      ctx.strokeStyle = `rgba(${col.r},${col.g},${col.b},${a})`;
+      ctx.lineWidth = (nearT > 0 ? 1.25 : 0.95);
+
+      ctx.beginPath();
+      ctx.moveTo(f.px, f.py);
+      ctx.lineTo(f.x, f.y);
+      ctx.stroke();
+
+      // white inner thread (lace)
+      ctx.strokeStyle = `rgba(255,255,255,${0.06 + 0.14*nearT})`;
+      ctx.lineWidth = 0.65;
+      ctx.beginPath();
+      ctx.moveTo(f.px, f.py);
+      ctx.lineTo(f.x, f.y);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+
+    if (st){
+      st.textContent = `${running ? "RUNNING" : "PAUSED"}\nfilaments: ${filaments.length.toLocaleString()}`;
+    }
+  }
+
+  function fadeFrame(){
+    // Lace look: persist trails (don’t fully clear)
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = `rgba(0,0,0,${REDUCED ? 0.22 : (IS_MOBILE ? 0.10 : 0.075)})`;
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
+  }
+
+  function softBloom(){
+    // Optional bloom: cheap self-draw blur (cap on iOS)
+    if (REDUCED) return;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = IS_IOS ? 0.18 : (IS_MOBILE ? 0.26 : 0.32);
+    ctx.filter = IS_IOS ? "blur(0.6px)" : (IS_MOBILE ? "blur(0.9px)" : "blur(1.1px)");
+    ctx.drawImage(canvas, 0, 0);
+    ctx.restore();
+    ctx.filter = "none";
+  }
+
+  function clearHard(){
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0,0,W,H);
+    xEnergy = 0;
+  }
+
+  function loop(now){
+    // FPS cap
+    if (TARGET_FPS !== 60){
+      const minDt = 1000 / TARGET_FPS;
+      if (now - lastFrameMs < minDt){ requestAnimationFrame(loop); return; }
+      lastFrameMs = now;
+    }
+
+    // trails fade
+    fadeFrame();
+
+    // draw filaments (text → X absorption)
+    if (running) tickAndDrawFilaments(now);
+
+    // bloom
+    softBloom();
+
+    // X pulse overlay (original vibe, energized)
+    renderXPulse(now);
+
+    requestAnimationFrame(loop);
+  }
+
+  // controls
+  window.addEventListener("keydown", (e)=>{
+    if (e.key === " "){ e.preventDefault(); running = !running; }
+    if (e.key === "r" || e.key === "R"){ buildTextSeeds(); buildFilaments(); }
+    if (e.key === "c" || e.key === "C"){ clearHard(); }
+    if (e.key === "+" || e.key === "="){
+      filamentDensity = clamp(filamentDensity + 0.12, 0.4, 1.6);
+      buildTextSeeds(); buildFilaments();
+    }
+    if (e.key === "-" || e.key === "_"){
+      filamentDensity = clamp(filamentDensity - 0.12, 0.4, 1.6);
+      buildTextSeeds(); buildFilaments();
+    }
+  });
+
+  // init
+  resize();
+  // start with clean frame
+  clearHard();
+  requestAnimationFrame(loop);
+
+  // pause on hidden tab
+  document.addEventListener("visibilitychange", ()=>{
+    if (document.visibilityState === "hidden") running = false;
+  });
+})();
+</script>
+</body>
+</html>
