@@ -78,7 +78,7 @@ function ensureUI() {
   const modal = el("div", { id: "mrxConsentModal", role: "dialog", "aria-modal": "true", "aria-label": "Cookie preferences" }, [
     el("div", { class: "mrx-modal-head" }, [
       el("div", { class: "mrx-modal-title" }, ["Cookie preferences"]),
-      el("button", { class: "mrx-btn mrx-btn-x", onclick: () => closeModal(), "aria-label": "Close" }, ["×"])
+     el("button", { class: "mrx-btn mrx-btn-x", onclick: () => closeModal(), "aria-label": "Close" }, ["×"])
     ]),
     el("div", { class: "mrx-modal-body" }, [
       el("div", { class: "mrx-row" }, [
