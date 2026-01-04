@@ -17,7 +17,7 @@ function el(tag, attrs = {}, children = []) {
 function trapKeys(e) {
   if (!document.documentElement.classList.contains("consent-locked")) return;
 
-const modal = document.getElementById("mrxConsentModal");
+  const modal = document.getElementById("mrxConsentModal");
   const focusables = modal
     ? Array.from(modal.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'))
         .filter(x => !x.hasAttribute("disabled"))
