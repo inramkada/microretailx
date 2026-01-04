@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>microretailX</title>
+  <title>microretailX — Life / X</title>
 
-  <!-- IMPORTANT:
-       If you already set CSP as a Cloudflare RESPONSE HEADER, remove this meta CSP to avoid conflicts.
-       (Cloudflare header + meta CSP can combine and break canvas/scripts.) -->
+  <!-- NOTE:
+       If you already set CSP in Cloudflare RESPONSE HEADERS, remove this meta CSP to avoid conflicts. -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self';
                  script-src 'self' 'unsafe-inline';
@@ -23,740 +22,665 @@
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
 
   <style>
-    :root{
-      --bg:#000;
-      --fg:#fff;
-      --glass: rgba(0,0,0,.92);
-      --hair: rgba(255,255,255,.12);
-      --cyan: rgba(0,234,255,.95);
-    }
-
-    html, body{
-      margin:0;
-      padding:0;
-      height:100%;
-      background:var(--bg);
-      color:var(--fg);
-      overflow:hidden;
+    html, body {
+      margin: 0; padding: 0;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #fff;
     }
 
-    canvas{ display:block; width:100vw; height:100vh; }
+    canvas { display:block; width:100vw; height:100vh; }
 
-    /* ===== UI ===== */
-    .ui-layer{ position:absolute; z-index:10; color:#fff; user-select:none; }
+    .ui {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
 
-    .top-bar{
-      top:0; right:0; width:100%;
-      background: var(--glass);
-      display:flex; justify-content:flex-end;
-      padding:12px 26px; box-sizing:border-box;
-      border-bottom: 1px solid var(--hair);
+    .top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.78);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(10px);
     }
 
-    .menu-dot{
-      width:15px; height:15px; border-radius:50%;
-      background:#fff; opacity:.85;
+    .brand {
+      letter-spacing: 3px;
+      font-size: 12px;
+      opacity: .9;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
 
-    .footer-bar{
-      bottom:0; left:0; width:100%;
-      background: var(--glass);
-      display:flex; flex-direction:column; align-items:center;
-      padding:10px 0 8px; box-sizing:border-box;
-      border-top: 1px solid var(--hair);
+    .status {
+      font-size: 11px;
+      letter-spacing: 1px;
+      opacity: .65;
+      text-align: right;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+
+    .footer {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 10px 18px 12px;
+      display:flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      background: rgba(0,0,0,0.78);
+      border-top: 1px solid rgba(255,255,255,0.10);
       backdrop-filter: blur(10px);
+      gap: 14px;
+      pointer-events: auto;
     }
 
     .footer-links{
-      display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
-      font-size:15px; margin-bottom:6px; line-height:1.9;
+      display:flex; flex-wrap:wrap; gap: 10px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      opacity: .85;
+      text-transform: uppercase;
     }
+
     .footer-links a{
-      color:#fff; text-decoration:none;
-      margin:4px 0; padding:0 10px; opacity:.85; cursor:pointer;
-      position:relative;
+      color:#fff; text-decoration:none; opacity:.85;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      padding: 7px 10px;
+      border-radius: 12px;
     }
-    .footer-links a:hover{ opacity:1; text-decoration:underline; }
-    .footer-links a:not(:last-child)::after{
-      content:"·"; position:absolute; right:-2px; top:50%;
-      transform:translateY(-52%); opacity:.38;
+    .footer-links a:hover{ opacity:1; box-shadow: 0 0 18px rgba(255,255,255,0.10); }
+
+    .help {
+      font-size: 10px;
+      letter-spacing: 1px;
+      opacity: .55;
+      line-height: 1.5;
+      pointer-events: none;
     }
 
-    .copyright{
-      font-size:9px; letter-spacing:1px; opacity:.45;
-      text-align:center; padding:0 14px; line-height:1.35;
+    .kbd {
+      display:inline-block;
+      padding: 1px 6px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-bottom-color: rgba(255,255,255,0.28);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      opacity: .9;
+      margin: 0 2px;
     }
 
-    @media (max-width: 600px){
-      .menu-dot{ width:12px; height:12px; }
-      .footer-links{ font-size:13px; padding:0 12px; }
-      .footer-links a{ padding:0 10px; }
-      .footer-links a:not(:last-child)::after{ right:-3px; }
-      .copyright{ font-size:8px; }
-    }
-
-    /* ===== Consent lock: blocks site interaction until decision ===== */
-    body.consent-locked .ui-layer,
-    body.consent-locked canvas{
-      pointer-events:none !important;
-      filter: grayscale(1) brightness(0.72) contrast(1.08);
-      opacity: 0.92;
-      transition: filter 0.8s ease, opacity 0.8s ease;
-    }
-
-    body.consent-waking .ui-layer,
-    body.consent-waking canvas{
-      filter:none; opacity:1;
-    }
-
-    body.consent-locked #consentBanner,
-    body.consent-locked #consentModalBackdrop{
-      pointer-events:auto !important;
-      filter:none !important;
-      opacity:1 !important;
-    }
-
-    /* ===== Consent banner ===== */
-    .consent-banner{
-      position:fixed; left:0; right:0; bottom:0;
-      z-index:9999;
-      background: rgba(0,0,0,.92);
-      border-top:1px solid rgba(255,255,255,.15);
-      box-shadow: 0 -10px 34px rgba(0,0,0,.65);
-      backdrop-filter: blur(10px);
-      padding:14px 18px; box-sizing:border-box;
-      display:none;
-    }
-    body.consent-locked .consent-banner{
-      left:50%; right:auto; bottom:auto; top:50%;
-      transform: translate(-50%,-50%);
-      width: min(920px, calc(100% - 36px));
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow: 0 0 40px rgba(255,255,255,.10), 0 0 100px rgba(255,255,255,.04);
-    }
-    .consent-banner.open{ display:block; }
-
-    .consent-row{ display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
-    .consent-text{ color:#e8ffff; opacity:.92; font-size:13px; line-height:1.4; max-width:860px; }
-    .consent-text a{ color:#fff; text-decoration:none; opacity:.95; }
-    .consent-text a:hover{ text-decoration:underline; opacity:1; }
-
-    .consent-actions{ display:flex; gap:10px; flex-wrap:wrap; }
-    .consent-btn{
-      appearance:none;
-      border:1px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.06);
-      color:#fff;
-      padding:9px 12px; border-radius:10px;
-      cursor:pointer;
-      font-family: inherit;
-      letter-spacing:.5px; font-size:12px;
-      opacity:.95;
-    }
-    .consent-btn:hover{ opacity:1; box-shadow:0 0 18px rgba(255,255,255,.12); }
-    .consent-btn.primary{
-      border-color: rgba(255,255,255,.42);
-      background: rgba(255,255,255,.12);
-      box-shadow:0 0 22px rgba(255,255,255,.18);
-    }
-
-    /* ===== Consent modal ===== */
-    .consent-modal-backdrop{
-      position:fixed; inset:0; z-index:10000;
-      background: rgba(0,0,0,.74);
-      display:none;
-      align-items:center; justify-content:center;
-      padding:18px; box-sizing:border-box;
-    }
-    .consent-modal-backdrop.open{ display:flex; }
-
-    .consent-modal{
-      width:min(720px,100%);
-      border-radius:16px;
-      background: rgba(0,8,18,.94);
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow: 0 0 40px rgba(255,255,255,.10);
-      backdrop-filter: blur(14px);
-      overflow:hidden;
-    }
-    .consent-modal-header{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px;
-      border-bottom:1px solid rgba(255,255,255,.12);
-    }
-    .consent-modal-title{ font-size:13px; letter-spacing:1px; color:#fff; opacity:.95; }
-    .consent-modal-close{
-      width:30px; height:30px; border-radius:10px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-      color:#fff; cursor:pointer; font-family: inherit; font-size:14px; opacity:.9;
-    }
-    .consent-modal-close:hover{ opacity:1; }
-    .consent-modal-body{
-      padding:14px 16px 8px;
-      color:#e8ffff; font-size:13px; line-height:1.45; opacity:.93;
-    }
-    .consent-cats{ display:grid; gap:10px; margin-top:10px; }
-    .consent-cat{
-      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
-      padding:10px 12px;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-      background: rgba(255,255,255,.03);
-    }
-    .consent-cat strong{ display:block; font-size:12px; letter-spacing:.7px; color:#fff; opacity:.95; margin-bottom:4px; }
-    .consent-cat p{ margin:0; font-size:12px; opacity:.86; max-width:520px; }
-
-    .toggle{
-      position:relative; width:44px; height:24px; flex:0 0 auto;
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.07);
-      cursor:pointer; margin-top:2px;
-    }
-    .toggle::after{
-      content:""; position:absolute; top:2px; left:2px;
-      width:18px; height:18px; border-radius:50%;
-      background: rgba(255,255,255,.92);
-      transition: transform .18s ease;
-    }
-    .toggle.on{
-      border-color: rgba(255,255,255,.35);
-      background: rgba(255,255,255,.14);
-      box-shadow:0 0 18px rgba(255,255,255,.10);
-    }
-    .toggle.on::after{ transform: translateX(20px); }
-    .toggle.locked{ opacity:.6; cursor:not-allowed; }
-
-    .consent-modal-footer{
-      display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
-      padding:12px 16px 14px;
-      border-top:1px solid rgba(255,255,255,.12);
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      canvas{ opacity:1 !important; filter:none !important; }
-      *{ transition:none !important; animation:none !important; }
+    @media (max-width: 720px){
+      .status { display:none; }
+      .footer { flex-direction: column; align-items: stretch; }
+      .footer-links{ justify-content: center; }
+      .help{ text-align:center; }
     }
   </style>
 </head>
 
 <body>
-  <canvas id="canvas"></canvas>
+  <canvas id="c"></canvas>
 
-  <div class="ui-layer top-bar">
-    <div class="menu-dot" aria-hidden="true"></div>
-  </div>
-
-  <div class="ui-layer footer-bar">
-    <div class="footer-links">
-      <a href="terms.html" id="linkTerms">Terms</a>
-      <a href="privacy.html" id="linkPrivacy">Privacy</a>
-      <a href="cookies.html" id="linkCookies">Cookies</a>
-      <a href="javascript:void(0)" id="cookiePreferencesLink">Cookie Preferences</a>
-      <a href="legal.html" id="linkLegal">Legal</a>
+  <div class="ui">
+    <div class="top">
+      <div class="brand">microretailX / LIFE · X</div>
+      <div class="status" id="status">RUNNING · 12/s<br/>cells: —</div>
     </div>
-    <div class="copyright">© 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED</div>
-  </div>
 
-  <!-- Consent Banner -->
-  <div class="consent-banner" id="consentBanner" aria-live="polite">
-    <div class="consent-row">
-      <div class="consent-text">
-        We use strictly necessary technologies to operate this site and store your preferences locally in your browser.
-        Optional categories (Analytics / Marketing) are not active and would only apply if implemented in the future and you explicitly enable them.
-        You can review or change your choice anytime via <a href="javascript:void(0)" id="cookiePreferencesInline">Cookie Preferences</a>.
+    <div class="footer">
+      <div class="help">
+        Paint: click/drag · Pause: <span class="kbd">Space</span> · Random: <span class="kbd">R</span> · Clear: <span class="kbd">C</span><br/>
+        Speed: <span class="kbd">+</span>/<span class="kbd">-</span> · Brush: <span class="kbd">1</span>/<span class="kbd">2</span>/<span class="kbd">3</span>
       </div>
-      <div class="consent-actions">
-        <button class="consent-btn" id="consentReject">Reject</button>
-        <button class="consent-btn" id="consentManage">Preferences</button>
-        <button class="consent-btn primary" id="consentAccept">Accept</button>
+
+      <div class="footer-links">
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="cookies.html">Cookies</a>
+        <a href="legal.html">Legal</a>
       </div>
     </div>
   </div>
 
-  <!-- Consent Modal -->
-  <div class="consent-modal-backdrop" id="consentModalBackdrop" aria-hidden="true">
-    <div class="consent-modal" role="dialog" aria-modal="true" aria-label="Cookie Preferences">
-      <div class="consent-modal-header">
-        <div class="consent-modal-title">COOKIE PREFERENCES</div>
-        <button class="consent-modal-close" id="consentModalClose" aria-label="Close">×</button>
-      </div>
-      <div class="consent-modal-body">
-        Choose which optional categories you would allow if such technologies are implemented in the future.
-        Strictly necessary technologies are always enabled and do not require consent.
-        <div class="consent-cats">
-          <div class="consent-cat">
-            <div>
-              <strong>Necessary</strong>
-              <p>Required for basic functionality, security and page delivery. Always on.</p>
-            </div>
-            <div class="toggle on locked" aria-label="Necessary cookies (always on)"></div>
-          </div>
+<script>
+(() => {
+  "use strict";
 
-          <div class="consent-cat">
-            <div>
-              <strong>Analytics (future use)</strong>
-              <p>No analytics technologies are currently active. If implemented, they would only load after your consent.</p>
-            </div>
-            <div class="toggle" id="toggleAnalytics" role="switch" aria-checked="false" tabindex="0" aria-label="Analytics cookies"></div>
-          </div>
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d", { alpha: false });
+  const statusEl = document.getElementById("status");
 
-          <div class="consent-cat">
-            <div>
-              <strong>Marketing (future use)</strong>
-              <p>No marketing/tracking technologies are currently active. If implemented, they would only load after your consent.</p>
-            </div>
-            <div class="toggle" id="toggleMarketing" role="switch" aria-checked="false" tabindex="0" aria-label="Marketing cookies"></div>
-          </div>
-        </div>
-      </div>
-      <div class="consent-modal-footer">
-        <button class="consent-btn" id="consentSave">Save</button>
-        <button class="consent-btn primary" id="consentAcceptAll">Accept All</button>
-      </div>
-    </div>
-  </div>
+  // -------- Perf & device --------
+  const UA = navigator.userAgent || "";
+  const IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(UA);
+  const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  <script>
-    "use strict";
+  // Cap DPR to avoid heavy fill on retina
+  const DPR_CAP = IS_IOS ? 1.6 : 2;
+  let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
 
-    /* ===========================
-       CONSENT (hard lock)
-    ============================ */
-    const CONSENT_KEY = "mrxx_consent_v1";
-    const consentBanner = document.getElementById("consentBanner");
-    const consentModalBackdrop = document.getElementById("consentModalBackdrop");
+  // FPS cap on iOS/mobile (prevents heat)
+  const TARGET_FPS = (IS_IOS || IS_MOBILE) ? 30 : 60;
+  let lastFrameMs = 0;
 
-    const cookiePreferencesLink = document.getElementById("cookiePreferencesLink");
-    const cookiePreferencesInline = document.getElementById("cookiePreferencesInline");
+  // -------- Helpers --------
+  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+  const ease = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  const pulse = t => 0.5 - 0.5 * Math.cos(Math.PI * clamp(t, 0, 1));
+  const lerp = (a,b,t)=> a + (b-a)*t;
 
-    const consentReject = document.getElementById("consentReject");
-    const consentManage = document.getElementById("consentManage");
-    const consentAccept = document.getElementById("consentAccept");
+  // -------- Canvas sizing --------
+  let W = 0, H = 0;
 
-    const consentModalClose = document.getElementById("consentModalClose");
-    const consentSave = document.getElementById("consentSave");
-    const consentAcceptAll = document.getElementById("consentAcceptAll");
+  function resize() {
+    dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+    W = Math.floor(window.innerWidth);
+    H = Math.floor(window.innerHeight);
 
-    const toggleAnalytics = document.getElementById("toggleAnalytics");
-    const toggleMarketing = document.getElementById("toggleMarketing");
+    canvas.width  = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    function persistConsent(state){ localStorage.setItem(CONSENT_KEY, JSON.stringify(state)); }
-    function loadConsent(){
-      const ls = localStorage.getItem(CONSENT_KEY);
-      if (!ls) return null;
-      try { return JSON.parse(ls); } catch { return null; }
+    // reinit Life buffers on resize
+    initLife();
+  }
+  window.addEventListener("resize", resize);
+
+  // ==========================================================
+  // 1) X PULSE (adapted from your fondo-legal-xpulse.js)
+  // ==========================================================
+  let xt = 0;
+  let xLast = performance.now();
+
+  const X_IN = 2.8;
+  const X_HOLD = 1.15;
+  const X_OUT = 2.2;
+  const X_REST = 0.55;
+  const X_CYCLE = X_IN + X_HOLD + X_OUT + X_REST;
+
+  function glow(x, y, r, a, rgb) {
+    if (a <= 0) return;
+    const c = rgb || { r:0, g:234, b:255 };
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${a})`);
+    g.addColorStop(0.35, `rgba(${c.r},${c.g},${c.b},${a * 0.35})`);
+    g.addColorStop(1, `rgba(${c.r},${c.g},${c.b},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawX(alpha) {
+    ctx.save();
+    ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(W, H);
+    ctx.moveTo(W, 0);
+    ctx.lineTo(0, H);
+    ctx.stroke();
+
+    ctx.strokeStyle = `rgba(0,234,255,${alpha * 0.52})`;
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(W, H);
+    ctx.moveTo(W, 0);
+    ctx.lineTo(0, H);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // "Energy" fed by Life reaching the X: boosts line glow + center pulse
+  let xEnergy = 0; // 0..~1
+  function feedXEnergy(amount) {
+    xEnergy = clamp(xEnergy + amount, 0, 1.25);
+  }
+
+  function renderXPulse(now) {
+    const dt = Math.min(0.05, (now - xLast) / 1000);
+    xLast = now;
+    xt = (xt + dt) % X_CYCLE;
+
+    // energy decay (keep it alive but not permanent)
+    xEnergy *= 0.985;
+
+    const cx = W / 2;
+    const cy = H / 2;
+
+    const tin = clamp(xt / X_IN, 0, 1);
+    const th = clamp((xt - X_IN) / X_HOLD, 0, 1);
+    const tout = clamp((xt - X_IN - X_HOLD) / X_OUT, 0, 1);
+
+    const inA = xt < X_IN;
+    const holdA = xt >= X_IN && xt < X_IN + X_HOLD;
+    const outA = xt >= X_IN + X_HOLD && xt < X_IN + X_HOLD + X_OUT;
+
+    const baseA = 0.045;
+    let lineA = baseA;
+    if (inA) lineA += 0.08 * pulse(tin);
+    if (holdA) lineA += 0.18 * pulse(th);
+    if (outA) lineA += 0.14 * (1 - pulse(tout));
+
+    // energy boost makes the X more "alive"
+    lineA += 0.10 * xEnergy;
+
+    drawX(lineA);
+
+    const origins = [
+      { x: 0, y: 0 },
+      { x: W, y: 0 },
+      { x: 0, y: H },
+      { x: W, y: H }
+    ];
+
+    const headR = IS_MOBILE ? 52 : 62;
+    const tailSteps = IS_MOBILE ? 10 : 14;
+    const tailSpan = 0.1;
+
+    function trail(posFn, prog, a) {
+      for (const o of origins) {
+        const head = posFn(o, prog);
+        for (let i = 0; i < tailSteps; i++) {
+          const k = i / tailSteps;
+          const tt = clamp(prog - k * tailSpan, 0, 1);
+          const e = ease(tt);
+          const p = posFn(o, e);
+          const f = 1 - k;
+          glow(p.x, p.y, (IS_MOBILE ? 28 : 38) * f, a * (0.08 * f));
+        }
+        glow(head.x, head.y, headR, a * 0.22);
+      }
     }
 
-    function lockSite(){
-      document.body.classList.add("consent-locked");
-      document.documentElement.style.overflow = "hidden";
-    }
-    function wakeSite(){
-      document.body.classList.remove("consent-locked");
-      document.documentElement.style.overflow = "";
-      document.body.classList.add("consent-waking");
-      setTimeout(() => document.body.classList.remove("consent-waking"), 900);
+    if (REDUCED) {
+      // Reduced motion: keep X subtle but present
+      glow(cx, cy, IS_MOBILE ? 56 : 64, 0.02 + 0.06 * xEnergy);
+      return;
     }
 
-    function setToggle(el, on){
-      el.classList.toggle("on", !!on);
-      el.setAttribute("aria-checked", String(!!on));
-    }
-    function toggleSwitch(el){ setToggle(el, !el.classList.contains("on")); }
-    function handleSwitchKey(el, e){
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSwitch(el); }
-    }
-
-    function openConsentPanel(){
-      const current = loadConsent() || { necessary:true, analytics:false, marketing:false, ts:Date.now(), decision:null };
-      setToggle(toggleAnalytics, !!current.analytics);
-      setToggle(toggleMarketing, !!current.marketing);
-      consentModalBackdrop.classList.add("open");
-      consentModalBackdrop.setAttribute("aria-hidden", "false");
-    }
-    function closeConsentPanel(){
-      consentModalBackdrop.classList.remove("open");
-      consentModalBackdrop.setAttribute("aria-hidden", "true");
-    }
-    function showBanner(){ consentBanner.classList.add("open"); }
-    function hideBanner(){ consentBanner.classList.remove("open"); }
-
-    function finalize(consent){
-      persistConsent(consent);
-      hideBanner();
-      closeConsentPanel();
-      wakeSite();
-    }
-
-    function setAllConsent(granted){
-      finalize({
-        necessary: true,
-        analytics: !!granted,
-        marketing: !!granted,
-        ts: Date.now(),
-        decision: granted ? "accepted" : "rejected"
-      });
-    }
-
-    function saveFromPanel(){
-      const analytics = toggleAnalytics.classList.contains("on");
-      const marketing = toggleMarketing.classList.contains("on");
-      finalize({
-        necessary: true,
-        analytics, marketing,
-        ts: Date.now(),
-        decision: (analytics || marketing) ? "accepted" : "rejected"
-      });
-    }
-
-    cookiePreferencesLink.addEventListener("click", (e)=>{ e.preventDefault(); openConsentPanel(); });
-    cookiePreferencesInline.addEventListener("click", (e)=>{ e.preventDefault(); openConsentPanel(); });
-
-    consentManage.addEventListener("click", ()=> openConsentPanel());
-    consentReject.addEventListener("click", ()=> setAllConsent(false));
-    consentAccept.addEventListener("click", ()=> setAllConsent(true));
-
-    consentModalClose.addEventListener("click", ()=> closeConsentPanel());
-    consentSave.addEventListener("click", ()=> saveFromPanel());
-    consentAcceptAll.addEventListener("click", ()=> setAllConsent(true));
-
-    consentModalBackdrop.addEventListener("click", (e)=>{ if (e.target === consentModalBackdrop) closeConsentPanel(); });
-    document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closeConsentPanel(); });
-
-    toggleAnalytics.addEventListener("click", ()=> toggleSwitch(toggleAnalytics));
-    toggleMarketing.addEventListener("click", ()=> toggleSwitch(toggleMarketing));
-    toggleAnalytics.addEventListener("keydown", (e)=> handleSwitchKey(toggleAnalytics, e));
-    toggleMarketing.addEventListener("keydown", (e)=> handleSwitchKey(toggleMarketing, e));
-
-    const existing = loadConsent();
-    if (existing && existing.decision) {
-      wakeSite();
+    if (inA) {
+      trail(o => ({ x: lerp(o.x, cx, ease(tin)), y: lerp(o.y, cy, ease(tin)) }), ease(tin), 1);
+    } else if (holdA) {
+      const c = 0.25 + 0.7 * pulse(th);
+      const boost = 1 + 0.85 * xEnergy;
+      glow(cx, cy, IS_MOBILE ? 98 : 120, c * 0.35 * boost);
+      glow(cx, cy, IS_MOBILE ? 64 : 78,  c * 0.55 * boost);
+      glow(cx, cy, IS_MOBILE ? 36 : 44,  c * 0.75 * boost);
+    } else if (outA) {
+      const a = Math.max(0, 0.9 * (1 - pulse(tout)));
+      trail(o => ({ x: lerp(cx, o.x, ease(tout)), y: lerp(cy, o.y, ease(tout)) }), ease(tout), a);
+      glow(cx, cy, IS_MOBILE ? 64 : 78, (0.1 + 0.2 * (1 - pulse(tout))) * 0.35 * (1 + 0.7*xEnergy));
     } else {
-      lockSite();
-      showBanner();
+      glow(cx, cy, IS_MOBILE ? 56 : 64, 0.02 + 0.07 * xEnergy);
     }
+  }
 
-    /* ===========================
-       BACKGROUND: X pulse + flow-to-X particles
-       (No O(n^2). Safe for laptops/phones.)
-    ============================ */
+  // ==========================================================
+  // 2) GAME OF LIFE + "DRIFT TO X" (cells migrate and get absorbed)
+  // ==========================================================
+  let running = true;
+  let stepsPerSecond = REDUCED ? 6 : 12;
+  let brush = 1;
 
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d", { alpha: false });
+  let cellSize = 8;
+  let cols = 0, rows = 0;
+  let a = null, b = null;
 
-    const UA = navigator.userAgent || "";
-    const IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(UA);
-    const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Additional buffer for drift (no O(n^2))
+  let driftBuf = null;
 
-    // FPS cap for iOS/mobile (prevents overheating)
-    const TARGET_FPS = (IS_IOS || IS_MOBILE) ? 30 : 60;
-    let lastFrameT = 0;
+  function idx(x, y) { return y * cols + x; }
 
-    // Canvas sizing
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+  function initLife() {
+    const minDim = Math.min(W, H);
+    cellSize = minDim < 520 ? 9 : 8;
+    if (minDim < 380) cellSize = 10;
 
-    function resize(){
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resize);
+    cols = Math.max(44, Math.floor(W / cellSize));
+    rows = Math.max(34, Math.floor(H / cellSize));
 
-    // Helpers
-    const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
-    const lerp = (a,b,t)=> a + (b-a)*t;
-    const easeInOutCubic = (t)=> t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
-    const smoothPulse = (t)=> 0.5 - 0.5*Math.cos(Math.PI * clamp(t,0,1));
+    a = new Uint8Array(cols * rows);
+    b = new Uint8Array(cols * rows);
+    driftBuf = new Uint8Array(cols * rows);
 
-    function drawLines(alpha){
-      ctx.save();
-      ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.moveTo(0, 0); ctx.lineTo(width, height);
-      ctx.moveTo(width, 0); ctx.lineTo(0, height);
-      ctx.stroke();
+    seedNice();
+  }
 
-      ctx.strokeStyle = `rgba(0,234,255,${alpha*0.52})`;
-      ctx.lineWidth = 3.0;
-      ctx.beginPath();
-      ctx.moveTo(0, 0); ctx.lineTo(width, height);
-      ctx.moveTo(width, 0); ctx.lineTo(0, height);
-      ctx.stroke();
-      ctx.restore();
-    }
+  function seedNice() {
+    a.fill(0);
+    // softer noise (prevents full chaos)
+    const noise = IS_MOBILE ? 0.075 : 0.085;
+    for (let i = 0; i < a.length; i++) a[i] = (Math.random() < noise) ? 1 : 0;
 
-    function glowDot(x, y, r, a, rgb){
-      if (a <= 0) return;
-      const c = rgb || { r:0, g:234, b:255 };
-      const boost = IS_IOS ? 1.35 : 1.0;
-      const aa = Math.min(1, a * boost);
-
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${aa})`);
-      g.addColorStop(0.35, `rgba(${c.r},${c.g},${c.b},${aa*0.35})`);
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // X pulse timing
-    let xPhaseT = 0;
-    let xLastT = performance.now();
-
-    const X_PHASE_IN   = 2.6;
-    const X_PHASE_HOLD = 1.1;
-    const X_PHASE_OUT  = 2.1;
-    const X_PHASE_REST = 0.55;
-    const X_CYCLE = X_PHASE_IN + X_PHASE_HOLD + X_PHASE_OUT + X_PHASE_REST;
-
-    const DOT_RGB = { r:0, g:234, b:255 };
-    const PULSE_RGB = { r:255, g:35, b:90 };
-
-    function renderXPulse(now){
-      const dt = Math.min(0.05, (now - xLastT) / 1000);
-      xLastT = now;
-      xPhaseT = (xPhaseT + dt) % X_CYCLE;
-
-      const cx = width / 2;
-      const cy = height / 2;
-
-      const tIn   = clamp(xPhaseT / X_PHASE_IN, 0, 1);
-      const tHold = clamp((xPhaseT - X_PHASE_IN) / X_PHASE_HOLD, 0, 1);
-      const tOut  = clamp((xPhaseT - X_PHASE_IN - X_PHASE_HOLD) / X_PHASE_OUT, 0, 1);
-
-      const inActive   = xPhaseT < X_PHASE_IN;
-      const holdActive = xPhaseT >= X_PHASE_IN && xPhaseT < X_PHASE_IN + X_PHASE_HOLD;
-      const outActive  = xPhaseT >= X_PHASE_IN + X_PHASE_HOLD && xPhaseT < X_PHASE_IN + X_PHASE_HOLD + X_PHASE_OUT;
-
-      const travelIn  = easeInOutCubic(tIn);
-      const travelOut = easeInOutCubic(tOut);
-      const glowUp = smoothPulse(tHold);
-      const fadeOut = 1 - smoothPulse(tOut);
-
-      // background X lines
-      const baseA = 0.055;
-      let lineA = baseA;
-      if (inActive)   lineA = baseA + 0.07 * smoothPulse(tIn);
-      if (holdActive) lineA = baseA + 0.16 * glowUp;
-      if (outActive)  lineA = baseA + 0.12 * fadeOut;
-
-      drawLines(lineA);
-
-      const origins = [
-        {x:0, y:0},
-        {x:width, y:0},
-        {x:0, y:height},
-        {x:width, y:height}
-      ];
-
-      function posFromOrigin(o, progress){
-        return { x: lerp(o.x, cx, progress), y: lerp(o.y, cy, progress) };
+    // a few clusters
+    const blobs = IS_MOBILE ? 3 : 4;
+    for (let k = 0; k < blobs; k++) {
+      const cx = (Math.random() * cols) | 0;
+      const cy = (Math.random() * rows) | 0;
+      const r = 6 + ((Math.random() * 10) | 0);
+      for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
+        const xx = cx + x, yy = cy + y;
+        if (xx < 1 || yy < 1 || xx >= cols - 1 || yy >= rows - 1) continue;
+        if (x*x + y*y <= r*r && Math.random() < 0.35) a[idx(xx, yy)] = 1;
       }
-      function posReturnToOrigin(o, progress){
-        return { x: lerp(cx, o.x, progress), y: lerp(cy, o.y, progress) };
-      }
+    }
+  }
 
-      const headR = IS_MOBILE ? 54 : 70;
-      const tailSteps = IS_MOBILE ? 10 : 14;
-      const tailSpan = 0.10;
+  function clearLife() { a.fill(0); }
+  function randomizeLife() {
+    const p = IS_MOBILE ? 0.12 : 0.14;
+    for (let i = 0; i < a.length; i++) a[i] = (Math.random() < p) ? 1 : 0;
+  }
 
-      function drawTrail(posFn, prog, alphaScale){
-        for (let oi = 0; oi < origins.length; oi++){
-          const o = origins[oi];
-          const head = posFn(o, prog);
+  // Distance to diagonals in *cell coords* (cheap)
+  function distToDiag1Cell(x, y) {
+    // y ~= (rows/cols)*x
+    const m = rows / cols;
+    return Math.abs(y - m * x);
+  }
+  function distToDiag2Cell(x, y) {
+    // y ~= rows - (rows/cols)*x
+    const m = rows / cols;
+    return Math.abs(y - (rows - m * x));
+  }
 
-          for (let i = 0; i < tailSteps; i++){
-            const k = i / tailSteps;
-            const tt = clamp(prog - k*tailSpan, 0, 1);
-            const e = easeInOutCubic(tt);
-            const p = posFn(o, e);
-            const fade = (1 - k);
-            glowDot(p.x, p.y, (IS_MOBILE ? 26 : 34) * fade, alphaScale * (0.07 * fade), DOT_RGB);
-          }
-          glowDot(head.x, head.y, headR, alphaScale * 0.22, DOT_RGB);
-        }
-      }
+  // drift pass: gently move living cells towards nearest diagonal (the X)
+  function driftToX() {
+    driftBuf.fill(0);
 
-      if (REDUCED) return;
+    const near = IS_MOBILE ? 1.6 : 2.0;      // distance in cell units to "stick" on X
+    const driftProb = IS_MOBILE ? 0.18 : 0.22; // probability to drift per alive cell per tick
 
-      if (inActive){
-        drawTrail(posFromOrigin, travelIn, 1);
-      } else if (holdActive){
-        const centerBurst = 0.22 + 0.75 * glowUp;
-        glowDot(cx, cy, IS_MOBILE ? 96 : 120, centerBurst * 0.20, DOT_RGB);
+    let fed = 0;
 
-        if (glowUp > 0.55){
-          const pulseA = (IS_IOS ? 0.62 : 0.48) * centerBurst;
-          glowDot(cx, cy, (IS_MOBILE ? 122 : 145) + 35*glowUp, pulseA, PULSE_RGB);
-          glowDot(cx, cy, (IS_MOBILE ? 78 : 92) + 18*glowUp, pulseA * 0.55, PULSE_RGB);
+    for (let y = 1; y < rows - 1; y++) {
+      for (let x = 1; x < cols - 1; x++) {
+        if (!a[idx(x, y)]) continue;
+
+        const d1 = distToDiag1Cell(x, y);
+        const d2 = distToDiag2Cell(x, y);
+        const d = Math.min(d1, d2);
+
+        // If close to X: stick + feed energy (absorption)
+        if (d <= near) {
+          driftBuf[idx(x, y)] = 1;
+          // feed energy proportional to density on the X
+          fed++;
+          continue;
         }
 
-        glowDot(cx, cy, IS_MOBILE ? 36 : 44, centerBurst * 0.65, DOT_RGB);
-      } else if (outActive){
-        const a = Math.max(0, 0.9 * fadeOut);
-        drawTrail(posReturnToOrigin, travelOut, a);
-        glowDot(cx, cy, IS_MOBILE ? 62 : 78, (0.10 + 0.20 * fadeOut) * 0.35, DOT_RGB);
-      } else {
-        glowDot(cx, cy, IS_MOBILE ? 56 : 64, 0.02, DOT_RGB);
+        // Drift some fraction of cells (keeps Life "alive", not all sucked instantly)
+        if (Math.random() > driftProb) {
+          driftBuf[idx(x, y)] = 1;
+          continue;
+        }
+
+        // choose target point on nearest diagonal (approx) in cell coords
+        // We push one step towards the diagonal: compute desired y for each diagonal
+        const m = rows / cols;
+        let tx = x, ty = y;
+
+        if (d1 <= d2) {
+          const yOn = m * x;
+          // move one step towards yOn
+          const dy = yOn - y;
+          ty = y + (dy > 0 ? 1 : -1);
+          // small x correction to avoid vertical striping
+          if (Math.random() < 0.35) tx = x + (Math.random() < 0.5 ? -1 : 1);
+        } else {
+          const yOn = (rows - m * x);
+          const dy = yOn - y;
+          ty = y + (dy > 0 ? 1 : -1);
+          if (Math.random() < 0.35) tx = x + (Math.random() < 0.5 ? -1 : 1);
+        }
+
+        tx = clamp(tx, 1, cols - 2);
+        ty = clamp(ty, 1, rows - 2);
+
+        // If occupied, keep original to avoid collisions blowing up
+        if (driftBuf[idx(tx, ty)] === 0) driftBuf[idx(tx, ty)] = 1;
+        else driftBuf[idx(x, y)] = 1;
       }
     }
 
-    // ===== Flow-to-X particles (cheap vector field) =====
-    const CORES = navigator.hardwareConcurrency || 4;
+    // swap a <- driftBuf
+    a.set(driftBuf);
 
-    const PCOUNT = REDUCED
-      ? (IS_MOBILE ? 120 : 220)
-      : (IS_MOBILE ? 240 : Math.min(1100, CORES * 240));
-
-    const particles = new Array(PCOUNT).fill(0).map(() => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.45,
-      vy: (Math.random() - 0.5) * 0.45,
-      seed: Math.random() * 1000
-    }));
-
-    const mouse = { x:-9999, y:-9999 };
-    window.addEventListener("mousemove", (e)=>{ mouse.x = e.clientX; mouse.y = e.clientY; }, { passive:true });
-    window.addEventListener("touchmove", (e)=>{
-      if (!e.touches || !e.touches[0]) return;
-      mouse.x = e.touches[0].clientX;
-      mouse.y = e.touches[0].clientY;
-    }, { passive:true });
-
-    function distToDiag1(x, y){ // y = (H/W)*x
-      const m = height / width;
-      return Math.abs(y - m * x);
+    // Feed X energy in a controlled way
+    if (fed > 0) {
+      // normalize by grid size so it behaves similarly on all devices
+      const norm = fed / (cols * rows);
+      feedXEnergy(clamp(norm * 18, 0, 0.12));
     }
-    function distToDiag2(x, y){ // y = H - (H/W)*x
-      const m = height / width;
-      return Math.abs(y - (height - m * x));
-    }
+  }
 
-    function projectToDiag1(x, y){
-      const m = height / width;
-      const inv = 1 / Math.sqrt(1 + m*m);
-      const ux = inv, uy = m * inv;
-      const dot = x*ux + y*uy;
-      return { x: dot*ux, y: dot*uy };
-    }
-    function projectToDiag2(x, y){
-      const m = height / width;
-      const yy = y - height;
-      const inv = 1 / Math.sqrt(1 + m*m);
-      const ux = inv, uy = -m * inv;
-      const dot = x*ux + yy*uy;
-      return { x: dot*ux, y: dot*uy + height };
-    }
+  function stepLife() {
+    // Conway B3/S23 with wrap (toroidal) keeps it alive
+    const w = cols, h = rows;
+    let alive = 0;
 
-    function updateAndDrawFlow(now){
-      const ATTRACT = IS_MOBILE ? 0.055 : 0.07;    // pull to X
-      const SWIRL   = IS_MOBILE ? 0.020 : 0.028;   // slide along X
-      const DAMP    = 0.985;                       // friction
-      const JITTER  = REDUCED ? 0 : (IS_MOBILE ? 0.006 : 0.009);
-      const NEAR    = IS_MOBILE ? 22 : 30;
+    for (let y = 0; y < h; y++) {
+      const ym1 = (y - 1 + h) % h;
+      const yp1 = (y + 1) % h;
 
-      const repelR2 = (IS_MOBILE ? 70 : 90) ** 2;
+      for (let x = 0; x < w; x++) {
+        const xm1 = (x - 1 + w) % w;
+        const xp1 = (x + 1) % w;
 
-      for (let i=0;i<particles.length;i++){
-        const p = particles[i];
+        const n =
+          a[idx(xm1, ym1)] + a[idx(x, ym1)] + a[idx(xp1, ym1)] +
+          a[idx(xm1, y)]                 +     a[idx(xp1, y)] +
+          a[idx(xm1, yp1)] + a[idx(x, yp1)] + a[idx(xp1, yp1)];
 
-        // pick nearest diagonal
-        const d1 = distToDiag1(p.x, p.y);
-        const d2 = distToDiag2(p.x, p.y);
-        const use1 = d1 <= d2;
-        const target = use1 ? projectToDiag1(p.x, p.y) : projectToDiag2(p.x, p.y);
+        const here = a[idx(x, y)];
+        const next = (here === 1)
+          ? (n === 2 || n === 3 ? 1 : 0)
+          : (n === 3 ? 1 : 0);
 
-        // unit vector to target
-        let dx = target.x - p.x;
-        let dy = target.y - p.y;
-        const dd = dx*dx + dy*dy + 1e-6;
-        const invd = 1 / Math.sqrt(dd);
-        dx *= invd; dy *= invd;
-
-        const dist = Math.sqrt(dd);
-        const near = dist < NEAR ? (1 - dist/NEAR) : 0;
-
-        // tangent (perpendicular) for swirl
-        const tx = -dy, ty = dx;
-        const sgn = (Math.sin(p.seed + now*0.0006) > 0 ? 1 : -1);
-
-        p.vx += dx * ATTRACT;
-        p.vy += dy * ATTRACT;
-
-        p.vx += tx * SWIRL * near * sgn;
-        p.vy += ty * SWIRL * near * sgn;
-
-        // mouse repulsion (cheap)
-        const mx = p.x - mouse.x;
-        const my = p.y - mouse.y;
-        const md2 = mx*mx + my*my;
-        if (md2 < repelR2 && md2 > 0.0001){
-          const md = Math.sqrt(md2);
-          const f = (Math.sqrt(repelR2) - md) * (IS_MOBILE ? 0.0008 : 0.0010);
-          p.vx += (mx / md) * f * 60;
-          p.vy += (my / md) * f * 60;
-        }
-
-        // micro noise
-        if (JITTER){
-          p.vx += Math.sin(now*0.0012 + p.seed) * JITTER;
-          p.vy += Math.cos(now*0.0011 + p.seed) * JITTER;
-        }
-
-        // integrate
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vx *= DAMP;
-        p.vy *= DAMP;
-
-        // wrap edges
-        if (p.x < 0) p.x += width;
-        if (p.x > width) p.x -= width;
-        if (p.y < 0) p.y += height;
-        if (p.y > height) p.y -= height;
-
-        // glow (stronger near X)
-        const a = 0.045 + 0.11 * near;
-        glowDot(p.x, p.y, (IS_MOBILE ? 9 : 10) + (IS_MOBILE ? 12 : 14) * near, a, DOT_RGB);
+        b[idx(x, y)] = next;
+        alive += next;
       }
     }
 
-    function frame(now){
-      // FPS cap on iOS/mobile
-      if (TARGET_FPS !== 60){
-        const minDt = 1000 / TARGET_FPS;
-        if (now - lastFrameT < minDt){
-          requestAnimationFrame(frame);
-          return;
-        }
-        lastFrameT = now;
+    const tmp = a; a = b; b = tmp;
+    return alive;
+  }
+
+  function drawLife(aliveCount) {
+    // background
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H);
+
+    // draw Life cells with glow (iog-ish but controlled)
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+
+    const GLOW_A = IS_MOBILE ? 0.22 : 0.28;
+    const CELL_A = 0.90;
+
+    for (let y = 0; y < rows; y++) {
+      const py = y * cellSize;
+      for (let x = 0; x < cols; x++) {
+        if (!a[idx(x, y)]) continue;
+
+        const px = x * cellSize;
+        const cx = px + cellSize * 0.5;
+        const cy = py + cellSize * 0.5;
+
+        // Color field: outside X = subtle color nebula, near X = cyan/white
+        const d1 = distToDiag1Cell(x, y);
+        const d2 = distToDiag2Cell(x, y);
+        const d = Math.min(d1, d2);
+
+        const nearT = clamp(1 - (d / (IS_MOBILE ? 6 : 7)), 0, 1);
+
+        // base nebula color (magenta -> cyan) depending on position
+        const t = (x / Math.max(1, cols - 1)) * 0.7 + (y / Math.max(1, rows - 1)) * 0.3;
+        const r = Math.floor(lerp(255, 0,  nearT));          // near X -> less red
+        const g = Math.floor(lerp(40,  234, nearT));         // near X -> more green (cyan)
+        const bcol = Math.floor(lerp(120 + 80*t, 255, nearT));
+
+        // glow
+        const rr = cellSize * (IS_MOBILE ? 1.6 : 1.8);
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rr);
+        grad.addColorStop(0, `rgba(${r},${g},${bcol},${GLOW_A})`);
+        grad.addColorStop(0.35, `rgba(${r},${g},${bcol},${GLOW_A * 0.35})`);
+        grad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+        ctx.fill();
+
+        // core
+        ctx.fillStyle = `rgba(255,255,255,${CELL_A * (0.75 + 0.25*nearT)})`;
+        ctx.fillRect(px + 1, py + 1, Math.max(1, cellSize - 2), Math.max(1, cellSize - 2));
       }
-
-      // clear
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, width, height);
-
-      // X pulse + flow
-      renderXPulse(now);
-      updateAndDrawFlow(now);
-
-      requestAnimationFrame(frame);
     }
+
+    ctx.restore();
+
+    if (statusEl) {
+      statusEl.textContent =
+        `${running ? "RUNNING" : "PAUSED"} · ${stepsPerSecond}/s\ncells: ${aliveCount.toLocaleString()}`;
+    }
+  }
+
+  // ==========================================================
+  // 3) Interaction (paint / keys) like your Life index
+  // ==========================================================
+  const pointer = { down:false };
+
+  function paintAt(clientX, clientY, val=1) {
+    const x = Math.floor(clientX / cellSize);
+    const y = Math.floor(clientY / cellSize);
+    if (x < 0 || y < 0 || x >= cols || y >= rows) return;
+
+    for (let yy = -brush; yy <= brush; yy++) for (let xx = -brush; xx <= brush; xx++) {
+      const nx = x + xx, ny = y + yy;
+      if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+      if (xx*xx + yy*yy <= brush*brush) a[idx(nx, ny)] = val;
+    }
+  }
+
+  canvas.addEventListener("mousedown", (e) => {
+    pointer.down = true;
+    paintAt(e.clientX, e.clientY, 1);
+  });
+  window.addEventListener("mouseup", () => { pointer.down = false; });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!pointer.down) return;
+    paintAt(e.clientX, e.clientY, 1);
+  }, { passive: true });
+
+  canvas.addEventListener("touchstart", (e) => {
+    pointer.down = true;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    paintAt(t.clientX, t.clientY, 1);
+  }, { passive: true });
+
+  window.addEventListener("touchend", () => { pointer.down = false; }, { passive:true });
+  window.addEventListener("touchmove", (e) => {
+    if (!pointer.down) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    paintAt(t.clientX, t.clientY, 1);
+  }, { passive:true });
+
+  function toggleRun(){ running = !running; }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === " "){ e.preventDefault(); toggleRun(); }
+    if (e.key === "r" || e.key === "R"){ randomizeLife(); }
+    if (e.key === "c" || e.key === "C"){ clearLife(); }
+    if (e.key === "+" || e.key === "="){ stepsPerSecond = Math.min(60, stepsPerSecond + 2); }
+    if (e.key === "-" || e.key === "_"){ stepsPerSecond = Math.max(1, stepsPerSecond - 2); }
+    if (e.key === "1") brush = 1;
+    if (e.key === "2") brush = 2;
+    if (e.key === "3") brush = 3;
+  });
+
+  // ==========================================================
+  // 4) Main loop (Life -> X overlay)
+  // ==========================================================
+  let acc = 0;
+  let last = performance.now();
+
+  function frame(now){
+    // FPS cap for mobile/iOS
+    if (TARGET_FPS !== 60){
+      const minDt = 1000 / TARGET_FPS;
+      if (now - lastFrameMs < minDt){
+        requestAnimationFrame(frame);
+        return;
+      }
+      lastFrameMs = now;
+    }
+
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+
+    if (running){
+      acc += dt;
+      const stepDt = 1 / Math.max(1, stepsPerSecond);
+
+      let steps = 0;
+      while (acc >= stepDt && steps < 4){
+        // Drift to X first (absorption), then normal Life step
+        driftToX();
+        var aliveCount = stepLife();
+        acc -= stepDt;
+        steps++;
+      }
+      // draw after stepping
+      drawLife(aliveCount || 0);
+    } else {
+      // still draw sometimes so X keeps breathing
+      drawLife(countAliveQuick());
+    }
+
+    // overlay X pulse on top of Life (original style, boosted by absorption)
+    renderXPulse(now);
 
     requestAnimationFrame(frame);
-  </script>
+  }
+
+  function countAliveQuick(){
+    let c = 0;
+    for (let i=0;i<a.length;i++) c += a[i];
+    return c;
+  }
+
+  // Init
+  resize();
+  requestAnimationFrame(frame);
+
+  // Pause when tab hidden (prevents wasting CPU)
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") running = false;
+  });
+})();
+</script>
+
 </body>
 </html>
