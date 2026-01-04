@@ -40,7 +40,7 @@
       backdrop-filter: blur(10px);
     }
 
-    /* Brand: cuerpo, sin efecto propio, pero se mezcla con lo de atrás */
+    /* Body + “transparent RGB to backgrounds” */
     .brand {
       font-size: 12px;
       letter-spacing: 4px;
@@ -143,11 +143,17 @@
     canvas.style.height = H + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  window.addEventListener("resize", resize);
+  addEventListener("resize", resize);
 
   const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
-  const lerp = (a,b,t)=> a + (b-a)*t;
-  const ease = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+  const lerp  = (a,b,t)=> a + (b-a)*t;
+  const ease  = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+
+  function hash01(x, y){
+    // deterministic "random" in [0,1)
+    const s = Math.sin(x*12.9898 + y*78.233) * 43758.5453;
+    return s - Math.floor(s);
+  }
 
   function glow(x, y, r, a, rgb) {
     if (a <= 0) return;
@@ -163,54 +169,7 @@
     ctx.restore();
   }
 
-  // ---- Event system ----
-  // We keep a short "sequence": inbound sweep -> center flash -> X hold -> outbound -> black.
-  const seq = {
-    active: false,
-    t0: 0,
-    amp: 0.0,
-    phi: 0.0
-  };
-
-  const COOLDOWN_MS = 900;
-  let nextAllowed = 0;
-
-  // timings (seconds)
-  const IN_DUR   = IS_MOBILE ? 0.75 : 0.70;  // inward sweep
-  const FLASH_DUR= 0.18;                     // center flash
-  const HOLD_DUR = 0.22;                     // X visible
-  const OUT_DUR  = IS_MOBILE ? 0.60 : 0.55;  // outward release
-
-  function startSequence(x, y) {
-    const now = performance.now();
-    if (now < nextAllowed) return;
-    nextAllowed = now + COOLDOWN_MS;
-
-    // amplitude based on how close click is to center (coherent, not random)
-    const cx = W/2, cy = H/2;
-    const dx = x - cx, dy = y - cy;
-    const d = Math.sqrt(dx*dx + dy*dy);
-    const maxD = Math.min(W, H) * 0.55;
-    const near = clamp(1 - d / maxD, 0, 1);
-    const amp = 0.35 + 0.65 * (near * near); // never zero, but rewards closer clicks
-
-    // phase depends on click coordinates (mathy, deterministic)
-    const phi = (x * 0.017 + y * 0.013) % (Math.PI * 2);
-
-    seq.active = true;
-    seq.t0 = now;
-    seq.amp = amp;
-    seq.phi = phi;
-  }
-
-  // ignore clicks on legal links
-  window.addEventListener("pointerdown", (e) => {
-    const a = e.target && e.target.closest && e.target.closest("a");
-    if (a) return;
-    startSequence(e.clientX, e.clientY);
-  }, { passive: true });
-
-  function drawX(alpha) {
+  function drawX(alpha){
     ctx.save();
     ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
     ctx.lineWidth = 1.7;
@@ -228,52 +187,109 @@
     ctx.restore();
   }
 
-  function drawEnergyHead(x, y, a, amp, tintPhase) {
-    // core cyan
-    glow(x, y, IS_MOBILE ? 58 : 66, a * 0.22 * amp, { r:0, g:234, b:255 });
-    // magenta-ish rim (very subtle, gives “premium”)
-    const mag = 0.35 + 0.65 * (0.5 - 0.5 * Math.cos(tintPhase));
-    glow(x, y, IS_MOBILE ? 42 : 48, a * 0.10 * amp * mag, { r:255, g:20, b:90 });
-    // inner hot point
-    glow(x, y, IS_MOBILE ? 18 : 20, a * 0.18 * amp, { r:255, g:255, b:255 });
-  }
-
-  function drawEnergyTrail(x1, y1, x2, y2, a, amp) {
+  function drawFiber(x1, y1, x2, y2, a, amp){
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     ctx.lineCap = "round";
-    ctx.lineWidth = 1.0 + 1.2 * amp;
-    ctx.strokeStyle = `rgba(0,234,255,${a * 0.12 * amp})`;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
+    ctx.lineWidth = 1.1 + 1.4 * amp;
+    ctx.strokeStyle = `rgba(0,234,255,${a * 0.10 * amp})`;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
 
-    // thin white fiber inside
-    ctx.lineWidth = 0.7;
-    ctx.strokeStyle = `rgba(255,255,255,${a * 0.06 * amp})`;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
+    ctx.lineWidth = 0.75;
+    ctx.strokeStyle = `rgba(255,255,255,${a * 0.05 * amp})`;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
     ctx.restore();
   }
+
+  function drawCloudHead(x, y, a, amp, bias){
+    // big soft cloud
+    glow(x, y, (IS_MOBILE? 84: 96) * (0.85 + 0.35*amp), a * 0.14 * amp, { r:0, g:234, b:255 });
+    // secondary purple tint (bias controls how much)
+    glow(x, y, (IS_MOBILE? 60: 70) * (0.9 + 0.4*amp), a * 0.08 * amp * bias, { r:120, g:0, b:255 });
+    // inner hot point
+    glow(x, y, (IS_MOBILE? 22: 26) * (0.85 + 0.5*amp), a * 0.14 * amp, { r:255, g:255, b:255 });
+    // tiny magenta rim occasionally
+    glow(x, y, (IS_MOBILE? 38: 44) * (0.85 + 0.4*amp), a * 0.05 * amp * bias, { r:255, g:20, b:90 });
+  }
+
+  // ---- Sequence state ----
+  const seq = {
+    active: false,
+    t0: 0,
+    amp: 0.0,
+    phi: 0.0,
+    mode: 0,
+    spin: 0.0,
+    skew: 0.0,
+    burst: 0.0
+  };
+
+  const COOLDOWN_MS = 900;
+  let nextAllowed = 0;
+
+  // timings (seconds)
+  const BASE_IN   = IS_MOBILE ? 0.78 : 0.72;
+  const BASE_FLASH= 0.18;
+  const BASE_HOLD = 0.22;
+  const BASE_OUT  = IS_MOBILE ? 0.62 : 0.56;
+
+  function startSequence(x, y) {
+    const now = performance.now();
+    if (now < nextAllowed) return;
+    nextAllowed = now + COOLDOWN_MS;
+
+    const cx = W/2, cy = H/2;
+    const dx = x - cx, dy = y - cy;
+    const d = Math.sqrt(dx*dx + dy*dy);
+    const maxD = Math.min(W, H) * 0.55;
+    const near = clamp(1 - d / maxD, 0, 1);
+    const amp = 0.35 + 0.65 * (near * near);
+
+    const h = hash01(x, y);
+    const mode = (h * 3) | 0;          // 0..2
+    const spin = (hash01(y, x) * 2 - 1) * (IS_MOBILE ? 0.12 : 0.16); // subtle curvature
+    const skew = (hash01(x+13, y+7) * 2 - 1) * 0.08;                 // asymmetry
+    const burst = (hash01(x+101, y+17) < 0.35) ? (0.15 + 0.35*hash01(x+5,y+9)) : 0.0;
+
+    const phi = (x * 0.017 + y * 0.013) % (Math.PI * 2);
+
+    seq.active = true;
+    seq.t0 = now;
+    seq.amp = amp;
+    seq.phi = phi;
+    seq.mode = mode;
+    seq.spin = spin;
+    seq.skew = skew;
+    seq.burst = burst;
+  }
+
+  window.addEventListener("pointerdown", (e) => {
+    const a = e.target && e.target.closest && e.target.closest("a");
+    if (a) return;
+    startSequence(e.clientX, e.clientY);
+  }, { passive: true });
 
   function renderSequence(now) {
     if (!seq.active) return;
 
-    const t = (now - seq.t0) / 1000;
-    const T_IN = IN_DUR, T_FLASH = FLASH_DUR, T_HOLD = HOLD_DUR, T_OUT = OUT_DUR;
-    const total = T_IN + T_FLASH + T_HOLD + T_OUT;
+    // mode shapes timings slightly, so it doesn't repeat
+    const IN_DUR    = BASE_IN   * (seq.mode === 0 ? 1.00 : seq.mode === 1 ? 0.92 : 1.06);
+    const FLASH_DUR = BASE_FLASH* (seq.mode === 2 ? 1.08 : 1.00);
+    const HOLD_DUR  = BASE_HOLD * (seq.mode === 1 ? 0.85 : 1.00);
+    const OUT_DUR   = BASE_OUT  * (seq.mode === 0 ? 1.00 : seq.mode === 2 ? 0.92 : 1.05);
+    const total = IN_DUR + FLASH_DUR + HOLD_DUR + OUT_DUR;
 
-    if (t >= total) {
-      seq.active = false;
-      return;
-    }
+    const t = (now - seq.t0) / 1000;
+    if (t >= total) { seq.active = false; return; }
+
+    // subtle persistence while active = volumetric "nube"
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = `rgba(0,0,0,${IS_MOBILE ? 0.20 : 0.16})`;
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
 
     const cx = W/2, cy = H/2;
-
-    // corners (four sources)
     const corners = [
       { x:0, y:0 },
       { x:W, y:0 },
@@ -281,120 +297,124 @@
       { x:W, y:H }
     ];
 
-    // Use afterimage only when active: keeps black absolute otherwise.
-    // (Very subtle so it feels volumetric, not smeary.)
-    ctx.save();
-    ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = `rgba(0,0,0,${IS_MOBILE ? 0.22 : 0.18})`;
-    ctx.fillRect(0,0,W,H);
-    ctx.restore();
-
     const amp = seq.amp;
+    const bias = 0.55 + 0.45 * (0.5 - 0.5 * Math.cos(seq.phi + now*0.001));
 
-    // Inbound: 4 heads travel to center
-    if (t < T_IN) {
-      const p = ease(t / T_IN);
+    // Inbound
+    if (t < IN_DUR) {
+      const p = ease(t / IN_DUR);
 
-      for (let i=0;i<corners.length;i++) {
+      for (let i=0;i<corners.length;i++){
         const o = corners[i];
 
-        // head position
-        const hx = lerp(o.x, cx, p);
-        const hy = lerp(o.y, cy, p);
+        // curvature: bend towards diagonal based on spin & corner id
+        const bend = seq.spin * (i%2===0 ? 1 : -1);
+        const midx = lerp(o.x, cx, p) + bend * (H*0.12) * Math.sin(p*Math.PI);
+        const midy = lerp(o.y, cy, p) - bend * (W*0.12) * Math.sin(p*Math.PI);
 
-        // trail: draw several ghost positions behind head
-        const steps = IS_MOBILE ? 10 : 14;
-        const span = 0.16;
+        // asymmetry: skew cloud size slightly
+        const skew = 1 + seq.skew * (i<2 ? 1 : -1);
+
+        // trail: multiple ghost heads
+        const steps = IS_MOBILE ? 12 : 18;
+        const span = 0.20;
         for (let k=0;k<steps;k++){
           const kk = k / steps;
           const tt = clamp(p - kk*span, 0, 1);
           const q = ease(tt);
-          const tx = lerp(o.x, cx, q);
-          const ty = lerp(o.y, cy, q);
+
+          const tx = lerp(o.x, cx, q) + bend * (H*0.12) * Math.sin(q*Math.PI);
+          const ty = lerp(o.y, cy, q) - bend * (W*0.12) * Math.sin(q*Math.PI);
+
           const fade = (1 - kk);
-          drawEnergyHead(tx, ty, 0.75 * fade, amp, seq.phi + i*1.1 + now*0.0012);
+          drawCloudHead(tx, ty, 0.80 * fade, amp * skew, bias);
         }
 
-        // fiber line from corner to head (gives the “barrido” feeling)
-        drawEnergyTrail(o.x, o.y, hx, hy, 0.9, amp);
+        // fiber from origin to head (thin, premium)
+        drawFiber(o.x, o.y, midx, midy, 0.9, amp);
 
         // head
-        drawEnergyHead(hx, hy, 1.0, amp, seq.phi + i*1.1 + now*0.0012);
+        drawCloudHead(midx, midy, 1.0, amp * skew, bias);
       }
-
       return;
     }
 
     // Center flash
-    const t1 = t - T_IN;
-    if (t1 < T_FLASH) {
-      const p = 1 - ease(t1 / T_FLASH);
-      const a = 0.35 * amp * (1 - p);
+    const t1 = t - IN_DUR;
+    if (t1 < FLASH_DUR) {
+      const u = t1 / FLASH_DUR;
+      const p = 1 - ease(u); // strong at start then down
 
-      // tight flash (not a screen nuke)
-      glow(cx, cy, Math.min(W,H) * 0.22, a * 0.22, { r:0, g:234, b:255 });
-      glow(cx, cy, Math.min(W,H) * 0.14, a * 0.18, { r:120, g:0, b:255 });
-      glow(cx, cy, Math.min(W,H) * 0.08, a * 0.14, { r:255, g:255, b:255 });
+      const flashA = (0.24 * amp) * (1 - p);
+      glow(cx, cy, Math.min(W,H) * 0.26, flashA * 0.20, { r:0, g:234, b:255 });
+      glow(cx, cy, Math.min(W,H) * 0.16, flashA * 0.14, { r:120, g:0, b:255 });
+      glow(cx, cy, Math.min(W,H) * 0.09, flashA * 0.10, { r:255, g:255, b:255 });
 
-      // a tiny “spark” cross to hint the X without fully drawing it yet
-      drawX(0.08 * amp * (1 - p));
+      // optional burst (not always)
+      if (seq.burst > 0.0 && u < 0.5) {
+        glow(cx, cy, Math.min(W,H) * 0.34, flashA * 0.10 * seq.burst, { r:255, g:20, b:90 });
+      }
+
+      // hint X briefly
+      drawX(0.07 * amp * (1 - p));
       return;
     }
 
-    // Hold X visible briefly
-    const t2 = t1 - T_FLASH;
-    if (t2 < T_HOLD) {
-      const holdP = t2 / T_HOLD;
-      const a = 0.20 * amp * (1 - 0.55*holdP);
-      glow(cx, cy, Math.min(W,H) * 0.18, 0.08 * amp);
+    // Hold X
+    const t2 = t1 - FLASH_DUR;
+    if (t2 < HOLD_DUR) {
+      const holdP = t2 / HOLD_DUR;
+      const a = 0.18 * amp * (1 - 0.62*holdP);
+      glow(cx, cy, Math.min(W,H) * 0.18, 0.07 * amp);
       drawX(a);
       return;
     }
 
-    // Outbound release: heads go back out a bit and vanish
-    const t3 = t2 - T_HOLD;
-    const pOut = ease(t3 / T_OUT); // 0..1
+    // Outbound release
+    const t3 = t2 - HOLD_DUR;
+    const pOut = ease(t3 / OUT_DUR);
     const p = 1 - pOut;
 
-    for (let i=0;i<corners.length;i++) {
+    for (let i=0;i<corners.length;i++){
       const o = corners[i];
 
-      // start at center, go outward a bit, fade
-      const hx = lerp(o.x, cx, p);
-      const hy = lerp(o.y, cy, p);
+      const bend = seq.spin * (i%2===0 ? 1 : -1);
+      const x = lerp(o.x, cx, p) + bend * (H*0.12) * Math.sin(p*Math.PI);
+      const y = lerp(o.y, cy, p) - bend * (W*0.12) * Math.sin(p*Math.PI);
+
       const fadeA = (1 - pOut);
+      const skew = 1 + seq.skew * (i<2 ? 1 : -1);
 
       // trail
-      const steps = IS_MOBILE ? 9 : 12;
-      const span = 0.14;
+      const steps = IS_MOBILE ? 10 : 14;
+      const span = 0.18;
       for (let k=0;k<steps;k++){
         const kk = k / steps;
         const tt = clamp(p - kk*span, 0, 1);
         const q = ease(tt);
-        const tx = lerp(o.x, cx, q);
-        const ty = lerp(o.y, cy, q);
+
+        const tx = lerp(o.x, cx, q) + bend * (H*0.12) * Math.sin(q*Math.PI);
+        const ty = lerp(o.y, cy, q) - bend * (W*0.12) * Math.sin(q*Math.PI);
+
         const fade = (1 - kk) * fadeA;
-        drawEnergyHead(tx, ty, 0.55 * fade, amp, seq.phi + i*1.1 + now*0.0012);
+        drawCloudHead(tx, ty, 0.55 * fade, amp * skew, bias);
       }
 
-      // fiber line from center towards corner
-      drawEnergyTrail(hx, hy, cx, cy, 0.65 * fadeA, amp);
+      // fiber from head to center
+      drawFiber(x, y, cx, cy, 0.65 * fadeA, amp);
 
-      drawEnergyHead(hx, hy, 0.85 * fadeA, amp, seq.phi + i*1.1 + now*0.0012);
+      drawCloudHead(x, y, 0.85 * fadeA, amp * skew, bias);
     }
   }
 
-  // ---- Main loop ----
-  function loop(now) {
-    // absolute black when idle
+  function loop(now){
     if (!seq.active) {
+      // absolute black idle
       ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(0,0,W,H);
     } else {
-      // renderSequence handles its own subtle fade
       renderSequence(now);
     }
-
     requestAnimationFrame(loop);
   }
 
