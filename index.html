@@ -112,10 +112,43 @@
       z-index:30;
     }
     .menu-dropdown-sub.open { max-height:500px; opacity:1; pointer-events:auto; }
-    .submenu-group { padding:4px 18px 6px 16px; }
-    .submenu-label { font-size:11px; letter-spacing:1px; color:#7fd8ff; opacity:.8; margin-bottom:2px; }
-    .submenu-link { display:block; font-size:13px; padding:3px 0; color:#e8ffff; text-decoration:none; }
+
+    /* ✅ UPDATED: more breathing room + clearer hierarchy */
+    .submenu-group{
+      padding:14px 22px 16px 22px;
+    }
+    .submenu-label{
+      font-size:11px;
+      letter-spacing:1.4px;
+      color:#7fd8ff;
+      opacity:.75;
+      margin:14px 0 6px;
+      text-transform: uppercase;
+    }
+    .submenu-link{
+      display:block;
+      font-size:14px;
+      padding:6px 0 8px;
+      color:#e8ffff;
+      text-decoration:none;
+      letter-spacing:0.6px;
+    }
     .submenu-link:hover { color:#fff; text-shadow:0 0 6px #00eaff; }
+
+    /* ✅ Optional polish: subtle separation rhythm */
+    .submenu-label + .submenu-link { margin-bottom: 6px; }
+    .submenu-group::after{
+      content:"";
+      display:block;
+      height:1px;
+      margin:14px 0 6px;
+      background: linear-gradient(
+        to right,
+        rgba(0,234,255,0.25),
+        rgba(0,234,255,0.05),
+        transparent
+      );
+    }
 
     .footer-bar{
       bottom:0; left:0; width:100%;
@@ -140,7 +173,7 @@
       .menu-dropdown-sub{ min-width:190px; margin-right:10px; }
 
       .menu-dot.active { background:transparent; box-shadow:none; opacity:1; transform:scale(1.1); }
-      .menu-dot::before, .menu-dot::after{ height:12px; } /* keep proportions when dot shrinks */
+      .menu-dot::before, .menu-dot::after{ height:12px; }
       .menu-dot.active::before, .menu-dot.active::after{ opacity:1; animation:xPulseDual 1.4s ease-in-out infinite; }
       .menu-dot.active.shake{ animation:none !important; }
       .menu-dot.active.double::before, .menu-dot.active.double::after{ box-shadow:none !important; }
@@ -155,7 +188,6 @@
         display:inline-block;
         margin:4px 10px;
       }
-
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -290,7 +322,7 @@
       100%{ box-shadow: 0 0 46px rgba(255,255,255,.14), 0 0 120px rgba(255,255,255,.05); }
     }
     body.consent-locked .consent-banner.open{ animation: execPulse 1.2s ease-in-out infinite alternate; }
-  
+
     .footer-links{
       display:flex;
       flex-wrap:wrap;
@@ -321,7 +353,6 @@
       .footer-links a{ padding:0 10px; }
       .footer-links a:not(:last-child)::after{ right:-3px; }
     }
-
   </style>
 </head>
 
@@ -334,7 +365,7 @@
 
       <div class="menu-dropdown" id="menuDropdown" role="menu" aria-hidden="true">
         <a href="javascript:void(0)" class="locations-link" id="verticalsLink" role="menuitem" aria-haspopup="true" aria-expanded="false">VERTICALS</a>
-        <a href="mailto:info@microretailx.com" id="contactEmail">CONTACT</a>
+        <a href="contact.html" id="contactLink" role="menuitem">CONTACT</a>
       </div>
 
       <div class="menu-dropdown-sub" id="verticalsSubmenu" aria-hidden="true">
@@ -679,7 +710,6 @@
       consentBanner.classList.add("open");
     }
 
-
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
 
@@ -705,11 +735,11 @@
     }
 
     const MOBILE_MODE = isMobile();
-  const UA = navigator.userAgent || "";
-  const IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const IS_ANDROID = /Android/i.test(UA);
-  let DOT_RGB = { r:0, g:234, b:255 };
-  let PULSE_RGB = { r:255, g:35, b:90 };
+    const UA = navigator.userAgent || "";
+    const IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const IS_ANDROID = /Android/i.test(UA);
+    let DOT_RGB = { r:0, g:234, b:255 };
+    let PULSE_RGB = { r:255, g:35, b:90 };
 
     const REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -731,7 +761,7 @@
     function xDrawGlowDot(x, y, r, a, rgb){
       if (a <= 0) return;
       const c = rgb || DOT_RGB;
-      const boost = IS_IOS ? 1.45 : 1.0; // iPhone needs more punch
+      const boost = IS_IOS ? 1.45 : 1.0;
       const aa = Math.min(1, a * boost);
 
       ctx.save();
@@ -746,7 +776,6 @@
       ctx.fill();
       ctx.restore();
     }
-
 
     function xDrawLines(alpha){
       ctx.save();
@@ -782,7 +811,6 @@
       const cx = width / 2;
       const cy = height / 2;
 
-      // Platform color profile
       DOT_RGB = IS_ANDROID ? { r: 40, g: 255, b: 150 } : { r: 0, g: 234, b: 255 };
       PULSE_RGB = IS_IOS ? { r: 255, g: 35, b: 90 } : (IS_ANDROID ? { r: 120, g: 255, b: 120 } : { r: 255, g: 35, b: 90 });
 
@@ -833,7 +861,6 @@
           const tint = (IS_IOS ? xClamp((prog - 0.70) / 0.30, 0, 1) : 0);
           const headRGB = (tint > 0 ? xBlendRGB(DOT_RGB, PULSE_RGB, tint) : DOT_RGB);
 
-
           for (let i = 0; i < tailSteps; i++){
             const k = i / tailSteps;
             const tt = xClamp(prog - k*tailSpan, 0, 1);
@@ -860,7 +887,7 @@
         }
 
         xDrawGlowDot(cx, cy, 44, centerBurst * 0.68, DOT_RGB);
-} else if (outActive){
+      } else if (outActive){
         const a = Math.max(0, 0.9 * fadeOut);
         drawTrailTo(posReturnToOrigin, travelOut, a);
         const centerA = (0.10 + 0.20 * fadeOut);
@@ -869,7 +896,6 @@
         xDrawGlowDot(cx, cy, 64, 0.02);
       }
     }
-
 
     const CORES = navigator.hardwareConcurrency || 4;
     const BASE_PARTICLES_DESKTOP = 1800;
@@ -987,8 +1013,6 @@
     }
 
     function animate(now) {
-
-      // --- iOS/iPad performance airbags ---
       if (typeof paused === "undefined") {
         window.paused = false;
         document.addEventListener("visibilitychange", () => { window.paused = document.hidden; }, { passive:true });
@@ -997,13 +1021,11 @@
       }
       if (window.paused) { requestAnimationFrame(animate); return; }
 
-      // Cap FPS only on iOS/iPad (prevents overheating on Safari)
       if (IS_IOS) {
         const minDt = 1000 / window.TARGET_FPS_IOS;
         if (now - window._lastFrameT < minDt) { requestAnimationFrame(animate); return; }
         window._lastFrameT = now;
       }
-
 
       if (MOBILE_MODE){
         ctx.fillStyle = "#000";
@@ -1040,19 +1062,17 @@
 
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, width, height);
-      if (MOBILE_MODE && !REDUCED_MOTION){
-        renderTermsX(now);
-      } else {
-        ctx.strokeStyle = "rgba(0,255,255,0.06)";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(width, height);
-        ctx.moveTo(width, 0);
-        ctx.lineTo(0, height);
-        ctx.stroke();
-      }
-drawConnections();
+
+      ctx.strokeStyle = "rgba(0,255,255,0.06)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(width, height);
+      ctx.moveTo(width, 0);
+      ctx.lineTo(0, height);
+      ctx.stroke();
+
+      drawConnections();
       if (!REDUCED_MOTION) drawDeathMarkers(now);
 
       for (const p of particles) {
@@ -1120,6 +1140,6 @@ drawConnections();
     }
 
     requestAnimationFrame(animate);
-</script>
+  </script>
 </body>
 </html>
