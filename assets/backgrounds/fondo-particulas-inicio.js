@@ -4,7 +4,8 @@ export function init(canvasId = "canvas") {
 
   const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
   let w = 0, h = 0, dpr = 1, raf = 0;
- 
+  let paused = false;
+
   const CFG = {
     density: 0.00009,
     maxNodes: 180,
@@ -58,6 +59,8 @@ export function init(canvasId = "canvas") {
   };
 
   const step = () => {
+    if (paused) return;
+
     ctx.fillStyle = `rgba(0,0,0,${CFG.fade})`;
     ctx.fillRect(0, 0, w, h);
 
@@ -124,8 +127,10 @@ export function init(canvasId = "canvas") {
 
   const onVis = () => {
     if (document.visibilityState === "hidden") {
+      paused = true;
       cancelAnimationFrame(raf);
     } else {
+      paused = false;
       raf = requestAnimationFrame(step);
     }
   };
@@ -140,6 +145,7 @@ export function init(canvasId = "canvas") {
   raf = requestAnimationFrame(step);
 
   return function destroy() {
+    paused = true;
     cancelAnimationFrame(raf);
     window.removeEventListener("resize", resize);
     window.removeEventListener("pointermove", onMove);
