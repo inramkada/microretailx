@@ -49,17 +49,20 @@
       backdrop-filter: blur(10px);
     }
 
+    /* Brand: más cuerpo, sin “efecto”, pero mezclándose con el fondo.
+       Con video/canvas debajo, el texto “cambia” con el contenido por blending. */
     .brand {
       font-size: 12px;
       letter-spacing: 4px;
-      font-weight: 700;
-      opacity: 0.95;
-      mix-blend-mode: screen;
-      position: relative;
-      text-shadow:
-        0 0 6px rgba(255,0,80,0.35),
-        0 0 6px rgba(0,180,255,0.35),
-        0 0 10px rgba(255,255,255,0.25);
+      font-weight: 800;
+      opacity: 0.92;
+
+      /* Importante: sin sombras, sin animación */
+      text-shadow: none;
+
+      /* “Transparente RGB a fondos”: el color se define por mezcla con lo de atrás */
+      color: rgba(255,255,255,0.92);
+      mix-blend-mode: difference; /* hace que el texto se adapte al fondo (video/canvas) */
     }
 
     /* CENTER (vacío, solo estructura) */
@@ -182,36 +185,65 @@
   }
   window.addEventListener("resize", resize);
 
-  /* === X EFFECT === */
-  let t = 0;
-  let last = performance.now();
+  // =========================================================
+  // X: invisible by default. Appears only from click impulses.
+  // =========================================================
 
-  function drawXGlow(strength) {
-    const cx = W / 2;
-    const cy = H / 2;
+  // Store a few recent impulses (position-based + phase)
+  const impulses = [];
+  const MAX_IMPULSES = 14;
 
+  // distance point -> nearest diagonal line
+  function distToDiag1(x, y) { // y = (H/W)x
+    const m = H / Math.max(1, W);
+    return Math.abs(y - m * x);
+  }
+  function distToDiag2(x, y) { // y = H - (H/W)x
+    const m = H / Math.max(1, W);
+    return Math.abs(y - (H - m * x));
+  }
+
+  function addImpulse(x, y) {
+    // “matemática”: intensidad depende de cercanía a la X + una fase derivada del punto
+    const d = Math.min(distToDiag1(x, y), distToDiag2(x, y));
+    const maxD = Math.min(W, H) * 0.35; // zona de influencia
+    const near = Math.max(0, 1 - d / maxD);
+    const amp = near * near; // curva más “quirúrgica”
+
+    // fase pseudo “phi-like” (sin random puro)
+    const phi = ((x * 0.017 + y * 0.013) % (Math.PI * 2));
+
+    impulses.push({
+      t0: performance.now(),
+      amp: amp,
+      phi: phi,
+      x, y
+    });
+
+    if (impulses.length > MAX_IMPULSES) impulses.shift();
+  }
+
+  // drawing helpers
+  function glow(x, y, r, a, rgb) {
+    if (a <= 0) return;
+    const c = rgb || { r: 0, g: 234, b: 255 };
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-
-    const r = Math.min(W, H) * 0.35;
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-
-    g.addColorStop(0, `rgba(0,234,255,${0.08 * strength})`);
-    g.addColorStop(0.4, `rgba(120,0,255,${0.04 * strength})`);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${a})`);
+    g.addColorStop(0.35, `rgba(${c.r},${c.g},${c.b},${a * 0.35})`);
     g.addColorStop(1, "rgba(0,0,0,0)");
-
     ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
-
     ctx.restore();
   }
 
-  function drawX(alpha, pulse) {
+  function drawX(alpha, fringe) {
     ctx.save();
 
-    // Base cyan
+    // base
     ctx.strokeStyle = `rgba(0,234,255,${alpha})`;
     ctx.lineWidth = 1.6;
     ctx.beginPath();
@@ -221,7 +253,6 @@
     ctx.lineTo(0, H);
     ctx.stroke();
 
-    // Thicker layer
     ctx.strokeStyle = `rgba(0,234,255,${alpha * 0.55})`;
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -231,11 +262,12 @@
     ctx.lineTo(0, H);
     ctx.stroke();
 
-    // RGB fringe (only when pulsing)
-    if (pulse > 0.2) {
+    // optional tiny RGB fringe driven by click math (still subtle)
+    if (fringe > 0.06) {
       ctx.globalCompositeOperation = "lighter";
+      const f = fringe;
 
-      ctx.strokeStyle = `rgba(255,0,80,${alpha * 0.35 * pulse})`;
+      ctx.strokeStyle = `rgba(255,0,80,${alpha * 0.35 * f})`;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(-1, 1);
@@ -244,7 +276,7 @@
       ctx.lineTo(1, H - 1);
       ctx.stroke();
 
-      ctx.strokeStyle = `rgba(0,180,255,${alpha * 0.35 * pulse})`;
+      ctx.strokeStyle = `rgba(0,180,255,${alpha * 0.35 * f})`;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(1, -1);
@@ -257,36 +289,79 @@
     ctx.restore();
   }
 
-  function loop(now) {
-    const dt = Math.min(0.05, (now - last) / 1000);
-    last = now;
-    t += dt;
+  // input
+  canvas.addEventListener("pointerdown", (e) => {
+    // capture click in CSS pixels
+    addImpulse(e.clientX, e.clientY);
+  }, { passive: true });
 
+  // also allow taps anywhere (if canvas doesn’t get it for some reason)
+  window.addEventListener("pointerdown", (e) => {
+    // ignore clicks on footer links (so clicking terms doesn’t flash X)
+    const a = e.target && e.target.closest && e.target.closest("a");
+    if (a) return;
+    addImpulse(e.clientX, e.clientY);
+  }, { passive: true });
+
+  // =========================================================
+  // Render loop
+  // =========================================================
+  function loop(now) {
+    // pure black background always
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, W, H);
 
-    const pulse = 0.5 - 0.5 * Math.cos(t * 1.2);
-    const alpha = 0.05 + 0.08 * pulse;
+    // compute visibility from impulses only
+    let energy = 0;
+    let fringe = 0;
+    let centerBoost = 0;
 
-    // background energy
-    drawXGlow(pulse);
+    const cx = W / 2, cy = H / 2;
 
-    // main X
-    drawX(alpha, pulse);
+    for (let i = 0; i < impulses.length; i++) {
+      const im = impulses[i];
+      const age = (now - im.t0) / 1000;
 
-    // sync brand RGB with pulse
-    const brand = document.querySelector(".brand");
-    if (brand) {
-      const k = 0.35 + pulse * 0.65;
-      brand.style.textShadow = `
-        ${2 * k}px 0 rgba(255,0,80,${0.4 * k}),
-        ${-2 * k}px 0 rgba(0,180,255,${0.4 * k}),
-        0 0 ${8 + 10 * k}px rgba(255,255,255,${0.25 * k})
-      `;
+      // decay (fast enough to vanish back to full black)
+      const decay = Math.exp(-age * 1.25);
+
+      // oscillation derived from the click phase (mathy)
+      const w = 2.4 + 0.8 * Math.sin(im.phi);
+      const osc = 0.5 - 0.5 * Math.cos(w * age * Math.PI * 2 + im.phi);
+
+      const v = im.amp * decay * osc;
+
+      energy += v;
+      fringe += v * 0.6;
+
+      // center glow reacts to impulses with distance weighting
+      const dx = (im.x - cx), dy = (im.y - cy);
+      const dd = Math.sqrt(dx*dx + dy*dy) / Math.max(1, Math.min(W, H));
+      centerBoost += v * (1 - clamp(dd * 1.6, 0, 1));
     }
+
+    // clamp & curve for a premium response (no blow-out)
+    energy = clamp(energy, 0, 1.1);
+    const alpha = 0.0 + 0.16 * (energy ** 0.85); // invisible if no energy
+    fringe = clamp(fringe, 0, 1);
+    centerBoost = clamp(centerBoost, 0, 1);
+
+    // draw X only if visible
+    if (alpha > 0.001) {
+      // subtle center glow
+      glow(cx, cy, Math.min(W, H) * 0.34, 0.06 * (centerBoost ** 0.9));
+      glow(cx, cy, Math.min(W, H) * 0.18, 0.08 * (centerBoost ** 0.85), { r: 120, g: 0, b: 255 });
+
+      drawX(alpha, fringe);
+    }
+
+    // cleanup old impulses
+    while (impulses.length && (now - impulses[0].t0) > 5000) impulses.shift();
 
     requestAnimationFrame(loop);
   }
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
   resize();
   requestAnimationFrame(loop);
