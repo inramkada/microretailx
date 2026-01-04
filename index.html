@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MICRORETAILX</title>
+  <title>microretailX</title>
 
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Permissions-Policy"
@@ -115,6 +115,7 @@
   const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
   const lerp  = (a,b,t)=> a + (b-a)*t;
   const ease  = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+  const easeInOut = t => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;
 
   const DPR_CAP = IS_IOS ? 1.6 : 2;
   let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
@@ -132,9 +133,9 @@
 
   const INTRO = {
     start: performance.now(),
-    durIn: 850,
-    durFlash: 180,
-    durOut: 450,
+    durIn: 1800,      // barrido LENTO
+    durFlash: 320,    // flash dramático
+    durOut: 650,      // settle suave
     get active() {
       const t = performance.now() - this.start;
       return t < (this.durIn + this.durFlash + this.durOut);
@@ -470,17 +471,19 @@
 
     const cx = W/2, cy = H/2;
 
-    function strokeX(alpha, w1, w2) {
+    function strokeX(alpha, w1, w2, glow=true) {
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
       vctx.lineCap = "round";
 
-      vctx.strokeStyle = `rgba(255,255,255,${alpha*0.45})`;
-      vctx.lineWidth = w2;
-      vctx.beginPath();
-      vctx.moveTo(0,0); vctx.lineTo(W,H);
-      vctx.moveTo(W,0); vctx.lineTo(0,H);
-      vctx.stroke();
+      if (glow) {
+        vctx.strokeStyle = `rgba(255,255,255,${alpha*0.35})`;
+        vctx.lineWidth = w2;
+        vctx.beginPath();
+        vctx.moveTo(0,0); vctx.lineTo(W,H);
+        vctx.moveTo(W,0); vctx.lineTo(0,H);
+        vctx.stroke();
+      }
 
       vctx.strokeStyle = `rgba(255,255,255,${alpha})`;
       vctx.lineWidth = w1;
@@ -496,54 +499,122 @@
     ];
 
     if (t < T1) {
-      const p = ease(t / T1);
+      const p = easeInOut(t / T1);
 
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
       vctx.lineCap = "round";
+
+      // X fantasma
+      const ghostAlpha = 0.04 + 0.08*p;
+      vctx.strokeStyle = `rgba(255,255,255,${ghostAlpha})`;
+      vctx.lineWidth = IS_MOBILE ? 3.2 : 4.0;
+      vctx.beginPath();
+      vctx.moveTo(0,0); vctx.lineTo(W,H);
+      vctx.moveTo(W,0); vctx.lineTo(0,H);
+      vctx.stroke();
 
       for (let i=0;i<corners.length;i++){
         const o = corners[i];
         const hx = lerp(o.x, cx, p);
         const hy = lerp(o.y, cy, p);
 
-        vctx.strokeStyle = `rgba(255,255,255,${0.65})`;
-        vctx.lineWidth = IS_MOBILE ? 2.4 : 2.8;
-        vctx.beginPath(); vctx.moveTo(o.x,o.y); vctx.lineTo(hx,hy); vctx.stroke();
+        // Trail con gradiente
+        const grad = vctx.createLinearGradient(o.x, o.y, hx, hy);
+        grad.addColorStop(0, `rgba(255,255,255,${0.15*p})`);
+        grad.addColorStop(0.7, `rgba(255,255,255,${0.45*p})`);
+        grad.addColorStop(1, `rgba(255,255,255,${0.75})`);
+        
+        vctx.strokeStyle = grad;
+        vctx.lineWidth = IS_MOBILE ? 2.8 : 3.4;
+        vctx.beginPath(); 
+        vctx.moveTo(o.x,o.y); 
+        vctx.lineTo(hx,hy); 
+        vctx.stroke();
 
-        const r = Math.min(W,H) * 0.06;
+        // Head glow
+        const r = Math.min(W,H) * (0.08 + 0.04*p);
         const g = vctx.createRadialGradient(hx,hy,0,hx,hy,r);
-        g.addColorStop(0, "rgba(255,255,255,0.85)");
-        g.addColorStop(0.35, "rgba(255,255,255,0.25)");
+        g.addColorStop(0, "rgba(255,255,255,0.95)");
+        g.addColorStop(0.25, "rgba(255,255,255,0.55)");
+        g.addColorStop(0.55, "rgba(255,255,255,0.15)");
         g.addColorStop(1, "rgba(0,0,0,0)");
         vctx.fillStyle = g;
-        vctx.beginPath(); vctx.arc(hx,hy,r,0,Math.PI*2); vctx.fill();
+        vctx.beginPath(); 
+        vctx.arc(hx,hy,r,0,Math.PI*2); 
+        vctx.fill();
+
+        // Sparkles
+        if (p > 0.2) {
+          for (let s=0; s<3; s++) {
+            const angle = (i*Math.PI/2) + (s*Math.PI/6) + (p*Math.PI*4);
+            const dist = r * 0.4;
+            const sx = hx + Math.cos(angle) * dist;
+            const sy = hy + Math.sin(angle) * dist;
+            const sparkR = Math.min(W,H) * 0.012;
+            
+            const sg = vctx.createRadialGradient(sx,sy,0,sx,sy,sparkR);
+            sg.addColorStop(0, `rgba(255,255,255,${0.85*p})`);
+            sg.addColorStop(0.5, `rgba(255,255,255,${0.25*p})`);
+            sg.addColorStop(1, "rgba(0,0,0,0)");
+            vctx.fillStyle = sg;
+            vctx.beginPath(); 
+            vctx.arc(sx,sy,sparkR,0,Math.PI*2); 
+            vctx.fill();
+          }
+        }
       }
       vctx.restore();
-
-      strokeX(0.10 + 0.22*p, IS_MOBILE ? 2.6 : 3.2, IS_MOBILE ? 7.2 : 9.0);
 
       return;
     }
 
     const t2 = t - T1;
     if (t2 < T2) {
-      const p = 1 - ease(t2 / T2);
+      const flashP = t2 / T2;
+      const intensity = Math.sin(flashP * Math.PI);
 
-      strokeX(0.55, IS_MOBILE ? 3.2 : 4.0, IS_MOBILE ? 10.0 : 12.0);
+      strokeX(0.85, IS_MOBILE ? 4.0 : 5.2, IS_MOBILE ? 14.0 : 18.0);
 
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
-      const rr = Math.min(W,H) * 0.22;
+
+      // Explosión central
+      const rr = Math.min(W,H) * (0.35 + 0.25*intensity);
       const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
-      g.addColorStop(0, `rgba(255,255,255,${0.55*(1-p)})`);
-      g.addColorStop(0.35, `rgba(255,255,255,${0.14*(1-p)})`);
+      g.addColorStop(0, `rgba(255,255,255,${0.95*intensity})`);
+      g.addColorStop(0.15, `rgba(255,255,255,${0.75*intensity})`);
+      g.addColorStop(0.35, `rgba(255,255,255,${0.45*intensity})`);
+      g.addColorStop(0.65, `rgba(255,255,255,${0.15*intensity})`);
       g.addColorStop(1, "rgba(0,0,0,0)");
       vctx.fillStyle = g;
-      vctx.beginPath(); vctx.arc(cx,cy,rr,0,Math.PI*2); vctx.fill();
+      vctx.beginPath(); 
+      vctx.arc(cx,cy,rr,0,Math.PI*2); 
+      vctx.fill();
+
+      // Rayos radiales
+      for (let i=0; i<8; i++) {
+        const angle = (i * Math.PI / 4);
+        const len = Math.max(W,H) * 0.6 * intensity;
+        const ex = cx + Math.cos(angle) * len;
+        const ey = cy + Math.sin(angle) * len;
+
+        const rayGrad = vctx.createLinearGradient(cx, cy, ex, ey);
+        rayGrad.addColorStop(0, `rgba(255,255,255,${0.65*intensity})`);
+        rayGrad.addColorStop(0.5, `rgba(255,255,255,${0.25*intensity})`);
+        rayGrad.addColorStop(1, "rgba(255,255,255,0)");
+        
+        vctx.strokeStyle = rayGrad;
+        vctx.lineWidth = (IS_MOBILE ? 1.8 : 2.5) * intensity;
+        vctx.beginPath();
+        vctx.moveTo(cx, cy);
+        vctx.lineTo(ex, ey);
+        vctx.stroke();
+      }
+
       vctx.restore();
 
-      inkXLine(0.55);
+      inkXLine(0.75 * intensity);
 
       return;
     }
@@ -552,9 +623,26 @@
     const p3 = ease(clamp(t3 / T3, 0, 1));
 
     renderMaze();
-    strokeX((1 - p3) * 0.25, IS_MOBILE ? 3.0 : 3.8, IS_MOBILE ? 9.5 : 11.5);
+    
+    const fadeAlpha = (1 - p3);
+    strokeX(fadeAlpha * 0.35, IS_MOBILE ? 3.4 : 4.2, IS_MOBILE ? 11.0 : 14.0, true);
 
-    if (p3 < 0.2) {
+    if (p3 < 0.6) {
+      vctx.save();
+      vctx.globalCompositeOperation = "lighter";
+      const rr = Math.min(W,H) * 0.15 * (1-p3);
+      const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
+      g.addColorStop(0, `rgba(255,255,255,${0.25*(1-p3)})`);
+      g.addColorStop(0.5, `rgba(255,255,255,${0.08*(1-p3)})`);
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      vctx.fillStyle = g;
+      vctx.beginPath(); 
+      vctx.arc(cx,cy,rr,0,Math.PI*2); 
+      vctx.fill();
+      vctx.restore();
+    }
+
+    if (p3 < 0.25) {
       for (let k=0; k<trailA.length; k++) trailA[k] *= 0.985;
     }
   }
