@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>microretailX</title>
 
-  <meta name="description" content="Advanced biotech and creative technology platforms." />
-  <link rel="canonical" href="https://www.microretailx.com/" />
-
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
   <meta name="color-scheme" content="dark" />
@@ -42,8 +39,7 @@
       --nav-size:clamp(12px, 1.15vw, 12.5px);
       --nav-track:0.12em;
 
-      /* ✅ legible sin romper estética */
-      --copy-size: clamp(9.5px, 1.1vw, 11px);
+      --copy-size:clamp(6.5px, 1.1vw, 7px);
       --copy-track:0.06em;
 
       --radius:14px;
@@ -89,17 +85,6 @@
         repeating-linear-gradient(0deg, rgba(255,255,255,.025), rgba(255,255,255,.025) 1px, transparent 1px, transparent 3px);
       mix-blend-mode:screen;
       z-index:-1;
-    }
-
-    /* ✅ fondo más ligero en móvil */
-    @media (max-width: 640px){
-      .page::before{
-        mix-blend-mode: normal;
-        opacity: .03;
-        background-image:
-          radial-gradient(circle at 20% 30%, rgba(255,255,255,.06), transparent 52%),
-          radial-gradient(circle at 80% 70%, rgba(255,255,255,.04), transparent 50%);
-      }
     }
 
     header, footer{
@@ -176,9 +161,7 @@
       position:absolute;
       top:100%;
       left:0;
-
-      /* ✅ baja un pelín para que BIOTECH no roce la línea */
-      margin-top:14px;
+      margin-top:10px;
 
       display:flex;
       flex-direction:column;
@@ -212,9 +195,7 @@
       flex-direction:column;
       align-items:flex-start;
       text-decoration:none;
-
-      /* ✅ un pelo más de aire */
-      padding:3px 0;
+      padding:2px 0;
     }
 
     .v-main{
@@ -292,7 +273,7 @@
 
       transition: opacity 0.4s ease, transform 0.2s ease;
 
-      /* ✅ iOS / iPad scroll stability */
+      /* ✅ iPad fix (core): keep scroll origin consistent + smoother */
       direction: ltr;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
@@ -348,24 +329,6 @@
     .lang-switch.is-open .lang-pill{
       transform: translateX(0);
       opacity: 1;
-    }
-
-    /* ✅ FIX INVENCIBLE: EN siempre visible en iPad (sticky dentro del scroll) */
-    .lang-pill[data-lang="en"]{
-      position: sticky;
-      left: 0;
-      z-index: 3;
-      background: rgba(0,0,0,.78);
-      border-color: rgba(255,255,255,.16);
-      box-shadow: 12px 0 16px rgba(0,0,0,.55);
-      margin-right: 2px;
-    }
-    [dir="rtl"] .lang-pill[data-lang="en"]{
-      left: auto;
-      right: 0;
-      box-shadow: -12px 0 16px rgba(0,0,0,.55);
-      margin-right: 0;
-      margin-left: 2px;
     }
 
     /* stagger (wave) */
@@ -544,7 +507,7 @@
     [dir="rtl"] .lang-rail{
       left:auto;
       right: calc(100% + 10px);
-      direction: rtl;
+      direction: rtl; /* keep natural in RTL mode */
     }
 
     [dir="rtl"] .verticals-menu{
@@ -590,7 +553,7 @@
 
         <nav>
           <div class="lang-switch" id="lang-switch">
-            <button class="lang-trigger" aria-label="Language selector" type="button">
+            <button class="lang-trigger" id="langTrigger" aria-label="Language selector" type="button">
               <svg class="globe" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
                 <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
@@ -831,19 +794,12 @@
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 
-        // optional (UX): update title
-        if (lang === "es") document.title = "microretailX — Próximamente";
-        else if (lang === "fr") document.title = "microretailX — Bientôt";
-        else if (lang === "de") document.title = "microretailX — Bald";
-        else document.title = "microretailX";
-
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
         switchEl?.classList.remove("open-right");
 
         const shouldScramble = (text) => {
           if (!text) return false;
-          // keep as you had; landing-scale ok
           return /^[\VIU0000-\LEN02FF\ZAA1E00-\u1EFF0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
         };
 
@@ -882,8 +838,7 @@
             const val = dict[key] ?? I18N[DEFAULT_LANG][key];
             if (typeof val !== "string") return;
 
-            // small perf guard: scramble only short strings
-            if (shouldScramble(val) && val.length <= 80) scrambleText(el, val, 180);
+            if (shouldScramble(val)) scrambleText(el, val, 180);
             else el.textContent = val;
 
             el.classList.remove("mx-i18n-out");
@@ -918,11 +873,12 @@
       });
     })();
 
-    // ===== Language rail timers (keep your logic) =====
+    // ===== Language rail timers (iPad FOCUS-scroll killer): open after 500ms, lock inside, close 3s after exit =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
-      if (!switchEl || !railEl) return;
+      const trigger  = document.getElementById('langTrigger') || switchEl?.querySelector('.lang-trigger');
+      if (!switchEl || !railEl || !trigger) return;
 
       let openTimer = null;
       let closeTimer = null;
@@ -934,6 +890,48 @@
       function clearTimers(){
         if (openTimer)  { clearTimeout(openTimer);  openTimer = null; }
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      }
+
+      function hardResetScroll(){
+        railEl.scrollTo({ left: 0, top: 0, behavior: 'auto' });
+        railEl.scrollLeft = 0;
+      }
+
+      function blurRailFocus(){
+        // iOS keeps focused element visible -> it scrolls the rail automatically.
+        const ae = document.activeElement;
+        if (ae && railEl.contains(ae) && typeof ae.blur === 'function') ae.blur();
+
+        // Put focus back to trigger without scrolling (critical)
+        try { trigger.focus({ preventScroll: true }); } catch { try { trigger.focus(); } catch {} }
+      }
+
+      function forceStartForAWhile(frames = 12){
+        // iOS can override scrollLeft for a few frames; we keep asserting start.
+        let n = 0;
+        const tick = () => {
+          hardResetScroll();
+          n++;
+          if (n < frames) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+
+        // extra pokes (helps on some iPads)
+        setTimeout(hardResetScroll, 30);
+        setTimeout(hardResetScroll, 90);
+      }
+
+      function ensureStartVisible(){
+        blurRailFocus();
+        hardResetScroll();
+
+        // Also force the first pill to be the "visible anchor"
+        const first = railEl.querySelector('.lang-pill');
+        if (first && typeof first.scrollIntoView === 'function'){
+          try { first.scrollIntoView({ inline: 'start', block: 'nearest' }); } catch {}
+        }
+
+        forceStartForAWhile(12);
       }
 
       function placeRailSmart(){
@@ -955,9 +953,13 @@
 
       function openRail(){
         switchEl.classList.add('is-open');
+
         requestAnimationFrame(() => {
+          // 1) placement (so we don't compute scroll vs a moving rail)
           placeRailSmart();
-          // (EN sticky => no need to fight scroll any more)
+
+          // 2) kill iOS focus-scroll + force EN visible
+          ensureStartVisible();
         });
       }
 
@@ -965,6 +967,10 @@
         locked = false;
         switchEl.classList.remove('is-open');
         switchEl.classList.remove('open-right');
+
+        // Kill focus memory + reset to EN for next open
+        blurRailFocus();
+        hardResetScroll();
       }
 
       function scheduleOpen(){
@@ -999,17 +1005,32 @@
         scheduleClose();
       });
 
-      const trigger = switchEl.querySelector('.lang-trigger');
-      trigger?.addEventListener('click', (e) => {
+      trigger.addEventListener('click', (e) => {
         e.preventDefault();
         clearTimers();
         if (switchEl.classList.contains('is-open')) closeRail();
         else openRail();
       });
 
+      // When user clicks a pill, iOS will focus it -> next open can auto-scroll to it.
+      // We immediately blur and reset start.
+      railEl.querySelectorAll('.lang-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          blurRailFocus();
+          setTimeout(() => {
+            blurRailFocus();
+            hardResetScroll();
+          }, 0);
+        });
+      });
+
+      // iPad rotates/resizes often
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
-        requestAnimationFrame(() => placeRailSmart());
+        requestAnimationFrame(() => {
+          placeRailSmart();
+          ensureStartVisible();
+        });
       });
     })();
 
