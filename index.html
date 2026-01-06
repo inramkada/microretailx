@@ -141,7 +141,6 @@
     }
     .verticals > span{ pointer-events:none; }
 
-    /* no box, no border, no background */
     .verticals-menu{
       position:absolute;
       top:100%;
@@ -169,7 +168,15 @@
       -webkit-backdrop-filter:none;
     }
 
+    /* Open on hover (desktop) */
     .verticals:hover .verticals-menu{
+      opacity:1;
+      pointer-events:auto;
+      transform: translateY(0);
+    }
+
+    /* Open when "pinned" by click (mobile + desktop) */
+    .verticals.is-open .verticals-menu{
       opacity:1;
       pointer-events:auto;
       transform: translateY(0);
@@ -534,15 +541,15 @@
 
           <a class="navlink" href="#/about" data-i18n="nav.about">About</a>
 
-          <!-- Verticals: two-line items, no frame -->
-          <div class="navlink verticals" role="button" aria-haspopup="true">
+          <!-- Verticals pinned by click -->
+          <div class="navlink verticals" id="verticals" role="button" aria-haspopup="true" aria-expanded="false">
             <span data-i18n="nav.verticals">Verticals</span>
             <div class="verticals-menu" aria-label="Verticals">
               <a class="v-item" href="https://www.microlabsx.com">
                 <span class="v-main">BIOTECH</span>
                 <span class="v-sub">MICROLABSX</span>
               </a>
-              <a class="v-item" href="https://www.microstudiox.com">
+              <a class="v-item" href="https://www.microstudio.com">
                 <span class="v-main">STUDIO</span>
                 <span class="v-sub">MICROSTUDIOX</span>
               </a>
@@ -761,6 +768,7 @@
           gear.setAttribute("aria-label", tip);
         }
 
+        // Prevent rail jump after dir change
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
       }
@@ -835,6 +843,42 @@
         clearTimers();
         if (switchEl.classList.contains('is-open')) closeRail();
         else openRail();
+      });
+    })();
+
+    // ===== Verticals: pin open on click, close outside / Escape =====
+    (function(){
+      const v = document.getElementById('verticals');
+      if (!v) return;
+
+      function setOpen(isOpen){
+        v.classList.toggle('is-open', isOpen);
+        v.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      }
+      function isOpen(){ return v.classList.contains('is-open'); }
+
+      // Toggle on click (but allow link clicks to navigate)
+      v.addEventListener('click', (e) => {
+        const a = e.target.closest('a');
+        if (a) return; // let navigation happen
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(!isOpen());
+      });
+
+      // Close when clicking anywhere else
+      document.addEventListener('click', (e) => {
+        if (!v.contains(e.target)) setOpen(false);
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setOpen(false);
+      });
+
+      // If you want: close after selecting a link (optional)
+      v.querySelectorAll('a').forEach(a=>{
+        a.addEventListener('click', ()=> setOpen(false));
       });
     })();
 
