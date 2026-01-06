@@ -47,7 +47,7 @@
                    "Liberation Mono", "Courier New", monospace;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
-      font-weight:400; /* no bold anywhere */
+      font-weight:400; /* no bold */
     }
 
     .page{
@@ -92,7 +92,7 @@
 
     .brand{
       font-size: var(--brand-size);
-      font-weight:400;
+      font-weight: 400;
       letter-spacing: var(--brand-track);
       text-transform: uppercase;
       white-space: nowrap;
@@ -132,7 +132,7 @@
     }
     .navlink:hover::after{ transform:scaleX(1); }
 
-    /* ===== Language rail (controlled by JS timers) ===== */
+    /* ===== Language rail (JS-controlled) ===== */
     .lang-switch{
       position:relative;
       display:flex;
@@ -149,7 +149,7 @@
       border:0;
       cursor:pointer;
       padding:0;
-      color:#fff; /* globe white */
+      color:#fff;
       line-height:1;
       border-radius:10px;
     }
@@ -158,7 +158,7 @@
 
     .lang-rail{
       position:absolute;
-      right: calc(100% + 10px); /* open to LEFT */
+      right: calc(100% + 10px); /* open LEFT in LTR */
       top: 50%;
       transform: translateY(-50%);
 
@@ -183,14 +183,12 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
 
-      /* close in 1s (opacity) */
-      transition: opacity 1s ease, transform 220ms ease;
+      transition: opacity 1s ease, transform 220ms ease; /* close in 1s opacity */
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
     .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
 
-    /* Open state controlled by JS */
     .lang-switch.is-open .lang-rail{
       opacity:1;
       pointer-events:auto;
@@ -223,13 +221,12 @@
       transition: transform 220ms ease, opacity 220ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
     }
 
-    /* Pills show when open */
     .lang-switch.is-open .lang-pill{
       transform: translateX(0);
       opacity: 1;
     }
 
-    /* stagger (wave) when open */
+    /* stagger (wave) */
     .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
     .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
     .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
@@ -378,7 +375,7 @@
     }
     .cookie-gear:hover::after{ opacity:1; }
 
-    /* ===== RTL (Arabic): flip open direction to the RIGHT ===== */
+    /* ===== RTL (Arabic): flips layout + rail opens RIGHT ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
     [dir="rtl"] nav{ flex-direction:row-reverse; }
     [dir="rtl"] .navlink::after{ transform-origin:right; }
@@ -386,14 +383,10 @@
 
     [dir="rtl"] .lang-rail{
       right:auto;
-      left: calc(100% + 10px);
+      left: calc(100% + 10px); /* open RIGHT in RTL */
     }
-    [dir="rtl"] .lang-pill{
-      transform: translateX(-10px);
-    }
-    [dir="rtl"] .lang-switch.is-open .lang-pill{
-      transform: translateX(0);
-    }
+    [dir="rtl"] .lang-pill{ transform: translateX(-10px); }
+    [dir="rtl"] .lang-switch.is-open .lang-pill{ transform: translateX(0); }
 
     /* Mobile: rail drops DOWN so it never collides */
     @media (max-width: 640px){
@@ -438,42 +431,45 @@
             </button>
 
             <div class="lang-rail" id="lang-rail" aria-label="Languages">
-              <button class="lang-pill" data-href="index.en.html" data-label="English" type="button">EN</button>
-              <button class="lang-pill" data-href="index.zh.html" data-label="中文 (Chinese)" type="button">ZH</button>
-              <button class="lang-pill" data-href="index.es.html" data-label="Español" type="button">ES</button>
-              <button class="lang-pill" data-href="index.hi.html" data-label="हिंदी (Hindi)" type="button">HI</button>
-              <button class="lang-pill" data-href="index.ar.html" data-label="العربية (Arabic)" type="button">AR</button>
-              <button class="lang-pill" data-href="index.fr.html" data-label="Français" type="button">FR</button>
-              <button class="lang-pill" data-href="index.pt.html" data-label="Português" type="button">PT</button>
-              <button class="lang-pill" data-href="index.ru.html" data-label="Русский" type="button">RU</button>
-              <button class="lang-pill" data-href="index.ja.html" data-label="日本語 (Japanese)" type="button">JA</button>
-              <button class="lang-pill" data-href="index.de.html" data-label="Deutsch" type="button">DE</button>
-              <button class="lang-pill" data-href="index.ca.html" data-label="Català" type="button">CA</button>
-              <button class="lang-pill" data-href="index.id.html" data-label="Bahasa Indonesia" type="button">ID</button>
+              <!-- Instant translation: no hrefs, only data-lang -->
+              <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
+              <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
+              <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
+              <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)" type="button">HI</button>
+              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
+              <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
+              <button class="lang-pill" data-lang="pt" data-label="Português" type="button">PT</button>
+              <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
+              <button class="lang-pill" data-lang="ja" data-label="日本語 (Japanese)" type="button">JA</button>
+              <button class="lang-pill" data-lang="de" data-label="Deutsch" type="button">DE</button>
+              <button class="lang-pill" data-lang="ca" data-label="Català" type="button">CA</button>
+              <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia" type="button">ID</button>
             </div>
           </div>
 
-          <a class="navlink" href="#/about">About</a>
-          <a class="navlink" href="#/verticals">Verticals</a>
-          <a class="navlink" href="#/contact">Contact</a>
+          <a class="navlink" href="#/about" data-i18n="nav.about">About</a>
+          <a class="navlink" href="#/verticals" data-i18n="nav.verticals">Verticals</a>
+          <a class="navlink" href="#/contact" data-i18n="nav.contact">Contact</a>
         </nav>
       </div>
     </header>
 
     <main>
       <section class="card">
-        <p>Language rail test: opens after 3s, locks while inside, closes 3s after exit (fade 1s).</p>
+        <p data-i18n="card.test">
+          Language rail test: opens after 3s, locks while inside, closes 3s after exit (fade 1s).
+        </p>
       </section>
     </main>
 
     <footer>
       <div class="footer-inner">
         <div class="footer-links">
-          <a href="terms.html">Terms</a>
-          <a href="privacy.html">Privacy</a>
+          <a href="terms.html" data-i18n="footer.terms">Terms</a>
+          <a href="privacy.html" data-i18n="footer.privacy">Privacy</a>
 
           <span style="display:inline-flex; align-items:center;">
-            <a href="cookies.html">Cookies</a>
+            <a href="cookies.html" data-i18n="footer.cookies">Cookies</a>
             <button
               type="button"
               class="cookie-gear"
@@ -487,7 +483,7 @@
             </button>
           </span>
 
-          <a href="legal.html">Legal</a>
+          <a href="legal.html" data-i18n="footer.legal">Legal</a>
         </div>
 
         <div class="copyright">
@@ -498,6 +494,204 @@
   </div>
 
   <script>
+    // ===== Instant i18n (no navigation) + RTL handling for Arabic =====
+    (function(){
+      const I18N = {
+        en: {
+          "nav.about": "About",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contact",
+          "footer.terms": "Terms",
+          "footer.privacy": "Privacy",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Language rail test: opens after 3s, locks while inside, closes 3s after exit (fade 1s).",
+          "cookie.prefs": "Cookie Preferences"
+        },
+        es: {
+          "nav.about": "Acerca de",
+          "nav.verticals": "Verticales",
+          "nav.contact": "Contacto",
+          "footer.terms": "Términos",
+          "footer.privacy": "Privacidad",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Selector de idioma: abre tras 3s, se bloquea dentro, y cierra 3s después de salir (desvanece 1s).",
+          "cookie.prefs": "Preferencias de cookies"
+        },
+        fr: {
+          "nav.about": "À propos",
+          "nav.verticals": "Verticales",
+          "nav.contact": "Contact",
+          "footer.terms": "Conditions",
+          "footer.privacy": "Confidentialité",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Mentions légales",
+          "card.test": "Sélecteur de langue : s’ouvre après 3 s, se verrouille à l’intérieur, se ferme 3 s après la sortie (fondu 1 s).",
+          "cookie.prefs": "Préférences cookies"
+        },
+        pt: {
+          "nav.about": "Sobre",
+          "nav.verticals": "Verticais",
+          "nav.contact": "Contato",
+          "footer.terms": "Termos",
+          "footer.privacy": "Privacidade",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Seletor de idioma: abre após 3s, bloqueia dentro, fecha 3s após sair (fade 1s).",
+          "cookie.prefs": "Preferências de cookies"
+        },
+        de: {
+          "nav.about": "Über uns",
+          "nav.verticals": "Vertikalen",
+          "nav.contact": "Kontakt",
+          "footer.terms": "AGB",
+          "footer.privacy": "Datenschutz",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Impressum",
+          "card.test": "Sprachauswahl: öffnet nach 3s, bleibt innen gesperrt, schließt 3s nach Verlassen (Fade 1s).",
+          "cookie.prefs": "Cookie-Einstellungen"
+        },
+        it: { // (por si luego lo quieres)
+          "nav.about": "Chi siamo",
+          "nav.verticals": "Verticali",
+          "nav.contact": "Contatto",
+          "footer.terms": "Termini",
+          "footer.privacy": "Privacy",
+          "footer.cookies": "Cookie",
+          "footer.legal": "Note legali",
+          "card.test": "Selettore lingua: si apre dopo 3s, si blocca dentro, si chiude 3s dopo l’uscita (fade 1s).",
+          "cookie.prefs": "Preferenze cookie"
+        },
+        ru: {
+          "nav.about": "О нас",
+          "nav.verticals": "Вертикали",
+          "nav.contact": "Контакты",
+          "footer.terms": "Условия",
+          "footer.privacy": "Конфиденциальность",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Правовая информация",
+          "card.test": "Выбор языка: открывается через 3с, фиксируется внутри, закрывается через 3с после выхода (плавно 1с).",
+          "cookie.prefs": "Настройки cookies"
+        },
+        ja: {
+          "nav.about": "概要",
+          "nav.verticals": "事業領域",
+          "nav.contact": "お問い合わせ",
+          "footer.terms": "利用規約",
+          "footer.privacy": "プライバシー",
+          "footer.cookies": "Cookies",
+          "footer.legal": "法的情報",
+          "card.test": "言語セレクター：3秒後に開き、内側で固定、退出後3秒で閉じます（フェード1秒）。",
+          "cookie.prefs": "Cookie設定"
+        },
+        zh: {
+          "nav.about": "关于",
+          "nav.verticals": "业务领域",
+          "nav.contact": "联系",
+          "footer.terms": "条款",
+          "footer.privacy": "隐私",
+          "footer.cookies": "Cookies",
+          "footer.legal": "法律",
+          "card.test": "语言选择：3秒后打开，进入后锁定，离开3秒后关闭（淡出1秒）。",
+          "cookie.prefs": "Cookie 偏好设置"
+        },
+        hi: {
+          "nav.about": "परिचय",
+          "nav.verticals": "वर्टिकल्स",
+          "nav.contact": "संपर्क",
+          "footer.terms": "शर्तें",
+          "footer.privacy": "गोपनीयता",
+          "footer.cookies": "Cookies",
+          "footer.legal": "कानूनी",
+          "card.test": "भाषा चयन: 3s बाद खुलेगा, अंदर रहते लॉक, बाहर जाने के 3s बाद बंद (fade 1s)।",
+          "cookie.prefs": "कुकी प्राथमिकताएँ"
+        },
+        ar: {
+          "nav.about": "حول",
+          "nav.verticals": "القطاعات",
+          "nav.contact": "تواصل",
+          "footer.terms": "الشروط",
+          "footer.privacy": "الخصوصية",
+          "footer.cookies": "ملفات تعريف الارتباط",
+          "footer.legal": "قانوني",
+          "card.test": "محدد اللغة: يفتح بعد 3 ثوانٍ، يثبت بالداخل، ويغلق بعد 3 ثوانٍ من الخروج (تلاشي 1 ثانية).",
+          "cookie.prefs": "تفضيلات ملفات تعريف الارتباط"
+        },
+        ca: {
+          "nav.about": "Sobre",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contacte",
+          "footer.terms": "Termes",
+          "footer.privacy": "Privacitat",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Selector d’idioma: s’obre després de 3s, queda bloquejat a dins, i es tanca 3s després de sortir (fade 1s).",
+          "cookie.prefs": "Preferències de cookies"
+        },
+        id: {
+          "nav.about": "Tentang",
+          "nav.verticals": "Vertikal",
+          "nav.contact": "Kontak",
+          "footer.terms": "Ketentuan",
+          "footer.privacy": "Privasi",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Pemilih bahasa: terbuka setelah 3d, terkunci saat di dalam, tertutup 3d setelah keluar (fade 1d).",
+          "cookie.prefs": "Preferensi cookies"
+        }
+      };
+
+      const RTL_LANGS = new Set(["ar"]);
+      const DEFAULT_LANG = "en";
+      const storageKey = "mx_lang";
+
+      function getLang(){
+        return localStorage.getItem(storageKey) || DEFAULT_LANG;
+      }
+
+      function setLang(lang){
+        localStorage.setItem(storageKey, lang);
+      }
+
+      function applyLang(lang){
+        const dict = I18N[lang] || I18N[DEFAULT_LANG];
+
+        // Set html lang + dir (Arabic => rtl)
+        const html = document.documentElement;
+        html.lang = lang;
+        html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
+
+        // Update all text nodes marked with data-i18n
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+          const key = el.getAttribute("data-i18n");
+          if (!key) return;
+          const val = dict[key] ?? I18N[DEFAULT_LANG][key];
+          if (typeof val === "string") el.textContent = val;
+        });
+
+        // Update cookie gear tooltip + aria-label
+        const gear = document.getElementById("cookiePreferencesGear");
+        if (gear){
+          const tip = dict["cookie.prefs"] ?? I18N[DEFAULT_LANG]["cookie.prefs"];
+          gear.setAttribute("data-tip", tip);
+          gear.setAttribute("aria-label", tip);
+        }
+      }
+
+      // Init
+      applyLang(getLang());
+
+      // Bind language buttons
+      document.querySelectorAll(".lang-pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
+          setLang(lang);
+          applyLang(lang);
+        });
+      });
+    })();
+
     // ===== Language rail timers: open after 3s, lock inside rail, close 3s after exit, fade 1s (CSS) =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
@@ -527,26 +721,20 @@
 
       function scheduleOpen(){
         clearTimers();
-        openTimer = setTimeout(() => {
-          openRail();
-        }, OPEN_DELAY_MS);
+        openTimer = setTimeout(() => openRail(), OPEN_DELAY_MS);
       }
 
       function scheduleClose(){
         clearTimers();
-        closeTimer = setTimeout(() => {
-          closeRail();
-        }, CLOSE_DELAY_MS);
+        closeTimer = setTimeout(() => closeRail(), CLOSE_DELAY_MS);
       }
 
-      // Enter language area (globe+rail)
       switchEl.addEventListener('pointerenter', () => {
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
         if (switchEl.classList.contains('is-open')) return;
         scheduleOpen();
       });
 
-      // Leave whole language area
       switchEl.addEventListener('pointerleave', () => {
         if (!switchEl.classList.contains('is-open')) {
           clearTimers();
@@ -556,28 +744,18 @@
         scheduleClose();
       });
 
-      // Lock when inside selection zone
       railEl.addEventListener('pointerenter', () => {
         locked = true;
         clearTimers();
         openRail();
       });
 
-      // Unlock and close after 3s when leaving selection zone
       railEl.addEventListener('pointerleave', () => {
         locked = false;
         scheduleClose();
       });
 
-      // Navigate in SAME TAB to translation pages
-      railEl.querySelectorAll('.lang-pill').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const href = btn.getAttribute('data-href');
-          if (href) window.location.href = href;
-        });
-      });
-
-      // Mobile: tap globe toggles instantly (no new tabs)
+      // Mobile: tap globe toggles instantly
       const trigger = switchEl.querySelector('.lang-trigger');
       trigger?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -592,7 +770,7 @@
       const gear = document.getElementById('cookiePreferencesGear');
       if (!gear) return;
       gear.addEventListener('click', () => {
-        // Replace this with your real handler:
+        // Replace with your real handler:
         // window.openCookiePreferences?.();
         // document.dispatchEvent(new CustomEvent('open-cookie-preferences'));
         alert('Open Cookie Preferences (hook to your consent modal).');
