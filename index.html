@@ -61,7 +61,11 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
       font-weight:400; /* no bold */
+
+      /* Premium micro-fade on language/dir changes */
+      transition: opacity 0.18s ease-in-out;
     }
+    body.is-i18n-switching{ opacity:0.92; }
 
     .page{
       min-height:100%;
@@ -154,7 +158,6 @@
     }
     .verticals > span{ pointer-events:none; }
 
-    /* no box, no border, no background */
     .verticals-menu{
       position:absolute;
       top:100%;
@@ -182,7 +185,6 @@
       -webkit-backdrop-filter:none;
     }
 
-    /* Open when pinned by click (mobile + desktop) */
     .verticals.is-open .verticals-menu{
       opacity:1;
       pointer-events:auto;
@@ -270,7 +272,8 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
 
-      transition: opacity 1s ease, transform 220ms ease;
+      /* Premium rail transition (avoids "blink") */
+      transition: opacity 0.4s ease, transform 0.2s ease;
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
@@ -548,7 +551,6 @@
 
           <a class="navlink" href="#/about" data-i18n="nav.about">About</a>
 
-          <!-- Verticals: click to open/close -->
           <div class="navlink verticals" id="verticals" role="button" aria-haspopup="true" aria-expanded="false">
             <span data-i18n="nav.verticals">Verticals</span>
             <div class="verticals-menu" aria-label="Verticals">
@@ -606,7 +608,7 @@
   </div>
 
   <script>
-    // ===== Instant i18n (no navigation) + RTL handling =====
+    // ===== Instant i18n (no navigation) + RTL handling + premium micro-fade =====
     (function(){
       const I18N = {
         en: {
@@ -755,6 +757,9 @@
       }
 
       function applyLang(lang){
+        // Premium micro-fade
+        document.body.classList.add("is-i18n-switching");
+
         const dict = I18N[lang] || I18N[DEFAULT_LANG];
 
         const html = document.documentElement;
@@ -778,6 +783,11 @@
         // Prevent rail jump after dir change
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
+
+        // End micro-fade next frame
+        requestAnimationFrame(() => {
+          document.body.classList.remove("is-i18n-switching");
+        });
       }
 
       applyLang(getLang());
@@ -791,7 +801,7 @@
       });
     })();
 
-    // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit, fade 1s =====
+    // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
@@ -801,7 +811,7 @@
       let closeTimer = null;
       let locked = false;
 
-      const OPEN_DELAY_MS  = 500;   // lowered from 3000
+      const OPEN_DELAY_MS  = 500;
       const CLOSE_DELAY_MS = 3000;
 
       function clearTimers(){
@@ -854,7 +864,7 @@
       });
     })();
 
-    // ===== Verticals: click to open/close, close outside / Escape =====
+    // ===== Verticals: click only (no hover), close outside / Escape =====
     (function(){
       const v = document.getElementById('verticals');
       if (!v) return;
