@@ -65,7 +65,6 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
       font-weight:400;
-
       transition: opacity 0.18s ease-in-out;
     }
     body.is-i18n-switching{ opacity:0.92; }
@@ -212,8 +211,6 @@
       flex-direction:column;
       align-items:flex-start;
       text-decoration:none;
-
-      /* ✅ un pelo más de aire */
       padding:3px 0;
     }
 
@@ -292,7 +289,11 @@
 
       transition: opacity 0.4s ease, transform 0.2s ease;
 
-      /* ✅ iOS / iPad scroll stability */
+      /* ✅ “garantizar eje” + anclaje visual limpio */
+      justify-content: flex-start;
+      scroll-padding-left: 8px;
+
+      /* ✅ estabilidad iOS */
       direction: ltr;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
@@ -348,24 +349,6 @@
     .lang-switch.is-open .lang-pill{
       transform: translateX(0);
       opacity: 1;
-    }
-
-    /* ✅ FIX INVENCIBLE: EN siempre visible en iPad (sticky dentro del scroll) */
-    .lang-pill[data-lang="en"]{
-      position: sticky;
-      left: 0;
-      z-index: 3;
-      background: rgba(0,0,0,.78);
-      border-color: rgba(255,255,255,.16);
-      box-shadow: 12px 0 16px rgba(0,0,0,.55);
-      margin-right: 2px;
-    }
-    [dir="rtl"] .lang-pill[data-lang="en"]{
-      left: auto;
-      right: 0;
-      box-shadow: -12px 0 16px rgba(0,0,0,.55);
-      margin-right: 0;
-      margin-left: 2px;
     }
 
     /* stagger (wave) */
@@ -545,6 +528,7 @@
       left:auto;
       right: calc(100% + 10px);
       direction: rtl;
+      scroll-padding-right: 8px;
     }
 
     [dir="rtl"] .verticals-menu{
@@ -843,7 +827,6 @@
 
         const shouldScramble = (text) => {
           if (!text) return false;
-          // keep as you had; landing-scale ok
           return /^[\VIU0000-\LEN02FF\ZAA1E00-\u1EFF0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
         };
 
@@ -882,7 +865,6 @@
             const val = dict[key] ?? I18N[DEFAULT_LANG][key];
             if (typeof val !== "string") return;
 
-            // small perf guard: scramble only short strings
             if (shouldScramble(val) && val.length <= 80) scrambleText(el, val, 180);
             else el.textContent = val;
 
@@ -918,11 +900,12 @@
       });
     })();
 
-    // ===== Language rail timers (keep your logic) =====
+    // ===== Language rail timers (iPadOS "scroll-to-focus" killer + hard reset on open) =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
-      if (!switchEl || !railEl) return;
+      const trigger  = switchEl?.querySelector('.lang-trigger');
+      if (!switchEl || !railEl || !trigger) return;
 
       let openTimer = null;
       let closeTimer = null;
@@ -934,6 +917,34 @@
       function clearTimers(){
         if (openTimer)  { clearTimeout(openTimer);  openTimer = null; }
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      }
+
+      function hardResetScroll(){
+        railEl.scrollLeft = 0;
+        railEl.scrollTo({ left: 0, top: 0, behavior: 'auto' });
+      }
+
+      function blurRailFocus(){
+        const ae = document.activeElement;
+        if (ae && railEl.contains(ae) && typeof ae.blur === 'function') ae.blur();
+        try { trigger.focus({ preventScroll: true }); } catch { try { trigger.focus(); } catch {} }
+      }
+
+      function forceStartForAWhile(frames = 10){
+        // iPadOS may override scrollLeft after we set it; we reassert for a few frames.
+        let n = 0;
+        const tick = () => {
+          blurRailFocus();
+          hardResetScroll();
+          n++;
+          if (n < frames) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+
+        // micro "golden fix" pokes
+        setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 10);
+        setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 40);
+        setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 90);
       }
 
       function placeRailSmart(){
@@ -955,9 +966,16 @@
 
       function openRail(){
         switchEl.classList.add('is-open');
+
         requestAnimationFrame(() => {
           placeRailSmart();
-          // (EN sticky => no need to fight scroll any more)
+
+          // ✅ Hard reset after layout is stable (this is the real iPad fix)
+          blurRailFocus();
+          hardResetScroll();
+
+          // ✅ keep winning against iOS "helpful" scroll
+          forceStartForAWhile(12);
         });
       }
 
@@ -965,6 +983,9 @@
         locked = false;
         switchEl.classList.remove('is-open');
         switchEl.classList.remove('open-right');
+
+        blurRailFocus();
+        hardResetScroll();
       }
 
       function scheduleOpen(){
@@ -999,17 +1020,30 @@
         scheduleClose();
       });
 
-      const trigger = switchEl.querySelector('.lang-trigger');
-      trigger?.addEventListener('click', (e) => {
+      trigger.addEventListener('click', (e) => {
         e.preventDefault();
         clearTimers();
         if (switchEl.classList.contains('is-open')) closeRail();
         else openRail();
       });
 
+      // Prevent iOS from "remembering" last focused pill and auto-scrolling to it next time
+      railEl.querySelectorAll('.lang-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          blurRailFocus();
+          setTimeout(() => {
+            blurRailFocus();
+            hardResetScroll();
+          }, 0);
+        });
+      });
+
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
-        requestAnimationFrame(() => placeRailSmart());
+        requestAnimationFrame(() => {
+          placeRailSmart();
+          forceStartForAWhile(10);
+        });
       });
     })();
 
