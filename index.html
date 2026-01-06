@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MICRORETAILX</title>
+  <title>microretailX</title>
 
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
@@ -61,7 +61,9 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
       font-weight:400; /* no bold */
-      transition: opacity 0.18s ease-in-out; /* premium micro-fade */
+
+      /* Premium micro-fade on language/dir changes */
+      transition: opacity 0.18s ease-in-out;
     }
     body.is-i18n-switching{ opacity:0.92; }
 
@@ -178,6 +180,9 @@
 
       white-space:nowrap;
       z-index:50;
+      filter:none;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
     }
 
     .verticals.is-open .verticals-menu{
@@ -216,7 +221,7 @@
     .v-item:hover .v-main{ color:#fff; }
     .v-item:hover .v-sub{ color:rgba(255,255,255,.72); }
 
-    /* ===== Language rail ===== */
+    /* ===== Language rail (JS-controlled) ===== */
     .lang-switch{
       position:relative;
       display:flex;
@@ -242,7 +247,7 @@
 
     .lang-rail{
       position:absolute;
-      right: calc(100% + 10px);
+      right: calc(100% + 10px); /* open LEFT (towards inside) */
       top: 50%;
       transform: translateY(-50%);
 
@@ -267,6 +272,7 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
 
+      /* Premium rail transition (avoids "blink") */
       transition: opacity 0.4s ease, transform 0.2s ease;
     }
 
@@ -310,6 +316,7 @@
       opacity: 1;
     }
 
+    /* stagger (wave) */
     .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
     .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
     .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
@@ -405,7 +412,7 @@
     .copyright{
       font-size:var(--copy-size);
       letter-spacing:var(--copy-track);
-      opacity:.58;
+      opacity:.58; /* raised for accessibility */
       text-align:center;
       line-height:1.3;
       font-weight:400;
@@ -468,7 +475,7 @@
     [data-i18n].mx-i18n-out{
       opacity:0;
       transform: translateY(2px);
-      filter: blur(2px); /* more visible */
+      filter: blur(1px);
     }
     [data-i18n].mx-i18n-in{
       opacity:1;
@@ -476,7 +483,7 @@
       filter: blur(0);
     }
 
-    /* ===== RTL ===== */
+    /* ===== RTL (Arabic): flip layout but keep rail opening LEFT (towards inside) ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
     [dir="rtl"] nav{ flex-direction:row-reverse; }
     [dir="rtl"] .navlink::after{ transform-origin:right; }
@@ -564,7 +571,7 @@
                 <span class="v-main">BIOTECH</span>
                 <span class="v-sub">MICROLABSX</span>
               </a>
-              <a class="v-item" href="https://www.microstudio.com">
+              <a class="v-item" href="https://www.microstudiox.com">
                 <span class="v-main">STUDIO</span>
                 <span class="v-sub">MICROSTUDIOX</span>
               </a>
@@ -579,9 +586,6 @@
     <main>
       <section class="card">
         <p data-i18n="card.test">We’re working on it — coming back soon.</p>
-        <p data-i18n="card.sub" style="margin:10px 0 0; opacity:.78;">
-          MICRORETAILX is building next-generation platforms across biotech and creative technology.
-        </p>
       </section>
     </main>
 
@@ -601,7 +605,7 @@
               data-tip="Cookie Preferences"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0 .44-.17.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
+                <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0-.44-.17-.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
               </svg>
             </button>
           </span>
@@ -617,6 +621,7 @@
   </div>
 
   <script>
+    // ===== Instant i18n (no navigation) + RTL handling + premium micro-fade + text swap animation =====
     (function(){
       const I18N = {
         en: {
@@ -628,7 +633,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
           "card.test": "We’re working on it — coming back soon.",
-          "card.sub": "MICRORETAILX is building next-generation platforms across biotech and creative technology.",
           "cookie.prefs": "Cookie Preferences"
         },
         es: {
@@ -640,7 +644,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
           "card.test": "Estamos trabajando — volvemos pronto.",
-          "card.sub": "MICRORETAILX está construyendo plataformas de nueva generación en biotecnología y tecnología creativa.",
           "cookie.prefs": "Preferencias de cookies"
         },
         fr: {
@@ -652,7 +655,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Légal",
           "card.test": "Nous travaillons — de retour bientôt.",
-          "card.sub": "MICRORETAILX construit des plateformes de nouvelle génération en biotechnologie et technologie créative.",
           "cookie.prefs": "Préférences cookies"
         },
         ru: {
@@ -664,7 +666,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Право",
           "card.test": "Мы работаем — скоро вернёмся.",
-          "card.sub": "MICRORETAILX создаёт платформы нового поколения в биотехе и креативных технологиях.",
           "cookie.prefs": "Настройки cookies"
         },
         pt: {
@@ -676,7 +677,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
           "card.test": "Estamos a trabalhar — voltamos em breve.",
-          "card.sub": "A MICRORETAILX está a construir plataformas de nova geração em biotecnologia e tecnologia criativa.",
           "cookie.prefs": "Preferências de cookies"
         },
         de: {
@@ -688,7 +688,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Impressum",
           "card.test": "Wir arbeiten daran — bald zurück.",
-          "card.sub": "MICRORETAILX baut Plattformen der nächsten Generation für Biotech und kreative Technologie.",
           "cookie.prefs": "Cookie-Einstellungen"
         },
         zh: {
@@ -700,7 +699,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "法律",
           "card.test": "我们正在建设中，敬请期待。",
-          "card.sub": "MICRORETAILX 正在打造覆盖生物科技与创意科技的下一代平台。",
           "cookie.prefs": "Cookie 偏好设置"
         },
         hi: {
@@ -712,7 +710,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "कानूनी",
           "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।",
-          "card.sub": "MICRORETAILX बायोटेक और क्रिएटिव टेक्नोलॉजी में अगली पीढ़ी के प्लेटफ़ॉर्म बना रहा है।",
           "cookie.prefs": "कुकी प्राथमिकताएँ"
         },
         ar: {
@@ -724,7 +721,6 @@
           "footer.cookies": "الكوكيز",
           "footer.legal": "قانوني",
           "card.test": "نعمل على ذلك — نعود قريبًا.",
-          "card.sub": "تبني MICRORETAILX منصات الجيل القادم في التقنيات الحيوية والتقنيات الإبداعية.",
           "cookie.prefs": "تفضيلات الكوكيز"
         },
         ja: {
@@ -736,7 +732,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "法的",
           "card.test": "現在準備中です。まもなく公開します。",
-          "card.sub": "MICRORETAILX はバイオテックとクリエイティブテクノロジーの次世代プラットフォームを構築しています。",
           "cookie.prefs": "Cookie設定"
         },
         ca: {
@@ -748,7 +743,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
           "card.test": "Estem treballant — tornem aviat.",
-          "card.sub": "MICRORETAILX està construint plataformes de nova generació en biotecnologia i tecnologia creativa.",
           "cookie.prefs": "Preferències de cookies"
         },
         id: {
@@ -760,7 +754,6 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
           "card.test": "Kami sedang mengerjakan — segera kembali.",
-          "card.sub": "MICRORETAILX sedang membangun platform generasi berikutnya di bidang biotek dan teknologi kreatif.",
           "cookie.prefs": "Preferensi cookies"
         }
       };
@@ -790,11 +783,11 @@
 
         const shouldScramble = (text) => {
           if (!text) return false;
-          return /^[\u0000-\u02FF\u1E00-\u1EFF0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
+          return /^[\VIU0000-\LEN02FF\ZAA1E00-\u1EFF0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
         };
 
         const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        const scrambleText = (el, finalText, durationMs = 420) => {
+        const scrambleText = (el, finalText, durationMs = 180) => {
           const start = performance.now();
           const base = finalText;
 
@@ -821,22 +814,18 @@
         const nodes = Array.from(document.querySelectorAll("[data-i18n]"));
         nodes.forEach(el => el.classList.add("mx-i18n-out"));
 
-        // Faster fade-out so the effect reads
         setTimeout(() => {
-          nodes.forEach((el, idx) => {
+          nodes.forEach(el => {
             const key = el.getAttribute("data-i18n");
             if (!key) return;
             const val = dict[key] ?? I18N[DEFAULT_LANG][key];
             if (typeof val !== "string") return;
 
-            const delay = Math.min(140, idx * 12); // cascade
-            setTimeout(() => {
-              if (shouldScramble(val)) scrambleText(el, val, 420);
-              else el.textContent = val;
+            if (shouldScramble(val)) scrambleText(el, val, 180);
+            else el.textContent = val;
 
-              el.classList.remove("mx-i18n-out");
-              el.classList.add("mx-i18n-in");
-            }, delay);
+            el.classList.remove("mx-i18n-out");
+            el.classList.add("mx-i18n-in");
           });
 
           const gear = document.getElementById("cookiePreferencesGear");
@@ -848,12 +837,12 @@
 
           setTimeout(() => {
             nodes.forEach(el => el.classList.remove("mx-i18n-in"));
-          }, 700);
+          }, 220);
 
           requestAnimationFrame(() => {
             document.body.classList.remove("is-i18n-switching");
           });
-        }, 120);
+        }, 160);
       }
 
       applyLang(getLang());
