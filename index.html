@@ -42,7 +42,7 @@
       --nav-size:clamp(12px, 1.15vw, 12.5px);
       --nav-track:0.12em;
 
-      /* ✅ legible sin romper estética */
+      /* Legible sin romper estética */
       --copy-size: clamp(9.5px, 1.1vw, 11px);
       --copy-track:0.06em;
 
@@ -90,7 +90,7 @@
       z-index:-1;
     }
 
-    /* ✅ fondo más ligero en móvil */
+    /* Fondo más ligero en móvil */
     @media (max-width: 640px){
       .page::before{
         mix-blend-mode: normal;
@@ -176,7 +176,7 @@
       top:100%;
       left:0;
 
-      /* ✅ baja un pelín para que BIOTECH no roce la línea */
+      /* Baja un pelín para que BIOTECH no roce la línea */
       margin-top:14px;
 
       display:flex;
@@ -289,11 +289,11 @@
 
       transition: opacity 0.4s ease, transform 0.2s ease;
 
-      /* ✅ “garantizar eje” + anclaje visual limpio */
+      /* Eje de seguridad */
       justify-content: flex-start;
       scroll-padding-left: 8px;
 
-      /* ✅ estabilidad iOS */
+      /* estabilidad iOS */
       direction: ltr;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
@@ -815,7 +815,7 @@
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 
-        // optional (UX): update title
+        // Title UX
         if (lang === "es") document.title = "microretailX — Próximamente";
         else if (lang === "fr") document.title = "microretailX — Bientôt";
         else if (lang === "de") document.title = "microretailX — Bald";
@@ -825,9 +825,10 @@
         switchEl?.classList.remove("is-open");
         switchEl?.classList.remove("open-right");
 
+        // scramble only for latin-ish uppercase-ish strings (safe)
         const shouldScramble = (text) => {
           if (!text) return false;
-          return /^[\VIU0000-\LEN02FF\ZAA1E00-\u1EFF0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
+          return /^[A-Za-z0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
         };
 
         const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -927,11 +928,11 @@
       function blurRailFocus(){
         const ae = document.activeElement;
         if (ae && railEl.contains(ae) && typeof ae.blur === 'function') ae.blur();
-        try { trigger.focus({ preventScroll: true }); } catch { try { trigger.focus(); } catch {} }
+        try { trigger.focus({ preventScroll: true }); }
+        catch { try { trigger.focus(); } catch {} }
       }
 
-      function forceStartForAWhile(frames = 10){
-        // iPadOS may override scrollLeft after we set it; we reassert for a few frames.
+      function forceStartForAWhile(frames = 12){
         let n = 0;
         const tick = () => {
           blurRailFocus();
@@ -941,7 +942,7 @@
         };
         requestAnimationFrame(tick);
 
-        // micro "golden fix" pokes
+        // micro-pokes (WebKit es terco)
         setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 10);
         setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 40);
         setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 90);
@@ -958,6 +959,7 @@
           switchEl.classList.add('open-right');
         }
 
+        // Si por abrir a la derecha se sale por el otro lado, vuelve a la izquierda
         const rect2 = railEl.getBoundingClientRect();
         if (rect2.right > (vw - margin)){
           switchEl.classList.remove('open-right');
@@ -969,12 +971,7 @@
 
         requestAnimationFrame(() => {
           placeRailSmart();
-
-          // ✅ Hard reset after layout is stable (this is the real iPad fix)
-          blurRailFocus();
-          hardResetScroll();
-
-          // ✅ keep winning against iOS "helpful" scroll
+          // Golden Fix iPad
           forceStartForAWhile(12);
         });
       }
@@ -983,7 +980,6 @@
         locked = false;
         switchEl.classList.remove('is-open');
         switchEl.classList.remove('open-right');
-
         blurRailFocus();
         hardResetScroll();
       }
@@ -1027,7 +1023,7 @@
         else openRail();
       });
 
-      // Prevent iOS from "remembering" last focused pill and auto-scrolling to it next time
+      // Evita que iOS recuerde/cente el último idioma tocado
       railEl.querySelectorAll('.lang-pill').forEach(btn => {
         btn.addEventListener('click', () => {
           blurRailFocus();
@@ -1038,6 +1034,7 @@
         });
       });
 
+      // iPad rota/resizes a menudo
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
         requestAnimationFrame(() => {
