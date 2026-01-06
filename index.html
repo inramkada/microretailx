@@ -42,6 +42,7 @@
       --nav-size:clamp(12px, 1.15vw, 12.5px);
       --nav-track:0.12em;
 
+      /* Legible sin romper estética */
       --copy-size: clamp(9.5px, 1.1vw, 11px);
       --copy-track:0.06em;
 
@@ -89,6 +90,7 @@
       z-index:-1;
     }
 
+    /* Fondo más ligero en móvil */
     @media (max-width: 640px){
       .page::before{
         mix-blend-mode: normal;
@@ -173,7 +175,10 @@
       position:absolute;
       top:100%;
       left:0;
-      margin-top:14px; /* baja un pelín */
+
+      /* Baja un pelín para que BIOTECH no roce la línea */
+      margin-top:14px;
+
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -231,7 +236,7 @@
     .v-item:hover .v-main{ color:#fff; }
     .v-item:hover .v-sub{ color:rgba(255,255,255,.72); }
 
-    /* ===== Language rail ===== */
+    /* ===== Language rail (JS-controlled) ===== */
     .lang-switch{
       position:relative;
       display:flex;
@@ -255,15 +260,15 @@
     .lang-trigger:hover{ background: rgba(255,255,255,.06); }
     .globe{ width:18px; height:18px; display:block; }
 
-    /* ✅ Rail NO scrollea. Scrollea su hijo .lang-scrollable */
     .lang-rail{
       position:absolute;
-      right: calc(100% + 10px);
+      right: calc(100% + 10px); /* open LEFT (towards inside) */
       top: 50%;
       transform: translateY(-50%);
 
       display:flex;
       align-items:center;
+      gap:8px;
 
       padding:6px 8px;
       border:1px solid var(--menu-border);
@@ -271,7 +276,8 @@
       border-radius: 999px;
 
       max-width: min(780px, calc(100vw - (2 * var(--px)) - 80px));
-      overflow: hidden; /* 👈 clave */
+      overflow-x: auto;
+      overflow-y: hidden;
       white-space: nowrap;
 
       opacity:0;
@@ -282,46 +288,36 @@
       -webkit-backdrop-filter: blur(10px);
 
       transition: opacity 0.4s ease, transform 0.2s ease;
+
+      /* Eje de seguridad */
+      justify-content: flex-start;
+      scroll-padding-left: 8px;
+
+      /* estabilidad iOS */
+      direction: ltr;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
     }
+
+    .lang-rail::-webkit-scrollbar{ height:0; }
+    .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
 
     .lang-switch.is-open .lang-rail{
       opacity:1;
       pointer-events:auto;
     }
 
+    /* iPad/tablet fix: if rail would clip on the left, open to the RIGHT of the globe */
     .lang-switch.open-right .lang-rail{
       right:auto;
       left: calc(100% + 10px);
     }
 
-    /* ✅ EN fijo como roca */
-    .lang-fixed{
-      flex: 0 0 auto;
-      padding-right: 8px;
-      z-index: 10;
-      background: var(--menu-bg);
-      display:flex;
-      align-items:center;
+    /* RTL: mirror the same idea */
+    [dir="rtl"] .lang-switch.open-right .lang-rail{
+      left:auto;
+      right: calc(100% + 10px);
     }
-
-    /* ✅ resto scrollable */
-    .lang-scrollable{
-      display:flex;
-      align-items:center;
-      gap:8px;
-
-      overflow-x:auto;
-      overflow-y:hidden;
-      -webkit-overflow-scrolling: touch;
-
-      scroll-behavior: smooth;
-      scroll-padding-left: 0;
-
-      padding-right: 10px;
-    }
-
-    .lang-scrollable::-webkit-scrollbar{ height:0; }
-    .lang-scrollable{ scrollbar-width:none; -ms-overflow-style:none; }
 
     .lang-pill{
       position:relative;
@@ -355,7 +351,7 @@
       opacity: 1;
     }
 
-    /* stagger (wave) — aplica a todos los pills (incluido EN) */
+    /* stagger (wave) */
     .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
     .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
     .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
@@ -528,26 +524,23 @@
     [dir="rtl"] .navlink::after{ transform-origin:right; }
     [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
 
-    /* RTL rail placement */
     [dir="rtl"] .lang-rail{
       left:auto;
       right: calc(100% + 10px);
-    }
-    [dir="rtl"] .lang-switch.open-right .lang-rail{
-      right:auto;
-      left: calc(100% + 10px);
+      direction: rtl;
+      scroll-padding-right: 8px;
     }
 
-    /* RTL: EN fijo se queda, el scroll va al lado contrario */
-    [dir="rtl"] .lang-fixed{
-      padding-right: 0;
-      padding-left: 8px;
+    [dir="rtl"] .verticals-menu{
+      left:auto;
+      right:0;
+      align-items:flex-end;
+      text-align:right;
     }
-    [dir="rtl"] .lang-scrollable{
-      direction: rtl;
-      padding-right: 0;
-      padding-left: 10px;
-    }
+    [dir="rtl"] .v-item{ align-items:flex-end; }
+
+    [dir="rtl"] .lang-pill{ transform: translateX(10px); }
+    [dir="rtl"] .lang-switch.is-open .lang-pill{ transform: translateX(0); }
 
     @media (max-width: 640px){
       .topbar{
@@ -590,25 +583,19 @@
               </svg>
             </button>
 
-            <!-- ✅ Nueva estructura: EN fijo + resto scrollable -->
             <div class="lang-rail" id="lang-rail" aria-label="Languages">
-              <div class="lang-fixed">
-                <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
-              </div>
-
-              <div class="lang-scrollable" id="lang-scrollable" aria-label="More languages">
-                <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
-                <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
-                <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)" type="button">HI</button>
-                <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
-                <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
-                <button class="lang-pill" data-lang="pt" data-label="Português" type="button">PT</button>
-                <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
-                <button class="lang-pill" data-lang="ja" data-label="日本語 (Japanese)" type="button">JA</button>
-                <button class="lang-pill" data-lang="de" data-label="Deutsch" type="button">DE</button>
-                <button class="lang-pill" data-lang="ca" data-label="Català" type="button">CA</button>
-                <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia" type="button">ID</button>
-              </div>
+              <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
+              <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
+              <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
+              <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)" type="button">HI</button>
+              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
+              <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
+              <button class="lang-pill" data-lang="pt" data-label="Português" type="button">PT</button>
+              <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
+              <button class="lang-pill" data-lang="ja" data-label="日本語 (Japanese)" type="button">JA</button>
+              <button class="lang-pill" data-lang="de" data-label="Deutsch" type="button">DE</button>
+              <button class="lang-pill" data-lang="ca" data-label="Català" type="button">CA</button>
+              <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia" type="button">ID</button>
             </div>
           </div>
 
@@ -671,7 +658,7 @@
   </div>
 
   <script>
-    // ===== Instant i18n + RTL handling + premium micro-fade + text swap animation =====
+    // ===== Instant i18n (no navigation) + RTL handling + premium micro-fade + text swap animation =====
     (function(){
       const I18N = {
         en: {
@@ -828,14 +815,17 @@
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 
+        // Title UX
         if (lang === "es") document.title = "microretailX — Próximamente";
         else if (lang === "fr") document.title = "microretailX — Bientôt";
         else if (lang === "de") document.title = "microretailX — Bald";
         else document.title = "microretailX";
 
-        const nodes = Array.from(document.querySelectorAll("[data-i18n]"));
-        nodes.forEach(el => el.classList.add("mx-i18n-out"));
+        const switchEl = document.getElementById("lang-switch");
+        switchEl?.classList.remove("is-open");
+        switchEl?.classList.remove("open-right");
 
+        // scramble only for latin-ish uppercase-ish strings (safe)
         const shouldScramble = (text) => {
           if (!text) return false;
           return /^[A-Za-z0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
@@ -866,6 +856,9 @@
           requestAnimationFrame(tick);
         };
 
+        const nodes = Array.from(document.querySelectorAll("[data-i18n]"));
+        nodes.forEach(el => el.classList.add("mx-i18n-out"));
+
         setTimeout(() => {
           nodes.forEach(el => {
             const key = el.getAttribute("data-i18n");
@@ -887,8 +880,13 @@
             gear.setAttribute("aria-label", tip);
           }
 
-          setTimeout(() => nodes.forEach(el => el.classList.remove("mx-i18n-in")), 220);
-          requestAnimationFrame(() => document.body.classList.remove("is-i18n-switching"));
+          setTimeout(() => {
+            nodes.forEach(el => el.classList.remove("mx-i18n-in"));
+          }, 220);
+
+          requestAnimationFrame(() => {
+            document.body.classList.remove("is-i18n-switching");
+          });
         }, 160);
       }
 
@@ -903,13 +901,12 @@
       });
     })();
 
-    // ===== Language rail open/close (now: reset only the scrollable child) =====
+    // ===== Language rail timers (iPadOS "scroll-to-focus" killer + hard reset on open) =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
       const trigger  = switchEl?.querySelector('.lang-trigger');
-      const scrollEl = document.getElementById('lang-scrollable');
-      if (!switchEl || !railEl || !trigger || !scrollEl) return;
+      if (!switchEl || !railEl || !trigger) return;
 
       let openTimer = null;
       let closeTimer = null;
@@ -923,9 +920,9 @@
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       }
 
-      function resetScrollable(){
-        scrollEl.scrollLeft = 0;
-        scrollEl.scrollTo({ left: 0, top: 0, behavior: 'auto' });
+      function hardResetScroll(){
+        railEl.scrollLeft = 0;
+        railEl.scrollTo({ left: 0, top: 0, behavior: 'auto' });
       }
 
       function blurRailFocus(){
@@ -935,6 +932,22 @@
         catch { try { trigger.focus(); } catch {} }
       }
 
+      function forceStartForAWhile(frames = 12){
+        let n = 0;
+        const tick = () => {
+          blurRailFocus();
+          hardResetScroll();
+          n++;
+          if (n < frames) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+
+        // micro-pokes (WebKit es terco)
+        setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 10);
+        setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 40);
+        setTimeout(() => { blurRailFocus(); hardResetScroll(); }, 90);
+      }
+
       function placeRailSmart(){
         switchEl.classList.remove('open-right');
 
@@ -942,10 +955,15 @@
         const margin = 10;
 
         const rect = railEl.getBoundingClientRect();
-        if (rect.left < margin) switchEl.classList.add('open-right');
+        if (rect.left < margin){
+          switchEl.classList.add('open-right');
+        }
 
+        // Si por abrir a la derecha se sale por el otro lado, vuelve a la izquierda
         const rect2 = railEl.getBoundingClientRect();
-        if (rect2.right > (vw - margin)) switchEl.classList.remove('open-right');
+        if (rect2.right > (vw - margin)){
+          switchEl.classList.remove('open-right');
+        }
       }
 
       function openRail(){
@@ -953,14 +971,8 @@
 
         requestAnimationFrame(() => {
           placeRailSmart();
-
-          // Golden fix: el scroll solo puede ocurrir dentro de scrollEl (EN fuera)
-          blurRailFocus();
-          resetScrollable();
-
-          // Re-afirmación tras la transición/paint
-          setTimeout(() => { blurRailFocus(); resetScrollable(); }, 50);
-          setTimeout(() => { blurRailFocus(); resetScrollable(); }, 120);
+          // Golden Fix iPad
+          forceStartForAWhile(12);
         });
       }
 
@@ -969,7 +981,7 @@
         switchEl.classList.remove('is-open');
         switchEl.classList.remove('open-right');
         blurRailFocus();
-        resetScrollable();
+        hardResetScroll();
       }
 
       function scheduleOpen(){
@@ -1011,20 +1023,23 @@
         else openRail();
       });
 
-      // Evitamos que iOS recuerde el último pill pulsado
+      // Evita que iOS recuerde/cente el último idioma tocado
       railEl.querySelectorAll('.lang-pill').forEach(btn => {
         btn.addEventListener('click', () => {
           blurRailFocus();
-          setTimeout(() => { blurRailFocus(); resetScrollable(); }, 0);
+          setTimeout(() => {
+            blurRailFocus();
+            hardResetScroll();
+          }, 0);
         });
       });
 
+      // iPad rota/resizes a menudo
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
         requestAnimationFrame(() => {
           placeRailSmart();
-          blurRailFocus();
-          resetScrollable();
+          forceStartForAWhile(10);
         });
       });
     })();
