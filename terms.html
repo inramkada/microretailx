@@ -3,261 +3,621 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SYSTEM CORE | MICRORETAILX</title>
-  <style>
-    :root { 
-      --accent: #00f2ff; 
-      --accent-dim: rgba(0, 242, 255, 0.15);
-      --bg: #000; 
-    }
-    
-    html, body { 
-      margin: 0; padding: 0; height: 100%; 
-      background: var(--bg); overflow: hidden; 
-      color: #fff; font-family: "JetBrains Mono", "Cascadia Code", monospace; 
-    }
+  <title>UNDER MAINTENANCE</title>
 
-    canvas { 
-      display: block; width: 100vw; height: 100vh; 
-      filter: contrast(1.1) brightness(1.05) saturate(1.2); 
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Permissions-Policy"
+        content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+      color: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+                   "Liberation Mono", "Courier New", monospace;
     }
+    canvas { display:block; width:100vw; height:100vh; }
 
     .ui-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 
     .top-bar {
       position: absolute; top: 0; left: 0; right: 0;
-      padding: 24px 32px;
-      display: flex; justify-content: space-between; align-items: center;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-      border-top: 1px solid var(--accent-dim);
-      backdrop-filter: blur(4px);
+      padding: 14px 18px;
+      display: flex; justify-content: flex-start;
+      background: rgba(0,0,0,0.78);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(10px);
     }
 
     .brand {
-      font-size: 11px; letter-spacing: 5px; font-weight: 800;
-      text-transform: uppercase; color: var(--accent);
-      text-shadow: 0 0 15px var(--accent-dim);
-    }
-
-    .status {
-      font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.4);
-      display: flex; align-items: center; gap: 10px;
+      font-size: 12px;
+      letter-spacing: 4px;
+      font-weight: 900;
+      opacity: 0.92;
+      color: rgba(255,255,255,0.92);
+      mix-blend-mode: difference;
+      text-shadow: none;
     }
 
     .footer-bar {
       position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 20px 32px;
-      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      border-bottom: 1px solid var(--accent-dim);
-    }
-
-    .links { display: flex; gap: 24px; margin-bottom: 8px; }
-    .links a { 
-      font-size: 10px; color: rgba(255,255,255,0.5); 
-      text-decoration: none; transition: 0.2s; letter-spacing: 2px;
+      padding: 14px 18px 12px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.78);
+      border-top: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(10px);
       pointer-events: auto;
     }
-    .links a:hover { color: var(--accent); opacity: 1; }
 
-    .copy { font-size: 8px; opacity: 0.25; letter-spacing: 1px; }
+    .footer-links {
+      display: flex; gap: 22px;
+      font-size: 11px; letter-spacing: 2px;
+      opacity: 0.65;
+    }
+    .footer-links a {
+      color:#fff; text-decoration:none;
+      opacity:0.75; pointer-events:auto;
+    }
+    .footer-links a:hover { opacity:1; text-decoration: underline; }
 
-    /* Animación del indicador de vida */
-    .dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+    .copyright {
+      font-size: 9px; letter-spacing: 1px;
+      opacity: 0.45; text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .brand { font-size: 11px; letter-spacing: 3px; }
+      .footer-links { flex-wrap: wrap; justify-content:center; gap: 14px; }
+    }
   </style>
 </head>
-<body>
 
+<body>
   <canvas id="view"></canvas>
 
   <div class="ui-layer">
     <div class="top-bar">
-      <div class="brand">Protocol_X // Maintenance</div>
-      <div class="status"><span class="dot"></span> NODE_ACTIVE [0x42F]</div>
+      <div class="brand">UNDER MAINTENANCE</div>
     </div>
 
-    <div class="footer-bar">
-      <div class="links">
-        <a href="#">ACCESS_CORE</a>
-        <a href="#">LEGAL_RESOURCES</a>
-        <a href="#">ENCRYPT_MODULE</a>
-      </div>
-      <div class="copy">© 2026 MICRORETAILX LLC // KERNEL_V3.0.1 // UNIFIED_REPLICANT</div>
-    </div>
+<footer class="footer-bar">
+  <div class="copyright">
+    © 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
   </div>
+</footer>
 
-  <script>
-    (() => {
-      "use strict";
 
-      const view = document.getElementById("view");
-      const vctx = view.getContext("2d", { alpha: false });
-      const simCanvas = document.createElement("canvas");
-      const sctx = simCanvas.getContext("2d", { willReadFrequently: true });
+<script>
 
-      const IS_MOBILE = /Mobi|Android/i.test(navigator.userAgent);
-      
-      let W, H, simW, simH, dpr;
-      let trailA, trailB, xField, imgData, img8;
-      let agents = [], foods = [];
-      let frame = 0, tPrev = performance.now();
+(() => {
+  "use strict";
 
-      const CFG = {
-        agentCount: IS_MOBILE ? 7500 : 16000,
-        step: IS_MOBILE ? 0.9 : 1.15,
-        sensorDist: 10.5,
-        sensorAngle: 0.56,
-        turnSpeed: 0.36,
-        deposit: 0.75,
-        decay: IS_MOBILE ? 0.968 : 0.974,
-        diffuseMix: 0.45,
-        xBias: 0.88,           // Intensidad de la guía diagonal (X)
-        foodLifeMs: 1400,      // Cuánto dura el rastro al hacer clic
-        foodStrength: 1.8      // Atracción al rastro del usuario
-      };
+  const view = document.getElementById("view");
+  const vctx = view.getContext("2d", { alpha: false });
 
-      function resize() {
-        dpr = Math.min(2, window.devicePixelRatio || 1);
-        W = window.innerWidth; H = window.innerHeight;
-        view.width = W * dpr; view.height = H * dpr;
-        vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const simCanvas = document.createElement("canvas");
+  const sctx = simCanvas.getContext("2d", { willReadFrequently: true });
 
-        // Escalado inteligente para rendimiento
-        const maxSide = IS_MOBILE ? 480 : 720;
-        const aspect = W / H;
-        simW = aspect >= 1 ? maxSide : (maxSide * aspect) | 0;
-        simH = aspect >= 1 ? (maxSide / aspect) | 0 : maxSide;
+  const UA = navigator.userAgent || "";
+  const IS_IOS =
+    /iPhone|iPad|iPod/i.test(UA) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(UA);
 
-        simCanvas.width = simW;
-        simCanvas.height = simH;
+  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+  const lerp  = (a,b,t)=> a + (b-a)*t;
+  const ease  = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+  const easeInOut = t => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;
 
-        const n = simW * simH;
-        trailA = new Float32Array(n).fill(0);
-        trailB = new Float32Array(n).fill(0);
-        xField = new Float32Array(n);
+  const DPR_CAP = IS_IOS ? 1.6 : 2;
+  let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+
+  let W=0, H=0;
+  let simW=0, simH=0;
+
+  let trailA, trailB;
+  let xField;
+  let imgData, img8;
+  let agents = [];
+  let foods = [];
+  let tPrev = performance.now();
+  let frame = 0;
+
+  const INTRO = {
+    start: performance.now(),
+    durIn: 1800,      // barrido lento
+    durFlash: 320,    // flash
+    durOut: 900,      // fade MÁS LENTO (era 650)
+    get active() {
+      const t = performance.now() - this.start;
+      return t < (this.durIn + this.durFlash + this.durOut);
+    }
+  };
+
+  let lastMouseFoodAt = 0;
+
+  const CFG = {
+    gridMax: IS_MOBILE ? 540 : 820,
+
+    agentCount: IS_MOBILE ? 6000 : 12000,
+    step: IS_MOBILE ? 0.90 : 1.05,
+
+    sensorDist: IS_MOBILE ? 6.2 : 7.8,
+    sensorAngle: 0.55,
+    turnSpeed: 0.34,
+
+    deposit: 0.94,
+    decay: IS_MOBILE ? 0.973 : 0.979,
+    diffuseEvery: 2,
+    diffuseMix: 0.42,
+
+    xBias: 0.82,
+    xWidthPx: IS_MOBILE ? 3.6 : 4.6,
+
+    foodRadius: IS_MOBILE ? 18 : 22,
+    foodStrength: 1.55,
+    foodLifeMs: 1300,
+    mouseFoodEveryMs: IS_MOBILE ? 42 : 28,
+
+    xInk: 0.42,
+
+    crush: 0.030,
+  };
+
+  function resize() {
+    dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+    W = window.innerWidth | 0;
+    H = window.innerHeight | 0;
+
+    view.width  = (W * dpr) | 0;
+    view.height = (H * dpr) | 0;
+    view.style.width  = W + "px";
+    view.style.height = H + "px";
+    vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const maxSide = CFG.gridMax;
+    const aspect = W / Math.max(1, H);
+    if (W >= H) {
+      simW = maxSide;
+      simH = Math.max(160, (maxSide / aspect) | 0);
+    } else {
+      simH = maxSide;
+      simW = Math.max(160, (maxSide * aspect) | 0);
+    }
+
+    simCanvas.width = simW;
+    simCanvas.height = simH;
+
+    const n = simW * simH;
+    trailA = new Float32Array(n);
+    trailB = new Float32Array(n);
+    xField = new Float32Array(n);
+
+    imgData = sctx.createImageData(simW, simH);
+    img8 = imgData.data;
+
+    buildXField();
+    seedAgents(true);
+
+    inkXLine(CFG.xInk);
+  }
+
+  window.addEventListener("resize", resize);
+
+  function idx(x, y) { return x + y * simW; }
+
+  function buildXField() {
+    const w = simW, h = simH;
+    const a = (h - 1) / Math.max(1, (w - 1));
+    const inv = 1 / Math.sqrt(1 + a*a);
+
+    const sigma = CFG.xWidthPx;
+    const sigma2 = sigma * sigma;
+
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        const d1 = Math.abs(a*x - y) * inv;
+        const d2 = Math.abs(a*x + y - (h - 1)) * inv;
+        const d = Math.min(d1, d2);
+        const v = Math.exp(-(d*d) / (2*sigma2));
+        xField[idx(x,y)] = v;
+      }
+    }
+  }
+
+  function seedAgents(resetTrails=false) {
+    if (resetTrails) { trailA.fill(0); trailB.fill(0); }
+    agents.length = 0;
+
+    const n = CFG.agentCount;
+    for (let i=0; i<n; i++) {
+      let x, y, tries=0;
+      while (true) {
+        x = (Math.random() * simW) | 0;
+        y = (Math.random() * simH) | 0;
+        const xf = xField[idx(x,y)];
+        if (Math.random() < 0.18 + 0.82*xf || tries++ > 10) break;
+      }
+      agents.push({ x: x + Math.random(), y: y + Math.random(), a: Math.random() * Math.PI * 2 });
+    }
+  }
+
+  function depositAt(f, x, y, amt) {
+    const xi = x | 0, yi = y | 0;
+    if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return;
+    const k = idx(xi, yi);
+    f[k] = Math.min(1.0, f[k] + amt);
+  }
+
+  function sampleField(f, x, y) {
+    const xi = x | 0, yi = y | 0;
+    if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return 0;
+    return f[idx(xi, yi)];
+  }
+
+  function diffuse(src, dst, mix) {
+    const w=simW, h=simH;
+    for (let y=1; y<h-1; y++) {
+      const row = y*w;
+      for (let x=1; x<w-1; x++) {
+        const k = row + x;
+        const v =
+          src[k] +
+          src[k-1] + src[k+1] +
+          src[k-w] + src[k+w] +
+          src[k-w-1] + src[k-w+1] +
+          src[k+w-1] + src[k+w+1];
+        const blur = v / 9;
+        dst[k] = src[k]*(1-mix) + blur*mix;
+      }
+    }
+    for (let x=0; x<w; x++) { dst[x] = src[x]; dst[x + (h-1)*w] = src[x + (h-1)*w]; }
+    for (let y=0; y<h; y++) { dst[y*w] = src[y*w]; dst[(w-1) + y*w] = src[(w-1) + y*w]; }
+  }
+
+  function inkXLine(amount) {
+    const w=simW, h=simH;
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        const xf = xField[idx(x,y)];
+        if (xf > 0.18) trailA[idx(x,y)] = Math.max(trailA[idx(x,y)], amount * xf);
+      }
+    }
+  }
+
+  function snapToX(x, y) {
+    const w = simW, h = simH;
+    const a = (h - 1) / Math.max(1, (w - 1));
+
+    const y1 = a * x;
+    const y2 = (h - 1) - a * x;
+    const d1 = Math.abs(y - y1);
+    const d2 = Math.abs(y - y2);
+
+    if (d1 < d2) return { x, y: y1 };
+    return { x, y: y2 };
+  }
+
+  function addMouseFood(clientX, clientY) {
+    const now = performance.now();
+    if (now - lastMouseFoodAt < CFG.mouseFoodEveryMs) return;
+    lastMouseFoodAt = now;
+
+    const el = document.elementFromPoint(clientX, clientY);
+    const a = el && el.closest ? el.closest("a") : null;
+    if (a) return;
+
+    let fx = clamp((clientX / W) * simW, 0, simW-1);
+    let fy = clamp((clientY / H) * simH, 0, simH-1);
+
+    const s = snapToX(fx, fy);
+    fx = clamp(s.x, 0, simW-1);
+    fy = clamp(s.y, 0, simH-1);
+
+    foods.push({ x: fx, y: fy, life: CFG.foodLifeMs, amp: 1.0 });
+
+    depositAt(trailA, fx, fy, 0.55);
+  }
+
+  window.addEventListener("pointermove", (e) => {
+    addMouseFood(e.clientX, e.clientY);
+  }, { passive:true });
+
+  window.addEventListener("pointerdown", (e) => {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const a = el && el.closest ? el.closest("a") : null;
+    if (a) return;
+
+    let fx = clamp((e.clientX / W) * simW, 0, simW-1);
+    let fy = clamp((e.clientY / H) * simH, 0, simH-1);
+    const s = snapToX(fx, fy);
+    fx = clamp(s.x, 0, simW-1);
+    fy = clamp(s.y, 0, simH-1);
+
+    foods.push({ x: fx, y: fy, life: CFG.foodLifeMs * 1.8, amp: 1.0 });
+    depositAt(trailA, fx, fy, 0.9);
+  }, { passive:true });
+
+  function stepSim(dtMs) {
+    for (let i=foods.length-1; i>=0; i--) {
+      foods[i].life -= dtMs;
+      if (foods[i].life <= 0) foods.splice(i, 1);
+      else foods[i].amp = foods[i].life / (CFG.foodLifeMs * 1.0);
+    }
+
+    const step = CFG.step;
+    const sDist = CFG.sensorDist;
+    const sAng  = CFG.sensorAngle;
+    const turn  = CFG.turnSpeed;
+
+    const xBias = CFG.xBias;
+    const foodStr = CFG.foodStrength;
+
+    for (let i=0; i<agents.length; i++) {
+      const p = agents[i];
+
+      const ca = Math.cos(p.a), sa = Math.sin(p.a);
+      const la = p.a - sAng, ra = p.a + sAng;
+
+      const fx = p.x + ca * sDist, fy = p.y + sa * sDist;
+      const lx = p.x + Math.cos(la) * sDist, ly = p.y + Math.sin(la) * sDist;
+      const rx = p.x + Math.cos(ra) * sDist, ry = p.y + Math.sin(ra) * sDist;
+
+      let fF = sampleField(trailA, fx, fy);
+      let fL = sampleField(trailA, lx, ly);
+      let fR = sampleField(trailA, rx, ry);
+
+      fF += xBias * sampleField(xField, fx, fy);
+      fL += xBias * sampleField(xField, lx, ly);
+      fR += xBias * sampleField(xField, rx, ry);
+
+      if (foods.length) {
+        let addF=0, addL=0, addR=0;
+        const rr = CFG.foodRadius;
+        const rr2 = 2*rr*rr;
+        for (let j=0; j<foods.length; j++) {
+          const fd = foods[j];
+          const amp = fd.amp;
+
+          const dxF = fx - fd.x, dyF = fy - fd.y;
+          const dxL = lx - fd.x, dyL = ly - fd.y;
+          const dxR = rx - fd.x, dyR = ry - fd.y;
+
+          addF += Math.exp(-(dxF*dxF + dyF*dyF) / rr2) * amp;
+          addL += Math.exp(-(dxL*dxL + dyL*dyL) / rr2) * amp;
+          addR += Math.exp(-(dxR*dxR + dyR*dyR) / rr2) * amp;
+        }
+        fF += foodStr * addF;
+        fL += foodStr * addL;
+        fR += foodStr * addR;
+      }
+
+      if (fF > fL && fF > fR) {
+        // straight
+      } else if (fL > fR) {
+        p.a -= turn;
+      } else if (fR > fL) {
+        p.a += turn;
+      } else {
+        p.a += (Math.random() - 0.5) * 0.15;
+      }
+
+      p.x += Math.cos(p.a) * step;
+      p.y += Math.sin(p.a) * step;
+
+      if (p.x < 0) p.x += simW; else if (p.x >= simW) p.x -= simW;
+      if (p.y < 0) p.y += simH; else if (p.y >= simH) p.y -= simH;
+
+      depositAt(trailA, p.x, p.y, CFG.deposit);
+    }
+
+    const d = CFG.decay;
+    for (let k=0; k<trailA.length; k++) trailA[k] *= d;
+
+    if ((frame % CFG.diffuseEvery) === 0) {
+      diffuse(trailA, trailB, CFG.diffuseMix);
+      const tmp = trailA; trailA = trailB; trailB = tmp;
+    }
+
+    frame++;
+  }
+
+  function renderMaze() {
+    const n = simW * simH;
+
+    for (let k=0, p=0; k<n; k++, p+=4) {
+      const t = trailA[k];
+      const v = t <= 0 ? 0 : Math.pow(clamp(t, 0, 1), 0.62);
+
+      const xf = xField[k];
+      const c = clamp(v * (0.92 + 0.22*xf), 0, 1);
+
+      // AZUL CIAN MÁS INTENSO
+      const r = clamp(  8 + c*110*0.80, 0, 255) | 0;
+      const g = clamp( 35 + c*250*1.05, 0, 255) | 0;
+      const b = clamp( 55 + c*255*1.15, 0, 255) | 0;
+
+      const crush = c < CFG.crush ? 0 : 1;
+      img8[p+0] = crush ? r : 0;
+      img8[p+1] = crush ? g : 0;
+      img8[p+2] = crush ? b : 0;
+      img8[p+3] = 255;
+    }
+
+    sctx.putImageData(imgData, 0, 0);
+
+    vctx.imageSmoothingEnabled = true;
+    vctx.fillStyle = "#000";
+    vctx.fillRect(0,0,W,H);
+    vctx.drawImage(simCanvas, 0, 0, simW, simH, 0, 0, W, H);
+  }
+
+  function drawIntro(now) {
+    const t = now - INTRO.start;
+    const T1 = INTRO.durIn;
+    const T2 = INTRO.durFlash;
+    const T3 = INTRO.durOut;
+
+    vctx.fillStyle = "#000";
+    vctx.fillRect(0,0,W,H);
+
+    const cx = W/2, cy = H/2;
+
+    function strokeX(alpha, w1, w2) {
+      vctx.save();
+      vctx.globalCompositeOperation = "lighter";
+      vctx.lineCap = "round";
+
+      vctx.strokeStyle = `rgba(255,255,255,${alpha*0.35})`;
+      vctx.lineWidth = w2;
+      vctx.beginPath();
+      vctx.moveTo(0,0); vctx.lineTo(W,H);
+      vctx.moveTo(W,0); vctx.lineTo(0,H);
+      vctx.stroke();
+
+      vctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+      vctx.lineWidth = w1;
+      vctx.beginPath();
+      vctx.moveTo(0,0); vctx.lineTo(W,H);
+      vctx.moveTo(W,0); vctx.lineTo(0,H);
+      vctx.stroke();
+      vctx.restore();
+    }
+
+    const corners = [
+      {x:0,y:0}, {x:W,y:0}, {x:0,y:H}, {x:W,y:H}
+    ];
+
+    if (t < T1) {
+      const p = easeInOut(t / T1);
+
+      vctx.save();
+      vctx.globalCompositeOperation = "lighter";
+      vctx.lineCap = "round";
+
+      // Segmentos barridos
+      for (let i=0;i<corners.length;i++){
+        const o = corners[i];
+        const hx = lerp(o.x, cx, p);
+        const hy = lerp(o.y, cy, p);
+
+        const grad = vctx.createLinearGradient(o.x, o.y, hx, hy);
+        grad.addColorStop(0, `rgba(255,255,255,${0.15*p})`);
+        grad.addColorStop(0.7, `rgba(255,255,255,${0.45*p})`);
+        grad.addColorStop(1, `rgba(255,255,255,${0.75})`);
         
-        imgData = sctx.createImageData(simW, simH);
-        img8 = imgData.data;
+        vctx.strokeStyle = grad;
+        vctx.lineWidth = IS_MOBILE ? 2.8 : 3.4;
+        vctx.beginPath(); 
+        vctx.moveTo(o.x,o.y); 
+        vctx.lineTo(hx,hy); 
+        vctx.stroke();
+      }
+      vctx.restore();
 
-        buildXField();
-        seed();
+      return;
+    }
+
+    const t2 = t - T1;
+    if (t2 < T2) {
+      const flashP = t2 / T2;
+      const intensity = Math.sin(flashP * Math.PI);
+
+      strokeX(0.85, IS_MOBILE ? 4.0 : 5.2, IS_MOBILE ? 14.0 : 18.0);
+
+      vctx.save();
+      vctx.globalCompositeOperation = "lighter";
+
+      // Explosión central
+      const rr = Math.min(W,H) * (0.35 + 0.25*intensity);
+      const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
+      g.addColorStop(0, `rgba(255,255,255,${0.95*intensity})`);
+      g.addColorStop(0.15, `rgba(255,255,255,${0.75*intensity})`);
+      g.addColorStop(0.35, `rgba(255,255,255,${0.45*intensity})`);
+      g.addColorStop(0.65, `rgba(255,255,255,${0.15*intensity})`);
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      vctx.fillStyle = g;
+      vctx.beginPath(); 
+      vctx.arc(cx,cy,rr,0,Math.PI*2); 
+      vctx.fill();
+
+      // Rayos siguiendo las diagonales de la X
+      for (let i=0; i<4; i++) {
+        const corner = corners[i];
+        const rayGrad = vctx.createLinearGradient(cx, cy, corner.x, corner.y);
+        rayGrad.addColorStop(0, `rgba(255,255,255,${0.65*intensity})`);
+        rayGrad.addColorStop(0.5, `rgba(255,255,255,${0.25*intensity})`);
+        rayGrad.addColorStop(1, "rgba(255,255,255,0)");
+        
+        vctx.strokeStyle = rayGrad;
+        vctx.lineWidth = (IS_MOBILE ? 2.0 : 2.8) * intensity;
+        vctx.beginPath();
+        vctx.moveTo(cx, cy);
+        vctx.lineTo(corner.x, corner.y);
+        vctx.stroke();
       }
 
-      function buildXField() {
-        const a = (simH - 1) / (simW - 1);
-        const inv = 1 / Math.sqrt(1 + a*a);
-        const thickness = 18; // Definición de la X
-        for (let y = 0; y < simH; y++) {
-          for (let x = 0; x < simW; x++) {
-            const d1 = Math.abs(a * x - y) * inv;
-            const d2 = Math.abs(a * x + y - (simH - 1)) * inv;
-            const d = Math.min(d1, d2);
-            xField[x + y * simW] = Math.exp(-(d * d) / thickness);
-          }
-        }
-      }
+      vctx.restore();
 
-      function seed() {
-        agents = Array.from({ length: CFG.agentCount }, () => ({
-          x: Math.random() * simW,
-          y: Math.random() * simH,
-          a: Math.random() * Math.PI * 2
-        }));
-      }
+      inkXLine(0.75 * intensity);
 
-      function addFood(x, y) {
-        const fx = (x / W) * simW;
-        const fy = (y / H) * simH;
-        foods.push({ x: fx, y: fy, life: CFG.foodLifeMs });
-      }
+      return;
+    }
 
-      const getVal = (f, x, y) => {
-        if (x < 0 || x >= simW || y < 0 || y >= simH) return 0;
-        return f[(x | 0) + (y | 0) * simW];
-      };
+    const t3 = t2 - T2;
+    const p3 = ease(clamp(t3 / T3, 0, 1));
 
-      function update(dt) {
-        // Actualizar comida activa
-        for (let i = foods.length - 1; i >= 0; i--) {
-          foods[i].life -= dt;
-          if (foods[i].life <= 0) foods.splice(i, 1);
-        }
+    renderMaze();
+    
+    // Fade MÁS LENTO con más presencia
+    const fadeAlpha = (1 - p3);
+    strokeX(fadeAlpha * 0.40, IS_MOBILE ? 3.6 : 4.4, IS_MOBILE ? 11.5 : 15.0);
 
-        for (let p of agents) {
-          const sense = (angle) => {
-            const sx = p.x + Math.cos(p.a + angle) * CFG.sensorDist;
-            const sy = p.y + Math.sin(p.a + angle) * CFG.sensorDist;
-            let val = getVal(trailA, sx, sy) + getVal(xField, sx, sy) * CFG.xBias;
-            
-            for (let f of foods) {
-              const dx = sx - f.x, dy = sy - f.y;
-              const d2 = dx*dx + dy*dy;
-              if (d2 < 800) val += (CFG.foodStrength * (f.life / CFG.foodLifeMs)) / (1 + d2 * 0.1);
-            }
-            return val;
-          };
+    // Brillo residual más persistente
+    if (p3 < 0.75) {
+      vctx.save();
+      vctx.globalCompositeOperation = "lighter";
+      const rr = Math.min(W,H) * 0.18 * (1-p3);
+      const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
+      g.addColorStop(0, `rgba(255,255,255,${0.30*(1-p3)})`);
+      g.addColorStop(0.5, `rgba(255,255,255,${0.10*(1-p3)})`);
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      vctx.fillStyle = g;
+      vctx.beginPath(); 
+      vctx.arc(cx,cy,rr,0,Math.PI*2); 
+      vctx.fill();
+      vctx.restore();
+    }
 
-          const f = sense(0), l = sense(-CFG.sensorAngle), r = sense(CFG.sensorAngle);
+    if (p3 < 0.30) {
+      for (let k=0; k<trailA.length; k++) trailA[k] *= 0.985;
+    }
+  }
 
-          if (f > l && f > r) {} 
-          else if (l > r) p.a -= CFG.turnSpeed;
-          else if (r > l) p.a += CFG.turnSpeed;
-          else p.a += (Math.random() - 0.5) * 0.15;
+  function loop(now) {
+    const dt = clamp(now - tPrev, 8, 40);
+    tPrev = now;
 
-          p.x += Math.cos(p.a) * CFG.step;
-          p.y += Math.sin(p.a) * CFG.step;
+    stepSim(dt);
 
-          if (p.x < 0) p.x += simW; else if (p.x >= simW) p.x -= simW;
-          if (p.y < 0) p.y += simH; else if (p.y >= simH) p.y -= simH;
+    if (INTRO.active) drawIntro(now);
+    else renderMaze();
 
-          const idx = (p.x | 0) + (p.y | 0) * simW;
-          trailA[idx] = Math.min(1.0, trailA[idx] + CFG.deposit);
-        }
+    requestAnimationFrame(loop);
+  }
 
-        for (let i = 0; i < trailA.length; i++) trailA[i] *= CFG.decay;
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "r" || e.key === "R") { seedAgents(true); inkXLine(CFG.xInk); }
+  });
 
-        if (frame % 2 === 0) {
-          // Difusión simple pero rápida
-          for (let i = simW; i < trailA.length - simW; i++) {
-            trailB[i] = (trailA[i] + trailA[i-1] + trailA[i+1] + trailA[i-simW] + trailA[i+simW]) / 5;
-          }
-          [trailA, trailB] = [trailB, trailA];
-        }
-        frame++;
-      }
-
-      function render() {
-        for (let i = 0; i < trailA.length; i++) {
-          const v = Math.pow(Math.min(trailA[i], 1), 0.72);
-          const p = i * 4;
-          img8[p] = v * 15;        // R
-          img8[p + 1] = v * 225;   // G
-          img8[p + 2] = v * 255;   // B
-          img8[p + 3] = 255;
-        }
-        sctx.putImageData(imgData, 0, 0);
-        vctx.fillStyle = "#000";
-        vctx.fillRect(0, 0, W, H);
-        vctx.imageSmoothingEnabled = true;
-        vctx.drawImage(simCanvas, 0, 0, simW, simH, 0, 0, W, H);
-      }
-
-      function loop(now) {
-        const dt = now - tPrev;
-        tPrev = now;
-        update(dt);
-        render();
-        requestAnimationFrame(loop);
-      }
-
-      window.addEventListener("pointermove", e => addFood(e.clientX, e.clientY));
-      window.addEventListener("pointerdown", e => addFood(e.clientX, e.clientY));
-      window.addEventListener("resize", resize);
-      window.addEventListener("keydown", e => { if(e.key.toLowerCase() === 'r') seed(); });
-
-      resize();
-      requestAnimationFrame(loop);
-    })();
-  </script>
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
 </body>
 </html>
