@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UNDER MAINTENANCE</title>
+  <title>MICRORETAILX</title>
 
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
@@ -12,37 +12,38 @@
   <style>
     :root{
       --bg:#000;
-      --fg:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.55);
-      --hair:rgba(255,255,255,.10);
+      --fg:rgba(255,255,255,.94);
+      --muted:rgba(255,255,255,.62);
+      --hair:rgba(255,255,255,.12);
       --glass:rgba(0,0,0,.78);
 
-      --px:clamp(14px,2.2vw,20px);
+      --px:clamp(14px, 2.2vw, 22px);
       --py:14px;
 
-      --brand-size:clamp(11px,1.2vw,12px);
-      --brand-track:0.32em;
+      --brand-size:clamp(12px, 1.35vw, 14px);
+      --brand-track:0.28em;
 
-      --nav-size:11px;
-      --nav-track:0.22em;
+      --nav-size:clamp(12px, 1.25vw, 13px);
+      --nav-track:0.18em;
 
-      --copy-size:7px;
+      --copy-size:clamp(6.5px, 1.25vw, 7.5px);
       --copy-track:0.08em;
 
       --radius:16px;
       --blur:10px;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
 
     body{
       margin:0;
       background:var(--bg);
       color:var(--fg);
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-      -webkit-font-smoothing:antialiased;
-      text-rendering:geometricPrecision;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+                   "Liberation Mono", "Courier New", monospace;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
     }
 
     .page{
@@ -57,141 +58,199 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      opacity:.065;
+      opacity:.06;
       background-image:
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,.08), transparent 45%),
-        radial-gradient(circle at 80% 70%, rgba(255,255,255,.06), transparent 42%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,.03), rgba(255,255,255,.03) 1px, transparent 1px, transparent 3px);
+        radial-gradient(circle at 18% 28%, rgba(255,255,255,.08), transparent 46%),
+        radial-gradient(circle at 82% 72%, rgba(255,255,255,.06), transparent 44%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.028), rgba(255,255,255,.028) 1px, transparent 1px, transparent 3px);
       mix-blend-mode:screen;
       z-index:-1;
     }
 
     header, footer{
       background:var(--glass);
-      backdrop-filter:blur(var(--blur));
-      -webkit-backdrop-filter:blur(var(--blur));
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
     }
 
     header{
-      padding:var(--py) var(--px);
-      border-bottom:1px solid var(--hair);
+      padding: var(--py) var(--px);
+      border-bottom: 1px solid var(--hair);
     }
 
     .topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
+      gap:14px;
     }
 
     .brand{
-      font-size:var(--brand-size);
-      font-weight:900;
-      letter-spacing:var(--brand-track);
-      text-transform:uppercase;
-      white-space:nowrap;
-      line-height:1;
-      opacity:.96;
-      text-shadow:0 0 14px rgba(255,255,255,.10), 0 0 2px rgba(255,255,255,.18);
+      font-size: var(--brand-size);
+      font-weight: 950;
+      letter-spacing: var(--brand-track);
+      text-transform: uppercase;
+      white-space: nowrap;
+      line-height: 1;
+      opacity:.97;
+      text-shadow:
+        0 0 14px rgba(255,255,255,.10),
+        0 0 2px rgba(255,255,255,.18);
       mix-blend-mode:difference;
     }
 
-    /* Nav (Miso-friendly) */
     nav{
       display:flex;
       align-items:center;
-      gap:18px;
+      gap:clamp(14px,2vw,22px);
       flex-wrap:wrap;
     }
 
     .navlink{
-      pointer-events:auto;
-      color:rgba(255,255,255,.78);
+      color:rgba(255,255,255,.82);
       text-decoration:none;
       font-size:var(--nav-size);
+      font-weight:850;
       letter-spacing:var(--nav-track);
       text-transform:uppercase;
-      opacity:.85;
+      padding:7px 2px;
       position:relative;
-      padding:6px 2px;
-      line-height:1;
-      user-select:none;
     }
 
-    .navlink:hover{ opacity:1; color:rgba(255,255,255,.92); }
+    .navlink:hover{ color:rgba(255,255,255,.96); }
 
     .navlink::after{
       content:"";
       position:absolute;
       left:0; right:0; bottom:0;
       height:1px;
-      background:rgba(255,255,255,.20);
+      background:rgba(255,255,255,.22);
       transform:scaleX(0);
       transform-origin:left;
-      transition:transform 180ms ease;
+      transition:transform 170ms ease;
     }
+
     .navlink:hover::after{ transform:scaleX(1); }
 
-    /* Optional “active” class for routing state */
-    .navlink.is-active{
-      color:rgba(255,255,255,.96);
-      opacity:1;
+    .lang-switch{ position:relative; }
+
+    .lang-trigger{
+      background:none;
+      border:0;
+      cursor:pointer;
+      font-size:18px;
+      padding:6px;
+      color:rgba(255,255,255,.9);
     }
-    .navlink.is-active::after{ transform:scaleX(1); background:rgba(255,255,255,.35); }
+
+    .lang-menu{
+      position:absolute;
+      right:100%;
+      top:50%;
+      transform:translateY(-50%) translateX(-10px);
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      padding:6px 8px;
+      background:rgba(0,0,0,.85);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:999px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 160ms ease, transform 160ms ease;
+      backdrop-filter:blur(10px);
+      max-width:min(360px,80vw);
+    }
+
+    .lang-switch:hover .lang-menu{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateY(-50%) translateX(-4px);
+    }
+
+    .lang-item{
+      background:none;
+      border:0;
+      cursor:pointer;
+      min-width:42px;
+      text-align:center;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.18em;
+      color:rgba(255,255,255,.8);
+    }
+
+    .lang-item:hover{ color:#fff; }
 
     main{
       display:grid;
       place-items:center;
-      padding:28px var(--px);
+      padding:30px var(--px);
     }
 
     .card{
-      width:min(720px,100%);
+      width:min(760px,100%);
       border:1px solid rgba(255,255,255,.12);
       border-radius:var(--radius);
       background:rgba(0,0,0,.55);
-      box-shadow:0 10px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.03) inset;
-      padding:clamp(18px,3vw,28px);
-    }
-
-    .title{
-      font-size:clamp(16px,2.2vw,18px);
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      margin:0 0 10px 0;
-      opacity:.92;
-    }
-
-    .text{
-      margin:0;
-      color:var(--muted);
-      line-height:1.55;
-      font-size:13px;
-      max-width:60ch;
+      padding:clamp(18px,3vw,30px);
     }
 
     footer{
-      padding:12px var(--px);
+      padding:12px var(--px) 14px;
       border-top:1px solid var(--hair);
     }
 
-    .copyright{
-      text-align:center;
-      font-size:var(--copy-size);
-      letter-spacing:var(--copy-track);
-      opacity:.40;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+    .footer-inner{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
     }
 
-    @media (max-width: 720px){
-      .topbar{ gap:10px; }
-      nav{ gap:14px; }
+    .footer-links{
+      display:flex;
+      gap:clamp(12px,2vw,22px);
+      flex-wrap:wrap;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.20em;
+      text-transform:uppercase;
+      opacity:.75;
     }
-    @media (max-width: 520px){
-      :root{ --copy-size:6.5px; }
-      .copyright{ white-space:normal; }
+
+    .footer-links a{
+      color:rgba(255,255,255,.85);
+      text-decoration:none;
+    }
+
+    .footer-links a:hover{ color:#fff; }
+
+    .copyright{
+      font-size:var(--copy-size);
+      letter-spacing:var(--copy-track);
+      opacity:.42;
+      text-align:center;
+    }
+
+    /* RTL (Arabic) */
+    [dir="rtl"] .topbar{ flex-direction:row-reverse; }
+    [dir="rtl"] nav{ flex-direction:row-reverse; }
+    [dir="rtl"] .navlink::after{ transform-origin:right; }
+    [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
+    [dir="rtl"] .lang-menu{
+      left:100%;
+      right:auto;
+      transform:translateY(-50%) translateX(10px);
+    }
+    [dir="rtl"] .lang-switch:hover .lang-menu{
+      transform:translateY(-50%) translateX(4px);
+    }
+    [dir="rtl"] .card{ text-align:right; }
+
+    @media (max-width:640px){
+      .topbar{ flex-direction:column; align-items:flex-start; }
+      nav{ width:100%; }
     }
   </style>
 </head>
@@ -200,30 +259,53 @@
   <div class="page" id="app-root">
     <header>
       <div class="topbar">
-        <div class="brand" id="brand">UNDER MAINTENANCE</div>
+        <div class="brand">MICRORETAILX</div>
 
-        <!-- For Miso: you can intercept clicks and route internally -->
-        <nav aria-label="Primary" id="nav">
-          <a class="navlink is-active" href="#/" data-route="home">Home</a>
-          <a class="navlink" href="#/vertical" data-route="vertical">Vertical</a>
-          <a class="navlink" href="#/about" data-route="about">About</a>
-          <a class="navlink" href="#/contact" data-route="contact">Contact</a>
+        <nav>
+          <div class="lang-switch">
+            <button class="lang-trigger">🌐</button>
+            <div class="lang-menu">
+              <button class="lang-item">EN</button>
+              <button class="lang-item">ZH</button>
+              <button class="lang-item">ES</button>
+              <button class="lang-item">HI</button>
+              <button class="lang-item">AR</button>
+              <button class="lang-item">FR</button>
+              <button class="lang-item">PT</button>
+              <button class="lang-item">RU</button>
+              <button class="lang-item">JA</button>
+              <button class="lang-item">DE</button>
+              <button class="lang-item">CA</button>
+              <button class="lang-item">ID</button>
+            </div>
+          </div>
+
+          <a class="navlink" href="#">About</a>
+          <a class="navlink" href="#">Verticals</a>
+          <a class="navlink" href="#">Contact</a>
         </nav>
       </div>
     </header>
 
     <main>
-      <section class="card" aria-label="Maintenance status" id="view">
-        <h1 class="title">Temporarily Offline</h1>
-        <p class="text">
-          This site is under maintenance. The surface area is intentionally minimal:
-          no logins, no trackers, no surprises.
-        </p>
+      <section class="card">
+        <p>This is a live visual test. Next step: compile to Miso.</p>
       </section>
     </main>
 
     <footer>
-      <div class="copyright">© 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED</div>
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+          <a href="#">Cookies</a>
+          <a href="#">Cookies Preferences</a>
+          <a href="#">Legal</a>
+        </div>
+        <div class="copyright">
+          © 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
+        </div>
+      </div>
     </footer>
   </div>
 </body>
