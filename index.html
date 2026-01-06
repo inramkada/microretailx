@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MICRORETAILX</title>
+  <title>microretailX</title>
 
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
@@ -132,29 +132,30 @@
     }
     .navlink:hover::after{ transform:scaleX(1); }
 
-    /* ===== Verticals dropdown (NEW) ===== */
+    /* ===== Verticals dropdown (NO ENCUADRES) ===== */
     .verticals{
       position:relative;
       display:inline-flex;
       align-items:center;
       cursor:pointer;
     }
-    .verticals > span{ pointer-events:none; } /* keep hover stable */
+    .verticals > span{ pointer-events:none; }
 
+    /* no box, no border, no background */
     .verticals-menu{
       position:absolute;
       top:100%;
       left:0;
-      margin-top:8px;
+      margin-top:10px;
 
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:10px;
 
-      padding:8px 10px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.88);
+      padding:0;
+      border:0;
+      background:transparent;
+      border-radius:0;
 
       opacity:0;
       pointer-events:none;
@@ -163,10 +164,9 @@
 
       white-space:nowrap;
       z-index:50;
-
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      filter:none;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
     }
 
     .verticals:hover .verticals-menu{
@@ -175,16 +175,35 @@
       transform: translateY(0);
     }
 
-    .verticals-menu a{
-      color:rgba(255,255,255,.85);
+    .v-item{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
       text-decoration:none;
-      font-size:11px;
+      padding:2px 0;
+    }
+
+    .v-main{
+      color:rgba(255,255,255,.92);
+      font-size:12px;
       font-weight:400;
       letter-spacing:.14em;
       text-transform:uppercase;
-      padding:4px 2px;
+      line-height:1.05;
     }
-    .verticals-menu a:hover{ color:#fff; }
+
+    .v-sub{
+      margin-top:3px;
+      color:rgba(255,255,255,.55);
+      font-size:10px;
+      font-weight:400;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      line-height:1.05;
+    }
+
+    .v-item:hover .v-main{ color:#fff; }
+    .v-item:hover .v-sub{ color:rgba(255,255,255,.72); }
 
     /* ===== Language rail (JS-controlled) ===== */
     .lang-switch{
@@ -340,7 +359,7 @@
       background:rgba(0,0,0,.55);
       padding:clamp(16px,2.5vw,24px);
       font-weight:400;
-      text-align:center; /* NEW: centered */
+      text-align:center;
     }
 
     footer{
@@ -442,11 +461,14 @@
       right: calc(100% + 10px);
     }
 
-    /* RTL: Verticals dropdown align inside */
+    /* RTL: Verticals menu align inside */
     [dir="rtl"] .verticals-menu{
       left:auto;
       right:0;
+      align-items:flex-end;
+      text-align:right;
     }
+    [dir="rtl"] .v-item{ align-items:flex-end; }
 
     /* Keep pill intro direction consistent in RTL */
     [dir="rtl"] .lang-pill{ transform: translateX(10px); }
@@ -512,16 +534,21 @@
 
           <a class="navlink" href="#/about" data-i18n="nav.about">About</a>
 
-          <!-- NEW: Verticals dropdown (keeps i18n label) -->
+          <!-- Verticals: two-line items, no frame -->
           <div class="navlink verticals" role="button" aria-haspopup="true">
             <span data-i18n="nav.verticals">Verticals</span>
             <div class="verticals-menu" aria-label="Verticals">
-              <a href="https://www.microlabsx.com">BIOTECH</a>
-              <a href="https://www.microstudio.com">CREATIVE STUDIO</a>
+              <a class="v-item" href="https://www.microlabsx.com">
+                <span class="v-main">BIOTECH</span>
+                <span class="v-sub">MICROLABSX</span>
+              </a>
+              <a class="v-item" href="https://www.microstudiox.com">
+                <span class="v-main">STUDIO</span>
+                <span class="v-sub">MICROSTUDIOX</span>
+              </a>
             </div>
           </div>
 
-          <!-- NEW: Contact mailto -->
           <a class="navlink" href="mailto:info@microretailx.com" data-i18n="nav.contact">Contact</a>
         </nav>
       </div>
@@ -734,7 +761,6 @@
           gear.setAttribute("aria-label", tip);
         }
 
-        // Prevent rail jump after dir change
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
       }
@@ -803,7 +829,6 @@
         scheduleClose();
       });
 
-      // Mobile: tap globe toggles instantly
       const trigger = switchEl.querySelector('.lang-trigger');
       trigger?.addEventListener('click', (e) => {
         e.preventDefault();
