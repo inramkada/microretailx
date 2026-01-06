@@ -12,7 +12,7 @@
   <style>
     :root{
       --bg:#000;
-      --fg:rgba(255,255,255,.92);
+      --fg:rgba(255,255,255,.94);
       --muted:rgba(255,255,255,.62);
       --hair:rgba(255,255,255,.12);
       --glass:rgba(0,0,0,.78);
@@ -20,7 +20,6 @@
       --px:clamp(12px, 2vw, 18px);
       --py:10px;
 
-      /* no bold */
       --brand-size:clamp(12px, 1.2vw, 13px);
       --brand-track:0.20em;
 
@@ -33,12 +32,8 @@
       --radius:14px;
       --blur:10px;
 
-      --menu-bg: rgba(0,0,0,.88);
+      --menu-bg: rgba(0,0,0,.86);
       --menu-border: rgba(255,255,255,.14);
-
-      /* timing */
-      --open-delay: 1000ms;      /* 1s before it shows */
-      --close-delay: 700ms;      /* grace after leaving */
     }
 
     *{ box-sizing:border-box; }
@@ -52,7 +47,6 @@
                    "Liberation Mono", "Courier New", monospace;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
-      font-weight: 400;
     }
 
     .page{
@@ -69,8 +63,8 @@
       pointer-events:none;
       opacity:.045;
       background-image:
-        radial-gradient(circle at 18% 28%, rgba(255,255,255,.08), transparent 46%),
-        radial-gradient(circle at 82% 72%, rgba(255,255,255,.06), transparent 44%),
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.07), transparent 46%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,.05), transparent 44%),
         repeating-linear-gradient(0deg, rgba(255,255,255,.025), rgba(255,255,255,.025) 1px, transparent 1px, transparent 3px);
       mix-blend-mode:screen;
       z-index:-1;
@@ -97,13 +91,13 @@
 
     .brand{
       font-size: var(--brand-size);
-      font-weight: 500;            /* not bold */
+      font-weight: 950;
       letter-spacing: var(--brand-track);
       text-transform: uppercase;
       white-space: nowrap;
       line-height: 1;
-      opacity:.95;
-      text-shadow: 0 0 10px rgba(255,255,255,.08);
+      opacity:.97;
+      text-shadow: 0 0 10px rgba(255,255,255,.10), 0 0 2px rgba(255,255,255,.18);
       mix-blend-mode:difference;
     }
 
@@ -115,20 +109,16 @@
     }
 
     .navlink{
-      color:rgba(255,255,255,.78);
+      color:rgba(255,255,255,.82);
       text-decoration:none;
       font-size:var(--nav-size);
-      font-weight: 400;            /* not bold */
+      font-weight:850;
       letter-spacing:var(--nav-track);
       text-transform:uppercase;
       padding:5px 2px;
       position:relative;
-      line-height:1;
-      opacity:.92;
     }
-
-    .navlink:hover{ color:rgba(255,255,255,.92); }
-
+    .navlink:hover{ color:rgba(255,255,255,.96); }
     .navlink::after{
       content:"";
       position:absolute;
@@ -141,13 +131,14 @@
     }
     .navlink:hover::after{ transform:scaleX(1); }
 
-    /* ===== Language switcher (panel menu) ===== */
+    /* ===== Language rail (opens LEFT, horizontal, organized) ===== */
     .lang-switch{
       position:relative;
       display:flex;
       align-items:center;
     }
 
+    /* White globe */
     .lang-trigger{
       display:inline-flex;
       align-items:center;
@@ -158,170 +149,134 @@
       border:0;
       cursor:pointer;
       padding:0;
-      color:#fff;
+      color:#fff;               /* globe must be white */
       line-height:1;
       border-radius:10px;
     }
     .lang-trigger:hover{ background: rgba(255,255,255,.06); }
-
     .globe{ width:18px; height:18px; display:block; }
 
-    /* “Hover bridge” so you can move from globe to menu without losing hover */
-    .lang-switch::before{
-      content:"";
+    /* This is the horizontal bar that occupies the red line */
+    .lang-rail{
       position:absolute;
-      top:-10px;
-      bottom:-10px;
-      left:-10px;
-      right:-10px;
-    }
-
-    /* OPEN LEFT in LTR */
-    .lang-menu{
-      position:absolute;
-      right:100%; /* <<--- LEFT side */
-      top:50%;
-      transform: translateY(-50%) translateX(-10px) scale(.98);
-
-      background:var(--menu-bg);
-      border:1px solid var(--menu-border);
-      border-radius:14px;
-      padding:8px;
+      right: calc(100% + 10px);    /* open to the LEFT */
+      top: 50%;
+      transform: translateY(-50%);
 
       display:flex;
-      flex-direction:column;
-      gap:6px;
+      align-items:center;
+      gap:8px;
 
-      min-width:210px;
-      z-index:50;
+      padding:6px 8px;
+      border:1px solid var(--menu-border);
+      background: var(--menu-bg);
+      border-radius: 999px;
+
+      /* Important: never “cut” vertically; if too many, scroll horizontally */
+      max-width: min(780px, calc(100vw - (2 * var(--px)) - 80px));
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
 
       opacity:0;
       pointer-events:none;
 
-      filter: drop-shadow(0 12px 28px rgba(0,0,0,.45));
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-
-      /* open waits 1s; close has grace */
-      transition:
-        opacity 220ms ease var(--close-delay),
-        transform 240ms ease var(--close-delay);
     }
 
-    /* open after 1s hover/focus-within */
-    .lang-switch:hover .lang-menu,
-    .lang-switch:focus-within .lang-menu{
+    /* Hide scrollbar (still scrollable) */
+    .lang-rail::-webkit-scrollbar{ height:0; }
+    .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
+
+    /* Show rail on hover */
+    .lang-switch:hover .lang-rail{
       opacity:1;
       pointer-events:auto;
-      transform: translateY(-50%) translateX(-6px) scale(1);
-      transition-delay: var(--open-delay);
     }
 
-    /* Menu stays open while hovering menu itself, and closes with grace/shrink */
-    .lang-menu:hover{
-      opacity:1;
-      pointer-events:auto;
-      transform: translateY(-50%) translateX(-6px) scale(1);
-      transition-delay: 0ms;
-    }
-
-    /* Items */
-    .lang-item{
-      display:flex;
+    /* Pills */
+    .lang-pill{
+      position:relative;
+      display:inline-flex;
       align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      justify-content:center;
 
-      width:100%;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.30);
-      color: rgba(255,255,255,.80);
+      color: rgba(255,255,255,.86);
+
+      height:26px;
+      padding: 0 10px;
+      border-radius: 999px;
+
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+
       cursor:pointer;
+      user-select:none;
 
-      padding:7px 10px;
-      border-radius:12px;
-
-      font-size:11px;
-      font-weight: 400;          /* not bold */
-      letter-spacing:.10em;
-      text-transform:uppercase;
-
-      /* wave */
+      /* wave (start slightly toward the globe, then settle) */
       transform: translateX(10px);
       opacity: 0;
-
-      transition:
-        transform 220ms ease,
-        opacity 220ms ease,
-        border-color 160ms ease,
-        background 160ms ease,
-        color 160ms ease;
+      transition: transform 220ms ease, opacity 220ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
     }
 
-    /* wave when menu visible */
-    .lang-switch:hover .lang-item,
-    .lang-switch:focus-within .lang-item,
-    .lang-menu:hover .lang-item{
+    .lang-switch:hover .lang-pill{
       transform: translateX(0);
       opacity: 1;
     }
 
-    /* stagger */
-    .lang-switch:hover .lang-item:nth-child(1),
-    .lang-switch:focus-within .lang-item:nth-child(1){ transition-delay: calc(var(--open-delay) + 0ms); }
-    .lang-switch:hover .lang-item:nth-child(2),
-    .lang-switch:focus-within .lang-item:nth-child(2){ transition-delay: calc(var(--open-delay) + 20ms); }
-    .lang-switch:hover .lang-item:nth-child(3),
-    .lang-switch:focus-within .lang-item:nth-child(3){ transition-delay: calc(var(--open-delay) + 40ms); }
-    .lang-switch:hover .lang-item:nth-child(4),
-    .lang-switch:focus-within .lang-item:nth-child(4){ transition-delay: calc(var(--open-delay) + 60ms); }
-    .lang-switch:hover .lang-item:nth-child(5),
-    .lang-switch:focus-within .lang-item:nth-child(5){ transition-delay: calc(var(--open-delay) + 80ms); }
-    .lang-switch:hover .lang-item:nth-child(6),
-    .lang-switch:focus-within .lang-item:nth-child(6){ transition-delay: calc(var(--open-delay) + 100ms); }
-    .lang-switch:hover .lang-item:nth-child(7),
-    .lang-switch:focus-within .lang-item:nth-child(7){ transition-delay: calc(var(--open-delay) + 120ms); }
-    .lang-switch:hover .lang-item:nth-child(8),
-    .lang-switch:focus-within .lang-item:nth-child(8){ transition-delay: calc(var(--open-delay) + 140ms); }
-    .lang-switch:hover .lang-item:nth-child(9),
-    .lang-switch:focus-within .lang-item:nth-child(9){ transition-delay: calc(var(--open-delay) + 160ms); }
-    .lang-switch:hover .lang-item:nth-child(10),
-    .lang-switch:focus-within .lang-item:nth-child(10){ transition-delay: calc(var(--open-delay) + 180ms); }
-    .lang-switch:hover .lang-item:nth-child(11),
-    .lang-switch:focus-within .lang-item:nth-child(11){ transition-delay: calc(var(--open-delay) + 200ms); }
-    .lang-switch:hover .lang-item:nth-child(12),
-    .lang-switch:focus-within .lang-item:nth-child(12){ transition-delay: calc(var(--open-delay) + 220ms); }
+    /* stagger (wave) */
+    .lang-switch:hover .lang-pill:nth-child(1)  { transition-delay:  0ms; }
+    .lang-switch:hover .lang-pill:nth-child(2)  { transition-delay: 18ms; }
+    .lang-switch:hover .lang-pill:nth-child(3)  { transition-delay: 36ms; }
+    .lang-switch:hover .lang-pill:nth-child(4)  { transition-delay: 54ms; }
+    .lang-switch:hover .lang-pill:nth-child(5)  { transition-delay: 72ms; }
+    .lang-switch:hover .lang-pill:nth-child(6)  { transition-delay: 90ms; }
+    .lang-switch:hover .lang-pill:nth-child(7)  { transition-delay:108ms; }
+    .lang-switch:hover .lang-pill:nth-child(8)  { transition-delay:126ms; }
+    .lang-switch:hover .lang-pill:nth-child(9)  { transition-delay:144ms; }
+    .lang-switch:hover .lang-pill:nth-child(10) { transition-delay:162ms; }
+    .lang-switch:hover .lang-pill:nth-child(11) { transition-delay:180ms; }
+    .lang-switch:hover .lang-pill:nth-child(12) { transition-delay:198ms; }
 
-    .lang-item:hover{
-      color: rgba(255,255,255,.94);
+    .lang-pill:hover{
+      color:#fff;
       border-color: rgba(255,255,255,.22);
       background: rgba(255,255,255,.06);
     }
 
-    .lang-code{
-      flex:0 0 auto;
-      min-width:38px;
-      text-align:left;
-      opacity:.92;
-    }
+    /* Tooltip with full language name */
+    .lang-pill::after{
+      content: attr(data-label);
+      position:absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
 
-    .lang-label{
-      flex:1 1 auto;
-      text-align:right;
-      color: rgba(255,255,255,.55);
-      font-weight: 400;          /* not bold */
-      letter-spacing:.02em;
-      text-transform:none;
+      background: rgba(0,0,0,.90);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 6px 8px;
+
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.92);
+
       opacity:0;
-      transform: translateX(-6px);
-      transition: opacity 150ms ease, transform 150ms ease;
+      pointer-events:none;
       white-space: nowrap;
-    }
 
-    .lang-item:hover .lang-label{
-      opacity:1;
-      transform: translateX(0);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
+    .lang-pill:hover::after{ opacity:1; }
 
     main{
       display:grid;
@@ -330,13 +285,11 @@
     }
 
     .card{
-      width:min(760px,100%);
+      width:min(720px,100%);
       border:1px solid rgba(255,255,255,.12);
       border-radius:var(--radius);
       background:rgba(0,0,0,.55);
       padding:clamp(16px,2.5vw,24px);
-      color:rgba(255,255,255,.86);
-      font-weight:400;
     }
 
     footer{
@@ -355,19 +308,16 @@
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      align-items:center;
-      justify-content:center;
       font-size:10.5px;
-      font-weight:400;          /* not bold */
-      letter-spacing:.14em;
+      font-weight:800;
+      letter-spacing:.16em;
       text-transform:uppercase;
       opacity:.75;
     }
 
     .footer-links a{
-      color:rgba(255,255,255,.82);
+      color:rgba(255,255,255,.85);
       text-decoration:none;
-      padding:4px 2px;
     }
     .footer-links a:hover{ color:#fff; }
 
@@ -377,87 +327,26 @@
       opacity:.42;
       text-align:center;
       line-height:1.3;
-      font-weight:400;
     }
 
-    /* Cookies gear/pulley icon ONLY (englobes cookies) */
-    .iconlink{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:26px;
-      height:26px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.20);
-      color: rgba(255,255,255,.86);
-      position:relative;
-    }
-    .iconlink:hover{
-      color:#fff;
-      border-color: rgba(255,255,255,.22);
-      background: rgba(255,255,255,.06);
-    }
-    .gear{ width:16px; height:16px; display:block; }
-
-    .iconlink::after{
-      content:"Cookies";
-      position:absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.90);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 10px;
-      padding: 6px 8px;
-      font-size: 10px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.92);
-      opacity:0;
-      pointer-events:none;
-      white-space: nowrap;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .iconlink:hover::after{ opacity:1; }
-
-    .sr-only{
-      position:absolute;
-      width:1px; height:1px;
-      padding:0; margin:-1px;
-      overflow:hidden;
-      clip:rect(0,0,0,0);
-      white-space:nowrap;
-      border:0;
-    }
-
-    /* RTL (Arabic): flip layout + open menu to the RIGHT */
+    /* ===== RTL (Arabic): flip open direction to the RIGHT ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
     [dir="rtl"] nav{ flex-direction:row-reverse; }
     [dir="rtl"] .navlink::after{ transform-origin:right; }
     [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
 
-    [dir="rtl"] .lang-menu{
+    [dir="rtl"] .lang-rail{
       right:auto;
-      left:100%;
-      transform: translateY(-50%) translateX(10px) scale(.98);
+      left: calc(100% + 10px);     /* open to the RIGHT in RTL */
     }
-    [dir="rtl"] .lang-switch:hover .lang-menu,
-    [dir="rtl"] .lang-switch:focus-within .lang-menu{
-      transform: translateY(-50%) translateX(6px) scale(1);
+    [dir="rtl"] .lang-pill{
+      transform: translateX(-10px);
     }
-    [dir="rtl"] .lang-item{ transform: translateX(-10px); }
-    [dir="rtl"] .lang-switch:hover .lang-item,
-    [dir="rtl"] .lang-switch:focus-within .lang-item,
-    [dir="rtl"] .lang-menu:hover .lang-item{ transform: translateX(0); }
-    [dir="rtl"] .lang-label{
-      text-align:left;
-      transform: translateX(6px);
+    [dir="rtl"] .lang-switch:hover .lang-pill{
+      transform: translateX(0);
     }
-    [dir="rtl"] .lang-item:hover .lang-label{ transform: translateX(0); }
 
-    /* Mobile: open DOWN centered */
+    /* Mobile: rail drops DOWN so it never collides */
     @media (max-width: 640px){
       .topbar{
         flex-direction:column;
@@ -466,20 +355,17 @@
       }
       nav{ width:100%; gap:10px; }
 
-      .lang-menu{
+      .lang-rail{
         right:auto;
-        left:50%;
+        left:0;
         top:100%;
-        transform: translateX(-50%) translateY(10px) scale(.98);
-        min-width: min(320px, 92vw);
+        transform: translateY(10px);
+        max-width: min(92vw, 520px);
       }
-      .lang-switch:hover .lang-menu,
-      .lang-switch:focus-within .lang-menu{
-        transform: translateX(-50%) translateY(10px) scale(1);
-      }
-      [dir="rtl"] .lang-menu{
-        left:50%;
-        right:auto;
+
+      [dir="rtl"] .lang-rail{
+        left:auto;
+        right:0;
       }
     }
   </style>
@@ -492,7 +378,8 @@
         <div class="brand">MICRORETAILX</div>
 
         <nav>
-          <div class="lang-switch" id="lang-switch" tabindex="0">
+          <!-- IMPORTANT: globe first, then About/Verticals/Contact -->
+          <div class="lang-switch" id="lang-switch">
             <button class="lang-trigger" aria-label="Language selector">
               <!-- White globe SVG -->
               <svg class="globe" viewBox="0 0 24 24" aria-hidden="true">
@@ -503,19 +390,20 @@
               </svg>
             </button>
 
-            <div class="lang-menu" id="lang-menu" aria-label="Languages">
-              <button class="lang-item" data-lang="en" data-dir="ltr"><span class="lang-code">EN</span><span class="lang-label">English</span></button>
-              <button class="lang-item" data-lang="zh" data-dir="ltr"><span class="lang-code">ZH</span><span class="lang-label">中文 (Chinese)</span></button>
-              <button class="lang-item" data-lang="es" data-dir="ltr"><span class="lang-code">ES</span><span class="lang-label">Español</span></button>
-              <button class="lang-item" data-lang="hi" data-dir="ltr"><span class="lang-code">HI</span><span class="lang-label">हिंदी (Hindi)</span></button>
-              <button class="lang-item" data-lang="ar" data-dir="rtl"><span class="lang-code">AR</span><span class="lang-label">العربية (Arabic)</span></button>
-              <button class="lang-item" data-lang="fr" data-dir="ltr"><span class="lang-code">FR</span><span class="lang-label">Français</span></button>
-              <button class="lang-item" data-lang="pt" data-dir="ltr"><span class="lang-code">PT</span><span class="lang-label">Português</span></button>
-              <button class="lang-item" data-lang="ru" data-dir="ltr"><span class="lang-code">RU</span><span class="lang-label">Русский</span></button>
-              <button class="lang-item" data-lang="ja" data-dir="ltr"><span class="lang-code">JA</span><span class="lang-label">日本語 (Japanese)</span></button>
-              <button class="lang-item" data-lang="de" data-dir="ltr"><span class="lang-code">DE</span><span class="lang-label">Deutsch</span></button>
-              <button class="lang-item" data-lang="ca" data-dir="ltr"><span class="lang-code">CA</span><span class="lang-label">Català</span></button>
-              <button class="lang-item" data-lang="id" data-dir="ltr"><span class="lang-code">ID</span><span class="lang-label">Bahasa Indonesia</span></button>
+            <!-- Horizontal rail occupying the “red line” space -->
+            <div class="lang-rail" id="lang-rail" aria-label="Languages">
+              <button class="lang-pill" data-lang="en" data-label="English">EN</button>
+              <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)">ZH</button>
+              <button class="lang-pill" data-lang="es" data-label="Español">ES</button>
+              <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)">HI</button>
+              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)">AR</button>
+              <button class="lang-pill" data-lang="fr" data-label="Français">FR</button>
+              <button class="lang-pill" data-lang="pt" data-label="Português">PT</button>
+              <button class="lang-pill" data-lang="ru" data-label="Русский">RU</button>
+              <button class="lang-pill" data-lang="ja" data-label="日本語 (Japanese)">JA</button>
+              <button class="lang-pill" data-lang="de" data-label="Deutsch">DE</button>
+              <button class="lang-pill" data-lang="ca" data-label="Català">CA</button>
+              <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia">ID</button>
             </div>
           </div>
 
@@ -527,81 +415,25 @@
     </header>
 
     <main>
-      <section class="card" id="demoCard">
-        <div id="demoTitle" style="opacity:.92; letter-spacing:.08em; text-transform:uppercase;">Language</div>
-        <div id="demoText" style="opacity:.70; margin-top:10px; font-size:12px;">
-          Click a language code to test state change (lang + dir + sample text).
-        </div>
+      <section class="card">
+        <p>Language rail test: opens left, fills the header line, tooltips on hover.</p>
       </section>
     </main>
 
     <footer>
       <div class="footer-inner">
-        <div class="footer-links" aria-label="Legal">
+        <div class="footer-links">
           <a href="terms.html">Terms</a>
           <a href="privacy.html">Privacy</a>
-
-          <!-- Cookies: ONLY via gear/pulley icon -->
-          <a href="javascript:void(0)" class="iconlink" id="cookiePreferencesLink" aria-label="Cookies Preferences">
-            <svg class="gear" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.08 7.08 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.22-1.12.52-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.5.41 1.05.73 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.22 1.12-.52 1.63-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/>
-            </svg>
-            <span class="sr-only">Cookies Preferences</span>
-          </a>
-
+          <a href="cookies.html">Cookies</a>
+          <a href="javascript:void(0)">Cookies Preferences</a>
           <a href="legal.html">Legal</a>
         </div>
-
         <div class="copyright">
           © 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
         </div>
       </div>
     </footer>
   </div>
-
-  <script>
-    // Minimal demo "translation" + RTL toggle. Replace later with Miso state.
-    (function () {
-      const html = document.documentElement;
-      const title = document.getElementById("demoTitle");
-      const text  = document.getElementById("demoText");
-
-      const samples = {
-        en: { t: "Language", s: "English selected." },
-        zh: { t: "语言", s: "已选择中文。" },
-        es: { t: "Idioma", s: "Español seleccionado." },
-        hi: { t: "भाषा", s: "हिंदी चुनी गई।" },
-        ar: { t: "اللغة", s: "تم اختيار العربية." },
-        fr: { t: "Langue", s: "Français sélectionné." },
-        pt: { t: "Idioma", s: "Português selecionado." },
-        ru: { t: "Язык", s: "Выбран русский." },
-        ja: { t: "言語", s: "日本語が選択されました。" },
-        de: { t: "Sprache", s: "Deutsch ausgewählt." },
-        ca: { t: "Idioma", s: "Català seleccionat." },
-        id: { t: "Bahasa", s: "Bahasa Indonesia dipilih." }
-      };
-
-      document.addEventListener("click", (e) => {
-        const btn = e.target.closest(".lang-item");
-        if (btn) {
-          const lang = btn.getAttribute("data-lang");
-          const dir  = btn.getAttribute("data-dir") || "ltr";
-
-          html.setAttribute("lang", lang);
-          html.setAttribute("dir", dir);
-
-          const sample = samples[lang] || samples.en;
-          title.textContent = sample.t;
-          text.textContent  = sample.s;
-        }
-
-        const cookieBtn = e.target.closest("#cookiePreferencesLink");
-        if (cookieBtn) {
-          // Placeholder: hook this to your cookie preferences modal in Miso.
-          alert("Open Cookies Preferences (hook this in Miso).");
-        }
-      });
-    })();
-  </script>
 </body>
 </html>
