@@ -17,7 +17,6 @@
       --hair:rgba(255,255,255,.12);
       --glass:rgba(0,0,0,.78);
 
-      /* tighter spacing */
       --px:clamp(12px, 2vw, 18px);
       --py:10px;
 
@@ -32,6 +31,9 @@
 
       --radius:14px;
       --blur:10px;
+
+      --menu-bg: rgba(0,0,0,.88);
+      --menu-border: rgba(255,255,255,.14);
     }
 
     *{ box-sizing:border-box; }
@@ -72,6 +74,7 @@
       background:var(--glass);
       backdrop-filter: blur(var(--blur));
       -webkit-backdrop-filter: blur(var(--blur));
+      overflow: visible; /* important: allow dropdown to escape */
     }
 
     header{
@@ -133,58 +136,149 @@
 
     .navlink:hover::after{ transform:scaleX(1); }
 
-    .lang-switch{ position:relative; }
+    /* ===== Language switcher ===== */
+    .lang-switch{
+      position:relative;
+      display:flex;
+      align-items:center;
+    }
 
     .lang-trigger{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:28px;
+      height:28px;
       background:none;
       border:0;
       cursor:pointer;
-      font-size:17px;
-      padding:4px;
-      color:rgba(255,255,255,.9);
+      padding:0;
+      color:#fff; /* globe must be white */
       line-height:1;
+      border-radius:10px;
     }
 
+    .lang-trigger:hover{
+      background: rgba(255,255,255,.06);
+    }
+
+    .globe{
+      width:18px;
+      height:18px;
+      display:block;
+    }
+
+    /* Menu opens to the RIGHT (LTR) */
     .lang-menu{
       position:absolute;
-      right:100%;
+      left:100%;
       top:50%;
-      transform:translateY(-50%) translateX(-8px);
+      transform: translateY(-50%) translateX(10px);
+      background: var(--menu-bg);
+      border: 1px solid var(--menu-border);
+      border-radius: 14px;
+      padding: 8px;
       display:flex;
-      flex-wrap:wrap;
-      gap:4px;
-      padding:5px 6px;
-      background:rgba(0,0,0,.85);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:999px;
+      flex-direction:column;
+      gap: 6px;
+      min-width: 168px;
+      z-index: 50;
+
       opacity:0;
       pointer-events:none;
-      transition:opacity 140ms ease, transform 140ms ease;
-      backdrop-filter:blur(10px);
-      max-width:min(320px,80vw);
+      filter: drop-shadow(0 12px 28px rgba(0,0,0,.45));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
+    /* show on hover */
     .lang-switch:hover .lang-menu{
       opacity:1;
       pointer-events:auto;
-      transform:translateY(-50%) translateX(-3px);
     }
 
+    /* Each item slides in with “wave” (stagger) */
     .lang-item{
-      background:none;
-      border:0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+
+      width:100%;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.86);
       cursor:pointer;
-      min-width:36px;
-      text-align:center;
-      font-size:10.5px;
-      font-weight:800;
-      letter-spacing:.16em;
-      color:rgba(255,255,255,.8);
-      padding:3px 4px;
+
+      padding: 7px 10px;
+      border-radius: 12px;
+
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+
+      transform: translateX(-10px);
+      opacity: 0;
+      transition:
+        transform 220ms ease,
+        opacity 220ms ease,
+        border-color 160ms ease,
+        background 160ms ease,
+        color 160ms ease;
     }
 
-    .lang-item:hover{ color:#fff; }
+    .lang-switch:hover .lang-item{
+      transform: translateX(0);
+      opacity: 1;
+    }
 
+    /* stagger delays (wave) */
+    .lang-switch:hover .lang-item:nth-child(1)  { transition-delay:  0ms; }
+    .lang-switch:hover .lang-item:nth-child(2)  { transition-delay: 20ms; }
+    .lang-switch:hover .lang-item:nth-child(3)  { transition-delay: 40ms; }
+    .lang-switch:hover .lang-item:nth-child(4)  { transition-delay: 60ms; }
+    .lang-switch:hover .lang-item:nth-child(5)  { transition-delay: 80ms; }
+    .lang-switch:hover .lang-item:nth-child(6)  { transition-delay:100ms; }
+    .lang-switch:hover .lang-item:nth-child(7)  { transition-delay:120ms; }
+    .lang-switch:hover .lang-item:nth-child(8)  { transition-delay:140ms; }
+    .lang-switch:hover .lang-item:nth-child(9)  { transition-delay:160ms; }
+    .lang-switch:hover .lang-item:nth-child(10) { transition-delay:180ms; }
+    .lang-switch:hover .lang-item:nth-child(11) { transition-delay:200ms; }
+    .lang-switch:hover .lang-item:nth-child(12) { transition-delay:220ms; }
+
+    .lang-item:hover{
+      color: rgba(255,255,255,.98);
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.06);
+    }
+
+    .lang-code{
+      flex: 0 0 auto;
+      min-width: 32px;
+      text-align:left;
+    }
+
+    /* label hidden until hover */
+    .lang-label{
+      flex: 1 1 auto;
+      text-align:right;
+      color: rgba(255,255,255,.60);
+      font-weight: 800;
+      letter-spacing: .02em;
+      text-transform: none;
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity 150ms ease, transform 150ms ease;
+      white-space: nowrap;
+    }
+
+    .lang-item:hover .lang-label{
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Main */
     main{
       display:grid;
       place-items:center;
@@ -237,28 +331,60 @@
       line-height:1.3;
     }
 
-    /* RTL (Arabic) */
+    /* ===== RTL (Arabic) ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
     [dir="rtl"] nav{ flex-direction:row-reverse; }
     [dir="rtl"] .navlink::after{ transform-origin:right; }
     [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
+
+    /* In RTL, menu opens to the LEFT */
     [dir="rtl"] .lang-menu{
-      left:100%;
-      right:auto;
-      transform:translateY(-50%) translateX(8px);
+      left:auto;
+      right:100%;
+      transform: translateY(-50%) translateX(-10px);
     }
-    [dir="rtl"] .lang-switch:hover .lang-menu{
-      transform:translateY(-50%) translateX(3px);
+    [dir="rtl"] .lang-item{
+      transform: translateX(10px);
+    }
+    [dir="rtl"] .lang-switch:hover .lang-item{
+      transform: translateX(0);
+    }
+    [dir="rtl"] .lang-label{
+      text-align:left;
+      transform: translateX(6px);
+    }
+    [dir="rtl"] .lang-item:hover .lang-label{
+      transform: translateX(0);
     }
     [dir="rtl"] .card{ text-align:right; }
 
-    @media (max-width:640px){
+    /* ===== Mobile: dropdown goes DOWN so it never cuts ===== */
+    @media (max-width: 640px){
       .topbar{
         flex-direction:column;
         align-items:flex-start;
         gap:8px;
       }
       nav{ width:100%; gap:10px; }
+
+      .lang-menu{
+        left: 0;
+        top: 100%;
+        transform: translateY(10px);
+        min-width: min(360px, 92vw);
+      }
+      .lang-switch:hover .lang-item{
+        transform: translateX(0);
+      }
+      .lang-item{ transform: translateY(-6px); }
+      .lang-switch:hover .lang-item{ transform: translateY(0); }
+
+      /* reset wave delays still apply */
+      [dir="rtl"] .lang-menu{
+        right: 0;
+        left: auto;
+        transform: translateY(10px);
+      }
     }
   </style>
 </head>
@@ -270,45 +396,81 @@
         <div class="brand">MICRORETAILX</div>
 
         <nav>
-          <div class="lang-switch">
-            <button class="lang-trigger">🌐</button>
-            <div class="lang-menu">
-              <button class="lang-item">EN</button>
-              <button class="lang-item">ZH</button>
-              <button class="lang-item">ES</button>
-              <button class="lang-item">HI</button>
-              <button class="lang-item">AR</button>
-              <button class="lang-item">FR</button>
-              <button class="lang-item">PT</button>
-              <button class="lang-item">RU</button>
-              <button class="lang-item">JA</button>
-              <button class="lang-item">DE</button>
-              <button class="lang-item">CA</button>
-              <button class="lang-item">ID</button>
+          <div class="lang-switch" id="lang-switch">
+            <button class="lang-trigger" aria-label="Language selector">
+              <!-- White globe (SVG) -->
+              <svg class="globe" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M12 3c3 3 3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
+
+            <div class="lang-menu" id="lang-menu" aria-label="Languages">
+              <button class="lang-item" data-lang="en">
+                <span class="lang-code">EN</span><span class="lang-label">English</span>
+              </button>
+              <button class="lang-item" data-lang="zh">
+                <span class="lang-code">ZH</span><span class="lang-label">中文</span>
+              </button>
+              <button class="lang-item" data-lang="es">
+                <span class="lang-code">ES</span><span class="lang-label">Español</span>
+              </button>
+              <button class="lang-item" data-lang="hi">
+                <span class="lang-code">HI</span><span class="lang-label">हिंदी</span>
+              </button>
+              <button class="lang-item" data-lang="ar">
+                <span class="lang-code">AR</span><span class="lang-label">العربية</span>
+              </button>
+              <button class="lang-item" data-lang="fr">
+                <span class="lang-code">FR</span><span class="lang-label">Français</span>
+              </button>
+              <button class="lang-item" data-lang="pt">
+                <span class="lang-code">PT</span><span class="lang-label">Português</span>
+              </button>
+              <button class="lang-item" data-lang="ru">
+                <span class="lang-code">RU</span><span class="lang-label">Русский</span>
+              </button>
+              <button class="lang-item" data-lang="ja">
+                <span class="lang-code">JA</span><span class="lang-label">日本語</span>
+              </button>
+              <button class="lang-item" data-lang="de">
+                <span class="lang-code">DE</span><span class="lang-label">Deutsch</span>
+              </button>
+              <button class="lang-item" data-lang="ca">
+                <span class="lang-code">CA</span><span class="lang-label">Català</span>
+              </button>
+              <button class="lang-item" data-lang="id">
+                <span class="lang-code">ID</span><span class="lang-label">Indonesia</span>
+              </button>
             </div>
           </div>
 
-          <a class="navlink" href="#">About</a>
-          <a class="navlink" href="#">Verticals</a>
-          <a class="navlink" href="#">Contact</a>
+          <a class="navlink" href="#/about">About</a>
+          <a class="navlink" href="#/verticals">Verticals</a>
+          <a class="navlink" href="#/contact">Contact</a>
         </nav>
       </div>
     </header>
 
     <main>
       <section class="card">
-        <p>This is a compact visual test with reduced spacing.</p>
+        <p>Language menu test: white globe + wave open + hover labels.</p>
+        <p style="opacity:.6;margin:10px 0 0 0;font-size:12px;">
+          Switch RTL test by changing <code>dir="ltr"</code> to <code>dir="rtl"</code> in the <code>&lt;html&gt;</code> tag.
+        </p>
       </section>
     </main>
 
     <footer>
       <div class="footer-inner">
         <div class="footer-links">
-          <a href="#">Terms</a>
-          <a href="#">Privacy</a>
-          <a href="#">Cookies</a>
-          <a href="#">Cookies Preferences</a>
-          <a href="#">Legal</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="cookies.html">Cookies</a>
+          <a href="javascript:void(0)">Cookies Preferences</a>
+          <a href="legal.html">Legal</a>
         </div>
         <div class="copyright">
           © 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
