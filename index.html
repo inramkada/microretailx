@@ -3,121 +3,105 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>microretailX</title>
+  <title>UNDER MAINTENANCE</title>
 
-  <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Permissions-Policy"
-        content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
+  <!-- Hygiene / low-risk defaults -->
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
 
   <style>
-    html, body {
+    :root {
+      --bg: #000;
+      --fg: #fff;
+      --pad-x: 18px;
+      --pad-y: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-      color: #fff;
+      background: var(--bg);
+      color: var(--fg);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
                    "Liberation Mono", "Courier New", monospace;
     }
-    canvas { display:block; width:100vw; height:100vh; }
 
-    .ui-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+    /* Layout: header + main (fills) + footer */
+    .page {
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
 
-    .top-bar {
-      position: absolute; top: 0; left: 0; right: 0;
-      padding: 14px 18px;
-      display: flex; justify-content: flex-start;
-      background: rgba(0,0,0,0.78);
+    header {
+      padding: var(--pad-y) var(--pad-x);
       border-bottom: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.85);
       backdrop-filter: blur(10px);
     }
 
     .brand {
       font-size: 12px;
-      letter-spacing: 4px;
       font-weight: 900;
+      letter-spacing: 4px;
       opacity: 0.92;
-      color: rgba(255,255,255,0.92);
       mix-blend-mode: difference;
-      text-shadow: none;
+      white-space: nowrap;
     }
 
-    .footer-bar {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 14px 18px 12px;
-      display: flex; flex-direction: column; align-items: center;
-      gap: 8px;
-      background: rgba(0,0,0,0.78);
+    main {
+      display: grid;
+      place-items: center;
+      padding: 24px var(--pad-x);
+    }
+
+    .status {
+      text-align: center;
+      opacity: 0.75;
+      line-height: 1.45;
+      max-width: 60ch;
+    }
+
+    footer {
+      padding: 12px var(--pad-x);
       border-top: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.85);
       backdrop-filter: blur(10px);
-      pointer-events: auto;
     }
-
-    .footer-links {
-      display: flex; gap: 22px;
-      font-size: 11px; letter-spacing: 2px;
-      opacity: 0.65;
-    }
-    .footer-links a {
-      color:#fff; text-decoration:none;
-      opacity:0.75; pointer-events:auto;
-    }
-    .footer-links a:hover { opacity:1; text-decoration: underline; }
 
     .copyright {
-      font-size: 7px; letter-spacing: 0.08px;
-      opacity: 0.45; text-align: center;
+      text-align: center;
+      font-size: 8px;          /* aquí lo haces más pequeño */
+      letter-spacing: 0.8px;
+      opacity: 0.40;
     }
 
     @media (max-width: 600px) {
       .brand { font-size: 11px; letter-spacing: 3px; }
-      .footer-links { flex-wrap: wrap; justify-content:center; gap: 14px; }
+      .copyright { font-size: 6.5px; }
     }
   </style>
 </head>
 
 <body>
-  <canvas id="view"></canvas>
+  <div class="page">
+    <header>
+      <div class="brand">UNDER MAINTENANCE</div>
+    </header>
 
-  <div class="ui-layer">
-    <div class="top-bar">
-      <div class="brand">MICRORETAILX</div>
-    </div>
-
-    <footer class="footer-bar">
-      <div class="copyright">
-        © 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
+    <main>
+      <div class="status">
+        This site is temporarily unavailable.<br />
+        Please check back soon.
       </div>
+    </main>
+
+    <footer>
+      <div class="copyright">© 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED</div>
     </footer>
   </div>
-
-  <script>
- 
-    (() => {
-      "use strict";
-
-      const view = document.getElementById("view");
-      const ctx = view.getContext("2d", { alpha: false });
-
-      function resize() {
-        const dpr = Math.min(2, window.devicePixelRatio || 1);
-        const W = window.innerWidth | 0;
-        const H = window.innerHeight | 0;
-
-        view.width  = (W * dpr) | 0;
-        view.height = (H * dpr) | 0;
-        view.style.width  = W + "px";
-        view.style.height = H + "px";
-
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.fillStyle = "#000";
-        ctx.fillRect(0, 0, W, H);
-      }
-
-      window.addEventListener("resize", resize, { passive: true });
-      resize();
-    })();
-  </script>
 </body>
 </html>
