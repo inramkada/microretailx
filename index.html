@@ -9,6 +9,19 @@
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
   <meta name="color-scheme" content="dark" />
 
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MICRORETAILX">
+  <meta property="og:description" content="Advanced biotech and creative technology platforms.">
+  <meta property="og:url" content="https://www.microretailx.com">
+  <meta property="og:image" content="https://www.microretailx.com/og-image.jpg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MICRORETAILX">
+  <meta name="twitter:description" content="Advanced biotech and creative technology platforms.">
+  <meta name="twitter:image" content="https://www.microretailx.com/og-image.jpg">
+
   <style>
     :root{
       --bg:#000;
@@ -141,6 +154,7 @@
     }
     .verticals > span{ pointer-events:none; }
 
+    /* no box, no border, no background */
     .verticals-menu{
       position:absolute;
       top:100%;
@@ -168,14 +182,7 @@
       -webkit-backdrop-filter:none;
     }
 
-    /* Open on hover (desktop) */
-    .verticals:hover .verticals-menu{
-      opacity:1;
-      pointer-events:auto;
-      transform: translateY(0);
-    }
-
-    /* Open when "pinned" by click (mobile + desktop) */
+    /* Open when pinned by click (mobile + desktop) */
     .verticals.is-open .verticals-menu{
       opacity:1;
       pointer-events:auto;
@@ -402,7 +409,7 @@
     .copyright{
       font-size:var(--copy-size);
       letter-spacing:var(--copy-track);
-      opacity:.42;
+      opacity:.58; /* raised for accessibility */
       text-align:center;
       line-height:1.3;
       font-weight:400;
@@ -541,7 +548,7 @@
 
           <a class="navlink" href="#/about" data-i18n="nav.about">About</a>
 
-          <!-- Verticals pinned by click -->
+          <!-- Verticals: click to open/close -->
           <div class="navlink verticals" id="verticals" role="button" aria-haspopup="true" aria-expanded="false">
             <span data-i18n="nav.verticals">Verticals</span>
             <div class="verticals-menu" aria-label="Verticals">
@@ -784,7 +791,7 @@
       });
     })();
 
-    // ===== Language rail timers: open after 3s, lock inside, close 3s after exit, fade 1s =====
+    // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit, fade 1s =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
@@ -794,7 +801,7 @@
       let closeTimer = null;
       let locked = false;
 
-      const OPEN_DELAY_MS  = 3000;
+      const OPEN_DELAY_MS  = 500;   // lowered from 3000
       const CLOSE_DELAY_MS = 3000;
 
       function clearTimers(){
@@ -837,6 +844,7 @@
         scheduleClose();
       });
 
+      // Mobile: tap globe toggles instantly
       const trigger = switchEl.querySelector('.lang-trigger');
       trigger?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -846,7 +854,7 @@
       });
     })();
 
-    // ===== Verticals: pin open on click, close outside / Escape =====
+    // ===== Verticals: click to open/close, close outside / Escape =====
     (function(){
       const v = document.getElementById('verticals');
       if (!v) return;
@@ -857,26 +865,22 @@
       }
       function isOpen(){ return v.classList.contains('is-open'); }
 
-      // Toggle on click (but allow link clicks to navigate)
       v.addEventListener('click', (e) => {
         const a = e.target.closest('a');
-        if (a) return; // let navigation happen
+        if (a) return; // allow navigation
         e.preventDefault();
         e.stopPropagation();
         setOpen(!isOpen());
       });
 
-      // Close when clicking anywhere else
       document.addEventListener('click', (e) => {
         if (!v.contains(e.target)) setOpen(false);
       });
 
-      // Close on Escape
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') setOpen(false);
       });
 
-      // If you want: close after selecting a link (optional)
       v.querySelectorAll('a').forEach(a=>{
         a.addEventListener('click', ()=> setOpen(false));
       });
