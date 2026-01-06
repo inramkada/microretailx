@@ -21,10 +21,10 @@
       --py:10px;
 
       --brand-size:clamp(12px, 1.2vw, 13px);
-      --brand-track:0.22em;
+      --brand-track:0.20em;
 
       --nav-size:clamp(12px, 1.15vw, 12.5px);
-      --nav-track:0.14em;
+      --nav-track:0.12em;
 
       --copy-size:clamp(6.5px, 1.1vw, 7px);
       --copy-track:0.06em;
@@ -32,7 +32,7 @@
       --radius:14px;
       --blur:10px;
 
-      --menu-bg: rgba(0,0,0,.88);
+      --menu-bg: rgba(0,0,0,.86);
       --menu-border: rgba(255,255,255,.14);
     }
 
@@ -74,7 +74,7 @@
       background:var(--glass);
       backdrop-filter: blur(var(--blur));
       -webkit-backdrop-filter: blur(var(--blur));
-      overflow: visible; /* important: allow dropdown to escape */
+      overflow: visible;
     }
 
     header{
@@ -97,9 +97,7 @@
       white-space: nowrap;
       line-height: 1;
       opacity:.97;
-      text-shadow:
-        0 0 10px rgba(255,255,255,.10),
-        0 0 2px rgba(255,255,255,.18);
+      text-shadow: 0 0 10px rgba(255,255,255,.10), 0 0 2px rgba(255,255,255,.18);
       mix-blend-mode:difference;
     }
 
@@ -120,9 +118,7 @@
       padding:5px 2px;
       position:relative;
     }
-
     .navlink:hover{ color:rgba(255,255,255,.96); }
-
     .navlink::after{
       content:"";
       position:absolute;
@@ -133,16 +129,16 @@
       transform-origin:left;
       transition:transform 150ms ease;
     }
-
     .navlink:hover::after{ transform:scaleX(1); }
 
-    /* ===== Language switcher ===== */
+    /* ===== Language rail (opens LEFT, horizontal, organized) ===== */
     .lang-switch{
       position:relative;
       display:flex;
       align-items:center;
     }
 
+    /* White globe */
     .lang-trigger{
       display:inline-flex;
       align-items:center;
@@ -153,132 +149,135 @@
       border:0;
       cursor:pointer;
       padding:0;
-      color:#fff; /* globe must be white */
+      color:#fff;               /* globe must be white */
       line-height:1;
       border-radius:10px;
     }
+    .lang-trigger:hover{ background: rgba(255,255,255,.06); }
+    .globe{ width:18px; height:18px; display:block; }
 
-    .lang-trigger:hover{
-      background: rgba(255,255,255,.06);
-    }
-
-    .globe{
-      width:18px;
-      height:18px;
-      display:block;
-    }
-
-    /* Menu opens to the RIGHT (LTR) */
-    .lang-menu{
+    /* This is the horizontal bar that occupies the red line */
+    .lang-rail{
       position:absolute;
-      left:100%;
-      top:50%;
-      transform: translateY(-50%) translateX(10px);
-      background: var(--menu-bg);
-      border: 1px solid var(--menu-border);
-      border-radius: 14px;
-      padding: 8px;
+      right: calc(100% + 10px);    /* open to the LEFT */
+      top: 50%;
+      transform: translateY(-50%);
+
       display:flex;
-      flex-direction:column;
-      gap: 6px;
-      min-width: 168px;
-      z-index: 50;
+      align-items:center;
+      gap:8px;
+
+      padding:6px 8px;
+      border:1px solid var(--menu-border);
+      background: var(--menu-bg);
+      border-radius: 999px;
+
+      /* Important: never “cut” vertically; if too many, scroll horizontally */
+      max-width: min(780px, calc(100vw - (2 * var(--px)) - 80px));
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
 
       opacity:0;
       pointer-events:none;
-      filter: drop-shadow(0 12px 28px rgba(0,0,0,.45));
+
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
 
-    /* show on hover */
-    .lang-switch:hover .lang-menu{
+    /* Hide scrollbar (still scrollable) */
+    .lang-rail::-webkit-scrollbar{ height:0; }
+    .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
+
+    /* Show rail on hover */
+    .lang-switch:hover .lang-rail{
       opacity:1;
       pointer-events:auto;
     }
 
-    /* Each item slides in with “wave” (stagger) */
-    .lang-item{
-      display:flex;
+    /* Pills */
+    .lang-pill{
+      position:relative;
+      display:inline-flex;
       align-items:center;
-      justify-content:space-between;
-      gap: 10px;
+      justify-content:center;
 
-      width:100%;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.35);
+      background: rgba(0,0,0,.30);
       color: rgba(255,255,255,.86);
-      cursor:pointer;
 
-      padding: 7px 10px;
-      border-radius: 12px;
+      height:26px;
+      padding: 0 10px;
+      border-radius: 999px;
 
       font-size: 11px;
-      font-weight: 850;
+      font-weight: 900;
       letter-spacing: .12em;
       text-transform: uppercase;
 
-      transform: translateX(-10px);
+      cursor:pointer;
+      user-select:none;
+
+      /* wave (start slightly toward the globe, then settle) */
+      transform: translateX(10px);
       opacity: 0;
-      transition:
-        transform 220ms ease,
-        opacity 220ms ease,
-        border-color 160ms ease,
-        background 160ms ease,
-        color 160ms ease;
+      transition: transform 220ms ease, opacity 220ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
     }
 
-    .lang-switch:hover .lang-item{
+    .lang-switch:hover .lang-pill{
       transform: translateX(0);
       opacity: 1;
     }
 
-    /* stagger delays (wave) */
-    .lang-switch:hover .lang-item:nth-child(1)  { transition-delay:  0ms; }
-    .lang-switch:hover .lang-item:nth-child(2)  { transition-delay: 20ms; }
-    .lang-switch:hover .lang-item:nth-child(3)  { transition-delay: 40ms; }
-    .lang-switch:hover .lang-item:nth-child(4)  { transition-delay: 60ms; }
-    .lang-switch:hover .lang-item:nth-child(5)  { transition-delay: 80ms; }
-    .lang-switch:hover .lang-item:nth-child(6)  { transition-delay:100ms; }
-    .lang-switch:hover .lang-item:nth-child(7)  { transition-delay:120ms; }
-    .lang-switch:hover .lang-item:nth-child(8)  { transition-delay:140ms; }
-    .lang-switch:hover .lang-item:nth-child(9)  { transition-delay:160ms; }
-    .lang-switch:hover .lang-item:nth-child(10) { transition-delay:180ms; }
-    .lang-switch:hover .lang-item:nth-child(11) { transition-delay:200ms; }
-    .lang-switch:hover .lang-item:nth-child(12) { transition-delay:220ms; }
+    /* stagger (wave) */
+    .lang-switch:hover .lang-pill:nth-child(1)  { transition-delay:  0ms; }
+    .lang-switch:hover .lang-pill:nth-child(2)  { transition-delay: 18ms; }
+    .lang-switch:hover .lang-pill:nth-child(3)  { transition-delay: 36ms; }
+    .lang-switch:hover .lang-pill:nth-child(4)  { transition-delay: 54ms; }
+    .lang-switch:hover .lang-pill:nth-child(5)  { transition-delay: 72ms; }
+    .lang-switch:hover .lang-pill:nth-child(6)  { transition-delay: 90ms; }
+    .lang-switch:hover .lang-pill:nth-child(7)  { transition-delay:108ms; }
+    .lang-switch:hover .lang-pill:nth-child(8)  { transition-delay:126ms; }
+    .lang-switch:hover .lang-pill:nth-child(9)  { transition-delay:144ms; }
+    .lang-switch:hover .lang-pill:nth-child(10) { transition-delay:162ms; }
+    .lang-switch:hover .lang-pill:nth-child(11) { transition-delay:180ms; }
+    .lang-switch:hover .lang-pill:nth-child(12) { transition-delay:198ms; }
 
-    .lang-item:hover{
-      color: rgba(255,255,255,.98);
+    .lang-pill:hover{
+      color:#fff;
       border-color: rgba(255,255,255,.22);
       background: rgba(255,255,255,.06);
     }
 
-    .lang-code{
-      flex: 0 0 auto;
-      min-width: 32px;
-      text-align:left;
-    }
+    /* Tooltip with full language name */
+    .lang-pill::after{
+      content: attr(data-label);
+      position:absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
 
-    /* label hidden until hover */
-    .lang-label{
-      flex: 1 1 auto;
-      text-align:right;
-      color: rgba(255,255,255,.60);
-      font-weight: 800;
-      letter-spacing: .02em;
-      text-transform: none;
-      opacity: 0;
-      transform: translateX(-6px);
-      transition: opacity 150ms ease, transform 150ms ease;
+      background: rgba(0,0,0,.90);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 6px 8px;
+
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.92);
+
+      opacity:0;
+      pointer-events:none;
       white-space: nowrap;
-    }
 
-    .lang-item:hover .lang-label{
-      opacity: 1;
-      transform: translateX(0);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
+    .lang-pill:hover::after{ opacity:1; }
 
-    /* Main */
     main{
       display:grid;
       place-items:center;
@@ -320,7 +319,6 @@
       color:rgba(255,255,255,.85);
       text-decoration:none;
     }
-
     .footer-links a:hover{ color:#fff; }
 
     .copyright{
@@ -331,34 +329,24 @@
       line-height:1.3;
     }
 
-    /* ===== RTL (Arabic) ===== */
+    /* ===== RTL (Arabic): flip open direction to the RIGHT ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
     [dir="rtl"] nav{ flex-direction:row-reverse; }
     [dir="rtl"] .navlink::after{ transform-origin:right; }
     [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
 
-    /* In RTL, menu opens to the LEFT */
-    [dir="rtl"] .lang-menu{
-      left:auto;
-      right:100%;
-      transform: translateY(-50%) translateX(-10px);
+    [dir="rtl"] .lang-rail{
+      right:auto;
+      left: calc(100% + 10px);     /* open to the RIGHT in RTL */
     }
-    [dir="rtl"] .lang-item{
-      transform: translateX(10px);
+    [dir="rtl"] .lang-pill{
+      transform: translateX(-10px);
     }
-    [dir="rtl"] .lang-switch:hover .lang-item{
+    [dir="rtl"] .lang-switch:hover .lang-pill{
       transform: translateX(0);
     }
-    [dir="rtl"] .lang-label{
-      text-align:left;
-      transform: translateX(6px);
-    }
-    [dir="rtl"] .lang-item:hover .lang-label{
-      transform: translateX(0);
-    }
-    [dir="rtl"] .card{ text-align:right; }
 
-    /* ===== Mobile: dropdown goes DOWN so it never cuts ===== */
+    /* Mobile: rail drops DOWN so it never collides */
     @media (max-width: 640px){
       .topbar{
         flex-direction:column;
@@ -367,23 +355,17 @@
       }
       nav{ width:100%; gap:10px; }
 
-      .lang-menu{
-        left: 0;
-        top: 100%;
+      .lang-rail{
+        right:auto;
+        left:0;
+        top:100%;
         transform: translateY(10px);
-        min-width: min(360px, 92vw);
+        max-width: min(92vw, 520px);
       }
-      .lang-switch:hover .lang-item{
-        transform: translateX(0);
-      }
-      .lang-item{ transform: translateY(-6px); }
-      .lang-switch:hover .lang-item{ transform: translateY(0); }
 
-      /* reset wave delays still apply */
-      [dir="rtl"] .lang-menu{
-        right: 0;
-        left: auto;
-        transform: translateY(10px);
+      [dir="rtl"] .lang-rail{
+        left:auto;
+        right:0;
       }
     }
   </style>
@@ -396,9 +378,10 @@
         <div class="brand">MICRORETAILX</div>
 
         <nav>
+          <!-- IMPORTANT: globe first, then About/Verticals/Contact -->
           <div class="lang-switch" id="lang-switch">
             <button class="lang-trigger" aria-label="Language selector">
-              <!-- White globe (SVG) -->
+              <!-- White globe SVG -->
               <svg class="globe" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
                 <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
@@ -407,43 +390,20 @@
               </svg>
             </button>
 
-            <div class="lang-menu" id="lang-menu" aria-label="Languages">
-              <button class="lang-item" data-lang="en">
-                <span class="lang-code">EN</span><span class="lang-label">English</span>
-              </button>
-              <button class="lang-item" data-lang="zh">
-                <span class="lang-code">ZH</span><span class="lang-label">中文</span>
-              </button>
-              <button class="lang-item" data-lang="es">
-                <span class="lang-code">ES</span><span class="lang-label">Español</span>
-              </button>
-              <button class="lang-item" data-lang="hi">
-                <span class="lang-code">HI</span><span class="lang-label">हिंदी</span>
-              </button>
-              <button class="lang-item" data-lang="ar">
-                <span class="lang-code">AR</span><span class="lang-label">العربية</span>
-              </button>
-              <button class="lang-item" data-lang="fr">
-                <span class="lang-code">FR</span><span class="lang-label">Français</span>
-              </button>
-              <button class="lang-item" data-lang="pt">
-                <span class="lang-code">PT</span><span class="lang-label">Português</span>
-              </button>
-              <button class="lang-item" data-lang="ru">
-                <span class="lang-code">RU</span><span class="lang-label">Русский</span>
-              </button>
-              <button class="lang-item" data-lang="ja">
-                <span class="lang-code">JA</span><span class="lang-label">日本語</span>
-              </button>
-              <button class="lang-item" data-lang="de">
-                <span class="lang-code">DE</span><span class="lang-label">Deutsch</span>
-              </button>
-              <button class="lang-item" data-lang="ca">
-                <span class="lang-code">CA</span><span class="lang-label">Català</span>
-              </button>
-              <button class="lang-item" data-lang="id">
-                <span class="lang-code">ID</span><span class="lang-label">Indonesia</span>
-              </button>
+            <!-- Horizontal rail occupying the “red line” space -->
+            <div class="lang-rail" id="lang-rail" aria-label="Languages">
+              <button class="lang-pill" data-lang="en" data-label="English">EN</button>
+              <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)">ZH</button>
+              <button class="lang-pill" data-lang="es" data-label="Español">ES</button>
+              <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)">HI</button>
+              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)">AR</button>
+              <button class="lang-pill" data-lang="fr" data-label="Français">FR</button>
+              <button class="lang-pill" data-lang="pt" data-label="Português">PT</button>
+              <button class="lang-pill" data-lang="ru" data-label="Русский">RU</button>
+              <button class="lang-pill" data-lang="ja" data-label="日本語 (Japanese)">JA</button>
+              <button class="lang-pill" data-lang="de" data-label="Deutsch">DE</button>
+              <button class="lang-pill" data-lang="ca" data-label="Català">CA</button>
+              <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia">ID</button>
             </div>
           </div>
 
@@ -456,10 +416,7 @@
 
     <main>
       <section class="card">
-        <p>Language menu test: white globe + wave open + hover labels.</p>
-        <p style="opacity:.6;margin:10px 0 0 0;font-size:12px;">
-          Switch RTL test by changing <code>dir="ltr"</code> to <code>dir="rtl"</code> in the <code>&lt;html&gt;</code> tag.
-        </p>
+        <p>Language rail test: opens left, fills the header line, tooltips on hover.</p>
       </section>
     </main>
 
