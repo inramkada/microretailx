@@ -47,7 +47,7 @@
                    "Liberation Mono", "Courier New", monospace;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
-      font-weight: 400; /* global: no bold */
+      font-weight:400; /* no bold anywhere */
     }
 
     .page{
@@ -92,7 +92,7 @@
 
     .brand{
       font-size: var(--brand-size);
-      font-weight: 400; /* no bold */
+      font-weight:400;
       letter-spacing: var(--brand-track);
       text-transform: uppercase;
       white-space: nowrap;
@@ -113,7 +113,7 @@
       color:rgba(255,255,255,.82);
       text-decoration:none;
       font-size:var(--nav-size);
-      font-weight:400; /* no bold */
+      font-weight:400;
       letter-spacing:var(--nav-track);
       text-transform:uppercase;
       padding:5px 2px;
@@ -132,7 +132,7 @@
     }
     .navlink:hover::after{ transform:scaleX(1); }
 
-    /* ===== Language rail (opens LEFT, horizontal, organized) ===== */
+    /* ===== Language rail (controlled by JS timers) ===== */
     .lang-switch{
       position:relative;
       display:flex;
@@ -149,7 +149,7 @@
       border:0;
       cursor:pointer;
       padding:0;
-      color:#fff;
+      color:#fff; /* globe white */
       line-height:1;
       border-radius:10px;
     }
@@ -158,7 +158,7 @@
 
     .lang-rail{
       position:absolute;
-      right: calc(100% + 10px);
+      right: calc(100% + 10px); /* open to LEFT */
       top: 50%;
       transform: translateY(-50%);
 
@@ -182,12 +182,16 @@
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+
+      /* close in 1s (opacity) */
+      transition: opacity 1s ease, transform 220ms ease;
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
     .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
 
-    .lang-switch:hover .lang-rail{
+    /* Open state controlled by JS */
+    .lang-switch.is-open .lang-rail{
       opacity:1;
       pointer-events:auto;
     }
@@ -207,7 +211,7 @@
       border-radius: 999px;
 
       font-size: 11px;
-      font-weight: 400; /* no bold */
+      font-weight: 400;
       letter-spacing: .12em;
       text-transform: uppercase;
 
@@ -219,23 +223,25 @@
       transition: transform 220ms ease, opacity 220ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
     }
 
-    .lang-switch:hover .lang-pill{
+    /* Pills show when open */
+    .lang-switch.is-open .lang-pill{
       transform: translateX(0);
       opacity: 1;
     }
 
-    .lang-switch:hover .lang-pill:nth-child(1)  { transition-delay:  0ms; }
-    .lang-switch:hover .lang-pill:nth-child(2)  { transition-delay: 18ms; }
-    .lang-switch:hover .lang-pill:nth-child(3)  { transition-delay: 36ms; }
-    .lang-switch:hover .lang-pill:nth-child(4)  { transition-delay: 54ms; }
-    .lang-switch:hover .lang-pill:nth-child(5)  { transition-delay: 72ms; }
-    .lang-switch:hover .lang-pill:nth-child(6)  { transition-delay: 90ms; }
-    .lang-switch:hover .lang-pill:nth-child(7)  { transition-delay:108ms; }
-    .lang-switch:hover .lang-pill:nth-child(8)  { transition-delay:126ms; }
-    .lang-switch:hover .lang-pill:nth-child(9)  { transition-delay:144ms; }
-    .lang-switch:hover .lang-pill:nth-child(10) { transition-delay:162ms; }
-    .lang-switch:hover .lang-pill:nth-child(11) { transition-delay:180ms; }
-    .lang-switch:hover .lang-pill:nth-child(12) { transition-delay:198ms; }
+    /* stagger (wave) when open */
+    .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
+    .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
+    .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
+    .lang-switch.is-open .lang-pill:nth-child(4)  { transition-delay: 54ms; }
+    .lang-switch.is-open .lang-pill:nth-child(5)  { transition-delay: 72ms; }
+    .lang-switch.is-open .lang-pill:nth-child(6)  { transition-delay: 90ms; }
+    .lang-switch.is-open .lang-pill:nth-child(7)  { transition-delay:108ms; }
+    .lang-switch.is-open .lang-pill:nth-child(8)  { transition-delay:126ms; }
+    .lang-switch.is-open .lang-pill:nth-child(9)  { transition-delay:144ms; }
+    .lang-switch.is-open .lang-pill:nth-child(10) { transition-delay:162ms; }
+    .lang-switch.is-open .lang-pill:nth-child(11) { transition-delay:180ms; }
+    .lang-switch.is-open .lang-pill:nth-child(12) { transition-delay:198ms; }
 
     .lang-pill:hover{
       color:#fff;
@@ -256,7 +262,7 @@
       padding: 6px 8px;
 
       font-size: 10px;
-      font-weight: 400; /* no bold */
+      font-weight: 400;
       letter-spacing: .06em;
       text-transform: uppercase;
       color: rgba(255,255,255,.92);
@@ -282,7 +288,7 @@
       border-radius:var(--radius);
       background:rgba(0,0,0,.55);
       padding:clamp(16px,2.5vw,24px);
-      font-weight: 400;
+      font-weight:400;
     }
 
     footer{
@@ -302,7 +308,7 @@
       gap:10px;
       flex-wrap:wrap;
       font-size:10.5px;
-      font-weight:400; /* no bold */
+      font-weight:400;
       letter-spacing:.16em;
       text-transform:uppercase;
       opacity:.75;
@@ -321,7 +327,7 @@
       opacity:.42;
       text-align:center;
       line-height:1.3;
-      font-weight: 400;
+      font-weight:400;
     }
 
     /* ===== Cookie gear ===== */
@@ -382,9 +388,14 @@
       right:auto;
       left: calc(100% + 10px);
     }
-    [dir="rtl"] .lang-pill{ transform: translateX(-10px); }
-    [dir="rtl"] .lang-switch:hover .lang-pill{ transform: translateX(0); }
+    [dir="rtl"] .lang-pill{
+      transform: translateX(-10px);
+    }
+    [dir="rtl"] .lang-switch.is-open .lang-pill{
+      transform: translateX(0);
+    }
 
+    /* Mobile: rail drops DOWN so it never collides */
     @media (max-width: 640px){
       .topbar{
         flex-direction:column;
@@ -417,7 +428,7 @@
 
         <nav>
           <div class="lang-switch" id="lang-switch">
-            <button class="lang-trigger" aria-label="Language selector">
+            <button class="lang-trigger" aria-label="Language selector" type="button">
               <svg class="globe" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
                 <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
@@ -427,19 +438,18 @@
             </button>
 
             <div class="lang-rail" id="lang-rail" aria-label="Languages">
-              <!-- Links to each translated page -->
-              <button class="lang-pill" data-href="index.en.html" data-label="English">EN</button>
-              <button class="lang-pill" data-href="index.zh.html" data-label="中文 (Chinese)">ZH</button>
-              <button class="lang-pill" data-href="index.es.html" data-label="Español">ES</button>
-              <button class="lang-pill" data-href="index.hi.html" data-label="हिंदी (Hindi)">HI</button>
-              <button class="lang-pill" data-href="index.ar.html" data-label="العربية (Arabic)">AR</button>
-              <button class="lang-pill" data-href="index.fr.html" data-label="Français">FR</button>
-              <button class="lang-pill" data-href="index.pt.html" data-label="Português">PT</button>
-              <button class="lang-pill" data-href="index.ru.html" data-label="Русский">RU</button>
-              <button class="lang-pill" data-href="index.ja.html" data-label="日本語 (Japanese)">JA</button>
-              <button class="lang-pill" data-href="index.de.html" data-label="Deutsch">DE</button>
-              <button class="lang-pill" data-href="index.ca.html" data-label="Català">CA</button>
-              <button class="lang-pill" data-href="index.id.html" data-label="Bahasa Indonesia">ID</button>
+              <button class="lang-pill" data-href="index.en.html" data-label="English" type="button">EN</button>
+              <button class="lang-pill" data-href="index.zh.html" data-label="中文 (Chinese)" type="button">ZH</button>
+              <button class="lang-pill" data-href="index.es.html" data-label="Español" type="button">ES</button>
+              <button class="lang-pill" data-href="index.hi.html" data-label="हिंदी (Hindi)" type="button">HI</button>
+              <button class="lang-pill" data-href="index.ar.html" data-label="العربية (Arabic)" type="button">AR</button>
+              <button class="lang-pill" data-href="index.fr.html" data-label="Français" type="button">FR</button>
+              <button class="lang-pill" data-href="index.pt.html" data-label="Português" type="button">PT</button>
+              <button class="lang-pill" data-href="index.ru.html" data-label="Русский" type="button">RU</button>
+              <button class="lang-pill" data-href="index.ja.html" data-label="日本語 (Japanese)" type="button">JA</button>
+              <button class="lang-pill" data-href="index.de.html" data-label="Deutsch" type="button">DE</button>
+              <button class="lang-pill" data-href="index.ca.html" data-label="Català" type="button">CA</button>
+              <button class="lang-pill" data-href="index.id.html" data-label="Bahasa Indonesia" type="button">ID</button>
             </div>
           </div>
 
@@ -452,7 +462,7 @@
 
     <main>
       <section class="card">
-        <p>Language rail test: opens left, fills the header line, tooltips on hover.</p>
+        <p>Language rail test: opens after 3s, locks while inside, closes 3s after exit (fade 1s).</p>
       </section>
     </main>
 
@@ -464,7 +474,6 @@
 
           <span style="display:inline-flex; align-items:center;">
             <a href="cookies.html">Cookies</a>
-            <!-- Gear next to Cookies -->
             <button
               type="button"
               class="cookie-gear"
@@ -472,7 +481,6 @@
               aria-label="Cookie Preferences"
               data-tip="Cookie Preferences"
             >
-              <!-- simple gear/pulley SVG -->
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0 .44-.17.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
               </svg>
@@ -490,23 +498,106 @@
   </div>
 
   <script>
-    // Language pills navigate to their translated page
-    document.querySelectorAll('.lang-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const href = btn.getAttribute('data-href');
-        if (href) window.location.href = href;
-      });
-    });
+    // ===== Language rail timers: open after 3s, lock inside rail, close 3s after exit, fade 1s (CSS) =====
+    (function(){
+      const switchEl = document.getElementById('lang-switch');
+      const railEl   = document.getElementById('lang-rail');
+      if (!switchEl || !railEl) return;
 
-    // Cookie preferences (gear) — hook this to your existing consent modal
-    const gear = document.getElementById('cookiePreferencesGear');
-    gear?.addEventListener('click', () => {
-      // If you already have an existing function/event, call it here.
-      // Example patterns:
-      // window.openCookiePreferences?.();
-      // document.dispatchEvent(new CustomEvent('open-cookie-preferences'));
-      alert('Open Cookie Preferences (hook this to your consent modal).');
-    });
+      let openTimer = null;
+      let closeTimer = null;
+      let locked = false;
+
+      const OPEN_DELAY_MS  = 3000;
+      const CLOSE_DELAY_MS = 3000;
+
+      function clearTimers(){
+        if (openTimer)  { clearTimeout(openTimer);  openTimer = null; }
+        if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      }
+
+      function openRail(){
+        switchEl.classList.add('is-open');
+      }
+
+      function closeRail(){
+        locked = false;
+        switchEl.classList.remove('is-open');
+      }
+
+      function scheduleOpen(){
+        clearTimers();
+        openTimer = setTimeout(() => {
+          openRail();
+        }, OPEN_DELAY_MS);
+      }
+
+      function scheduleClose(){
+        clearTimers();
+        closeTimer = setTimeout(() => {
+          closeRail();
+        }, CLOSE_DELAY_MS);
+      }
+
+      // Enter language area (globe+rail)
+      switchEl.addEventListener('pointerenter', () => {
+        if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+        if (switchEl.classList.contains('is-open')) return;
+        scheduleOpen();
+      });
+
+      // Leave whole language area
+      switchEl.addEventListener('pointerleave', () => {
+        if (!switchEl.classList.contains('is-open')) {
+          clearTimers();
+          return;
+        }
+        if (locked) return;
+        scheduleClose();
+      });
+
+      // Lock when inside selection zone
+      railEl.addEventListener('pointerenter', () => {
+        locked = true;
+        clearTimers();
+        openRail();
+      });
+
+      // Unlock and close after 3s when leaving selection zone
+      railEl.addEventListener('pointerleave', () => {
+        locked = false;
+        scheduleClose();
+      });
+
+      // Navigate in SAME TAB to translation pages
+      railEl.querySelectorAll('.lang-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const href = btn.getAttribute('data-href');
+          if (href) window.location.href = href;
+        });
+      });
+
+      // Mobile: tap globe toggles instantly (no new tabs)
+      const trigger = switchEl.querySelector('.lang-trigger');
+      trigger?.addEventListener('click', (e) => {
+        e.preventDefault();
+        clearTimers();
+        if (switchEl.classList.contains('is-open')) closeRail();
+        else openRail();
+      });
+    })();
+
+    // Cookie preferences gear: hook to your real consent modal
+    (function(){
+      const gear = document.getElementById('cookiePreferencesGear');
+      if (!gear) return;
+      gear.addEventListener('click', () => {
+        // Replace this with your real handler:
+        // window.openCookiePreferences?.();
+        // document.dispatchEvent(new CustomEvent('open-cookie-preferences'));
+        alert('Open Cookie Preferences (hook to your consent modal).');
+      });
+    })();
   </script>
 </body>
 </html>
