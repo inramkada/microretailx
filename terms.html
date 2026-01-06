@@ -14,7 +14,7 @@
       background: var(--bg); overflow: hidden;
       color: #fff; font-family: "JetBrains Mono", "Fira Code", monospace;
     }
-    canvas { display:block; width:100vw; height:100vh; filter: contrast(1.1) brightness(1.1); }
+    canvas { display:block; width:100vw; height:100vh; filter: contrast(1.15) brightness(1.08); }
 
     .ui-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 
@@ -48,7 +48,7 @@
     }
 
     .footer-links { display: flex; gap: 25px; font-size: 10px; letter-spacing: 2px; margin-bottom: 10px; }
-    .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; transition: 0.3s; }
+    .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; transition: 0.3s; pointer-events: auto; }
     .footer-links a:hover { color: var(--accent); }
 
     .copyright { font-size: 8px; opacity: 0.3; letter-spacing: 1px; }
@@ -75,38 +75,68 @@
   </div>
 
   <script>
-    // 
     (() => {
       "use strict";
       const view = document.getElementById("view");
-      const vctx = view.getContext("2d");
+      const vctx = view.getContext("2d", { alpha: false });
       const simCanvas = document.createElement("canvas");
-      const sctx = simCanvas.getContext("2d");
+      const sctx = simCanvas.getContext("2d", { willReadFrequently: true });
+
+      const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
       let W, H, simW, simH, dpr;
-      let trail = [], agents = [];
+      let trailA, trailB, imgData, img8;
+      let agents = [];
+      let frame = 0;
+
       const CFG = {
-        agentCount: window.innerWidth < 600 ? 8000 : 15000,
-        sensorDist: 10,
-        sensorAngle: 0.6,
-        turnSpeed: 0.4,
-        decay: 0.96,
-        deposit: 0.8
+        agentCount: IS_MOBILE ? 8000 : 15000,
+        step: IS_MOBILE ? 0.85 : 1.1,
+        sensorDist: IS_MOBILE ? 8.5 : 11.0,
+        sensorAngle: 0.58,
+        turnSpeed: 0.38,
+        deposit: 0.85,
+        decay: IS_MOBILE ? 0.965 : 0.972,
+        diffuseEvery: 2,
+        diffuseMix: 0.48
       };
 
       function resize() {
-        dpr = window.devicePixelRatio || 1;
-        W = window.innerWidth; H = window.innerHeight;
-        view.width = W * dpr; view.height = H * dpr;
-        simW = Math.floor(W / 2); simH = Math.floor(H / 2);
-        simCanvas.width = simW; simCanvas.height = simH;
-        trail = new Float32Array(simW * simH).fill(0);
+        dpr = Math.min(2, window.devicePixelRatio || 1);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        view.width = W * dpr;
+        view.height = H * dpr;
+        view.style.width = W + "px";
+        view.style.height = H + "px";
+        vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const maxSide = IS_MOBILE ? 520 : 750;
+        const aspect = W / Math.max(1, H);
+        if (W >= H) {
+          simW = maxSide;
+          simH = Math.max(160, (maxSide / aspect) | 0);
+        } else {
+          simH = maxSide;
+          simW = Math.max(160, (maxSide * aspect) | 0);
+        }
+
+        simCanvas.width = simW;
+        simCanvas.height = simH;
+
+        const n = simW * simH;
+        trailA = new Float32Array(n).fill(0);
+        trailB = new Float32Array(n).fill(0);
+
+        imgData = sctx.createImageData(simW, simH);
+        img8 = imgData.data;
+
         seed();
       }
 
       function seed() {
         agents = [];
-        for(let i=0; i<CFG.agentCount; i++) {
+        for (let i = 0; i < CFG.agentCount; i++) {
           agents.push({
             x: Math.random() * simW,
             y: Math.random() * simH,
@@ -115,45 +145,128 @@
         }
       }
 
+      function idx(x, y) {
+        return x + y * simW;
+      }
+
+      function sample(f, x, y) {
+        const xi = x | 0, yi = y | 0;
+        if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return 0;
+        return f[idx(xi, yi)];
+      }
+
+      function deposit(f, x, y, amt) {
+        const xi = x | 0, yi = y | 0;
+        if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return;
+        const k = idx(xi, yi);
+        f[k] = Math.min(1.0, f[k] + amt);
+      }
+
+      function diffuse(src, dst, mix) {
+        const w = simW, h = simH;
+        for (let y = 1; y < h - 1; y++) {
+          const row = y * w;
+          for (let x = 1; x < w - 1; x++) {
+            const k = row + x;
+            const v =
+              src[k] +
+              src[k - 1] + src[k + 1] +
+              src[k - w] + src[k + w] +
+              src[k - w - 1] + src[k - w + 1] +
+              src[k + w - 1] + src[k + w + 1];
+            const blur = v / 9;
+            dst[k] = src[k] * (1 - mix) + blur * mix;
+          }
+        }
+        // Bordes
+        for (let x = 0; x < w; x++) {
+          dst[x] = src[x];
+          dst[x + (h - 1) * w] = src[x + (h - 1) * w];
+        }
+        for (let y = 0; y < h; y++) {
+          dst[y * w] = src[y * w];
+          dst[(w - 1) + y * w] = src[(w - 1) + y * w];
+        }
+      }
+
       function step() {
-        for (let a of agents) {
-          // Lógica de sensores simplificada pero agresiva
-          const look = (angle) => {
-            const x = Math.floor(a.x + Math.cos(a.a + angle) * CFG.sensorDist);
-            const y = Math.floor(a.y + Math.sin(a.a + angle) * CFG.sensorDist);
-            if (x < 0 || x >= simW || y < 0 || y >= simH) return -1;
-            return trail[y * simW + x];
-          };
+        const stepDist = CFG.step;
+        const sDist = CFG.sensorDist;
+        const sAng = CFG.sensorAngle;
+        const turn = CFG.turnSpeed;
 
-          const f = look(0), l = look(CFG.sensorAngle), r = look(-CFG.sensorAngle);
-          if (f > l && f > r) {} 
-          else if (l > r) a.a += CFG.turnSpeed;
-          else if (r > l) a.a -= CFG.turnSpeed;
-          else a.a += (Math.random() - 0.5) * 0.2;
+        for (let i = 0; i < agents.length; i++) {
+          const p = agents[i];
 
-          a.x += Math.cos(a.a); a.y += Math.sin(a.a);
-          if (a.x < 0) a.x = simW - 1; if (a.x >= simW) a.x = 0;
-          if (a.y < 0) a.y = simH - 1; if (a.y >= simH) a.y = 0;
+          const ca = Math.cos(p.a), sa = Math.sin(p.a);
+          const fx = p.x + ca * sDist, fy = p.y + sa * sDist;
+          const lx = p.x + Math.cos(p.a - sAng) * sDist, ly = p.y + Math.sin(p.a - sAng) * sDist;
+          const rx = p.x + Math.cos(p.a + sAng) * sDist, ry = p.y + Math.sin(p.a + sAng) * sDist;
 
-          trail[Math.floor(a.y) * simW + Math.floor(a.x)] += CFG.deposit;
+          const fF = sample(trailA, fx, fy);
+          const fL = sample(trailA, lx, ly);
+          const fR = sample(trailA, rx, ry);
+
+          if (fF > fL && fF > fR) {
+            // Mantener dirección
+          } else if (fL > fR) {
+            p.a -= turn;
+          } else if (fR > fL) {
+            p.a += turn;
+          } else {
+            p.a += (Math.random() - 0.5) * 0.18;
+          }
+
+          p.x += Math.cos(p.a) * stepDist;
+          p.y += Math.sin(p.a) * stepDist;
+
+          // Wrapping toroidal
+          if (p.x < 0) p.x += simW;
+          else if (p.x >= simW) p.x -= simW;
+          if (p.y < 0) p.y += simH;
+          else if (p.y >= simH) p.y -= simH;
+
+          deposit(trailA, p.x, p.y, CFG.deposit);
         }
 
-        for (let i = 0; i < trail.length; i++) trail[i] *= CFG.decay;
+        // Decay
+        const d = CFG.decay;
+        for (let k = 0; k < trailA.length; k++) trailA[k] *= d;
+
+        // Diffusion
+        if ((frame % CFG.diffuseEvery) === 0) {
+          diffuse(trailA, trailB, CFG.diffuseMix);
+          const tmp = trailA;
+          trailA = trailB;
+          trailB = tmp;
+        }
+
+        frame++;
       }
 
       function draw() {
-        const imgData = sctx.createImageData(simW, simH);
-        for (let i = 0; i < trail.length; i++) {
-          const val = trail[i] * 255;
-          const idx = i * 4;
-          imgData.data[idx] = val * 0.2;     // R: Sutil
-          imgData.data[idx + 1] = val * 0.8; // G: Cian base
-          imgData.data[idx + 2] = val;       // B: Brillante
-          imgData.data[idx + 3] = 255;
+        const n = simW * simH;
+        for (let k = 0, p = 0; k < n; k++, p += 4) {
+          const t = trailA[k];
+          const v = t <= 0 ? 0 : Math.pow(Math.min(t, 1), 0.68);
+
+          // Cyan tech agresivo
+          const r = Math.min(255, (12 + v * 95) | 0);
+          const g = Math.min(255, (45 + v * 240) | 0);
+          const b = Math.min(255, (65 + v * 255) | 0);
+
+          img8[p] = r;
+          img8[p + 1] = g;
+          img8[p + 2] = b;
+          img8[p + 3] = 255;
         }
+
         sctx.putImageData(imgData, 0, 0);
-        vctx.clearRect(0,0, view.width, view.height);
-        vctx.drawImage(simCanvas, 0, 0, view.width, view.height);
+
+        vctx.imageSmoothingEnabled = true;
+        vctx.fillStyle = "#000";
+        vctx.fillRect(0, 0, W, H);
+        vctx.drawImage(simCanvas, 0, 0, simW, simH, 0, 0, W, H);
       }
 
       function loop() {
@@ -162,7 +275,11 @@
         requestAnimationFrame(loop);
       }
 
-      window.addEventListener('resize', resize);
+      window.addEventListener("resize", resize);
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "r" || e.key === "R") seed();
+      });
+
       resize();
       loop();
     })();
