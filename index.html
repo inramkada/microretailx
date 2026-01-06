@@ -60,9 +60,8 @@
                    "Liberation Mono", "Courier New", monospace;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
-      font-weight:400; /* no bold */
+      font-weight:400;
 
-      /* Premium micro-fade on language/dir changes */
       transition: opacity 0.18s ease-in-out;
     }
     body.is-i18n-switching{ opacity:0.92; }
@@ -245,9 +244,30 @@
     .lang-trigger:hover{ background: rgba(255,255,255,.06); }
     .globe{ width:18px; height:18px; display:block; }
 
+    /* Arrows (hidden on desktop, shown on mobile) */
+    .lang-arrow{
+      display:none;
+      align-items:center;
+      justify-content:center;
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.55);
+      color:#fff;
+      font-size:16px;
+      cursor:pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      user-select:none;
+      line-height:1;
+    }
+    .lang-arrow:hover{ background:rgba(255,255,255,.08); }
+    .lang-arrow:active{ transform: translateY(0.5px); }
+
     .lang-rail{
       position:absolute;
-      right: calc(100% + 10px); /* open LEFT (towards inside) */
+      right: calc(100% + 10px);
       top: 50%;
       transform: translateY(-50%);
 
@@ -272,9 +292,38 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
 
-      /* Premium rail transition (avoids "blink") */
       transition: opacity 0.4s ease, transform 0.2s ease;
     }
+
+    /* Premium edge fade to hint "scroll" */
+    .lang-rail::before,
+    .lang-rail::after{
+      content:"";
+      position: sticky;
+      top:0;
+      width:14px;
+      height:100%;
+      pointer-events:none;
+      opacity:0;
+      transition: opacity 160ms ease;
+      z-index:2;
+    }
+    .lang-rail::before{
+      left:0;
+      margin-left:-8px;
+      background: linear-gradient(90deg, rgba(0,0,0,.92), rgba(0,0,0,0));
+      border-top-left-radius:999px;
+      border-bottom-left-radius:999px;
+    }
+    .lang-rail::after{
+      right:0;
+      margin-right:-8px;
+      background: linear-gradient(270deg, rgba(0,0,0,.92), rgba(0,0,0,0));
+      border-top-right-radius:999px;
+      border-bottom-right-radius:999px;
+    }
+    .lang-rail.has-left-fade::before{ opacity:1; }
+    .lang-rail.has-right-fade::after{ opacity:1; }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
     .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
@@ -412,7 +461,7 @@
     .copyright{
       font-size:var(--copy-size);
       letter-spacing:var(--copy-track);
-      opacity:.58; /* raised for accessibility */
+      opacity:.58;
       text-align:center;
       line-height:1.3;
       font-weight:400;
@@ -513,6 +562,8 @@
       }
       nav{ width:100%; gap:10px; }
 
+      .lang-switch{ gap:6px; }
+
       .lang-rail{
         right:auto;
         left:0;
@@ -524,6 +575,10 @@
       [dir="rtl"] .lang-rail{
         left:auto;
         right:0;
+      }
+
+      .lang-arrow{
+        display:inline-flex;
       }
     }
   </style>
@@ -546,6 +601,9 @@
               </svg>
             </button>
 
+            <!-- Mobile arrows (auto show/hide via JS) -->
+            <button class="lang-arrow left" aria-label="Scroll languages left" type="button">‹</button>
+
             <div class="lang-rail" id="lang-rail" aria-label="Languages">
               <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
               <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
@@ -560,6 +618,8 @@
               <button class="lang-pill" data-lang="ca" data-label="Català" type="button">CA</button>
               <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia" type="button">ID</button>
             </div>
+
+            <button class="lang-arrow right" aria-label="Scroll languages right" type="button">›</button>
           </div>
 
           <a class="navlink" href="#/about" data-i18n="nav.about">About</a>
@@ -856,11 +916,14 @@
       });
     })();
 
-    // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit =====
+    // ===== Language rail timers + arrows + fades + auto-center active =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
       if (!switchEl || !railEl) return;
+
+      const btnLeft  = switchEl.querySelector('.lang-arrow.left');
+      const btnRight = switchEl.querySelector('.lang-arrow.right');
 
       let openTimer = null;
       let closeTimer = null;
@@ -868,24 +931,109 @@
 
       const OPEN_DELAY_MS  = 500;
       const CLOSE_DELAY_MS = 3000;
+      const STEP = 120;
 
       function clearTimers(){
         if (openTimer)  { clearTimeout(openTimer);  openTimer = null; }
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       }
 
-      function openRail(){ switchEl.classList.add('is-open'); }
-      function closeRail(){ locked = false; switchEl.classList.remove('is-open'); }
+      function isMobile(){
+        return window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+      }
+
+      function updateFadesAndArrows(){
+        const overflow = railEl.scrollWidth > railEl.clientWidth + 2;
+
+        // show/hide arrows only when mobile + overflow
+        if (btnLeft && btnRight){
+          const shouldShow = isMobile() && overflow;
+          btnLeft.style.display  = shouldShow ? 'inline-flex' : 'none';
+          btnRight.style.display = shouldShow ? 'inline-flex' : 'none';
+
+          if (shouldShow){
+            const maxScroll = railEl.scrollWidth - railEl.clientWidth;
+            const sl = railEl.scrollLeft;
+
+            btnLeft.style.opacity  = (sl > 6) ? '1' : '0.35';
+            btnRight.style.opacity = (sl < maxScroll - 6) ? '1' : '0.35';
+          }
+        }
+
+        // edge fades (premium hint)
+        if (!overflow){
+          railEl.classList.remove('has-left-fade','has-right-fade');
+          return;
+        }
+
+        const maxScroll = railEl.scrollWidth - railEl.clientWidth;
+        const sl = railEl.scrollLeft;
+
+        railEl.classList.toggle('has-left-fade', sl > 6);
+        railEl.classList.toggle('has-right-fade', sl < maxScroll - 6);
+      }
+
+      function centerActiveLang(){
+        // use localStorage from the i18n block (mx_lang)
+        const lang = localStorage.getItem('mx_lang') || 'en';
+        const activeBtn = railEl.querySelector(`.lang-pill[data-lang="${lang}"]`);
+        if (!activeBtn) return;
+
+        // Ensure EN is reachable: if we're at weird scroll state, center active
+        try{
+          activeBtn.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+        }catch{
+          // fallback
+          const rect = activeBtn.getBoundingClientRect();
+          const parent = railEl.getBoundingClientRect();
+          const delta = (rect.left + rect.width/2) - (parent.left + parent.width/2);
+          railEl.scrollLeft += delta;
+        }
+      }
+
+      function openRail(){
+        switchEl.classList.add('is-open');
+
+        // next frame: recompute + center
+        requestAnimationFrame(() => {
+          // hard guarantee: EN never "inaccessible" — if somehow negative/odd, clamp
+          if (railEl.scrollLeft < 0) railEl.scrollLeft = 0;
+
+          centerActiveLang();
+          updateFadesAndArrows();
+        });
+      }
+
+      function closeRail(){
+        locked = false;
+        switchEl.classList.remove('is-open');
+      }
 
       function scheduleOpen(){
         clearTimers();
         openTimer = setTimeout(() => openRail(), OPEN_DELAY_MS);
       }
+
       function scheduleClose(){
         clearTimers();
         closeTimer = setTimeout(() => closeRail(), CLOSE_DELAY_MS);
       }
 
+      // arrow clicks
+      btnLeft?.addEventListener('click', (e) => {
+        e.preventDefault();
+        railEl.scrollBy({ left: -STEP, behavior: 'smooth' });
+      });
+      btnRight?.addEventListener('click', (e) => {
+        e.preventDefault();
+        railEl.scrollBy({ left: STEP, behavior: 'smooth' });
+      });
+
+      // keep UI updated
+      railEl.addEventListener('scroll', updateFadesAndArrows, { passive:true });
+      window.addEventListener('resize', updateFadesAndArrows);
+
+      // hover timers (desktop)
       switchEl.addEventListener('pointerenter', () => {
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
         if (switchEl.classList.contains('is-open')) return;
@@ -909,6 +1057,7 @@
         scheduleClose();
       });
 
+      // click toggle
       const trigger = switchEl.querySelector('.lang-trigger');
       trigger?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -916,6 +1065,9 @@
         if (switchEl.classList.contains('is-open')) closeRail();
         else openRail();
       });
+
+      // initial state
+      requestAnimationFrame(updateFadesAndArrows);
     })();
 
     // ===== Verticals: click only (no hover), close outside / Escape =====
