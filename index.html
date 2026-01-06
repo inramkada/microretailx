@@ -21,10 +21,10 @@
       --py:10px;
 
       --brand-size:clamp(12px, 1.2vw, 13px);
-      --brand-track:0.20em;
+      --brand-track:0.22em;
 
       --nav-size:clamp(12px, 1.15vw, 12.5px);
-      --nav-track:0.12em;
+      --nav-track:0.14em;
 
       --copy-size:clamp(6.5px, 1.1vw, 7px);
       --copy-track:0.06em;
@@ -32,8 +32,8 @@
       --radius:14px;
       --blur:10px;
 
-      --rail-bg: rgba(0,0,0,.86);
-      --rail-border: rgba(255,255,255,.14);
+      --menu-bg: rgba(0,0,0,.88);
+      --menu-border: rgba(255,255,255,.14);
     }
 
     *{ box-sizing:border-box; }
@@ -61,11 +61,11 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      opacity:.045;
+      opacity:.06;
       background-image:
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,.07), transparent 46%),
-        radial-gradient(circle at 80% 70%, rgba(255,255,255,.05), transparent 44%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,.025), rgba(255,255,255,.025) 1px, transparent 1px, transparent 3px);
+        radial-gradient(circle at 18% 28%, rgba(255,255,255,.08), transparent 46%),
+        radial-gradient(circle at 82% 72%, rgba(255,255,255,.06), transparent 44%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.028), rgba(255,255,255,.028) 1px, transparent 1px, transparent 3px);
       mix-blend-mode:screen;
       z-index:-1;
     }
@@ -97,7 +97,9 @@
       white-space: nowrap;
       line-height: 1;
       opacity:.97;
-      text-shadow: 0 0 10px rgba(255,255,255,.10), 0 0 2px rgba(255,255,255,.18);
+      text-shadow:
+        0 0 10px rgba(255,255,255,.10),
+        0 0 2px rgba(255,255,255,.18);
       mix-blend-mode:difference;
     }
 
@@ -119,7 +121,9 @@
       position:relative;
       line-height:1;
     }
+
     .navlink:hover{ color:rgba(255,255,255,.96); }
+
     .navlink::after{
       content:"";
       position:absolute;
@@ -130,18 +134,16 @@
       transform-origin:left;
       transition:transform 150ms ease;
     }
+
     .navlink:hover::after{ transform:scaleX(1); }
 
-    /* =========================
-       Language rail (NOT buttons)
-       ========================= */
+    /* ===== Language switcher (menu panel) ===== */
     .lang-switch{
       position:relative;
       display:flex;
       align-items:center;
     }
 
-    /* White globe trigger */
     .lang-trigger{
       display:inline-flex;
       align-items:center;
@@ -152,155 +154,144 @@
       border:0;
       cursor:pointer;
       padding:0;
-      color:#fff;
+      color:#fff; /* white globe */
       line-height:1;
       border-radius:10px;
     }
+
     .lang-trigger:hover{ background: rgba(255,255,255,.06); }
+
     .globe{ width:18px; height:18px; display:block; }
 
-    /* The horizontal bar occupies the red line space, opens LEFT in LTR */
-    .lang-rail{
+    /* Panel opens to the RIGHT in LTR */
+    .lang-menu{
       position:absolute;
-      right: calc(100% + 10px);
-      top: 50%;
-      transform: translateY(-50%);
+      left:100%;
+      top:50%;
+      transform:translateY(-50%) translateX(10px);
+
+      background:var(--menu-bg);
+      border:1px solid var(--menu-border);
+      border-radius:14px;
+      padding:8px;
 
       display:flex;
-      align-items:center;
-      gap: 12px;
+      flex-direction:column;
+      gap:6px;
 
-      padding: 6px 10px;
-      border: 1px solid var(--rail-border);
-      background: var(--rail-bg);
-      border-radius: 999px;
+      min-width:190px;
+      z-index:50;
 
-      max-width: min(860px, calc(100vw - (2 * var(--px)) - 86px));
-      overflow-x: auto;
-      overflow-y: hidden;
-      white-space: nowrap;
+      opacity:0;
+      pointer-events:none;
 
-      /* IMPORTANT: keep visible a moment after mouse leaves */
-      opacity: 0;
-      pointer-events: none;
-
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
+      filter: drop-shadow(0 12px 28px rgba(0,0,0,.45));
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-
-      transition: opacity 180ms ease 420ms; /* delay on hide */
-    }
-    /* Hide scrollbar (still scrollable) */
-    .lang-rail::-webkit-scrollbar{ height:0; }
-    .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
-
-    /* Keep open on hover OR focus within (important for click/tap + Miso) */
-    .lang-switch:hover .lang-rail,
-    .lang-switch:focus-within .lang-rail{
-      opacity: 1;
-      pointer-events: auto;
-      transition-delay: 0ms; /* open instantly */
     }
 
-    /* Wave appearance: items slide gently from the globe direction */
+    .lang-switch:hover .lang-menu,
+    .lang-switch:focus-within .lang-menu{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    /* Item: code always visible; translation appears on hover */
     .lang-item{
-      display:inline-flex;
+      display:flex;
       align-items:center;
-      gap: 6px;
+      justify-content:space-between;
+      gap:10px;
 
-      text-decoration:none;
+      width:100%;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.86);
       cursor:pointer;
-      user-select:none;
 
-      /* NOT button-like */
-      background: none;
-      border: 0;
-      padding: 2px 2px;
-      margin: 0;
+      padding:7px 10px;
+      border-radius:12px;
 
-      color: rgba(255,255,255,.70);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      line-height: 1;
+      font-size:11px;
+      font-weight:850;
+      letter-spacing:.12em;
+      text-transform:uppercase;
 
+      transform: translateX(-10px);
       opacity: 0;
-      transform: translateX(10px);
 
-      transition: transform 220ms ease, opacity 220ms ease, color 140ms ease;
+      transition:
+        transform 220ms ease,
+        opacity 220ms ease,
+        border-color 160ms ease,
+        background 160ms ease,
+        color 160ms ease;
     }
 
     .lang-switch:hover .lang-item,
     .lang-switch:focus-within .lang-item{
-      opacity: 1;
       transform: translateX(0);
+      opacity: 1;
     }
 
-    /* subtle emphasis on hover (no button feel) */
-    .lang-item:hover{
-      color: rgba(255,255,255,.92);
-    }
-
-    .flag{ font-size: 14px; line-height: 1; }
-
-    /* Stagger (wave) */
+    /* wave stagger */
     .lang-switch:hover .lang-item:nth-child(1),
     .lang-switch:focus-within .lang-item:nth-child(1){ transition-delay:  0ms; }
     .lang-switch:hover .lang-item:nth-child(2),
-    .lang-switch:focus-within .lang-item:nth-child(2){ transition-delay: 18ms; }
+    .lang-switch:focus-within .lang-item:nth-child(2){ transition-delay: 20ms; }
     .lang-switch:hover .lang-item:nth-child(3),
-    .lang-switch:focus-within .lang-item:nth-child(3){ transition-delay: 36ms; }
+    .lang-switch:focus-within .lang-item:nth-child(3){ transition-delay: 40ms; }
     .lang-switch:hover .lang-item:nth-child(4),
-    .lang-switch:focus-within .lang-item:nth-child(4){ transition-delay: 54ms; }
+    .lang-switch:focus-within .lang-item:nth-child(4){ transition-delay: 60ms; }
     .lang-switch:hover .lang-item:nth-child(5),
-    .lang-switch:focus-within .lang-item:nth-child(5){ transition-delay: 72ms; }
+    .lang-switch:focus-within .lang-item:nth-child(5){ transition-delay: 80ms; }
     .lang-switch:hover .lang-item:nth-child(6),
-    .lang-switch:focus-within .lang-item:nth-child(6){ transition-delay: 90ms; }
+    .lang-switch:focus-within .lang-item:nth-child(6){ transition-delay:100ms; }
     .lang-switch:hover .lang-item:nth-child(7),
-    .lang-switch:focus-within .lang-item:nth-child(7){ transition-delay:108ms; }
+    .lang-switch:focus-within .lang-item:nth-child(7){ transition-delay:120ms; }
     .lang-switch:hover .lang-item:nth-child(8),
-    .lang-switch:focus-within .lang-item:nth-child(8){ transition-delay:126ms; }
+    .lang-switch:focus-within .lang-item:nth-child(8){ transition-delay:140ms; }
     .lang-switch:hover .lang-item:nth-child(9),
-    .lang-switch:focus-within .lang-item:nth-child(9){ transition-delay:144ms; }
+    .lang-switch:focus-within .lang-item:nth-child(9){ transition-delay:160ms; }
     .lang-switch:hover .lang-item:nth-child(10),
-    .lang-switch:focus-within .lang-item:nth-child(10){ transition-delay:162ms; }
+    .lang-switch:focus-within .lang-item:nth-child(10){ transition-delay:180ms; }
     .lang-switch:hover .lang-item:nth-child(11),
-    .lang-switch:focus-within .lang-item:nth-child(11){ transition-delay:180ms; }
+    .lang-switch:focus-within .lang-item:nth-child(11){ transition-delay:200ms; }
     .lang-switch:hover .lang-item:nth-child(12),
-    .lang-switch:focus-within .lang-item:nth-child(12){ transition-delay:198ms; }
+    .lang-switch:focus-within .lang-item:nth-child(12){ transition-delay:220ms; }
 
-    /* Tooltip with translation/full name */
-    .lang-item::after{
-      content: attr(data-label);
-      position:absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.90);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 10px;
-      padding: 6px 8px;
-      font-size: 10px;
-      font-weight: 850;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.92);
-      opacity: 0;
-      pointer-events:none;
-      white-space: nowrap;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+    .lang-item:hover{
+      color: rgba(255,255,255,.98);
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.06);
     }
 
-    /* We need relative positioning for tooltip anchoring */
-    .lang-item{ position: relative; }
+    .lang-code{
+      flex:0 0 auto;
+      min-width:36px;
+      text-align:left;
+    }
 
-    .lang-item:hover::after{ opacity: 1; }
+    .lang-label{
+      flex:1 1 auto;
+      text-align:right;
+      color: rgba(255,255,255,.60);
+      font-weight:800;
+      letter-spacing:.02em;
+      text-transform:none;
 
-    /* =========================
-       Main & footer
-       ========================= */
+      opacity:0;
+      transform: translateX(-6px);
+      transition: opacity 150ms ease, transform 150ms ease;
+      white-space: nowrap;
+    }
+
+    .lang-item:hover .lang-label{
+      opacity:1;
+      transform: translateX(0);
+    }
+
+    /* Main */
     main{
       display:grid;
       place-items:center;
@@ -343,8 +334,7 @@
     .footer-links a{
       color:rgba(255,255,255,.85);
       text-decoration:none;
-      position:relative;
-      padding: 4px 2px;
+      padding:4px 2px;
     }
     .footer-links a:hover{ color:#fff; }
 
@@ -356,7 +346,7 @@
       line-height:1.3;
     }
 
-    /* Cookie Preferences pulley icon link */
+    /* Gear/Pulley icon link for cookie preferences */
     .iconlink{
       display:inline-flex;
       align-items:center;
@@ -373,7 +363,7 @@
       border-color: rgba(255,255,255,.22);
       background: rgba(255,255,255,.06);
     }
-    .pulley{ width:16px; height:16px; display:block; }
+    .gear{ width:16px; height:16px; display:block; }
 
     .sr-only{
       position:absolute;
@@ -385,30 +375,35 @@
       border:0;
     }
 
-    /* =========================
-       RTL (Arabic) behavior
-       ========================= */
+    /* ===== RTL (Arabic) ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
     [dir="rtl"] nav{ flex-direction:row-reverse; }
     [dir="rtl"] .navlink::after{ transform-origin:right; }
     [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
 
-    /* In RTL, rail opens to the RIGHT */
-    [dir="rtl"] .lang-rail{
-      right:auto;
-      left: calc(100% + 10px);
+    /* In RTL, panel opens to the LEFT */
+    [dir="rtl"] .lang-menu{
+      left:auto;
+      right:100%;
+      transform:translateY(-50%) translateX(-10px);
     }
     [dir="rtl"] .lang-item{
-      transform: translateX(-10px);
+      transform: translateX(10px);
     }
     [dir="rtl"] .lang-switch:hover .lang-item,
     [dir="rtl"] .lang-switch:focus-within .lang-item{
       transform: translateX(0);
     }
+    [dir="rtl"] .lang-label{
+      text-align:left;
+      transform: translateX(6px);
+    }
+    [dir="rtl"] .lang-item:hover .lang-label{
+      transform: translateX(0);
+    }
+    [dir="rtl"] .card{ text-align:right; }
 
-    /* =========================
-       Mobile: open downward, centered & organized
-       ========================= */
+    /* Mobile: menu opens DOWN centered */
     @media (max-width: 640px){
       .topbar{
         flex-direction:column;
@@ -417,22 +412,16 @@
       }
       nav{ width:100%; gap:10px; }
 
-      .lang-rail{
-        right:auto;
-        left:50%;
-        top:100%;
+      .lang-menu{
+        left: 50%;
+        right: auto;
+        top: 100%;
         transform: translateX(-50%) translateY(10px);
-        max-width: min(92vw, 680px);
-        justify-content:center;
-        flex-wrap:wrap;             /* organized blocks */
-        white-space: normal;        /* allow wrap */
-        overflow-x: visible;         /* no horizontal cut */
-        gap: 10px 14px;
+        min-width: min(320px, 92vw);
       }
-
-      [dir="rtl"] .lang-rail{
-        left:50%;
-        right:auto;
+      [dir="rtl"] .lang-menu{
+        left: 50%;
+        right: auto;
       }
     }
   </style>
@@ -456,20 +445,19 @@
               </svg>
             </button>
 
-            <!-- Rail: appears softly, not buttons, opens LEFT in LTR -->
-            <div class="lang-rail" id="lang-rail" aria-label="Languages">
-              <a class="lang-item" href="javascript:void(0)" data-lang="en" data-label="English"><span class="flag">🇬🇧</span>EN</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="zh" data-label="中文 (Chinese)"><span class="flag">🇨🇳</span>ZH</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="es" data-label="Español"><span class="flag">🇪🇸</span>ES</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="hi" data-label="हिंदी (Hindi)"><span class="flag">🇮🇳</span>HI</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="ar" data-label="العربية (Arabic)"><span class="flag">🇸🇦</span>AR</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="fr" data-label="Français"><span class="flag">🇫🇷</span>FR</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="pt" data-label="Português"><span class="flag">🇵🇹</span>PT</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="ru" data-label="Русский"><span class="flag">🇷🇺</span>RU</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="ja" data-label="日本語 (Japanese)"><span class="flag">🇯🇵</span>JA</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="de" data-label="Deutsch"><span class="flag">🇩🇪</span>DE</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="ca" data-label="Català"><span class="flag">🏴</span>CA</a>
-              <a class="lang-item" href="javascript:void(0)" data-lang="id" data-label="Bahasa Indonesia"><span class="flag">🇮🇩</span>ID</a>
+            <div class="lang-menu" id="lang-menu" aria-label="Languages">
+              <button class="lang-item" data-lang="en"><span class="lang-code">EN</span><span class="lang-label">English</span></button>
+              <button class="lang-item" data-lang="zh"><span class="lang-code">ZH</span><span class="lang-label">中文 (Chinese)</span></button>
+              <button class="lang-item" data-lang="es"><span class="lang-code">ES</span><span class="lang-label">Español</span></button>
+              <button class="lang-item" data-lang="hi"><span class="lang-code">HI</span><span class="lang-label">हिंदी (Hindi)</span></button>
+              <button class="lang-item" data-lang="ar"><span class="lang-code">AR</span><span class="lang-label">العربية (Arabic)</span></button>
+              <button class="lang-item" data-lang="fr"><span class="lang-code">FR</span><span class="lang-label">Français</span></button>
+              <button class="lang-item" data-lang="pt"><span class="lang-code">PT</span><span class="lang-label">Português</span></button>
+              <button class="lang-item" data-lang="ru"><span class="lang-code">RU</span><span class="lang-label">Русский</span></button>
+              <button class="lang-item" data-lang="ja"><span class="lang-code">JA</span><span class="lang-label">日本語 (Japanese)</span></button>
+              <button class="lang-item" data-lang="de"><span class="lang-code">DE</span><span class="lang-label">Deutsch</span></button>
+              <button class="lang-item" data-lang="ca"><span class="lang-code">CA</span><span class="lang-label">Català</span></button>
+              <button class="lang-item" data-lang="id"><span class="lang-code">ID</span><span class="lang-label">Bahasa Indonesia</span></button>
             </div>
           </div>
 
@@ -482,7 +470,7 @@
 
     <main>
       <section class="card">
-        <p>Rail test: soft opacity + wave + tooltips + mobile down + RTL-ready.</p>
+        <p>Menu test: wave open + hover translations + mobile opens down + RTL-ready.</p>
       </section>
     </main>
 
@@ -493,17 +481,10 @@
           <a href="privacy.html">Privacy</a>
           <a href="cookies.html">Cookies</a>
 
-          <!-- Pulley icon opens cookie preferences modal (hook in Miso by id) -->
+          <!-- Gear/Pulley icon: Cookie Preferences -->
           <a href="javascript:void(0)" class="iconlink" id="cookiePreferencesLink" aria-label="Cookie Preferences">
-            <svg class="pulley" viewBox="0 0 24 24" aria-hidden="true">
-              <!-- simple pulley/cog hybrid (white via currentColor) -->
-              <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
-                d="M12 3a5 5 0 0 1 5 5v2a3 3 0 0 1-3 3h-4a3 3 0 0 1-3-3V8a5 5 0 0 1 5-5z"/>
-              <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
-                d="M9 20h6M12 13v7"/>
-              <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
-                d="M8 10h8"/>
-              <circle cx="12" cy="8" r="1.2" fill="currentColor"/>
+            <svg class="gear" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.08 7.08 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.22-1.12.52-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.5.41 1.05.73 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.22 1.12-.52 1.63-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/>
             </svg>
             <span class="sr-only">Cookies Preferences</span>
           </a>
