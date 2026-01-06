@@ -3,55 +3,67 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SYSTEM UPGRADE | MICRORETAILX</title>
+  <title>SYSTEM CORE | MICRORETAILX</title>
   <style>
-    :root {
-      --accent: #00f2ff;
-      --bg: #000;
+    :root { 
+      --accent: #00f2ff; 
+      --accent-dim: rgba(0, 242, 255, 0.15);
+      --bg: #000; 
     }
-    html, body {
-      margin: 0; padding: 0; height: 100%;
-      background: var(--bg); overflow: hidden;
-      color: #fff; font-family: "JetBrains Mono", "Fira Code", monospace;
+    
+    html, body { 
+      margin: 0; padding: 0; height: 100%; 
+      background: var(--bg); overflow: hidden; 
+      color: #fff; font-family: "JetBrains Mono", "Cascadia Code", monospace; 
     }
-    canvas { display:block; width:100vw; height:100vh; filter: contrast(1.15) brightness(1.08); }
+
+    canvas { 
+      display: block; width: 100vw; height: 100vh; 
+      filter: contrast(1.1) brightness(1.05) saturate(1.2); 
+    }
 
     .ui-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 
     .top-bar {
       position: absolute; top: 0; left: 0; right: 0;
-      padding: 20px 30px;
-      display: flex; justify-content: space-between;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-      border-top: 2px solid var(--accent);
+      padding: 24px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+      border-top: 1px solid var(--accent-dim);
+      backdrop-filter: blur(4px);
     }
 
     .brand {
-      font-size: 10px; letter-spacing: 6px; font-weight: 900;
+      font-size: 11px; letter-spacing: 5px; font-weight: 800;
       text-transform: uppercase; color: var(--accent);
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+      text-shadow: 0 0 15px var(--accent-dim);
     }
 
-    .status-tag {
-      font-size: 9px; color: rgba(255,255,255,0.5);
-      display: flex; align-items: center; gap: 8px;
+    .status {
+      font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.4);
+      display: flex; align-items: center; gap: 10px;
     }
-    .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 1.5s infinite; }
-
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .footer-bar {
       position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 20px 30px;
-      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-      pointer-events: auto;
+      padding: 20px 32px;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      border-bottom: 1px solid var(--accent-dim);
     }
 
-    .footer-links { display: flex; gap: 25px; font-size: 10px; letter-spacing: 2px; margin-bottom: 10px; }
-    .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; transition: 0.3s; pointer-events: auto; }
-    .footer-links a:hover { color: var(--accent); }
+    .links { display: flex; gap: 24px; margin-bottom: 8px; }
+    .links a { 
+      font-size: 10px; color: rgba(255,255,255,0.5); 
+      text-decoration: none; transition: 0.2s; letter-spacing: 2px;
+      pointer-events: auto;
+    }
+    .links a:hover { color: var(--accent); opacity: 1; }
 
-    .copyright { font-size: 8px; opacity: 0.3; letter-spacing: 1px; }
+    .copy { font-size: 8px; opacity: 0.25; letter-spacing: 1px; }
+
+    /* Animación del indicador de vida */
+    .dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
   </style>
 </head>
 <body>
@@ -60,66 +72,61 @@
 
   <div class="ui-layer">
     <div class="top-bar">
-      <div class="brand">Protocol: Maintenance</div>
-      <div class="status-tag"><span class="dot"></span> System Live</div>
+      <div class="brand">Protocol_X // Maintenance</div>
+      <div class="status"><span class="dot"></span> NODE_ACTIVE [0x42F]</div>
     </div>
 
     <div class="footer-bar">
-      <div class="footer-links">
+      <div class="links">
         <a href="#">ACCESS_CORE</a>
-        <a href="#">ENCRYPT_KEY</a>
-        <a href="#">TERMINAL</a>
+        <a href="#">LEGAL_RESOURCES</a>
+        <a href="#">ENCRYPT_MODULE</a>
       </div>
-      <div class="copyright">© 2026 MICRORETAILX LLC // REPLICANT_ENGINE_V2</div>
+      <div class="copy">© 2026 MICRORETAILX LLC // KERNEL_V3.0.1 // UNIFIED_REPLICANT</div>
     </div>
   </div>
 
   <script>
     (() => {
       "use strict";
+
       const view = document.getElementById("view");
       const vctx = view.getContext("2d", { alpha: false });
       const simCanvas = document.createElement("canvas");
       const sctx = simCanvas.getContext("2d", { willReadFrequently: true });
 
-      const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
+      const IS_MOBILE = /Mobi|Android/i.test(navigator.userAgent);
+      
       let W, H, simW, simH, dpr;
-      let trailA, trailB, imgData, img8;
-      let agents = [];
-      let frame = 0;
+      let trailA, trailB, xField, imgData, img8;
+      let agents = [], foods = [];
+      let frame = 0, tPrev = performance.now();
 
       const CFG = {
-        agentCount: IS_MOBILE ? 8000 : 15000,
-        step: IS_MOBILE ? 0.85 : 1.1,
-        sensorDist: IS_MOBILE ? 8.5 : 11.0,
-        sensorAngle: 0.58,
-        turnSpeed: 0.38,
-        deposit: 0.85,
-        decay: IS_MOBILE ? 0.965 : 0.972,
-        diffuseEvery: 2,
-        diffuseMix: 0.48
+        agentCount: IS_MOBILE ? 7500 : 16000,
+        step: IS_MOBILE ? 0.9 : 1.15,
+        sensorDist: 10.5,
+        sensorAngle: 0.56,
+        turnSpeed: 0.36,
+        deposit: 0.75,
+        decay: IS_MOBILE ? 0.968 : 0.974,
+        diffuseMix: 0.45,
+        xBias: 0.88,           // Intensidad de la guía diagonal (X)
+        foodLifeMs: 1400,      // Cuánto dura el rastro al hacer clic
+        foodStrength: 1.8      // Atracción al rastro del usuario
       };
 
       function resize() {
         dpr = Math.min(2, window.devicePixelRatio || 1);
-        W = window.innerWidth;
-        H = window.innerHeight;
-        view.width = W * dpr;
-        view.height = H * dpr;
-        view.style.width = W + "px";
-        view.style.height = H + "px";
+        W = window.innerWidth; H = window.innerHeight;
+        view.width = W * dpr; view.height = H * dpr;
         vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        const maxSide = IS_MOBILE ? 520 : 750;
-        const aspect = W / Math.max(1, H);
-        if (W >= H) {
-          simW = maxSide;
-          simH = Math.max(160, (maxSide / aspect) | 0);
-        } else {
-          simH = maxSide;
-          simW = Math.max(160, (maxSide * aspect) | 0);
-        }
+        // Escalado inteligente para rendimiento
+        const maxSide = IS_MOBILE ? 480 : 720;
+        const aspect = W / H;
+        simW = aspect >= 1 ? maxSide : (maxSide * aspect) | 0;
+        simH = aspect >= 1 ? (maxSide / aspect) | 0 : maxSide;
 
         simCanvas.width = simW;
         simCanvas.height = simH;
@@ -127,161 +134,129 @@
         const n = simW * simH;
         trailA = new Float32Array(n).fill(0);
         trailB = new Float32Array(n).fill(0);
-
+        xField = new Float32Array(n);
+        
         imgData = sctx.createImageData(simW, simH);
         img8 = imgData.data;
 
+        buildXField();
         seed();
       }
 
+      function buildXField() {
+        const a = (simH - 1) / (simW - 1);
+        const inv = 1 / Math.sqrt(1 + a*a);
+        const thickness = 18; // Definición de la X
+        for (let y = 0; y < simH; y++) {
+          for (let x = 0; x < simW; x++) {
+            const d1 = Math.abs(a * x - y) * inv;
+            const d2 = Math.abs(a * x + y - (simH - 1)) * inv;
+            const d = Math.min(d1, d2);
+            xField[x + y * simW] = Math.exp(-(d * d) / thickness);
+          }
+        }
+      }
+
       function seed() {
-        agents = [];
-        for (let i = 0; i < CFG.agentCount; i++) {
-          agents.push({
-            x: Math.random() * simW,
-            y: Math.random() * simH,
-            a: Math.random() * Math.PI * 2
-          });
+        agents = Array.from({ length: CFG.agentCount }, () => ({
+          x: Math.random() * simW,
+          y: Math.random() * simH,
+          a: Math.random() * Math.PI * 2
+        }));
+      }
+
+      function addFood(x, y) {
+        const fx = (x / W) * simW;
+        const fy = (y / H) * simH;
+        foods.push({ x: fx, y: fy, life: CFG.foodLifeMs });
+      }
+
+      const getVal = (f, x, y) => {
+        if (x < 0 || x >= simW || y < 0 || y >= simH) return 0;
+        return f[(x | 0) + (y | 0) * simW];
+      };
+
+      function update(dt) {
+        // Actualizar comida activa
+        for (let i = foods.length - 1; i >= 0; i--) {
+          foods[i].life -= dt;
+          if (foods[i].life <= 0) foods.splice(i, 1);
         }
-      }
 
-      function idx(x, y) {
-        return x + y * simW;
-      }
+        for (let p of agents) {
+          const sense = (angle) => {
+            const sx = p.x + Math.cos(p.a + angle) * CFG.sensorDist;
+            const sy = p.y + Math.sin(p.a + angle) * CFG.sensorDist;
+            let val = getVal(trailA, sx, sy) + getVal(xField, sx, sy) * CFG.xBias;
+            
+            for (let f of foods) {
+              const dx = sx - f.x, dy = sy - f.y;
+              const d2 = dx*dx + dy*dy;
+              if (d2 < 800) val += (CFG.foodStrength * (f.life / CFG.foodLifeMs)) / (1 + d2 * 0.1);
+            }
+            return val;
+          };
 
-      function sample(f, x, y) {
-        const xi = x | 0, yi = y | 0;
-        if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return 0;
-        return f[idx(xi, yi)];
-      }
+          const f = sense(0), l = sense(-CFG.sensorAngle), r = sense(CFG.sensorAngle);
 
-      function deposit(f, x, y, amt) {
-        const xi = x | 0, yi = y | 0;
-        if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return;
-        const k = idx(xi, yi);
-        f[k] = Math.min(1.0, f[k] + amt);
-      }
+          if (f > l && f > r) {} 
+          else if (l > r) p.a -= CFG.turnSpeed;
+          else if (r > l) p.a += CFG.turnSpeed;
+          else p.a += (Math.random() - 0.5) * 0.15;
 
-      function diffuse(src, dst, mix) {
-        const w = simW, h = simH;
-        for (let y = 1; y < h - 1; y++) {
-          const row = y * w;
-          for (let x = 1; x < w - 1; x++) {
-            const k = row + x;
-            const v =
-              src[k] +
-              src[k - 1] + src[k + 1] +
-              src[k - w] + src[k + w] +
-              src[k - w - 1] + src[k - w + 1] +
-              src[k + w - 1] + src[k + w + 1];
-            const blur = v / 9;
-            dst[k] = src[k] * (1 - mix) + blur * mix;
+          p.x += Math.cos(p.a) * CFG.step;
+          p.y += Math.sin(p.a) * CFG.step;
+
+          if (p.x < 0) p.x += simW; else if (p.x >= simW) p.x -= simW;
+          if (p.y < 0) p.y += simH; else if (p.y >= simH) p.y -= simH;
+
+          const idx = (p.x | 0) + (p.y | 0) * simW;
+          trailA[idx] = Math.min(1.0, trailA[idx] + CFG.deposit);
+        }
+
+        for (let i = 0; i < trailA.length; i++) trailA[i] *= CFG.decay;
+
+        if (frame % 2 === 0) {
+          // Difusión simple pero rápida
+          for (let i = simW; i < trailA.length - simW; i++) {
+            trailB[i] = (trailA[i] + trailA[i-1] + trailA[i+1] + trailA[i-simW] + trailA[i+simW]) / 5;
           }
+          [trailA, trailB] = [trailB, trailA];
         }
-        // Bordes
-        for (let x = 0; x < w; x++) {
-          dst[x] = src[x];
-          dst[x + (h - 1) * w] = src[x + (h - 1) * w];
-        }
-        for (let y = 0; y < h; y++) {
-          dst[y * w] = src[y * w];
-          dst[(w - 1) + y * w] = src[(w - 1) + y * w];
-        }
-      }
-
-      function step() {
-        const stepDist = CFG.step;
-        const sDist = CFG.sensorDist;
-        const sAng = CFG.sensorAngle;
-        const turn = CFG.turnSpeed;
-
-        for (let i = 0; i < agents.length; i++) {
-          const p = agents[i];
-
-          const ca = Math.cos(p.a), sa = Math.sin(p.a);
-          const fx = p.x + ca * sDist, fy = p.y + sa * sDist;
-          const lx = p.x + Math.cos(p.a - sAng) * sDist, ly = p.y + Math.sin(p.a - sAng) * sDist;
-          const rx = p.x + Math.cos(p.a + sAng) * sDist, ry = p.y + Math.sin(p.a + sAng) * sDist;
-
-          const fF = sample(trailA, fx, fy);
-          const fL = sample(trailA, lx, ly);
-          const fR = sample(trailA, rx, ry);
-
-          if (fF > fL && fF > fR) {
-            // Mantener dirección
-          } else if (fL > fR) {
-            p.a -= turn;
-          } else if (fR > fL) {
-            p.a += turn;
-          } else {
-            p.a += (Math.random() - 0.5) * 0.18;
-          }
-
-          p.x += Math.cos(p.a) * stepDist;
-          p.y += Math.sin(p.a) * stepDist;
-
-          // Wrapping toroidal
-          if (p.x < 0) p.x += simW;
-          else if (p.x >= simW) p.x -= simW;
-          if (p.y < 0) p.y += simH;
-          else if (p.y >= simH) p.y -= simH;
-
-          deposit(trailA, p.x, p.y, CFG.deposit);
-        }
-
-        // Decay
-        const d = CFG.decay;
-        for (let k = 0; k < trailA.length; k++) trailA[k] *= d;
-
-        // Diffusion
-        if ((frame % CFG.diffuseEvery) === 0) {
-          diffuse(trailA, trailB, CFG.diffuseMix);
-          const tmp = trailA;
-          trailA = trailB;
-          trailB = tmp;
-        }
-
         frame++;
       }
 
-      function draw() {
-        const n = simW * simH;
-        for (let k = 0, p = 0; k < n; k++, p += 4) {
-          const t = trailA[k];
-          const v = t <= 0 ? 0 : Math.pow(Math.min(t, 1), 0.68);
-
-          // Cyan tech agresivo
-          const r = Math.min(255, (12 + v * 95) | 0);
-          const g = Math.min(255, (45 + v * 240) | 0);
-          const b = Math.min(255, (65 + v * 255) | 0);
-
-          img8[p] = r;
-          img8[p + 1] = g;
-          img8[p + 2] = b;
+      function render() {
+        for (let i = 0; i < trailA.length; i++) {
+          const v = Math.pow(Math.min(trailA[i], 1), 0.72);
+          const p = i * 4;
+          img8[p] = v * 15;        // R
+          img8[p + 1] = v * 225;   // G
+          img8[p + 2] = v * 255;   // B
           img8[p + 3] = 255;
         }
-
         sctx.putImageData(imgData, 0, 0);
-
-        vctx.imageSmoothingEnabled = true;
         vctx.fillStyle = "#000";
         vctx.fillRect(0, 0, W, H);
+        vctx.imageSmoothingEnabled = true;
         vctx.drawImage(simCanvas, 0, 0, simW, simH, 0, 0, W, H);
       }
 
-      function loop() {
-        step();
-        draw();
+      function loop(now) {
+        const dt = now - tPrev;
+        tPrev = now;
+        update(dt);
+        render();
         requestAnimationFrame(loop);
       }
 
+      window.addEventListener("pointermove", e => addFood(e.clientX, e.clientY));
+      window.addEventListener("pointerdown", e => addFood(e.clientX, e.clientY));
       window.addEventListener("resize", resize);
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "r" || e.key === "R") seed();
-      });
+      window.addEventListener("keydown", e => { if(e.key.toLowerCase() === 'r') seed(); });
 
       resize();
-      loop();
+      requestAnimationFrame(loop);
     })();
   </script>
 </body>
