@@ -381,13 +381,13 @@
     [dir="rtl"] .navlink::after{ transform-origin:right; }
     [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
 
-    /* IMPORTANT FIX: in RTL, DO NOT open rail to the right (off-screen). Keep it opening left. */
+    /* IMPORTANT FIX: in RTL, keep rail opening left (not off-screen) */
     [dir="rtl"] .lang-rail{
       left:auto;
       right: calc(100% + 10px);
     }
 
-    /* Optional: keep the pill intro direction consistent in RTL */
+    /* Keep pill intro direction consistent in RTL */
     [dir="rtl"] .lang-pill{ transform: translateX(10px); }
     [dir="rtl"] .lang-switch.is-open .lang-pill{ transform: translateX(0); }
 
@@ -458,9 +458,7 @@
 
     <main>
       <section class="card">
-        <p data-i18n="card.test">
-          Language rail test: opens after 3s, locks while inside, closes 3s after exit (fade 1s).
-        </p>
+        <p data-i18n="card.test">We’re working on it — coming back soon.</p>
       </section>
     </main>
 
@@ -507,7 +505,7 @@
           "footer.privacy": "Privacy",
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
-          "card.test": "Language rail test: opens after 3s, locks while inside, closes 3s after exit (fade 1s).",
+          "card.test": "We’re working on it — coming back soon.",
           "cookie.prefs": "Cookie Preferences"
         },
         es: {
@@ -518,7 +516,7 @@
           "footer.privacy": "Privacidad",
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
-          "card.test": "Selector de idioma: abre tras 3s, se bloquea dentro, y cierra 3s después de salir (desvanece 1s).",
+          "card.test": "Estamos trabajando — volvemos pronto.",
           "cookie.prefs": "Preferencias de cookies"
         },
         fr: {
@@ -529,7 +527,7 @@
           "footer.privacy": "Conf.",
           "footer.cookies": "Cookies",
           "footer.legal": "Légal",
-          "card.test": "Sélecteur de langue : s’ouvre après 3 s, se verrouille à l’intérieur, se ferme 3 s après la sortie (fondu 1 s).",
+          "card.test": "Nous travaillons — de retour bientôt.",
           "cookie.prefs": "Préférences cookies"
         },
         ru: {
@@ -540,7 +538,7 @@
           "footer.privacy": "Конф.",
           "footer.cookies": "Cookies",
           "footer.legal": "Право",
-          "card.test": "Выбор языка: открывается через 3с, фиксируется внутри, закрывается через 3с после выхода (плавно 1с).",
+          "card.test": "Мы работаем — скоро вернёмся.",
           "cookie.prefs": "Настройки cookies"
         },
         pt: {
@@ -551,7 +549,7 @@
           "footer.privacy": "Privacidade",
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
-          "card.test": "Seletor de idioma: abre após 3s, bloqueia dentro, fecha 3s após sair (fade 1s).",
+          "card.test": "Estamos a trabalhar — voltamos em breve.",
           "cookie.prefs": "Preferências de cookies"
         },
         de: {
@@ -562,7 +560,7 @@
           "footer.privacy": "DSGVO",
           "footer.cookies": "Cookies",
           "footer.legal": "Impressum",
-          "card.test": "Sprachauswahl: öffnet nach 3s, bleibt innen gesperrt, schließt 3s nach Verlassen (Fade 1s).",
+          "card.test": "Wir arbeiten daran — bald zurück.",
           "cookie.prefs": "Cookie-Einstellungen"
         },
         zh: {
@@ -573,7 +571,7 @@
           "footer.privacy": "隐私",
           "footer.cookies": "Cookies",
           "footer.legal": "法律",
-          "card.test": "语言选择：3秒后打开，进入后锁定，离开3秒后关闭（淡出1秒）。",
+          "card.test": "我们正在建设中，敬请期待。",
           "cookie.prefs": "Cookie 偏好设置"
         },
         hi: {
@@ -584,7 +582,7 @@
           "footer.privacy": "गोपनीयता",
           "footer.cookies": "Cookies",
           "footer.legal": "कानूनी",
-          "card.test": "भाषा चयन: 3s बाद खुलेगा, अंदर रहते लॉक, बाहर जाने के 3s बाद बंद (fade 1s)।",
+          "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।",
           "cookie.prefs": "कुकी प्राथमिकताएँ"
         },
         ar: {
@@ -595,7 +593,7 @@
           "footer.privacy": "الخصوصية",
           "footer.cookies": "الكوكيز",
           "footer.legal": "قانوني",
-          "card.test": "محدد اللغة: يفتح بعد 3 ثوانٍ، يثبت بالداخل، ويغلق بعد 3 ثوانٍ من الخروج (تلاشي 1 ثانية).",
+          "card.test": "نعمل على ذلك — نعود قريبًا.",
           "cookie.prefs": "تفضيلات الكوكيز"
         },
         ja: {
@@ -606,7 +604,7 @@
           "footer.privacy": "プライバシー",
           "footer.cookies": "Cookies",
           "footer.legal": "法的",
-          "card.test": "言語セレクター：3秒後に開き、内側で固定、退出後3秒で閉じます（フェード1秒）。",
+          "card.test": "現在準備中です。まもなく公開します。",
           "cookie.prefs": "Cookie設定"
         },
         ca: {
@@ -617,7 +615,7 @@
           "footer.privacy": "Privacitat",
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
-          "card.test": "Selector d’idioma: s’obre després de 3s, queda bloquejat a dins, i es tanca 3s després de sortir (fade 1s).",
+          "card.test": "Estem treballant — tornem aviat.",
           "cookie.prefs": "Preferències de cookies"
         },
         id: {
@@ -628,7 +626,7 @@
           "footer.privacy": "Priv.",
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
-          "card.test": "Pemilih bahasa: terbuka setelah 3d, terkunci saat di dalam, tertutup 3d setelah keluar (fade 1d).",
+          "card.test": "Kami sedang mengerjakan — segera kembali.",
           "cookie.prefs": "Preferensi cookies"
         }
       };
@@ -647,12 +645,10 @@
       function applyLang(lang){
         const dict = I18N[lang] || I18N[DEFAULT_LANG];
 
-        // Set html lang + dir (Arabic => rtl)
         const html = document.documentElement;
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 
-        // Translate all nodes with data-i18n
         document.querySelectorAll("[data-i18n]").forEach(el => {
           const key = el.getAttribute("data-i18n");
           if (!key) return;
@@ -660,7 +656,6 @@
           if (typeof val === "string") el.textContent = val;
         });
 
-        // Cookie gear tooltip + aria-label
         const gear = document.getElementById("cookiePreferencesGear");
         if (gear){
           const tip = dict["cookie.prefs"] ?? I18N[DEFAULT_LANG]["cookie.prefs"];
@@ -668,15 +663,13 @@
           gear.setAttribute("aria-label", tip);
         }
 
-        // Prevent rail jump after dir change (RTL)
+        // Prevent rail jump after dir change
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
       }
 
-      // Init
       applyLang(getLang());
 
-      // Bind language buttons
       document.querySelectorAll(".lang-pill").forEach(btn => {
         btn.addEventListener("click", () => {
           const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
@@ -686,7 +679,7 @@
       });
     })();
 
-    // ===== Language rail timers: open after 3s, lock inside rail, close 3s after exit, fade 1s (CSS) =====
+    // ===== Language rail timers: open after 3s, lock inside, close 3s after exit, fade 1s =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
@@ -704,20 +697,13 @@
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       }
 
-      function openRail(){
-        switchEl.classList.add('is-open');
-      }
-
-      function closeRail(){
-        locked = false;
-        switchEl.classList.remove('is-open');
-      }
+      function openRail(){ switchEl.classList.add('is-open'); }
+      function closeRail(){ locked = false; switchEl.classList.remove('is-open'); }
 
       function scheduleOpen(){
         clearTimers();
         openTimer = setTimeout(() => openRail(), OPEN_DELAY_MS);
       }
-
       function scheduleClose(){
         clearTimers();
         closeTimer = setTimeout(() => closeRail(), CLOSE_DELAY_MS);
@@ -730,10 +716,7 @@
       });
 
       switchEl.addEventListener('pointerleave', () => {
-        if (!switchEl.classList.contains('is-open')) {
-          clearTimers();
-          return;
-        }
+        if (!switchEl.classList.contains('is-open')) { clearTimers(); return; }
         if (locked) return;
         scheduleClose();
       });
