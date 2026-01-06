@@ -47,6 +47,7 @@
                    "Liberation Mono", "Courier New", monospace;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
+      font-weight: 400; /* global: no bold */
     }
 
     .page{
@@ -91,7 +92,7 @@
 
     .brand{
       font-size: var(--brand-size);
-      font-weight: 950;
+      font-weight: 400; /* no bold */
       letter-spacing: var(--brand-track);
       text-transform: uppercase;
       white-space: nowrap;
@@ -112,7 +113,7 @@
       color:rgba(255,255,255,.82);
       text-decoration:none;
       font-size:var(--nav-size);
-      font-weight:850;
+      font-weight:400; /* no bold */
       letter-spacing:var(--nav-track);
       text-transform:uppercase;
       padding:5px 2px;
@@ -138,7 +139,6 @@
       align-items:center;
     }
 
-    /* White globe */
     .lang-trigger{
       display:inline-flex;
       align-items:center;
@@ -149,17 +149,16 @@
       border:0;
       cursor:pointer;
       padding:0;
-      color:#fff;               /* globe must be white */
+      color:#fff;
       line-height:1;
       border-radius:10px;
     }
     .lang-trigger:hover{ background: rgba(255,255,255,.06); }
     .globe{ width:18px; height:18px; display:block; }
 
-    /* This is the horizontal bar that occupies the red line */
     .lang-rail{
       position:absolute;
-      right: calc(100% + 10px);    /* open to the LEFT */
+      right: calc(100% + 10px);
       top: 50%;
       transform: translateY(-50%);
 
@@ -172,7 +171,6 @@
       background: var(--menu-bg);
       border-radius: 999px;
 
-      /* Important: never “cut” vertically; if too many, scroll horizontally */
       max-width: min(780px, calc(100vw - (2 * var(--px)) - 80px));
       overflow-x: auto;
       overflow-y: hidden;
@@ -186,17 +184,14 @@
       -webkit-backdrop-filter: blur(10px);
     }
 
-    /* Hide scrollbar (still scrollable) */
     .lang-rail::-webkit-scrollbar{ height:0; }
     .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
 
-    /* Show rail on hover */
     .lang-switch:hover .lang-rail{
       opacity:1;
       pointer-events:auto;
     }
 
-    /* Pills */
     .lang-pill{
       position:relative;
       display:inline-flex;
@@ -212,14 +207,13 @@
       border-radius: 999px;
 
       font-size: 11px;
-      font-weight: 900;
+      font-weight: 400; /* no bold */
       letter-spacing: .12em;
       text-transform: uppercase;
 
       cursor:pointer;
       user-select:none;
 
-      /* wave (start slightly toward the globe, then settle) */
       transform: translateX(10px);
       opacity: 0;
       transition: transform 220ms ease, opacity 220ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
@@ -230,7 +224,6 @@
       opacity: 1;
     }
 
-    /* stagger (wave) */
     .lang-switch:hover .lang-pill:nth-child(1)  { transition-delay:  0ms; }
     .lang-switch:hover .lang-pill:nth-child(2)  { transition-delay: 18ms; }
     .lang-switch:hover .lang-pill:nth-child(3)  { transition-delay: 36ms; }
@@ -250,7 +243,6 @@
       background: rgba(255,255,255,.06);
     }
 
-    /* Tooltip with full language name */
     .lang-pill::after{
       content: attr(data-label);
       position:absolute;
@@ -264,7 +256,7 @@
       padding: 6px 8px;
 
       font-size: 10px;
-      font-weight: 850;
+      font-weight: 400; /* no bold */
       letter-spacing: .06em;
       text-transform: uppercase;
       color: rgba(255,255,255,.92);
@@ -290,6 +282,7 @@
       border-radius:var(--radius);
       background:rgba(0,0,0,.55);
       padding:clamp(16px,2.5vw,24px);
+      font-weight: 400;
     }
 
     footer{
@@ -309,10 +302,11 @@
       gap:10px;
       flex-wrap:wrap;
       font-size:10.5px;
-      font-weight:800;
+      font-weight:400; /* no bold */
       letter-spacing:.16em;
       text-transform:uppercase;
       opacity:.75;
+      align-items:center;
     }
 
     .footer-links a{
@@ -327,7 +321,56 @@
       opacity:.42;
       text-align:center;
       line-height:1.3;
+      font-weight: 400;
     }
+
+    /* ===== Cookie gear ===== */
+    .cookie-gear{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:22px;
+      height:22px;
+      margin-left:6px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      cursor:pointer;
+      position:relative;
+      vertical-align:middle;
+    }
+    .cookie-gear:hover{
+      border-color: rgba(255,255,255,.20);
+      background: rgba(255,255,255,.05);
+    }
+    .cookie-gear svg{
+      width:14px;
+      height:14px;
+      display:block;
+      color: rgba(255,255,255,.88);
+    }
+    .cookie-gear::after{
+      content: attr(data-tip);
+      position:absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.90);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.92);
+      opacity:0;
+      pointer-events:none;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .cookie-gear:hover::after{ opacity:1; }
 
     /* ===== RTL (Arabic): flip open direction to the RIGHT ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
@@ -337,16 +380,11 @@
 
     [dir="rtl"] .lang-rail{
       right:auto;
-      left: calc(100% + 10px);     /* open to the RIGHT in RTL */
+      left: calc(100% + 10px);
     }
-    [dir="rtl"] .lang-pill{
-      transform: translateX(-10px);
-    }
-    [dir="rtl"] .lang-switch:hover .lang-pill{
-      transform: translateX(0);
-    }
+    [dir="rtl"] .lang-pill{ transform: translateX(-10px); }
+    [dir="rtl"] .lang-switch:hover .lang-pill{ transform: translateX(0); }
 
-    /* Mobile: rail drops DOWN so it never collides */
     @media (max-width: 640px){
       .topbar{
         flex-direction:column;
@@ -378,10 +416,8 @@
         <div class="brand">MICRORETAILX</div>
 
         <nav>
-          <!-- IMPORTANT: globe first, then About/Verticals/Contact -->
           <div class="lang-switch" id="lang-switch">
             <button class="lang-trigger" aria-label="Language selector">
-              <!-- White globe SVG -->
               <svg class="globe" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
                 <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
@@ -390,20 +426,20 @@
               </svg>
             </button>
 
-            <!-- Horizontal rail occupying the “red line” space -->
             <div class="lang-rail" id="lang-rail" aria-label="Languages">
-              <button class="lang-pill" data-lang="en" data-label="English">EN</button>
-              <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)">ZH</button>
-              <button class="lang-pill" data-lang="es" data-label="Español">ES</button>
-              <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)">HI</button>
-              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)">AR</button>
-              <button class="lang-pill" data-lang="fr" data-label="Français">FR</button>
-              <button class="lang-pill" data-lang="pt" data-label="Português">PT</button>
-              <button class="lang-pill" data-lang="ru" data-label="Русский">RU</button>
-              <button class="lang-pill" data-lang="ja" data-label="日本語 (Japanese)">JA</button>
-              <button class="lang-pill" data-lang="de" data-label="Deutsch">DE</button>
-              <button class="lang-pill" data-lang="ca" data-label="Català">CA</button>
-              <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia">ID</button>
+              <!-- Links to each translated page -->
+              <button class="lang-pill" data-href="index.en.html" data-label="English">EN</button>
+              <button class="lang-pill" data-href="index.zh.html" data-label="中文 (Chinese)">ZH</button>
+              <button class="lang-pill" data-href="index.es.html" data-label="Español">ES</button>
+              <button class="lang-pill" data-href="index.hi.html" data-label="हिंदी (Hindi)">HI</button>
+              <button class="lang-pill" data-href="index.ar.html" data-label="العربية (Arabic)">AR</button>
+              <button class="lang-pill" data-href="index.fr.html" data-label="Français">FR</button>
+              <button class="lang-pill" data-href="index.pt.html" data-label="Português">PT</button>
+              <button class="lang-pill" data-href="index.ru.html" data-label="Русский">RU</button>
+              <button class="lang-pill" data-href="index.ja.html" data-label="日本語 (Japanese)">JA</button>
+              <button class="lang-pill" data-href="index.de.html" data-label="Deutsch">DE</button>
+              <button class="lang-pill" data-href="index.ca.html" data-label="Català">CA</button>
+              <button class="lang-pill" data-href="index.id.html" data-label="Bahasa Indonesia">ID</button>
             </div>
           </div>
 
@@ -425,15 +461,52 @@
         <div class="footer-links">
           <a href="terms.html">Terms</a>
           <a href="privacy.html">Privacy</a>
-          <a href="cookies.html">Cookies</a>
-          <a href="javascript:void(0)">Cookies Preferences</a>
+
+          <span style="display:inline-flex; align-items:center;">
+            <a href="cookies.html">Cookies</a>
+            <!-- Gear next to Cookies -->
+            <button
+              type="button"
+              class="cookie-gear"
+              id="cookiePreferencesGear"
+              aria-label="Cookie Preferences"
+              data-tip="Cookie Preferences"
+            >
+              <!-- simple gear/pulley SVG -->
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0 .44-.17.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
+              </svg>
+            </button>
+          </span>
+
           <a href="legal.html">Legal</a>
         </div>
+
         <div class="copyright">
           © 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
         </div>
       </div>
     </footer>
   </div>
+
+  <script>
+    // Language pills navigate to their translated page
+    document.querySelectorAll('.lang-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const href = btn.getAttribute('data-href');
+        if (href) window.location.href = href;
+      });
+    });
+
+    // Cookie preferences (gear) — hook this to your existing consent modal
+    const gear = document.getElementById('cookiePreferencesGear');
+    gear?.addEventListener('click', () => {
+      // If you already have an existing function/event, call it here.
+      // Example patterns:
+      // window.openCookiePreferences?.();
+      // document.dispatchEvent(new CustomEvent('open-cookie-preferences'));
+      alert('Open Cookie Preferences (hook this to your consent modal).');
+    });
+  </script>
 </body>
 </html>
