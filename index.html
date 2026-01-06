@@ -132,6 +132,60 @@
     }
     .navlink:hover::after{ transform:scaleX(1); }
 
+    /* ===== Verticals dropdown (NEW) ===== */
+    .verticals{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      cursor:pointer;
+    }
+    .verticals > span{ pointer-events:none; } /* keep hover stable */
+
+    .verticals-menu{
+      position:absolute;
+      top:100%;
+      left:0;
+      margin-top:8px;
+
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.88);
+
+      opacity:0;
+      pointer-events:none;
+      transform: translateY(6px);
+      transition: opacity 160ms ease, transform 160ms ease;
+
+      white-space:nowrap;
+      z-index:50;
+
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .verticals:hover .verticals-menu{
+      opacity:1;
+      pointer-events:auto;
+      transform: translateY(0);
+    }
+
+    .verticals-menu a{
+      color:rgba(255,255,255,.85);
+      text-decoration:none;
+      font-size:11px;
+      font-weight:400;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      padding:4px 2px;
+    }
+    .verticals-menu a:hover{ color:#fff; }
+
     /* ===== Language rail (JS-controlled) ===== */
     .lang-switch{
       position:relative;
@@ -286,6 +340,7 @@
       background:rgba(0,0,0,.55);
       padding:clamp(16px,2.5vw,24px);
       font-weight:400;
+      text-align:center; /* NEW: centered */
     }
 
     footer{
@@ -387,6 +442,12 @@
       right: calc(100% + 10px);
     }
 
+    /* RTL: Verticals dropdown align inside */
+    [dir="rtl"] .verticals-menu{
+      left:auto;
+      right:0;
+    }
+
     /* Keep pill intro direction consistent in RTL */
     [dir="rtl"] .lang-pill{ transform: translateX(10px); }
     [dir="rtl"] .lang-switch.is-open .lang-pill{ transform: translateX(0); }
@@ -450,8 +511,18 @@
           </div>
 
           <a class="navlink" href="#/about" data-i18n="nav.about">About</a>
-          <a class="navlink" href="#/verticals" data-i18n="nav.verticals">Verticals</a>
-          <a class="navlink" href="#/contact" data-i18n="nav.contact">Contact</a>
+
+          <!-- NEW: Verticals dropdown (keeps i18n label) -->
+          <div class="navlink verticals" role="button" aria-haspopup="true">
+            <span data-i18n="nav.verticals">Verticals</span>
+            <div class="verticals-menu" aria-label="Verticals">
+              <a href="https://www.microlabsx.com">BIOTECH</a>
+              <a href="https://www.microstudio.com">CREATIVE STUDIO</a>
+            </div>
+          </div>
+
+          <!-- NEW: Contact mailto -->
+          <a class="navlink" href="mailto:info@microretailx.com" data-i18n="nav.contact">Contact</a>
         </nav>
       </div>
     </header>
@@ -747,9 +818,6 @@
       const gear = document.getElementById('cookiePreferencesGear');
       if (!gear) return;
       gear.addEventListener('click', () => {
-        // Replace with your real handler:
-        // window.openCookiePreferences?.();
-        // document.dispatchEvent(new CustomEvent('open-cookie-preferences'));
         alert('Open Cookie Preferences (hook to your consent modal).');
       });
     })();
