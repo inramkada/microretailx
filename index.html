@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>microretailX</title>
 
+  <meta name="description" content="Advanced biotech and creative technology platforms." />
+  <link rel="canonical" href="https://www.microretailx.com/" />
+
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
   <meta name="color-scheme" content="dark" />
@@ -39,7 +42,8 @@
       --nav-size:clamp(12px, 1.15vw, 12.5px);
       --nav-track:0.12em;
 
-      --copy-size:clamp(6.5px, 1.1vw, 7px);
+      /* ✅ legible sin romper estética */
+      --copy-size: clamp(9.5px, 1.1vw, 11px);
       --copy-track:0.06em;
 
       --radius:14px;
@@ -85,6 +89,17 @@
         repeating-linear-gradient(0deg, rgba(255,255,255,.025), rgba(255,255,255,.025) 1px, transparent 1px, transparent 3px);
       mix-blend-mode:screen;
       z-index:-1;
+    }
+
+    /* ✅ fondo más ligero en móvil */
+    @media (max-width: 640px){
+      .page::before{
+        mix-blend-mode: normal;
+        opacity: .03;
+        background-image:
+          radial-gradient(circle at 20% 30%, rgba(255,255,255,.06), transparent 52%),
+          radial-gradient(circle at 80% 70%, rgba(255,255,255,.04), transparent 50%);
+      }
     }
 
     header, footer{
@@ -161,7 +176,9 @@
       position:absolute;
       top:100%;
       left:0;
-      margin-top:10px;
+
+      /* ✅ baja un pelín para que BIOTECH no roce la línea */
+      margin-top:14px;
 
       display:flex;
       flex-direction:column;
@@ -195,7 +212,9 @@
       flex-direction:column;
       align-items:flex-start;
       text-decoration:none;
-      padding:2px 0;
+
+      /* ✅ un pelo más de aire */
+      padding:3px 0;
     }
 
     .v-main{
@@ -272,6 +291,11 @@
       -webkit-backdrop-filter: blur(10px);
 
       transition: opacity 0.4s ease, transform 0.2s ease;
+
+      /* ✅ iOS / iPad scroll stability */
+      direction: ltr;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
@@ -324,6 +348,24 @@
     .lang-switch.is-open .lang-pill{
       transform: translateX(0);
       opacity: 1;
+    }
+
+    /* ✅ FIX INVENCIBLE: EN siempre visible en iPad (sticky dentro del scroll) */
+    .lang-pill[data-lang="en"]{
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: rgba(0,0,0,.78);
+      border-color: rgba(255,255,255,.16);
+      box-shadow: 12px 0 16px rgba(0,0,0,.55);
+      margin-right: 2px;
+    }
+    [dir="rtl"] .lang-pill[data-lang="en"]{
+      left: auto;
+      right: 0;
+      box-shadow: -12px 0 16px rgba(0,0,0,.55);
+      margin-right: 0;
+      margin-left: 2px;
     }
 
     /* stagger (wave) */
@@ -502,6 +544,7 @@
     [dir="rtl"] .lang-rail{
       left:auto;
       right: calc(100% + 10px);
+      direction: rtl;
     }
 
     [dir="rtl"] .verticals-menu{
@@ -788,12 +831,19 @@
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 
+        // optional (UX): update title
+        if (lang === "es") document.title = "microretailX — Próximamente";
+        else if (lang === "fr") document.title = "microretailX — Bientôt";
+        else if (lang === "de") document.title = "microretailX — Bald";
+        else document.title = "microretailX";
+
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
         switchEl?.classList.remove("open-right");
 
         const shouldScramble = (text) => {
           if (!text) return false;
+          // keep as you had; landing-scale ok
           return /^[\VIU0000-\LEN02FF\ZAA1E00-\u1EFF0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
         };
 
@@ -832,7 +882,8 @@
             const val = dict[key] ?? I18N[DEFAULT_LANG][key];
             if (typeof val !== "string") return;
 
-            if (shouldScramble(val)) scrambleText(el, val, 180);
+            // small perf guard: scramble only short strings
+            if (shouldScramble(val) && val.length <= 80) scrambleText(el, val, 180);
             else el.textContent = val;
 
             el.classList.remove("mx-i18n-out");
@@ -867,7 +918,7 @@
       });
     })();
 
-    // ===== Language rail timers (iPad-killer reset): open after 500ms, lock inside, close 3s after exit =====
+    // ===== Language rail timers (keep your logic) =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
@@ -883,17 +934,6 @@
       function clearTimers(){
         if (openTimer)  { clearTimeout(openTimer);  openTimer = null; }
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
-      }
-
-      function hardResetScroll(){
-        railEl.scrollTo({ left: 0, top: 0, behavior: 'auto' });
-        railEl.scrollLeft = 0;
-      }
-
-      function ensureStartVisible(){
-        // iPad Safari sometimes preserves scrollLeft across open/close -> force-reset twice
-        hardResetScroll();
-        setTimeout(hardResetScroll, 30);
       }
 
       function placeRailSmart(){
@@ -915,16 +955,9 @@
 
       function openRail(){
         switchEl.classList.add('is-open');
-
         requestAnimationFrame(() => {
-          // 1) show EN reliably
-          ensureStartVisible();
-
-          // 2) keep rail inside viewport on iPad/tablet
           placeRailSmart();
-
-          // 3) after potential side-flip and paint, re-assert start (final kill shot)
-          setTimeout(hardResetScroll, 60);
+          // (EN sticky => no need to fight scroll any more)
         });
       }
 
@@ -932,9 +965,6 @@
         locked = false;
         switchEl.classList.remove('is-open');
         switchEl.classList.remove('open-right');
-
-        // Reset so next open always starts at EN
-        hardResetScroll();
       }
 
       function scheduleOpen(){
@@ -977,14 +1007,9 @@
         else openRail();
       });
 
-      // iPad rotates/resizes often
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
-        requestAnimationFrame(() => {
-          ensureStartVisible();
-          placeRailSmart();
-          setTimeout(hardResetScroll, 60);
-        });
+        requestAnimationFrame(() => placeRailSmart());
       });
     })();
 
