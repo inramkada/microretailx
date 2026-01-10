@@ -560,7 +560,7 @@
             </div>
           </div>
 
-          <a class="navlink" href="mailto:info@microretailx.com" data-i18n="nav.contact">Contact</a>
+          <a class="navlink" href="/cdn-cgi/l/email-protection#abc2c5cdc4ebc6c2c8d9c4d9cedfcac2c7d385c8c4c6" data-i18n="nav.contact">Contact</a>
         </nav>
       </div>
     </header>
@@ -596,7 +596,7 @@
     </footer>
   </div>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     (function(){
       const I18N = {
         en: {"nav.about": "About", "nav.verticals": "Verticals", "nav.contact": "Contact", "footer.terms": "Terms", "footer.privacy": "Privacy", "footer.cookies": "Cookies", "footer.legal": "Legal", "card.test": "We're working on it — coming back soon.", "cookie.prefs": "Cookie Preferences"},
@@ -684,8 +684,30 @@
 
       applyLang(getLang());
 
+      // CRITICAL: iPhone scroll momentum fix
+      const railEl = document.getElementById('lang-rail');
+      let isScrolling = false;
+      let scrollTimer = null;
+
+      if (railEl) {
+        railEl.addEventListener('scroll', () => {
+          isScrolling = true;
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(() => {
+            isScrolling = false;
+          }, 100);
+        }, { passive: true });
+      }
+
       document.querySelectorAll(".lang-pill").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", (e) => {
+          // Block click if rail is actively scrolling
+          if (isScrolling) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+
           const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
           setLang(lang);
           applyLang(lang);
@@ -710,8 +732,6 @@
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       }
 
-      function ensureStartVisible(){ railEl.scrollLeft = 0; }
-
       function placeRailSmart(){
         switchEl.classList.remove('open-right');
         const vw = window.innerWidth || document.documentElement.clientWidth;
@@ -723,9 +743,16 @@
       }
 
       function openRail(){
-        ensureStartVisible();
+        // CRITICAL: Reset scroll position FIRST (synchronously)
+        railEl.scrollLeft = 0;
+        
         switchEl.classList.add('is-open');
-        requestAnimationFrame(() => { ensureStartVisible(); placeRailSmart(); });
+
+        requestAnimationFrame(() => {
+          // Double-check after CSS transitions apply
+          railEl.scrollLeft = 0;
+          placeRailSmart();
+        });
       }
 
       function closeRail(){
@@ -762,7 +789,10 @@
 
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
-        requestAnimationFrame(() => { ensureStartVisible(); placeRailSmart(); });
+        requestAnimationFrame(() => {
+          railEl.scrollLeft = 0;
+          placeRailSmart();
+        });
       });
     })();
 
@@ -789,8 +819,3 @@
     (function(){
       const gear = document.getElementById('cookiePreferencesGear');
       if (!gear) return;
-      gear.addEventListener('click', () => { alert('Open Cookie Preferences (hook to your consent modal).'); });
-    })();
-  </script>
-</body>
-</html>
