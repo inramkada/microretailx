@@ -248,7 +248,6 @@
     .globe{ width:18px; height:18px; display:block; }
 
     .lang-rail{
-      /* viewport clamp via CSS var (set by JS) */
       --rail-shift: 0px;
 
       position:absolute;
@@ -279,9 +278,10 @@
 
       transition: opacity 0.4s ease, transform 0.2s ease;
 
-      /* iOS: make it explicit that this is horizontal scrolling */
+      /* iOS: make horizontal scroll explicit and prevent scroll chaining */
       touch-action: pan-x;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
@@ -292,13 +292,11 @@
       pointer-events:auto;
     }
 
-    /* If rail would clip, we can open on the other side (kept for flexibility) */
     .lang-switch.open-right .lang-rail{
       right:auto;
       left: calc(100% + 10px);
     }
 
-    /* RTL: mirror the idea */
     [dir="rtl"] .lang-switch.open-right .lang-rail{
       left:auto;
       right: calc(100% + 10px);
@@ -894,7 +892,6 @@
         if (Math.abs(e.clientX - startX) > 8) dragged = true;
       });
 
-      // capture phase: kill the click before it reaches buttons
       rail.addEventListener("click", (e) => {
         if (!dragged) return;
         e.preventDefault();
@@ -902,7 +899,7 @@
       }, true);
     })();
 
-    // ===== Language rail timers + smart placement + viewport clamp (RTL + iPhone SE safe) =====
+    // ===== Language rail timers + smart placement + viewport clamp + "lock while scrolling" =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
@@ -916,6 +913,9 @@
       const CLOSE_DELAY_MS = 3000;
 
       let firstOpen = true;
+
+      // NEW: lock positioning while user is interacting (prevents "moving popover" on iOS/RTL)
+      let isInteracting = false;
 
       function clearTimers(){
         if (openTimer)  { clearTimeout(openTimer);  openTimer = null; }
@@ -933,13 +933,11 @@
       }
 
       function clampRailIntoViewport(){
-        // measure and shift rail horizontally so it stays inside viewport
         const vw = window.innerWidth || document.documentElement.clientWidth;
         const margin = 8;
 
         resetShift();
 
-        // measure after resetting shift
         const rect = railEl.getBoundingClientRect();
         let shift = 0;
 
@@ -949,35 +947,31 @@
           shift = - (rect.right - (vw - margin));
         }
 
-        // apply shift if needed
         if (shift !== 0){
           railEl.style.setProperty('--rail-shift', `${Math.round(shift)}px`);
         }
       }
 
       function placeRailSmart(){
-        // optional: flip side if it's *way* off, then clamp precisely
+        if (isInteracting) return; // ✅ don't reposition during scroll/drag
+
         switchEl.classList.remove('open-right');
         resetShift();
 
         const vw = window.innerWidth || document.documentElement.clientWidth;
         const margin = 8;
 
-        // measure current side
         let rect = railEl.getBoundingClientRect();
 
-        // If it clips hard on the left, try open-right
         if (rect.left < -margin){
           switchEl.classList.add('open-right');
           rect = railEl.getBoundingClientRect();
         }
 
-        // If it clips hard on the right, revert
         if (rect.right > vw + margin){
           switchEl.classList.remove('open-right');
         }
 
-        // final clamp (works for RTL/LTR + any screen width)
         clampRailIntoViewport();
       }
 
@@ -1005,6 +999,22 @@
         clearTimers();
         closeTimer = setTimeout(() => closeRail(), CLOSE_DELAY_MS);
       }
+
+      // Lock/unlock positioning while user scrolls inside rail
+      function onInteractStart(){ isInteracting = true; }
+      function onInteractEnd(){
+        isInteracting = false;
+        requestAnimationFrame(() => {
+          if (switchEl.classList.contains('is-open')) placeRailSmart();
+        });
+      }
+
+      railEl.addEventListener('touchstart', onInteractStart, { passive: true });
+      railEl.addEventListener('touchend', onInteractEnd, { passive: true });
+      railEl.addEventListener('touchcancel', onInteractEnd, { passive: true });
+      railEl.addEventListener('pointerdown', onInteractStart, { passive: true });
+      railEl.addEventListener('pointerup', onInteractEnd, { passive: true });
+      railEl.addEventListener('pointercancel', onInteractEnd, { passive: true });
 
       switchEl.addEventListener('pointerenter', () => {
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
@@ -1039,9 +1049,7 @@
 
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
-        requestAnimationFrame(() => {
-          placeRailSmart();
-        });
+        requestAnimationFrame(() => placeRailSmart());
       });
     })();
 
