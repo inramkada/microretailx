@@ -878,49 +878,39 @@
 
       applyLang(getLang());
 
-      // Better scroll vs click detection (iPhone/iPad fix)
+      // Lightweight scroll detection only for preventing accidental clicks during momentum
       let isScrolling = false;
       let scrollTimeout = null;
-      let startX = 0;
-      let hasMoved = false;
 
       const railEl = document.getElementById('lang-rail');
       
       if (railEl) {
-        // Track scroll events
+        // Only track scroll events with minimal debounce
         railEl.addEventListener('scroll', () => {
           isScrolling = true;
           clearTimeout(scrollTimeout);
           scrollTimeout = setTimeout(() => {
             isScrolling = false;
-          }, 50);
+          }, 100);
         }, { passive: true });
-
-        // Track pointer movement to distinguish scroll from click
-        railEl.addEventListener('pointerdown', (e) => {
-          startX = e.clientX;
-          hasMoved = false;
-        });
-
-        railEl.addEventListener('pointermove', (e) => {
-          if (Math.abs(e.clientX - startX) > 5) {
-            hasMoved = true;
-            isScrolling = true;
-          }
-        });
-
-        railEl.addEventListener('pointerup', () => {
-          setTimeout(() => {
-            hasMoved = false;
-            isScrolling = false;
-          }, 50);
-        });
       }
 
       document.querySelectorAll(".lang-pill").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          // Block clicks during scroll or drag
-          if (isScrolling || hasMoved) {
+        let pointerStart = null;
+
+        // Track if this specific pill had pointer movement
+        btn.addEventListener('pointerdown', (e) => {
+          pointerStart = { x: e.clientX, y: e.clientY };
+        });
+
+        btn.addEventListener('click', (e) => {
+          // Only block if actively scrolling OR if pointer moved significantly
+          const movedSignificantly = pointerStart && (
+            Math.abs(e.clientX - pointerStart.x) > 10 ||
+            Math.abs(e.clientY - pointerStart.y) > 10
+          );
+
+          if (isScrolling || movedSignificantly) {
             e.preventDefault();
             e.stopPropagation();
             return;
