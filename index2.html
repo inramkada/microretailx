@@ -1,668 +1,1031 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MICRORETAILX</title>
+  <title>microretailX</title>
 
-  <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MICRORETAILX">
+  <meta property="og:description" content="Advanced biotech and creative technology platforms.">
+  <meta property="og:url" content="https://www.microretailx.com">
+  <meta property="og:image" content="https://www.microretailx.com/og-image.jpg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MICRORETAILX">
+  <meta name="twitter:description" content="Advanced biotech and creative technology platforms.">
+  <meta name="twitter:image" content="https://www.microretailx.com/og-image.jpg">
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-      color: #fff;
+    :root{
+      --bg:#000;
+      --fg:rgba(255,255,255,.94);
+      --muted:rgba(255,255,255,.62);
+      --hair:rgba(255,255,255,.12);
+      --glass:rgba(0,0,0,.78);
+
+      --px:clamp(12px, 2vw, 18px);
+      --py:10px;
+
+      --brand-size:clamp(12px, 1.2vw, 13px);
+      --brand-track:0.20em;
+
+      --nav-size:clamp(12px, 1.15vw, 12.5px);
+      --nav-track:0.12em;
+
+      --copy-size:clamp(6.5px, 1.1vw, 7px);
+      --copy-track:0.06em;
+
+      --radius:14px;
+      --blur:10px;
+
+      --menu-bg: rgba(0,0,0,.86);
+      --menu-border: rgba(255,255,255,.14);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
                    "Liberation Mono", "Courier New", monospace;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+      font-weight:400; /* no bold */
+
+      /* Premium micro-fade on language/dir changes */
+      transition: opacity 0.18s ease-in-out;
     }
-    canvas { display:block; width:100vw; height:100vh; }
+    body.is-i18n-switching{ opacity:0.92; }
 
-    .ui-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+    .page{
+      min-height:100%;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      isolation:isolate;
+    }
 
-    .top-bar {
-      position: absolute; top: 0; left: 0; right: 0;
-      padding: 14px 18px;
-      display: flex; justify-content: flex-start;
-      background: rgba(0,0,0,0.78);
-      border-bottom: 1px solid rgba(255,255,255,0.10);
+    .page::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.045;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.07), transparent 46%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,.05), transparent 44%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.025), rgba(255,255,255,.025) 1px, transparent 1px, transparent 3px);
+      mix-blend-mode:screen;
+      z-index:-1;
+    }
+
+    header, footer{
+      background:var(--glass);
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
+      overflow: visible;
+    }
+
+    header{
+      padding: var(--py) var(--px);
+      border-bottom: 1px solid var(--hair);
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .brand{
+      font-size: var(--brand-size);
+      font-weight: 400;
+      letter-spacing: var(--brand-track);
+      text-transform: uppercase;
+      white-space: nowrap;
+      line-height: 1;
+      opacity:.97;
+      text-shadow: 0 0 10px rgba(255,255,255,.10), 0 0 2px rgba(255,255,255,.18);
+      mix-blend-mode:difference;
+    }
+
+    nav{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .navlink{
+      color:rgba(255,255,255,.82);
+      text-decoration:none;
+      font-size:var(--nav-size);
+      font-weight:400;
+      letter-spacing:var(--nav-track);
+      text-transform:uppercase;
+      padding:5px 2px;
+      position:relative;
+    }
+    .navlink:hover{ color:rgba(255,255,255,.96); }
+    .navlink::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:1px;
+      background:rgba(255,255,255,.22);
+      transform:scaleX(0);
+      transform-origin:left;
+      transition:transform 150ms ease;
+    }
+    .navlink:hover::after{ transform:scaleX(1); }
+
+    /* ===== Verticals dropdown (NO ENCUADRES) ===== */
+    .verticals{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      cursor:pointer;
+    }
+    .verticals > span{ pointer-events:none; }
+
+    .verticals-menu{
+      position:absolute;
+      top:100%;
+      left:0;
+      margin-top:10px;
+
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+
+      padding:0;
+      padding-top:2px; /* ✅ separación leve arriba (BIOTECH no toca borde) */
+      border:0;
+      background:transparent;
+      border-radius:0;
+
+      opacity:0;
+      pointer-events:none;
+      transform: translateY(6px);
+      transition: opacity 160ms ease, transform 160ms ease;
+
+      white-space:nowrap;
+      z-index:50;
+      filter:none;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+    }
+
+    /* (opcional premium) micro-margen solo al primer item */
+    .verticals-menu .v-item:first-child{ margin-top:2px; }
+
+    .verticals.is-open .verticals-menu{
+      opacity:1;
+      pointer-events:auto;
+      transform: translateY(0);
+    }
+
+    .v-item{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      text-decoration:none;
+      padding:2px 0;
+    }
+
+    .v-main{
+      color:rgba(255,255,255,.92);
+      font-size:12px;
+      font-weight:400;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      line-height:1.05;
+    }
+
+    .v-sub{
+      margin-top:3px;
+      color:rgba(255,255,255,.55);
+      font-size:10px;
+      font-weight:400;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      line-height:1.05;
+    }
+
+    .v-item:hover .v-main{ color:#fff; }
+    .v-item:hover .v-sub{ color:rgba(255,255,255,.72); }
+
+    /* ===== Language rail (JS-controlled) ===== */
+    .lang-switch{
+      position:relative;
+      display:flex;
+      align-items:center;
+    }
+
+    .lang-trigger{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:28px;
+      height:28px;
+      background:none;
+      border:0;
+      cursor:pointer;
+      padding:0;
+      color:#fff;
+      line-height:1;
+      border-radius:10px;
+    }
+    .lang-trigger:hover{ background: rgba(255,255,255,.06); }
+    .globe{ width:18px; height:18px; display:block; }
+
+    .lang-rail{
+      position:absolute;
+      right: calc(100% + 10px); /* open LEFT (towards inside) */
+      top: 50%;
+      transform: translateY(-50%);
+
+      display:flex;
+      align-items:center;
+      gap:8px;
+
+      padding:6px 8px;
+      border:1px solid var(--menu-border);
+      background: var(--menu-bg);
+      border-radius: 999px;
+
+      max-width: min(780px, calc(100vw - (2 * var(--px)) - 80px));
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+
+      opacity:0;
+      pointer-events:none;
+
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+
+      /* Premium rail transition (avoids "blink") */
+      transition: opacity 0.4s ease, transform 0.2s ease;
     }
 
-    .brand {
-      font-size: 12px;
-      letter-spacing: 4px;
-      font-weight: 900;
-      opacity: 0.92;
-      color: rgba(255,255,255,0.92);
-      mix-blend-mode: difference;
-      text-shadow: none;
+    .lang-rail::-webkit-scrollbar{ height:0; }
+    .lang-rail{ scrollbar-width:none; -ms-overflow-style:none; }
+
+    .lang-switch.is-open .lang-rail{
+      opacity:1;
+      pointer-events:auto;
     }
 
-    .footer-bar {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 14px 18px 12px;
-      display: flex; flex-direction: column; align-items: center;
-      gap: 8px;
-      background: rgba(0,0,0,0.78);
-      border-top: 1px solid rgba(255,255,255,0.10);
+    /* iPad/tablet fix: if rail would clip on the left, open to the RIGHT of the globe */
+    .lang-switch.open-right .lang-rail{
+      right:auto;
+      left: calc(100% + 10px);
+    }
+
+    /* RTL: mirror the same idea */
+    [dir="rtl"] .lang-switch.open-right .lang-rail{
+      left:auto;
+      right: calc(100% + 10px);
+    }
+
+    .lang-pill{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.30);
+      color: rgba(255,255,255,.86);
+
+      height:26px;
+      padding: 0 10px;
+      border-radius: 999px;
+
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+
+      cursor:pointer;
+      user-select:none;
+
+      /* iOS-optimized: scale + opacity (GPU-accelerated, no layout shift) */
+      transform: scale(0.88);
+      opacity: 0;
+      transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  opacity 240ms ease, 
+                  background 160ms ease, 
+                  border-color 160ms ease, 
+                  color 160ms ease;
+      will-change: transform, opacity;
+    }
+
+    .lang-switch.is-open .lang-pill{
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    /* stagger (wave) */
+    .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
+    .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
+    .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
+    .lang-switch.is-open .lang-pill:nth-child(4)  { transition-delay: 54ms; }
+    .lang-switch.is-open .lang-pill:nth-child(5)  { transition-delay: 72ms; }
+    .lang-switch.is-open .lang-pill:nth-child(6)  { transition-delay: 90ms; }
+    .lang-switch.is-open .lang-pill:nth-child(7)  { transition-delay:108ms; }
+    .lang-switch.is-open .lang-pill:nth-child(8)  { transition-delay:126ms; }
+    .lang-switch.is-open .lang-pill:nth-child(9)  { transition-delay:144ms; }
+    .lang-switch.is-open .lang-pill:nth-child(10) { transition-delay:162ms; }
+    .lang-switch.is-open .lang-pill:nth-child(11) { transition-delay:180ms; }
+    .lang-switch.is-open .lang-pill:nth-child(12) { transition-delay:198ms; }
+
+    .lang-pill:hover{
+      color:#fff;
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.06);
+    }
+
+    .lang-pill::after{
+      content: attr(data-label);
+      position:absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+
+      background: rgba(0,0,0,.90);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 6px 8px;
+
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.92);
+
+      opacity:0;
+      pointer-events:none;
+      white-space: nowrap;
+
       backdrop-filter: blur(10px);
-      pointer-events: auto;
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .lang-pill:hover::after{ opacity:1; }
+
+    main{
+      display:grid;
+      place-items:center;
+      padding:22px var(--px);
     }
 
-    .footer-links {
-      display: flex; gap: 22px;
-      font-size: 11px; letter-spacing: 2px;
-      opacity: 0.65;
-    }
-    .footer-links a {
-      color:#fff; text-decoration:none;
-      opacity:0.75; pointer-events:auto;
-    }
-    .footer-links a:hover { opacity:1; text-decoration: underline; }
-
-    .copyright {
-      font-size: 9px; letter-spacing: 1px;
-      opacity: 0.45; text-align: center;
+    .card{
+      width:min(720px,100%);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:var(--radius);
+      background:rgba(0,0,0,.55);
+      padding:clamp(16px,2.5vw,24px);
+      font-weight:400;
+      text-align:center;
     }
 
-    @media (max-width: 600px) {
-      .brand { font-size: 11px; letter-spacing: 3px; }
-      .footer-links { flex-wrap: wrap; justify-content:center; gap: 14px; }
+    footer{
+      padding:10px var(--px) 12px;
+      border-top:1px solid var(--hair);
+    }
+
+    .footer-inner{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
+
+    .footer-links{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      font-size:10.5px;
+      font-weight:400;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      opacity:.75;
+      align-items:center;
+    }
+
+    .footer-links a{
+      color:rgba(255,255,255,.85);
+      text-decoration:none;
+    }
+    .footer-links a:hover{ color:#fff; }
+
+    .copyright{
+      font-size:var(--copy-size);
+      letter-spacing:var(--copy-track);
+      opacity:.58; /* raised for accessibility */
+      text-align:center;
+      line-height:1.3;
+      font-weight:400;
+    }
+
+    /* ===== Cookie gear ===== */
+    .cookie-gear{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:22px;
+      height:22px;
+      margin-left:6px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      cursor:pointer;
+      position:relative;
+      vertical-align:middle;
+    }
+    .cookie-gear:hover{
+      border-color: rgba(255,255,255,.20);
+      background: rgba(255,255,255,.05);
+    }
+    .cookie-gear svg{
+      width:14px;
+      height:14px;
+      display:block;
+      color: rgba(255,255,255,.88);
+    }
+    .cookie-gear::after{
+      content: attr(data-tip);
+      position:absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.90);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.92);
+      opacity:0;
+      pointer-events:none;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .cookie-gear:hover::after{ opacity:1; }
+
+    /* ===== Premium text swap on i18n ===== */
+    [data-i18n]{
+      display:inline-block;
+      transition: opacity 160ms ease, transform 160ms ease, filter 160ms ease;
+      will-change: opacity, transform, filter;
+    }
+    [data-i18n].mx-i18n-out{
+      opacity:0;
+      transform: translateY(2px);
+      filter: blur(1px);
+    }
+    [data-i18n].mx-i18n-in{
+      opacity:1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    /* ===== RTL (Arabic): flip layout but keep rail opening LEFT (towards inside) ===== */
+    [dir="rtl"] .topbar{ flex-direction:row-reverse; }
+    [dir="rtl"] nav{ flex-direction:row-reverse; }
+    [dir="rtl"] .navlink::after{ transform-origin:right; }
+    [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
+
+    [dir="rtl"] .lang-rail{
+      left:auto;
+      right: calc(100% + 10px);
+    }
+
+    [dir="rtl"] .verticals-menu{
+      left:auto;
+      right:0;
+      align-items:flex-end;
+      text-align:right;
+    }
+    [dir="rtl"] .v-item{ align-items:flex-end; }
+
+    @media (max-width: 640px){
+      .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:8px;
+      }
+      nav{ width:100%; gap:10px; }
+
+      .lang-rail{
+        right:auto;
+        left:0;
+        top:100%;
+        transform: translateY(10px);
+        max-width: min(92vw, 520px);
+      }
+
+      [dir="rtl"] .lang-rail{
+        left:auto;
+        right:0;
+      }
     }
   </style>
 </head>
 
 <body>
-  <canvas id="view"></canvas>
+  <div class="page" id="app-root">
+    <header>
+      <div class="topbar">
+        <div class="brand">MICRORETAILX</div>
 
-  <div class="ui-layer">
-    <div class="top-bar">
-      <div class="brand">MICRORETAILX</div>
-    </div>
+        <nav>
+          <div class="lang-switch" id="lang-switch">
+            <button class="lang-trigger" aria-label="Language selector" type="button">
+              <svg class="globe" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M12 3c3 3 3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
 
-    <div class="footer-bar">
-      <div class="footer-links">
-        <a href="terms.html">TERMS</a>
-        <a href="privacy.html">PRIVACY</a>
-        <a href="cookies.html">COOKIES</a>
-        <a href="legal.html">LEGAL</a>
+            <div class="lang-rail" id="lang-rail" aria-label="Languages">
+              <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
+              <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
+              <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
+              <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)" type="button">HI</button>
+              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
+              <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
+              <button class="lang-pill" data-lang="pt" data-label="Português" type="button">PT</button>
+              <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
+              <button class="lang-pill" data-lang="ja" data-label="日本語 (Japanese)" type="button">JA</button>
+              <button class="lang-pill" data-lang="de" data-label="Deutsch" type="button">DE</button>
+              <button class="lang-pill" data-lang="ca" data-label="Català" type="button">CA</button>
+              <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia" type="button">ID</button>
+            </div>
+          </div>
+
+          <a class="navlink" href="#/about" data-i18n="nav.about">About</a>
+
+          <div class="navlink verticals" id="verticals" role="button" aria-haspopup="true" aria-expanded="false">
+            <span data-i18n="nav.verticals">Verticals</span>
+            <div class="verticals-menu" aria-label="Verticals">
+              <a class="v-item" href="https://www.microlabsx.com">
+                <span class="v-main">BIOTECH</span>
+                <span class="v-sub">MICROLABSX</span>
+              </a>
+              <a class="v-item" href="https://www.microstudiox.com">
+                <span class="v-main">STUDIO</span>
+                <span class="v-sub">MICROSTUDIOX</span>
+              </a>
+            </div>
+          </div>
+
+          <a class="navlink" href="mailto:info@microretailx.com" data-i18n="nav.contact">Contact</a>
+        </nav>
       </div>
-      <div class="copyright">© 2023–2026 MICRORETAILX LLC. ALL RIGHTS RESERVED.</div>
-    </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <p data-i18n="card.test">We're working on it — coming back soon.</p>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="terms.html" data-i18n="footer.terms">Terms</a>
+          <a href="privacy.html" data-i18n="footer.privacy">Privacy</a>
+
+          <span style="display:inline-flex; align-items:center;">
+            <a href="cookies.html" data-i18n="footer.cookies">Cookies</a>
+            <button
+              type="button"
+              class="cookie-gear"
+              id="cookiePreferencesGear"
+              aria-label="Cookie Preferences"
+              data-tip="Cookie Preferences"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0-.44-.17-.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
+              </svg>
+            </button>
+          </span>
+
+          <a href="legal.html" data-i18n="footer.legal">Legal</a>
+        </div>
+
+        <div class="copyright">
+          © 2023–2026 MICRORETAILX LLC — ALL RIGHTS RESERVED
+        </div>
+      </div>
+    </footer>
   </div>
 
-<script>
-(() => {
-  "use strict";
-
-  const view = document.getElementById("view");
-  const vctx = view.getContext("2d", { alpha: false });
-
-  const simCanvas = document.createElement("canvas");
-  const sctx = simCanvas.getContext("2d", { willReadFrequently: true });
-
-  const UA = navigator.userAgent || "";
-  const IS_IOS =
-    /iPhone|iPad|iPod/i.test(UA) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(UA);
-
-  const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
-  const lerp  = (a,b,t)=> a + (b-a)*t;
-  const ease  = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
-  const easeInOut = t => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;
-
-  const DPR_CAP = IS_IOS ? 1.6 : 2;
-  let dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
-
-  let W=0, H=0;
-  let simW=0, simH=0;
-
-  let trailA, trailB;
-  let xField;
-  let imgData, img8;
-  let agents = [];
-  let foods = [];
-  let tPrev = performance.now();
-  let frame = 0;
-
-  const INTRO = {
-    start: performance.now(),
-    durIn: 2200,
-    durFlash: 360,
-    durOut: 780,
-    get total() { return this.durIn + this.durFlash + this.durOut; },
-    get t() { return performance.now() - this.start; },
-    get active() { return this.t < this.total; }
-  };
-
-  let lastMouseFoodAt = 0;
-
-  const CFG = {
-    gridMax: IS_MOBILE ? 540 : 820,
-
-    agentCount: IS_MOBILE ? 6000 : 12000,
-    step: IS_MOBILE ? 0.90 : 1.05,
-
-    sensorDist: IS_MOBILE ? 6.2 : 7.8,
-    sensorAngle: 0.55,
-    turnSpeed: 0.34,
-
-    deposit: 0.94,
-    decay: IS_MOBILE ? 0.973 : 0.979,
-    diffuseEvery: 2,
-    diffuseMix: 0.42,
-
-    xBias: 0.82,
-    xWidthPx: IS_MOBILE ? 3.6 : 4.6,
-
-    foodRadius: IS_MOBILE ? 18 : 22,
-    foodStrength: 1.55,
-    foodLifeMs: 1300,
-    mouseFoodEveryMs: IS_MOBILE ? 42 : 28,
-
-    xInk: 0.42,
-
-    crush: 0.030,
-
-    introSeed: IS_MOBILE ? 0.42 : 0.55,
-    introSeedRadiusPx: IS_MOBILE ? 10 : 12
-  };
-
-  function resize() {
-    dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
-    W = window.innerWidth | 0;
-    H = window.innerHeight | 0;
-
-    view.width  = (W * dpr) | 0;
-    view.height = (H * dpr) | 0;
-    view.style.width  = W + "px";
-    view.style.height = H + "px";
-    vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    const maxSide = CFG.gridMax;
-    const aspect = W / Math.max(1, H);
-    if (W >= H) {
-      simW = maxSide;
-      simH = Math.max(160, (maxSide / aspect) | 0);
-    } else {
-      simH = maxSide;
-      simW = Math.max(160, (maxSide * aspect) | 0);
-    }
-
-    simCanvas.width = simW;
-    simCanvas.height = simH;
-
-    const n = simW * simH;
-    trailA = new Float32Array(n);
-    trailB = new Float32Array(n);
-    xField = new Float32Array(n);
-
-    imgData = sctx.createImageData(simW, simH);
-    img8 = imgData.data;
-
-    buildXField();
-    seedAgents(true);
-
-    inkXLine(CFG.xInk);
-  }
-
-  window.addEventListener("resize", resize);
-
-  function idx(x, y) { return x + y * simW; }
-
-  function buildXField() {
-    const w = simW, h = simH;
-    const a = (h - 1) / Math.max(1, (w - 1));
-    const inv = 1 / Math.sqrt(1 + a*a);
-
-    const sigma = CFG.xWidthPx;
-    const sigma2 = sigma * sigma;
-
-    for (let y=0; y<h; y++) {
-      for (let x=0; x<w; x++) {
-        const d1 = Math.abs(a*x - y) * inv;
-        const d2 = Math.abs(a*x + y - (h - 1)) * inv;
-        const d = Math.min(d1, d2);
-        xField[idx(x,y)] = Math.exp(-(d*d) / (2*sigma2));
-      }
-    }
-  }
-
-  function seedAgents(resetTrails=false) {
-    if (resetTrails) { trailA.fill(0); trailB.fill(0); }
-    agents.length = 0;
-
-    const n = CFG.agentCount;
-    for (let i=0; i<n; i++) {
-      let x, y, tries=0;
-      while (true) {
-        x = (Math.random() * simW) | 0;
-        y = (Math.random() * simH) | 0;
-        const xf = xField[idx(x,y)];
-        if (Math.random() < 0.18 + 0.82*xf || tries++ > 10) break;
-      }
-      agents.push({ x: x + Math.random(), y: y + Math.random(), a: Math.random() * Math.PI * 2 });
-    }
-  }
-
-  function depositAt(f, x, y, amt) {
-    const xi = x | 0, yi = y | 0;
-    if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return;
-    const k = idx(xi, yi);
-    f[k] = Math.min(1.0, f[k] + amt);
-  }
-
-  function sampleField(f, x, y) {
-    const xi = x | 0, yi = y | 0;
-    if (xi < 0 || yi < 0 || xi >= simW || yi >= simH) return 0;
-    return f[idx(xi, yi)];
-  }
-
-  function diffuse(src, dst, mix) {
-    const w=simW, h=simH;
-    for (let y=1; y<h-1; y++) {
-      const row = y*w;
-      for (let x=1; x<w-1; x++) {
-        const k = row + x;
-        const v =
-          src[k] +
-          src[k-1] + src[k+1] +
-          src[k-w] + src[k+w] +
-          src[k-w-1] + src[k-w+1] +
-          src[k+w-1] + src[k+w+1];
-        const blur = v / 9;
-        dst[k] = src[k]*(1-mix) + blur*mix;
-      }
-    }
-    for (let x=0; x<w; x++) { dst[x] = src[x]; dst[x + (h-1)*w] = src[x + (h-1)*w]; }
-    for (let y=0; y<h; y++) { dst[y*w] = src[y*w]; dst[(w-1) + y*w] = src[(w-1) + y*w]; }
-  }
-
-  function inkXLine(amount) {
-    const w=simW, h=simH;
-    for (let y=0; y<h; y++) {
-      for (let x=0; x<w; x++) {
-        const xf = xField[idx(x,y)];
-        if (xf > 0.18) trailA[idx(x,y)] = Math.max(trailA[idx(x,y)], amount * xf);
-      }
-    }
-  }
-
-  function snapToX(x, y) {
-    const w = simW, h = simH;
-    const a = (h - 1) / Math.max(1, (w - 1));
-
-    const y1 = a * x;
-    const y2 = (h - 1) - a * x;
-    const d1 = Math.abs(y - y1);
-    const d2 = Math.abs(y - y2);
-
-    if (d1 < d2) return { x, y: y1 };
-    return { x, y: y2 };
-  }
-
-  function screenToSim(x, y) {
-    return { x: (x / W) * simW, y: (y / H) * simH };
-  }
-
-  function introSeedAtScreen(x, y, strength) {
-    const s = screenToSim(x, y);
-    const sn = snapToX(clamp(s.x,0,simW-1), clamp(s.y,0,simH-1));
-
-    const rr = CFG.introSeedRadiusPx;
-    const rr2 = 2*rr*rr;
-
-    const cx = sn.x, cy = sn.y;
-    const xmin = clamp((cx-rr)|0, 0, simW-1);
-    const xmax = clamp((cx+rr)|0, 0, simW-1);
-    const ymin = clamp((cy-rr)|0, 0, simH-1);
-    const ymax = clamp((cy+rr)|0, 0, simH-1);
-
-    for (let yy=ymin; yy<=ymax; yy++){
-      for (let xx=xmin; xx<=xmax; xx++){
-        const dx = xx - cx, dy = yy - cy;
-        const w = Math.exp(-(dx*dx + dy*dy)/rr2);
-        depositAt(trailA, xx, yy, strength * w);
-      }
-    }
-  }
-
-  function addMouseFood(clientX, clientY, outFactor) {
-    const now = performance.now();
-    const gate = clamp(outFactor, 0, 1);
-    if (gate <= 0) return;
-    const every = CFG.mouseFoodEveryMs + (1-gate)*70;
-    if (now - lastMouseFoodAt < every) return;
-    lastMouseFoodAt = now;
-
-    const el = document.elementFromPoint(clientX, clientY);
-    const a = el && el.closest ? el.closest("a") : null;
-    if (a) return;
-
-    let fx = clamp((clientX / W) * simW, 0, simW-1);
-    let fy = clamp((clientY / H) * simH, 0, simH-1);
-
-    const s = snapToX(fx, fy);
-    fx = clamp(s.x, 0, simW-1);
-    fy = clamp(s.y, 0, simH-1);
-
-    foods.push({ x: fx, y: fy, life: CFG.foodLifeMs, amp: 1.0 });
-    depositAt(trailA, fx, fy, 0.55 * gate);
-  }
-
-  window.addEventListener("pointermove", (e) => {
-    const t = INTRO.t;
-    const outT = (t - (INTRO.durIn + INTRO.durFlash)) / INTRO.durOut;
-    const outFactor = clamp(ease(clamp(outT,0,1)), 0, 1);
-    addMouseFood(e.clientX, e.clientY, outFactor);
-  }, { passive:true });
-
-  window.addEventListener("pointerdown", (e) => {
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    const a = el && el.closest ? el.closest("a") : null;
-    if (a) return;
-
-    let fx = clamp((e.clientX / W) * simW, 0, simW-1);
-    let fy = clamp((e.clientY / H) * simH, 0, simH-1);
-    const s = snapToX(fx, fy);
-    fx = clamp(s.x, 0, simW-1);
-    fy = clamp(s.y, 0, simH-1);
-
-    foods.push({ x: fx, y: fy, life: CFG.foodLifeMs * 1.8, amp: 1.0 });
-    depositAt(trailA, fx, fy, 0.9);
-  }, { passive:true });
-
-  function stepSim(dtMs, simFactor) {
-    const dt = dtMs * simFactor;
-
-    for (let i=foods.length-1; i>=0; i--) {
-      foods[i].life -= dt;
-      if (foods[i].life <= 0) foods.splice(i, 1);
-      else foods[i].amp = foods[i].life / (CFG.foodLifeMs * 1.0);
-    }
-
-    const step = CFG.step * simFactor;
-    const sDist = CFG.sensorDist;
-    const sAng  = CFG.sensorAngle;
-    const turn  = CFG.turnSpeed;
-
-    const xBias = CFG.xBias;
-    const foodStr = CFG.foodStrength;
-
-    for (let i=0; i<agents.length; i++) {
-      const p = agents[i];
-
-      const la = p.a - sAng, ra = p.a + sAng;
-
-      const fx = p.x + Math.cos(p.a) * sDist, fy = p.y + Math.sin(p.a) * sDist;
-      const lx = p.x + Math.cos(la) * sDist, ly = p.y + Math.sin(la) * sDist;
-      const rx = p.x + Math.cos(ra) * sDist, ry = p.y + Math.sin(ra) * sDist;
-
-      let fF = sampleField(trailA, fx, fy);
-      let fL = sampleField(trailA, lx, ly);
-      let fR = sampleField(trailA, rx, ry);
-
-      fF += xBias * sampleField(xField, fx, fy);
-      fL += xBias * sampleField(xField, lx, ly);
-      fR += xBias * sampleField(xField, rx, ry);
-
-      if (foods.length) {
-        let addF=0, addL=0, addR=0;
-        const rr = CFG.foodRadius;
-        const rr2 = 2*rr*rr;
-        for (let j=0; j<foods.length; j++) {
-          const fd = foods[j];
-          const amp = fd.amp;
-
-          const dxF = fx - fd.x, dyF = fy - fd.y;
-          const dxL = lx - fd.x, dyL = ly - fd.y;
-          const dxR = rx - fd.x, dyR = ry - fd.y;
-
-          addF += Math.exp(-(dxF*dxF + dyF*dyF) / rr2) * amp;
-          addL += Math.exp(-(dxL*dxL + dyL*dyL) / rr2) * amp;
-          addR += Math.exp(-(dxR*dxR + dyR*dyR) / rr2) * amp;
+  <script>
+    // ===== Instant i18n (no navigation) + RTL handling + premium micro-fade + text swap animation =====
+    (function(){
+      const I18N = {
+        en: {
+          "nav.about": "About",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contact",
+          "footer.terms": "Terms",
+          "footer.privacy": "Privacy",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "We're working on it — coming back soon.",
+          "cookie.prefs": "Cookie Preferences"
+        },
+        es: {
+          "nav.about": "Acerca de",
+          "nav.verticals": "Verticales",
+          "nav.contact": "Contacto",
+          "footer.terms": "Términos",
+          "footer.privacy": "Privacidad",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estamos trabajando — volvemos pronto.",
+          "cookie.prefs": "Preferencias de cookies"
+        },
+        fr: {
+          "nav.about": "À propos",
+          "nav.verticals": "Verticales",
+          "nav.contact": "Contact",
+          "footer.terms": "CGU",
+          "footer.privacy": "Conf.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Légal",
+          "card.test": "Nous travaillons — de retour bientôt.",
+          "cookie.prefs": "Préférences cookies"
+        },
+        ru: {
+          "nav.about": "О нас",
+          "nav.verticals": "Вертикали",
+          "nav.contact": "Контакты",
+          "footer.terms": "Усл.",
+          "footer.privacy": "Конф.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Право",
+          "card.test": "Мы работаем — скоро вернёмся.",
+          "cookie.prefs": "Настройки cookies"
+        },
+        pt: {
+          "nav.about": "Sobre",
+          "nav.verticals": "Verticais",
+          "nav.contact": "Contato",
+          "footer.terms": "Termos",
+          "footer.privacy": "Privacidade",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estamos a trabalhar — voltamos em breve.",
+          "cookie.prefs": "Preferências de cookies"
+        },
+        de: {
+          "nav.about": "Über uns",
+          "nav.verticals": "Vertikalen",
+          "nav.contact": "Kontakt",
+          "footer.terms": "AGB",
+          "footer.privacy": "DSGVO",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Impressum",
+          "card.test": "Wir arbeiten daran — bald zurück.",
+          "cookie.prefs": "Cookie-Einstellungen"
+        },
+        zh: {
+          "nav.about": "关于",
+          "nav.verticals": "领域",
+          "nav.contact": "联系",
+          "footer.terms": "条款",
+          "footer.privacy": "隐私",
+          "footer.cookies": "Cookies",
+          "footer.legal": "法律",
+          "card.test": "我们正在建设中,敬请期待。",
+          "cookie.prefs": "Cookie 偏好设置"
+        },
+        hi: {
+          "nav.about": "परिचय",
+          "nav.verticals": "वर्टिकल्स",
+          "nav.contact": "संपर्क",
+          "footer.terms": "शर्तें",
+          "footer.privacy": "गोपनीयता",
+          "footer.cookies": "Cookies",
+          "footer.legal": "कानूनी",
+          "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।",
+          "cookie.prefs": "कुकी प्राथमिकताएँ"
+        },
+        ar: {
+          "nav.about": "حول",
+          "nav.verticals": "القطاعات",
+          "nav.contact": "تواصل",
+          "footer.terms": "الشروط",
+          "footer.privacy": "الخصوصية",
+          "footer.cookies": "الكوكيز",
+          "footer.legal": "قانوني",
+          "card.test": "نعمل على ذلك — نعود قريبًا.",
+          "cookie.prefs": "تفضيلات الكوكيز"
+        },
+        ja: {
+          "nav.about": "概要",
+          "nav.verticals": "領域",
+          "nav.contact": "連絡先",
+          "footer.terms": "規約",
+          "footer.privacy": "プライバシー",
+          "footer.cookies": "Cookies",
+          "footer.legal": "法的",
+          "card.test": "現在準備中です。まもなく公開します。",
+          "cookie.prefs": "Cookie設定"
+        },
+        ca: {
+          "nav.about": "Sobre",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contacte",
+          "footer.terms": "Termes",
+          "footer.privacy": "Privacitat",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estem treballant — tornem aviat.",
+          "cookie.prefs": "Preferències de cookies"
+        },
+        id: {
+          "nav.about": "Tentang",
+          "nav.verticals": "Vertikal",
+          "nav.contact": "Kontak",
+          "footer.terms": "S&K",
+          "footer.privacy": "Priv.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Kami sedang mengerjakan — segera kembali.",
+          "cookie.prefs": "Preferensi cookies"
         }
-        fF += foodStr * addF;
-        fL += foodStr * addL;
-        fR += foodStr * addR;
+      };
+
+      const RTL_LANGS = new Set(["ar"]);
+      const DEFAULT_LANG = "en";
+      const storageKey = "mx_lang";
+
+      function getLang(){
+        return localStorage.getItem(storageKey) || DEFAULT_LANG;
+      }
+      function setLang(lang){
+        localStorage.setItem(storageKey, lang);
       }
 
-      if (fF > fL && fF > fR) {
-      } else if (fL > fR) {
-        p.a -= turn;
-      } else if (fR > fL) {
-        p.a += turn;
-      } else {
-        p.a += (Math.random() - 0.5) * 0.15;
+      function applyLang(lang){
+        document.body.classList.add("is-i18n-switching");
+
+        const dict = I18N[lang] || I18N[DEFAULT_LANG];
+
+        const html = document.documentElement;
+        html.lang = lang;
+        html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
+
+        const switchEl = document.getElementById("lang-switch");
+        switchEl?.classList.remove("is-open");
+        switchEl?.classList.remove("open-right");
+
+        const shouldScramble = (text) => {
+          if (!text) return false;
+          return /^[\u0000-\u02FF\u1E00-\u1EFF0-9\s\-\—\–\.\,\!\?\:\;\'\"\(\)\[\]\/\&\+%#@€$£]+$/.test(text);
+        };
+
+        const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const scrambleText = (el, finalText, durationMs = 180) => {
+          const start = performance.now();
+          const base = finalText;
+
+          const tick = (t) => {
+            const p = Math.min(1, (t - start) / durationMs);
+            const reveal = Math.floor(p * base.length);
+
+            let out = "";
+            for (let i = 0; i < base.length; i++){
+              if (i < reveal) out += base[i];
+              else {
+                const ch = SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+                out += (base[i] === " ") ? " " : ch;
+              }
+            }
+            el.textContent = out;
+
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = base;
+          };
+          requestAnimationFrame(tick);
+        };
+
+        const nodes = Array.from(document.querySelectorAll("[data-i18n]"));
+        nodes.forEach(el => el.classList.add("mx-i18n-out"));
+
+        setTimeout(() => {
+          nodes.forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            if (!key) return;
+            const val = dict[key] ?? I18N[DEFAULT_LANG][key];
+            if (typeof val !== "string") return;
+
+            if (shouldScramble(val)) scrambleText(el, val, 180);
+            else el.textContent = val;
+
+            el.classList.remove("mx-i18n-out");
+            el.classList.add("mx-i18n-in");
+          });
+
+          const gear = document.getElementById("cookiePreferencesGear");
+          if (gear){
+            const tip = dict["cookie.prefs"] ?? I18N[DEFAULT_LANG]["cookie.prefs"];
+            gear.setAttribute("data-tip", tip);
+            gear.setAttribute("aria-label", tip);
+          }
+
+          setTimeout(() => {
+            nodes.forEach(el => el.classList.remove("mx-i18n-in"));
+          }, 220);
+
+          requestAnimationFrame(() => {
+            document.body.classList.remove("is-i18n-switching");
+          });
+        }, 160);
       }
 
-      p.x += Math.cos(p.a) * step;
-      p.y += Math.sin(p.a) * step;
+      applyLang(getLang());
 
-      if (p.x < 0) p.x += simW; else if (p.x >= simW) p.x -= simW;
-      if (p.y < 0) p.y += simH; else if (p.y >= simH) p.y -= simH;
+      document.querySelectorAll(".lang-pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
+          setLang(lang);
+          applyLang(lang);
+        });
+      });
+    })();
 
-      depositAt(trailA, p.x, p.y, CFG.deposit * simFactor);
-    }
+    // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit (iPad-safe placement) =====
+    (function(){
+      const switchEl = document.getElementById('lang-switch');
+      const railEl   = document.getElementById('lang-rail');
+      if (!switchEl || !railEl) return;
 
-    const d = 1 - (1 - CFG.decay) * simFactor;
-    for (let k=0; k<trailA.length; k++) trailA[k] *= d;
+      let openTimer = null;
+      let closeTimer = null;
+      let locked = false;
 
-    if ((frame % CFG.diffuseEvery) === 0) {
-      diffuse(trailA, trailB, CFG.diffuseMix);
-      const tmp = trailA; trailA = trailB; trailB = tmp;
-    }
+      const OPEN_DELAY_MS  = 500;
+      const CLOSE_DELAY_MS = 3000;
 
-    frame++;
-  }
-
-  function renderMaze() {
-    const n = simW * simH;
-
-    for (let k=0, p=0; k<n; k++, p+=4) {
-      const t = trailA[k];
-      const v = t <= 0 ? 0 : Math.pow(clamp(t, 0, 1), 0.62);
-
-      const xf = xField[k];
-      const c = clamp(v * (0.92 + 0.22*xf), 0, 1);
-
-      const r = clamp(  10 + c*100*0.75, 0, 255) | 0;
-      const g = clamp(  40 + c*240*1.00, 0, 255) | 0;
-      const b = clamp(  60 + c*255*1.10, 0, 255) | 0;
-
-      const crush = c < CFG.crush ? 0 : 1;
-      img8[p+0] = crush ? r : 0;
-      img8[p+1] = crush ? g : 0;
-      img8[p+2] = crush ? b : 0;
-      img8[p+3] = 255;
-    }
-
-    sctx.putImageData(imgData, 0, 0);
-
-    vctx.imageSmoothingEnabled = true;
-    vctx.fillStyle = "#000";
-    vctx.fillRect(0,0,W,H);
-    vctx.drawImage(simCanvas, 0, 0, simW, simH, 0, 0, W, H);
-  }
-
-  function drawIntro(now) {
-    const t = now - INTRO.start;
-    const T1 = INTRO.durIn;
-    const T2 = INTRO.durFlash;
-    const T3 = INTRO.durOut;
-
-    vctx.fillStyle = "#000";
-    vctx.fillRect(0,0,W,H);
-
-    const cx = W/2, cy = H/2;
-
-    function strokeX(alpha, w1, w2) {
-      vctx.save();
-      vctx.globalCompositeOperation = "lighter";
-      vctx.lineCap = "round";
-
-      vctx.strokeStyle = `rgba(255,255,255,${alpha*0.35})`;
-      vctx.lineWidth = w2;
-      vctx.beginPath();
-      vctx.moveTo(0,0); vctx.lineTo(W,H);
-      vctx.moveTo(W,0); vctx.lineTo(0,H);
-      vctx.stroke();
-
-      vctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-      vctx.lineWidth = w1;
-      vctx.beginPath();
-      vctx.moveTo(0,0); vctx.lineTo(W,H);
-      vctx.moveTo(W,0); vctx.lineTo(0,H);
-      vctx.stroke();
-
-      vctx.restore();
-    }
-
-    const corners = [
-      {x:0,y:0}, {x:W,y:0}, {x:0,y:H}, {x:W,y:H}
-    ];
-
-    if (t < T1) {
-      const base = t / T1;
-      const ghost = 0.04 + 0.08*ease(base);
-
-      vctx.save();
-      vctx.globalCompositeOperation = "lighter";
-      vctx.lineCap = "round";
-
-      vctx.strokeStyle = `rgba(255,255,255,${ghost})`;
-      vctx.lineWidth = IS_MOBILE ? 3.2 : 4.0;
-      vctx.beginPath();
-      vctx.moveTo(0,0); vctx.lineTo(W,H);
-      vctx.moveTo(W,0); vctx.lineTo(0,H);
-      vctx.stroke();
-
-      for (let i=0;i<corners.length;i++){
-        const o = corners[i];
-
-        const p0 = clamp(base - i*0.07, 0, 1);
-        const p = easeInOut(p0);
-
-        const dirx = cx - o.x, diry = cy - o.y;
-        const len = Math.hypot(dirx, diry) || 1;
-        const nx = -diry / len, ny = dirx / len;
-
-        const wobAmp = (1 - p) * (Math.min(W,H) * 0.020);
-        const w = Math.sin(p*8 + i*1.6) + 0.55*Math.sin(p*17 + i*2.2);
-
-        const hx = lerp(o.x, cx, p) + nx * wobAmp * w;
-        const hy = lerp(o.y, cy, p) + ny * wobAmp * w;
-
-        const grad = vctx.createLinearGradient(o.x, o.y, hx, hy);
-        grad.addColorStop(0, `rgba(255,255,255,${0.10*p})`);
-        grad.addColorStop(0.7, `rgba(255,255,255,${0.42*p})`);
-        grad.addColorStop(1, `rgba(255,255,255,${0.80})`);
-
-        vctx.strokeStyle = grad;
-        vctx.lineWidth = (IS_MOBILE ? 2.6 : 3.2) + 1.2*p;
-        vctx.beginPath();
-        vctx.moveTo(o.x, o.y);
-        vctx.lineTo(hx, hy);
-        vctx.stroke();
-
-        const seed = CFG.introSeed * (0.35 + 0.65*p) * (i === 0 ? 1.0 : 0.92);
-        introSeedAtScreen(hx, hy, seed);
+      function clearTimers(){
+        if (openTimer)  { clearTimeout(openTimer);  openTimer = null; }
+        if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       }
 
-      vctx.restore();
+      function ensureStartVisible(){
+        // EN is the first item -> guarantee it never starts clipped
+        railEl.scrollLeft = 0;
+      }
 
-      strokeX(0.12 + 0.16*ease(base), IS_MOBILE ? 2.4 : 2.8, IS_MOBILE ? 10 : 12);
-      inkXLine(0.22 + 0.10*ease(base));
+      function placeRailSmart(){
+        // Reset forced placement
+        switchEl.classList.remove('open-right');
 
-      return;
-    }
+        const vw = window.innerWidth || document.documentElement.clientWidth;
+        const margin = 10;
 
-    const t2 = t - T1;
-    if (t2 < T2) {
-      const flashP = t2 / T2;
-      const intensity = Math.sin(flashP * Math.PI);
+        // Measure current placement (after is-open is applied)
+        const rect = railEl.getBoundingClientRect();
 
-      strokeX(0.85, IS_MOBILE ? 4.0 : 5.2, IS_MOBILE ? 14.0 : 18.0);
+        // If it clips on the left, flip to the right
+        if (rect.left < margin){
+          switchEl.classList.add('open-right');
+        }
 
-      vctx.save();
-      vctx.globalCompositeOperation = "lighter";
+        // Re-check: if now it clips on the right, revert back
+        const rect2 = railEl.getBoundingClientRect();
+        if (rect2.right > (vw - margin)){
+          switchEl.classList.remove('open-right');
+        }
+      }
 
-      const rr = Math.min(W,H) * (0.35 + 0.25*intensity);
-      const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
-      g.addColorStop(0, `rgba(255,255,255,${0.95*intensity})`);
-      g.addColorStop(0.15, `rgba(255,255,255,${0.75*intensity})`);
-      g.addColorStop(0.35, `rgba(255,255,255,${0.45*intensity})`);
-      g.addColorStop(0.65, `rgba(255,255,255,${0.15*intensity})`);
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      vctx.fillStyle = g;
-      vctx.beginPath();
-      vctx.arc(cx,cy,rr,0,Math.PI*2);
-      vctx.fill();
+      function openRail(){
+        switchEl.classList.add('is-open');
 
-      vctx.restore();
+        requestAnimationFrame(() => {
+          ensureStartVisible();
+          placeRailSmart();
+        });
+      }
 
-      inkXLine(0.95 * intensity);
+      function closeRail(){
+        locked = false;
+        switchEl.classList.remove('is-open');
+        switchEl.classList.remove('open-right');
+      }
 
-      introSeedAtScreen(cx, cy, 0.90 * intensity);
-      return;
-    }
+      function scheduleOpen(){
+        clearTimers();
+        openTimer = setTimeout(() => openRail(), OPEN_DELAY_MS);
+      }
+      function scheduleClose(){
+        clearTimers();
+        closeTimer = setTimeout(() => closeRail(), CLOSE_DELAY_MS);
+      }
 
-    const t3 = t2 - T2;
-    const p3 = ease(clamp(t3 / T3, 0, 1));
+      switchEl.addEventListener('pointerenter', () => {
+        if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+        if (switchEl.classList.contains('is-open')) return;
+        scheduleOpen();
+      });
 
-    renderMaze();
+      switchEl.addEventListener('pointerleave', () => {
+        if (!switchEl.classList.contains('is-open')) { clearTimers(); return; }
+        if (locked) return;
+        scheduleClose();
+      });
 
-    const fadeAlpha = (1 - p3);
-    strokeX(fadeAlpha * 0.30, IS_MOBILE ? 3.4 : 4.2, IS_MOBILE ? 11.0 : 14.0);
+      railEl.addEventListener('pointerenter', () => {
+        locked = true;
+        clearTimers();
+        openRail();
+      });
 
-    if (p3 < 0.25) {
-      for (let k=0; k<trailA.length; k++) trailA[k] *= 0.985;
-    }
-  }
+      railEl.addEventListener('pointerleave', () => {
+        locked = false;
+        scheduleClose();
+      });
 
-  function loop(now) {
-    const dt = clamp(now - tPrev, 8, 40);
-    tPrev = now;
+      const trigger = switchEl.querySelector('.lang-trigger');
+      trigger?.addEventListener('click', (e) => {
+        e.preventDefault();
+        clearTimers();
+        if (switchEl.classList.contains('is-open')) closeRail();
+        else openRail();
+      });
 
-    const t = INTRO.t;
-    let simFactor = 1;
+      // iPad rotates a lot -> keep it inside viewport if open
+      window.addEventListener('resize', () => {
+        if (!switchEl.classList.contains('is-open')) return;
+        requestAnimationFrame(() => {
+          ensureStartVisible();
+          placeRailSmart();
+        });
+      });
+    })();
 
-    if (t < INTRO.durIn) {
-      const p = ease(clamp(t / INTRO.durIn, 0, 1));
-      simFactor = 0.45 + 0.55*p;
-    } else if (t < INTRO.durIn + INTRO.durFlash) {
-      const p = Math.sin(((t - INTRO.durIn) / INTRO.durFlash) * Math.PI);
-      simFactor = 0.95 + 0.35*p;
-    } else if (t < INTRO.total) {
-      const p = ease(clamp((t - (INTRO.durIn + INTRO.durFlash)) / INTRO.durOut, 0, 1));
-      simFactor = 0.75 + 0.25*p;
-    }
+    // ===== Verticals: click only (no hover), close outside / Escape =====
+    (function(){
+      const v = document.getElementById('verticals');
+      if (!v) return;
 
-    stepSim(dt, simFactor);
+      function setOpen(isOpen){
+        v.classList.toggle('is-open', isOpen);
+        v.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      }
+      function isOpen(){ return v.classList.contains('is-open'); }
 
-    if (INTRO.active) drawIntro(now);
-    else renderMaze();
+      v.addEventListener('click', (e) => {
+        const a = e.target.closest('a');
+        if (a) return;
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(!isOpen());
+      });
 
-    requestAnimationFrame(loop);
-  }
+      document.addEventListener('click', (e) => {
+        if (!v.contains(e.target)) setOpen(false);
+      });
 
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "r" || e.key === "R") {
-      foods.length = 0;
-      seedAgents(true);
-      inkXLine(CFG.xInk);
-      INTRO.start = performance.now();
-    }
-  });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setOpen(false);
+      });
 
-  resize();
-  requestAnimationFrame(loop);
-})();
-</script>
+      v.querySelectorAll('a').forEach(a=>{
+        a.addEventListener('click', ()=> setOpen(false));
+      });
+    })();
+
+    // Cookie preferences gear: hook to your real consent modal
+    (function(){
+      const gear = document.getElementById('cookiePreferencesGear');
+      if (!gear) return;
+      gear.addEventListener('click', () => {
+        alert('Open Cookie Preferences (hook to your consent modal).');
+      });
+    })();
+  </script>
 </body>
 </html>
