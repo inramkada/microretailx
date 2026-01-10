@@ -60,9 +60,8 @@
                    "Liberation Mono", "Courier New", monospace;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
-      font-weight:400; /* no bold */
+      font-weight:400;
 
-      /* Premium micro-fade on language/dir changes */
       transition: opacity 0.18s ease-in-out;
     }
     body.is-i18n-switching{ opacity:0.92; }
@@ -169,7 +168,7 @@
       gap:10px;
 
       padding:0;
-      padding-top:2px; /* ✅ separación leve arriba (BIOTECH no toca borde) */
+      padding-top:2px;
       border:0;
       background:transparent;
       border-radius:0;
@@ -186,7 +185,6 @@
       -webkit-backdrop-filter:none;
     }
 
-    /* (opcional premium) micro-margen solo al primer item */
     .verticals-menu .v-item:first-child{ margin-top:2px; }
 
     .verticals.is-open .verticals-menu{
@@ -250,10 +248,13 @@
     .globe{ width:18px; height:18px; display:block; }
 
     .lang-rail{
+      /* viewport clamp via CSS var (set by JS) */
+      --rail-shift: 0px;
+
       position:absolute;
-      right: calc(100% + 10px); /* open LEFT (towards inside) */
+      right: calc(100% + 10px);
       top: 50%;
-      transform: translateY(-50%);
+      transform: translateY(-50%) translateX(var(--rail-shift));
 
       display:flex;
       align-items:center;
@@ -276,8 +277,11 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
 
-      /* Premium rail transition (avoids "blink") */
       transition: opacity 0.4s ease, transform 0.2s ease;
+
+      /* iOS: make it explicit that this is horizontal scrolling */
+      touch-action: pan-x;
+      -webkit-overflow-scrolling: touch;
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
@@ -288,13 +292,13 @@
       pointer-events:auto;
     }
 
-    /* iPad/tablet fix: if rail would clip on the left, open to the RIGHT of the globe */
+    /* If rail would clip, we can open on the other side (kept for flexibility) */
     .lang-switch.open-right .lang-rail{
       right:auto;
       left: calc(100% + 10px);
     }
 
-    /* RTL: mirror the same idea */
+    /* RTL: mirror the idea */
     [dir="rtl"] .lang-switch.open-right .lang-rail{
       left:auto;
       right: calc(100% + 10px);
@@ -322,23 +326,17 @@
       cursor:pointer;
       user-select:none;
 
-      /* CAMBIO: scale en lugar de translateX para iOS */
-      transform: scale(0.88);
+      transform: translateX(10px);
       opacity: 0;
-      transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), 
-                  opacity 240ms ease, 
-                  background 160ms ease, 
-                  border-color 160ms ease, 
-                  color 160ms ease;
-      will-change: transform, opacity;
+      transition: transform 220ms ease, opacity 220ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .lang-switch.is-open .lang-pill{
-      transform: scale(1);
+      transform: translateX(0);
       opacity: 1;
     }
 
-    /* stagger (wave) */
     .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
     .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
     .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
@@ -434,7 +432,7 @@
     .copyright{
       font-size:var(--copy-size);
       letter-spacing:var(--copy-track);
-      opacity:.58; /* raised for accessibility */
+      opacity:.58;
       text-align:center;
       line-height:1.3;
       font-weight:400;
@@ -505,7 +503,7 @@
       filter: blur(0);
     }
 
-    /* ===== RTL (Arabic): flip layout but keep rail opening LEFT (towards inside) ===== */
+    /* ===== RTL ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
     [dir="rtl"] nav{ flex-direction:row-reverse; }
     [dir="rtl"] .navlink::after{ transform-origin:right; }
@@ -514,7 +512,6 @@
     [dir="rtl"] .lang-rail{
       left:auto;
       right: calc(100% + 10px);
-      direction: ltr; /* CAMBIO: Keep pills LTR order */
     }
 
     [dir="rtl"] .verticals-menu{
@@ -524,6 +521,9 @@
       text-align:right;
     }
     [dir="rtl"] .v-item{ align-items:flex-end; }
+
+    [dir="rtl"] .lang-pill{ transform: translateX(10px); }
+    [dir="rtl"] .lang-switch.is-open .lang-pill{ transform: translateX(0); }
 
     @media (max-width: 640px){
       .topbar{
@@ -537,14 +537,13 @@
         right:auto;
         left:0;
         top:100%;
-        transform: translateY(10px);
+        transform: translateY(10px) translateX(var(--rail-shift));
         max-width: min(92vw, 520px);
       }
 
       [dir="rtl"] .lang-rail{
         left:auto;
         right:0;
-        direction: ltr; /* CAMBIO: Keep pills LTR on mobile */
       }
     }
   </style>
@@ -606,7 +605,7 @@
 
     <main>
       <section class="card">
-        <p data-i18n="card.test">We're working on it — coming back soon.</p>
+        <p data-i18n="card.test">We’re working on it — coming back soon.</p>
       </section>
     </main>
 
@@ -653,7 +652,7 @@
           "footer.privacy": "Privacy",
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
-          "card.test": "We're working on it — coming back soon.",
+          "card.test": "We’re working on it — coming back soon.",
           "cookie.prefs": "Cookie Preferences"
         },
         es: {
@@ -719,7 +718,7 @@
           "footer.privacy": "隐私",
           "footer.cookies": "Cookies",
           "footer.legal": "法律",
-          "card.test": "我们正在建设中,敬请期待。",
+          "card.test": "我们正在建设中，敬请期待。",
           "cookie.prefs": "Cookie 偏好设置"
         },
         hi: {
@@ -871,25 +870,39 @@
 
       document.querySelectorAll(".lang-pill").forEach(btn => {
         btn.addEventListener("click", () => {
-          // CAMBIO MÍNIMO: Esperar 150ms para que el scroll se estabilice
-          const railEl = document.getElementById('lang-rail');
-          const scrollBefore = railEl ? railEl.scrollLeft : 0;
-          
-          setTimeout(() => {
-            const scrollAfter = railEl ? railEl.scrollLeft : 0;
-            
-            // Solo cambiar idioma si el scroll no cambió (no hubo momentum)
-            if (Math.abs(scrollAfter - scrollBefore) < 5) {
-              const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
-              setLang(lang);
-              applyLang(lang);
-            }
-          }, 150);
+          const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
+          setLang(lang);
+          applyLang(lang);
         });
       });
     })();
 
-    // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit (iPad-safe placement) =====
+    // ===== iOS: prevent "click after horizontal scroll" inside the rail =====
+    (function(){
+      const rail = document.getElementById("lang-rail");
+      if (!rail) return;
+
+      let startX = 0;
+      let dragged = false;
+
+      rail.addEventListener("pointerdown", (e) => {
+        startX = e.clientX;
+        dragged = false;
+      });
+
+      rail.addEventListener("pointermove", (e) => {
+        if (Math.abs(e.clientX - startX) > 8) dragged = true;
+      });
+
+      // capture phase: kill the click before it reaches buttons
+      rail.addEventListener("click", (e) => {
+        if (!dragged) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }, true);
+    })();
+
+    // ===== Language rail timers + smart placement + viewport clamp (RTL + iPhone SE safe) =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
@@ -902,43 +915,77 @@
       const OPEN_DELAY_MS  = 500;
       const CLOSE_DELAY_MS = 3000;
 
+      let firstOpen = true;
+
       function clearTimers(){
         if (openTimer)  { clearTimeout(openTimer);  openTimer = null; }
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       }
 
-      function ensureStartVisible(){
-        // CAMBIO: Reset scroll SIEMPRE que se abra
+      function ensureStartVisibleOnce(){
+        if (!firstOpen) return;
         railEl.scrollLeft = 0;
+        firstOpen = false;
+      }
+
+      function resetShift(){
+        railEl.style.setProperty('--rail-shift', '0px');
+      }
+
+      function clampRailIntoViewport(){
+        // measure and shift rail horizontally so it stays inside viewport
+        const vw = window.innerWidth || document.documentElement.clientWidth;
+        const margin = 8;
+
+        resetShift();
+
+        // measure after resetting shift
+        const rect = railEl.getBoundingClientRect();
+        let shift = 0;
+
+        if (rect.left < margin){
+          shift = (margin - rect.left);
+        } else if (rect.right > (vw - margin)){
+          shift = - (rect.right - (vw - margin));
+        }
+
+        // apply shift if needed
+        if (shift !== 0){
+          railEl.style.setProperty('--rail-shift', `${Math.round(shift)}px`);
+        }
       }
 
       function placeRailSmart(){
-        // Reset forced placement
+        // optional: flip side if it's *way* off, then clamp precisely
         switchEl.classList.remove('open-right');
+        resetShift();
 
         const vw = window.innerWidth || document.documentElement.clientWidth;
-        const margin = 10;
+        const margin = 8;
 
-        // Measure current placement (after is-open is applied)
-        const rect = railEl.getBoundingClientRect();
+        // measure current side
+        let rect = railEl.getBoundingClientRect();
 
-        // If it clips on the left, flip to the right
-        if (rect.left < margin){
+        // If it clips hard on the left, try open-right
+        if (rect.left < -margin){
           switchEl.classList.add('open-right');
+          rect = railEl.getBoundingClientRect();
         }
 
-        // Re-check: if now it clips on the right, revert back
-        const rect2 = railEl.getBoundingClientRect();
-        if (rect2.right > (vw - margin)){
+        // If it clips hard on the right, revert
+        if (rect.right > vw + margin){
           switchEl.classList.remove('open-right');
         }
+
+        // final clamp (works for RTL/LTR + any screen width)
+        clampRailIntoViewport();
       }
 
       function openRail(){
         switchEl.classList.add('is-open');
 
         requestAnimationFrame(() => {
-          ensureStartVisible();
+          ensureStartVisibleOnce();
           placeRailSmart();
         });
       }
@@ -947,6 +994,7 @@
         locked = false;
         switchEl.classList.remove('is-open');
         switchEl.classList.remove('open-right');
+        resetShift();
       }
 
       function scheduleOpen(){
@@ -989,11 +1037,9 @@
         else openRail();
       });
 
-      // iPad rotates a lot -> keep it inside viewport if open
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
         requestAnimationFrame(() => {
-          ensureStartVisible();
           placeRailSmart();
         });
       });
