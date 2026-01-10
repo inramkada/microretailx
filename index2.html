@@ -878,14 +878,49 @@
 
       applyLang(getLang());
 
-      // Track if user is actively scrolling
+      // Better scroll vs click detection (iPhone/iPad fix)
       let isScrolling = false;
       let scrollTimeout = null;
+      let startX = 0;
+      let hasMoved = false;
+
+      const railEl = document.getElementById('lang-rail');
+      
+      if (railEl) {
+        // Track scroll events
+        railEl.addEventListener('scroll', () => {
+          isScrolling = true;
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+          }, 50);
+        }, { passive: true });
+
+        // Track pointer movement to distinguish scroll from click
+        railEl.addEventListener('pointerdown', (e) => {
+          startX = e.clientX;
+          hasMoved = false;
+        });
+
+        railEl.addEventListener('pointermove', (e) => {
+          if (Math.abs(e.clientX - startX) > 5) {
+            hasMoved = true;
+            isScrolling = true;
+          }
+        });
+
+        railEl.addEventListener('pointerup', () => {
+          setTimeout(() => {
+            hasMoved = false;
+            isScrolling = false;
+          }, 50);
+        });
+      }
 
       document.querySelectorAll(".lang-pill").forEach(btn => {
         btn.addEventListener("click", (e) => {
-          // CRITICAL: Ignore clicks during scroll momentum (iPhone fix)
-          if (isScrolling) {
+          // Block clicks during scroll or drag
+          if (isScrolling || hasMoved) {
             e.preventDefault();
             e.stopPropagation();
             return;
@@ -896,18 +931,6 @@
           applyLang(lang);
         });
       });
-
-      // Detect scrolling state
-      const railEl = document.getElementById('lang-rail');
-      if (railEl) {
-        railEl.addEventListener('scroll', () => {
-          isScrolling = true;
-          clearTimeout(scrollTimeout);
-          scrollTimeout = setTimeout(() => {
-            isScrolling = false;
-          }, 150); // 150ms debounce
-        });
-      }
     })();
 
     // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit (iPad-safe placement) =====
