@@ -248,7 +248,6 @@
     .globe{ width:18px; height:18px; display:block; }
 
     .lang-rail{
-      /* viewport clamp via CSS var (set by JS) */
       --rail-shift: 0px;
 
       position:absolute;
@@ -279,7 +278,6 @@
 
       transition: opacity 0.4s ease, transform 0.2s ease;
 
-      /* iOS: make it explicit that this is horizontal scrolling */
       touch-action: pan-x;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
@@ -293,13 +291,11 @@
       pointer-events:auto;
     }
 
-    /* If rail would clip, we can open on the other side (kept for flexibility) */
     .lang-switch.open-right .lang-rail{
       right:auto;
       left: calc(100% + 10px);
     }
 
-    /* RTL: mirror the idea */
     [dir="rtl"] .lang-switch.open-right .lang-rail{
       left:auto;
       right: calc(100% + 10px);
@@ -563,7 +559,7 @@
        8 idiomas: EN ZH ES PT RU FR DE JA
        ========================================================= */
     html.mx-ar-basic .lang-rail{
-      overflow-x: auto !important;         /* sigue horizontal como siempre */
+      overflow-x: auto !important;
       overflow-y: hidden !important;
       white-space: nowrap !important;
 
@@ -928,44 +924,50 @@
         }, 160);
       }
 
+      // Expose applyLang to the robust rail handler below
+      window.__mxApplyLang = applyLang;
+
       applyLang(getLang());
 
-      document.querySelectorAll(".lang-pill").forEach(btn => {
-        btn.addEventListener("click", () => {
+      // ===== Robust tap selection inside the rail (iOS-safe) =====
+      (function(){
+        const rail = document.getElementById("lang-rail");
+        if (!rail) return;
+
+        let downX = 0, downY = 0;
+        let dragging = false;
+
+        rail.addEventListener("pointerdown", (e) => {
+          downX = e.clientX; downY = e.clientY;
+          dragging = false;
+        }, { passive: true });
+
+        rail.addEventListener("pointermove", (e) => {
+          if (Math.abs(e.clientX - downX) > 8 || Math.abs(e.clientY - downY) > 8) dragging = true;
+        }, { passive: true });
+
+        rail.addEventListener("pointerup", (e) => {
+          if (dragging) return;
+
+          const el = document.elementFromPoint(e.clientX, e.clientY);
+          const btn = el && el.closest ? el.closest(".lang-pill") : null;
+          if (!btn || !rail.contains(btn)) return;
+
           const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
           setLang(lang);
-          applyLang(lang);
+          window.__mxApplyLang(lang);
 
-          // iOS: evita auto-scroll por foco tras click
           btn.blur();
           if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-        });
-      });
-    })();
+        }, { passive: true });
 
-    // ===== iOS: prevent "click after horizontal scroll" inside the rail =====
-    (function(){
-      const rail = document.getElementById("lang-rail");
-      if (!rail) return;
+        // kill ghost click
+        rail.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }, true);
+      })();
 
-      let startX = 0;
-      let dragged = false;
-
-      rail.addEventListener("pointerdown", (e) => {
-        startX = e.clientX;
-        dragged = false;
-      });
-
-      rail.addEventListener("pointermove", (e) => {
-        if (Math.abs(e.clientX - startX) > 8) dragged = true;
-      });
-
-      // capture phase: kill the click before it reaches buttons
-      rail.addEventListener("click", (e) => {
-        if (!dragged) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-      }, true);
     })();
 
     // ===== Language rail timers + smart placement + viewport clamp =====
@@ -1095,7 +1097,6 @@
         if (switchEl.classList.contains('is-open')) closeRail();
         else openRail();
 
-        // iOS: evita auto-scroll por foco
         trigger.blur();
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       });
