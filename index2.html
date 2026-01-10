@@ -547,17 +547,35 @@
       }
     }
 
+    /* ==========================
+       ✅ iOS RTL: evitar empujón lateral del viewport al abrir el rail
+       ========================== */
+    html[dir="rtl"], body[dir="rtl"], [dir="rtl"] body{
+      overflow-x: hidden !important;
+    }
+    [dir="rtl"] .page{
+      overflow-x: clip;
+    }
+
     /* =========================================================
-       ✅ AR BASIC MODE (solo en árabe): EN ZH ES RU PT, sin scroll
-       (El resto de idiomas sigue igual en LTR/otros idiomas)
+       ✅ SOLO EN ÁRABE: 8 idiomas, 2 filas, SIN scroll horizontal
+       EN ZH ES PT RU FR DE JA
+       (El resto de idiomas sigue igual en otros idiomas)
        ========================================================= */
     html.mx-ar-basic .lang-rail{
       overflow-x: hidden !important;
-      white-space: nowrap;
+      overflow-y: hidden;
+      white-space: normal !important;
+
       direction: ltr;
       unicode-bidi: isolate;
-      padding: 5px 6px !important;
-      gap: 6px !important;
+
+      display: flex;
+      flex-wrap: wrap !important;
+      gap: 6px 6px !important;
+
+      padding: 6px 8px !important;
+      max-width: min(92vw, 520px);
     }
 
     html.mx-ar-basic .lang-rail .lang-pill{
@@ -567,8 +585,11 @@
     html.mx-ar-basic .lang-rail .lang-pill[data-lang="en"],
     html.mx-ar-basic .lang-rail .lang-pill[data-lang="zh"],
     html.mx-ar-basic .lang-rail .lang-pill[data-lang="es"],
+    html.mx-ar-basic .lang-rail .lang-pill[data-lang="pt"],
     html.mx-ar-basic .lang-rail .lang-pill[data-lang="ru"],
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="pt"]{
+    html.mx-ar-basic .lang-rail .lang-pill[data-lang="fr"],
+    html.mx-ar-basic .lang-rail .lang-pill[data-lang="de"],
+    html.mx-ar-basic .lang-rail .lang-pill[data-lang="ja"]{
       display: inline-flex !important;
     }
 
@@ -577,6 +598,8 @@
       padding: 0 8px !important;
       font-size: 10px !important;
       letter-spacing: .10em !important;
+      transform: none !important;
+      opacity: 1 !important;
     }
   </style>
 </head>
@@ -830,7 +853,7 @@
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 
-        // ✅ SOLO EN ÁRABE: activar modo básico (EN ZH ES RU PT) para evitar el baile iOS RTL
+        // ✅ SOLO EN ÁRABE: activar modo estable (8 idiomas + wrap) para iOS
         html.classList.toggle("mx-ar-basic", lang === "ar");
         if (lang === "ar"){
           const railEl = document.getElementById("lang-rail");
@@ -912,6 +935,10 @@
           const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
           setLang(lang);
           applyLang(lang);
+
+          // iOS: evita auto-scroll por foco tras click
+          btn.blur();
+          if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
         });
       });
     })();
@@ -941,7 +968,7 @@
       }, true);
     })();
 
-    // ===== Language rail timers + smart placement + viewport clamp (RTL + iPhone SE safe-ish) =====
+    // ===== Language rail timers + smart placement + viewport clamp =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
@@ -1064,8 +1091,13 @@
       trigger?.addEventListener('click', (e) => {
         e.preventDefault();
         clearTimers();
+
         if (switchEl.classList.contains('is-open')) closeRail();
         else openRail();
+
+        // iOS: evita auto-scroll por foco
+        trigger.blur();
+        if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       });
 
       window.addEventListener('resize', () => {
