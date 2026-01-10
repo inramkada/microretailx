@@ -239,8 +239,11 @@
       color:#fff;
       line-height:1;
       border-radius:10px;
+      -webkit-user-select:none;
+      user-select:none;
     }
     .lang-trigger:hover{ background: rgba(255,255,255,.06); }
+    .lang-trigger:focus{ outline:none; }
     .globe{ width:18px; height:18px; display:block; }
 
     .lang-rail{
@@ -724,11 +727,19 @@
       function applyLang(lang){
         document.body.classList.add("is-i18n-switching");
 
+        // ✅ preserve scroll during LTR<->RTL (iOS Safari)
+        const prevY = window.scrollY || document.documentElement.scrollTop || 0;
+        const prevX = window.scrollX || document.documentElement.scrollLeft || 0;
+
         const dict = I18N[lang] || I18N[DEFAULT_LANG];
 
         const html = document.documentElement;
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
+
+        requestAnimationFrame(() => {
+          window.scrollTo(prevX, prevY);
+        });
 
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
@@ -913,12 +924,44 @@
         clampRailIntoViewport();
       }
 
+      // ===== iOS Safari: lock scroll to avoid viewport jump on focus/RTL =====
+      let _mxScrollLocked = false;
+      let _mxScrollY = 0;
+
+      function lockScroll(){
+        if (_mxScrollLocked) return;
+        _mxScrollLocked = true;
+        _mxScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+
+        document.body.style.position = "fixed";
+        document.body.style.top = `-${_mxScrollY}px`;
+        document.body.style.left = "0";
+        document.body.style.right = "0";
+        document.body.style.width = "100%";
+      }
+
+      function unlockScroll(){
+        if (!_mxScrollLocked) return;
+        _mxScrollLocked = false;
+
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.left = "";
+        document.body.style.right = "";
+        document.body.style.width = "";
+
+        window.scrollTo(0, _mxScrollY);
+      }
+
       function openRail(){
+        lockScroll();
+
         switchEl.classList.add('is-open');
 
         requestAnimationFrame(() => {
           ensureStartVisibleOnce();
           placeRailSmart();
+          setTimeout(() => unlockScroll(), 320);
         });
       }
 
@@ -927,6 +970,7 @@
         switchEl.classList.remove('is-open');
         switchEl.classList.remove('open-right');
         resetShift();
+        unlockScroll();
       }
 
       function scheduleOpen(){
@@ -961,16 +1005,30 @@
         scheduleClose();
       });
 
+      // ✅ iOS: prevent focus/scroll jump (touchstart) + avoid double fire
       const trigger = switchEl.querySelector('.lang-trigger');
-      trigger?.addEventListener('click', (e) => {
-        e.preventDefault();
-        clearTimers();
+      let _touchHandled = false;
 
+      function toggleRail(){
+        clearTimers();
         if (switchEl.classList.contains('is-open')) closeRail();
         else openRail();
 
-        trigger.blur();
+        trigger?.blur();
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      }
+
+      trigger?.addEventListener('touchstart', (e) => {
+        _touchHandled = true;
+        e.preventDefault();
+        toggleRail();
+        setTimeout(() => { _touchHandled = false; }, 450);
+      }, { passive: false });
+
+      trigger?.addEventListener('click', (e) => {
+        if (_touchHandled) return;
+        e.preventDefault();
+        toggleRail();
       });
 
       window.addEventListener('resize', () => {
