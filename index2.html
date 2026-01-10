@@ -544,6 +544,31 @@
         right:0;
       }
     }
+  
+/* === A/B rail strategy ===
+   A) LTR (default): smart anchored popover
+   B) RTL on small screens: fixed, centered rail (Safari iOS stable) */
+@media (max-width: 700px){
+  [dir="rtl"] .lang-switch{
+    position: static;
+  }
+  [dir="rtl"] .lang-rail{
+    position: fixed !important;
+    top: 64px;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+
+    max-width: calc(100vw - 24px);
+    overflow-x: auto;
+
+    direction: ltr;
+    unicode-bidi: isolate;
+
+    --rail-shift: 0px;
+  }
+}
+
   </style>
 </head>
 
@@ -924,13 +949,22 @@
 
       function ensureStartVisibleOnce(){
         if (!firstOpen) return;
-        railEl.scrollLeft = 0;
+        // In RTL (especially iOS), forcing scrollLeft=0 can create weird jumps.
+        if (document.documentElement.dir !== "rtl") {
+          railEl.scrollLeft = 0;
+        }
         firstOpen = false;
       }
 
       function resetShift(){
         railEl.style.setProperty('--rail-shift', '0px');
       }
+
+      function isRtlFixedMode(){
+        return document.documentElement.dir === "rtl"
+          && window.matchMedia("(max-width: 700px)").matches;
+      }
+
 
       function clampRailIntoViewport(){
         const vw = window.innerWidth || document.documentElement.clientWidth;
@@ -953,6 +987,11 @@
       }
 
       function placeRailSmart(){
+        // B) RTL on small screens: CSS switches the rail to fixed+centered (Safari iOS stable).
+        // In that mode we must NOT run any smart positioning logic.
+        if (isRtlFixedMode()) return;
+
+        // A) LTR (default): smart anchored popover
         if (isInteracting) return; // ✅ don't reposition during scroll/drag
 
         switchEl.classList.remove('open-right');
@@ -974,6 +1013,7 @@
 
         clampRailIntoViewport();
       }
+
 
       function openRail(){
         switchEl.classList.add('is-open');
