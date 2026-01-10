@@ -61,7 +61,6 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
       font-weight:400;
-
       transition: opacity 0.18s ease-in-out;
     }
     body.is-i18n-switching{ opacity:0.92; }
@@ -180,9 +179,6 @@
 
       white-space:nowrap;
       z-index:50;
-      filter:none;
-      backdrop-filter:none;
-      -webkit-backdrop-filter:none;
     }
 
     .verticals-menu .v-item:first-child{ margin-top:2px; }
@@ -334,18 +330,13 @@
       opacity: 1;
     }
 
-    .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
-    .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
-    .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
-    .lang-switch.is-open .lang-pill:nth-child(4)  { transition-delay: 54ms; }
-    .lang-switch.is-open .lang-pill:nth-child(5)  { transition-delay: 72ms; }
-    .lang-switch.is-open .lang-pill:nth-child(6)  { transition-delay: 90ms; }
-    .lang-switch.is-open .lang-pill:nth-child(7)  { transition-delay:108ms; }
-    .lang-switch.is-open .lang-pill:nth-child(8)  { transition-delay:126ms; }
-    .lang-switch.is-open .lang-pill:nth-child(9)  { transition-delay:144ms; }
-    .lang-switch.is-open .lang-pill:nth-child(10) { transition-delay:162ms; }
-    .lang-switch.is-open .lang-pill:nth-child(11) { transition-delay:180ms; }
-    .lang-switch.is-open .lang-pill:nth-child(12) { transition-delay:198ms; }
+    .lang-switch.is-open .lang-pill:nth-child(1) { transition-delay:  0ms; }
+    .lang-switch.is-open .lang-pill:nth-child(2) { transition-delay: 18ms; }
+    .lang-switch.is-open .lang-pill:nth-child(3) { transition-delay: 36ms; }
+    .lang-switch.is-open .lang-pill:nth-child(4) { transition-delay: 54ms; }
+    .lang-switch.is-open .lang-pill:nth-child(5) { transition-delay: 72ms; }
+    .lang-switch.is-open .lang-pill:nth-child(6) { transition-delay: 90ms; }
+    .lang-switch.is-open .lang-pill:nth-child(7) { transition-delay:108ms; }
 
     .lang-pill:hover{
       color:#fff;
@@ -544,59 +535,9 @@
       }
     }
 
-    /* ==========================
-       ✅ iOS RTL: evitar empujón lateral del viewport al abrir el rail
-       ========================== */
-    html[dir="rtl"], body{
-      overflow-x: hidden;
-    }
-    [dir="rtl"] .page{
-      overflow-x: clip;
-    }
-
-    /* =========================================================
-       ✅ SOLO EN ÁRABE: MISMO DESPLIEGUE (1 fila horizontal)
-       8 idiomas: EN ZH ES PT RU FR DE JA
-       ========================================================= */
-    html.mx-ar-basic .lang-rail{
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      white-space: nowrap !important;
-
-      direction: ltr;
-      unicode-bidi: isolate;
-
-      padding: 5px 6px !important;
-      gap: 6px !important;
-
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-x;
-      overscroll-behavior-x: contain;
-    }
-
-    html.mx-ar-basic .lang-rail .lang-pill{
-      display: none !important;
-    }
-
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="en"],
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="zh"],
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="es"],
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="pt"],
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="ru"],
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="fr"],
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="de"],
-    html.mx-ar-basic .lang-rail .lang-pill[data-lang="ja"]{
-      display: inline-flex !important;
-    }
-
-    html.mx-ar-basic .lang-pill{
-      height: 24px !important;
-      padding: 0 7px !important;
-      font-size: 10px !important;
-      letter-spacing: .10em !important;
-      transform: none !important;
-      opacity: 1 !important;
-    }
+    /* ✅ iOS RTL: evitar empujón lateral del viewport al abrir el rail */
+    html[dir="rtl"], body{ overflow-x: hidden; }
+    [dir="rtl"] .page{ overflow-x: clip; }
   </style>
 </head>
 
@@ -621,15 +562,10 @@
               <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
               <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
               <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
-              <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)" type="button">HI</button>
-              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
               <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
-              <button class="lang-pill" data-lang="pt" data-label="Português" type="button">PT</button>
+              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
               <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
-              <button class="lang-pill" data-lang="ja" data-label="日本語 (Japanese)" type="button">JA</button>
-              <button class="lang-pill" data-lang="de" data-label="Deutsch" type="button">DE</button>
-              <button class="lang-pill" data-lang="ca" data-label="Català" type="button">CA</button>
-              <button class="lang-pill" data-lang="id" data-label="Bahasa Indonesia" type="button">ID</button>
+              <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)" type="button">HI</button>
             </div>
           </div>
 
@@ -676,7 +612,7 @@
               data-tip="Cookie Preferences"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0-.44-.17-.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
+                <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0 .44-.17.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
               </svg>
             </button>
           </span>
@@ -706,6 +642,17 @@
           "card.test": "We’re working on it — coming back soon.",
           "cookie.prefs": "Cookie Preferences"
         },
+        zh: {
+          "nav.about": "关于",
+          "nav.verticals": "领域",
+          "nav.contact": "联系",
+          "footer.terms": "条款",
+          "footer.privacy": "隐私",
+          "footer.cookies": "Cookies",
+          "footer.legal": "法律",
+          "card.test": "我们正在建设中，敬请期待。",
+          "cookie.prefs": "Cookie 偏好设置"
+        },
         es: {
           "nav.about": "Acerca de",
           "nav.verticals": "Verticales",
@@ -728,61 +675,6 @@
           "card.test": "Nous travaillons — de retour bientôt.",
           "cookie.prefs": "Préférences cookies"
         },
-        ru: {
-          "nav.about": "О нас",
-          "nav.verticals": "Вертикали",
-          "nav.contact": "Контакты",
-          "footer.terms": "Усл.",
-          "footer.privacy": "Конф.",
-          "footer.cookies": "Cookies",
-          "footer.legal": "Право",
-          "card.test": "Мы работаем — скоро вернёмся.",
-          "cookie.prefs": "Настройки cookies"
-        },
-        pt: {
-          "nav.about": "Sobre",
-          "nav.verticals": "Verticais",
-          "nav.contact": "Contato",
-          "footer.terms": "Termos",
-          "footer.privacy": "Privacidade",
-          "footer.cookies": "Cookies",
-          "footer.legal": "Legal",
-          "card.test": "Estamos a trabalhar — voltamos em breve.",
-          "cookie.prefs": "Preferências de cookies"
-        },
-        de: {
-          "nav.about": "Über uns",
-          "nav.verticals": "Vertikalen",
-          "nav.contact": "Kontakt",
-          "footer.terms": "AGB",
-          "footer.privacy": "DSGVO",
-          "footer.cookies": "Cookies",
-          "footer.legal": "Impressum",
-          "card.test": "Wir arbeiten daran — bald zurück.",
-          "cookie.prefs": "Cookie-Einstellungen"
-        },
-        zh: {
-          "nav.about": "关于",
-          "nav.verticals": "领域",
-          "nav.contact": "联系",
-          "footer.terms": "条款",
-          "footer.privacy": "隐私",
-          "footer.cookies": "Cookies",
-          "footer.legal": "法律",
-          "card.test": "我们正在建设中，敬请期待。",
-          "cookie.prefs": "Cookie 偏好设置"
-        },
-        hi: {
-          "nav.about": "परिचय",
-          "nav.verticals": "वर्टिकल्स",
-          "nav.contact": "संपर्क",
-          "footer.terms": "शर्तें",
-          "footer.privacy": "गोपनीयता",
-          "footer.cookies": "Cookies",
-          "footer.legal": "कानूनी",
-          "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।",
-          "cookie.prefs": "कुकी प्राथमिकताएँ"
-        },
         ar: {
           "nav.about": "حول",
           "nav.verticals": "القطاعات",
@@ -794,38 +686,27 @@
           "card.test": "نعمل على ذلك — نعود قريبًا.",
           "cookie.prefs": "تفضيلات الكوكيز"
         },
-        ja: {
-          "nav.about": "概要",
-          "nav.verticals": "領域",
-          "nav.contact": "連絡先",
-          "footer.terms": "規約",
-          "footer.privacy": "プライバシー",
+        ru: {
+          "nav.about": "О нас",
+          "nav.verticals": "Вертикали",
+          "nav.contact": "Контакты",
+          "footer.terms": "Усл.",
+          "footer.privacy": "Конф.",
           "footer.cookies": "Cookies",
-          "footer.legal": "法的",
-          "card.test": "現在準備中です。まもなく公開します。",
-          "cookie.prefs": "Cookie設定"
+          "footer.legal": "Право",
+          "card.test": "Мы работаем — скоро вернёмся.",
+          "cookie.prefs": "Настройки cookies"
         },
-        ca: {
-          "nav.about": "Sobre",
-          "nav.verticals": "Verticals",
-          "nav.contact": "Contacte",
-          "footer.terms": "Termes",
-          "footer.privacy": "Privacitat",
+        hi: {
+          "nav.about": "परिचय",
+          "nav.verticals": "वर्टिकल्स",
+          "nav.contact": "संपर्क",
+          "footer.terms": "शर्तें",
+          "footer.privacy": "गोपनीयता",
           "footer.cookies": "Cookies",
-          "footer.legal": "Legal",
-          "card.test": "Estem treballant — tornem aviat.",
-          "cookie.prefs": "Preferències de cookies"
-        },
-        id: {
-          "nav.about": "Tentang",
-          "nav.verticals": "Vertikal",
-          "nav.contact": "Kontak",
-          "footer.terms": "S&K",
-          "footer.privacy": "Priv.",
-          "footer.cookies": "Cookies",
-          "footer.legal": "Legal",
-          "card.test": "Kami sedang mengerjakan — segera kembali.",
-          "cookie.prefs": "Preferensi cookies"
+          "footer.legal": "कानूनी",
+          "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।",
+          "cookie.prefs": "कुकी प्राथमिकताएँ"
         }
       };
 
@@ -848,13 +729,6 @@
         const html = document.documentElement;
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
-
-        // ✅ SOLO EN ÁRABE: activar modo estable (subset + compacto), sin despliegue vertical
-        html.classList.toggle("mx-ar-basic", lang === "ar");
-        if (lang === "ar"){
-          const railEl = document.getElementById("lang-rail");
-          if (railEl) railEl.scrollLeft = 0;
-        }
 
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
@@ -924,9 +798,7 @@
         }, 160);
       }
 
-      // Expose applyLang to the robust rail handler below
       window.__mxApplyLang = applyLang;
-
       applyLang(getLang());
 
       // ===== Robust tap selection inside the rail (iOS-safe) =====
