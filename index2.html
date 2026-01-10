@@ -268,9 +268,9 @@
       overflow-y: hidden;
       white-space: nowrap;
 
-      /* ✅ important: keep order stable even in RTL */
-      direction: ltr;
-      unicode-bidi: isolate;
+      /* keep order stable even in RTL */
+      direction:ltr;
+      unicode-bidi:isolate;
 
       opacity:0;
       pointer-events:none;
@@ -333,8 +333,6 @@
     }
 
     .lang-pill:focus{ outline:none; }
-
-    /* ✅ hide active language button */
     .lang-pill[hidden]{ display:none !important; }
 
     .lang-switch.is-open .lang-pill{
@@ -430,8 +428,8 @@
     .footer-links a:hover{ color:#fff; }
 
     .copyright{
-      font-size:clamp(6.5px, 1.1vw, 7px);
-      letter-spacing:.06em;
+      font-size:var(--copy-size);
+      letter-spacing:var(--copy-track);
       opacity:.58;
       text-align:center;
       line-height:1.3;
@@ -539,7 +537,7 @@
       }
     }
 
-    /* ✅ iOS RTL: evitar empujón lateral */
+    /* iOS RTL safety */
     html[dir="rtl"], body{ overflow-x: hidden; }
     [dir="rtl"] .page{ overflow-x: clip; }
   </style>
@@ -563,7 +561,7 @@
             </button>
 
             <div class="lang-rail" id="lang-rail" aria-label="Languages">
-              <!-- ✅ order requested: EN → ZH → ES → FR → AR → RU → HI -->
+              <!-- order: EN → ZH → ES → FR → AR → RU → HI -->
               <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
               <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
               <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
@@ -633,7 +631,7 @@
   </div>
 
   <script>
-    // ===== Instant i18n + RTL + premium micro-fade + scramble for all scripts =====
+    // ===== i18n + RTL + safe scramble (iPad-safe) + hide active lang =====
     (function(){
       const I18N = {
         en: {
@@ -719,106 +717,111 @@
       const DEFAULT_LANG = "en";
       const storageKey = "mx_lang";
 
-      function getLang(){
-        return localStorage.getItem(storageKey) || DEFAULT_LANG;
+      function getLang(){ return localStorage.getItem(storageKey) || DEFAULT_LANG; }
+      function setLang(lang){ localStorage.setItem(storageKey, lang); }
+
+      // ✅ small safe pools (no huge strings => iPad safe)
+      const POOL_LATIN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const POOL_CYR   = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ0123456789";
+      const POOL_DEV   = "अआइईउऊएऐओऔकखगघचछजझटठडढतथदधनपफबभमयरलवशषसह०१२३४५६७८९";
+      const POOL_CJK   = "的一是在不了有人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经";
+      const POOL_AR    = "ابتثجحخدذرزسشصضطظعغفقكلمنهوي٠١٢٣٤٥٦٧٨٩";
+
+      function poolForLang(lang){
+        if (lang === "ru") return POOL_CYR;
+        if (lang === "hi") return POOL_DEV;
+        if (lang === "zh") return POOL_CJK;
+        if (lang === "ar") return POOL_AR;
+        return POOL_LATIN;
       }
-      function setLang(lang){
-        localStorage.setItem(storageKey, lang);
+
+      function scrambleSmart(el, finalText, durationMs, lang){
+        const base = String(finalText ?? "");
+        const pool = poolForLang(lang);
+        const isArabic = (lang === "ar");
+
+        const start = performance.now();
+        const tick = (t) => {
+          const p = Math.min(1, (t - start) / durationMs);
+          const reveal = Math.floor(p * base.length);
+
+          if (isArabic){
+            const shown = base.slice(0, reveal);
+            const hidden = base.slice(reveal).replace(/[^\s]/g, " ");
+            el.textContent = shown + hidden;
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = base;
+            return;
+          }
+
+          let out = "";
+          for (let i = 0; i < base.length; i++){
+            const c = base[i];
+            if (i < reveal) { out += c; continue; }
+            if (c === " ") { out += " "; continue; }
+            if (/[\.\,\!\?\:\;\-\—\–\(\)\[\]\/\&\+%#@€$£"']/.test(c)) { out += c; continue; }
+            out += pool[(Math.random() * pool.length) | 0];
+          }
+          el.textContent = out;
+
+          if (p < 1) requestAnimationFrame(tick);
+          else el.textContent = base;
+        };
+        requestAnimationFrame(tick);
       }
 
       function applyLang(lang){
         document.body.classList.add("is-i18n-switching");
 
-        const dict = I18N[lang] || I18N[DEFAULT_LANG];
+        try{
+          const dict = I18N[lang] || I18N[DEFAULT_LANG];
 
-        const html = document.documentElement;
-        html.lang = lang;
-        html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
+          const html = document.documentElement;
+          html.lang = lang;
+          html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 
-        const switchEl = document.getElementById("lang-switch");
-        switchEl?.classList.remove("is-open");
-        switchEl?.classList.remove("open-right");
+          const switchEl = document.getElementById("lang-switch");
+          switchEl?.classList.remove("is-open");
+          switchEl?.classList.remove("open-right");
 
-        const railEl = document.getElementById("lang-rail");
-        if (railEl){
-          railEl.querySelectorAll(".lang-pill").forEach(btn => {
-            const l = btn.getAttribute("data-lang");
-            btn.hidden = (l === lang);
-          });
-          railEl.scrollLeft = 0;
-        }
-
-        const CHARSETS = {
-          en: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-          es: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-          fr: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-          ru: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789",
-          ar: "ابتثجحخدذرزسشصضطظعغفقكلمنهوي٠١٢٣٤٥٦٧٨٩",
-          zh: "的一是在不了有和人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实加量都两体制机当使点从业本去把性好应开它合还因由其些然前外天政四日那社义事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道命此变条只没结解问意建月公无系军很情者最立代想已通并提直题党程展五果料象员革位入常文总次品式活设及管特件长求老头基资边流路级少图山统接知较将组见计别她手角期根论运农指几九区强放决西被干做必战先回则任取据处队南给色光门即保治北造百规热领七海口东导器压志世金增争济阶油思术极交受联什认六共权收证改清己美再采转更单风切打白教速花带安场身车例真务具万每目至达走积示议声报斗完类八离华名确才科张信马节话米整空元况今集温传土许步群广石记需段研界拉林律叫且究观越织装影算低持音众书布复容儿须际商非验连断深难近矿千周委素技备半办青省列习响约支般史感劳便团往酸历市克何除消构府称太准精值号率族维划选标写存候毛亲快效斯院查江型眼王按格养易置派层片始却专状育厂京识适属圆包火住调满县局照参红细引听该铁价严龙飞",
-          hi: "अआइईउऊएऐओऔकखगघचछजझटठडढतथदधनपफबभमयरलवशषसह0123456789"
-        };
-        const getCharset = () => CHARSETS[lang] || CHARSETS.en;
-
-        const scrambleText = (el, finalText, durationMs = 220) => {
-          const start = performance.now();
-          const base = finalText;
-          const chars = getCharset();
-
-          const tick = (t) => {
-            const p = Math.min(1, (t - start) / durationMs);
-            const reveal = Math.floor(p * base.length);
-
-            let out = "";
-            for (let i = 0; i < base.length; i++){
-              const c = base[i];
-              if (i < reveal) out += c;
-              else {
-                if (c === " ") { out += " "; continue; }
-                if (/[\.\,\!\?\:\;\-\—\–\(\)\[\]\/\&\+%#@€$£"']/.test(c)) { out += c; continue; }
-                out += chars[(Math.random() * chars.length) | 0];
-              }
-            }
-
-            el.textContent = out;
-
-            if (p < 1) requestAnimationFrame(tick);
-            else el.textContent = base;
-          };
-
-          requestAnimationFrame(tick);
-        };
-
-        const nodes = Array.from(document.querySelectorAll("[data-i18n]"));
-        nodes.forEach(el => el.classList.add("mx-i18n-out"));
-
-        setTimeout(() => {
-          nodes.forEach(el => {
-            const key = el.getAttribute("data-i18n");
-            if (!key) return;
-            const val = dict[key] ?? I18N[DEFAULT_LANG][key];
-            if (typeof val !== "string") return;
-
-            scrambleText(el, val, 220);
-
-            el.classList.remove("mx-i18n-out");
-            el.classList.add("mx-i18n-in");
-          });
-
-          const gear = document.getElementById("cookiePreferencesGear");
-          if (gear){
-            const tip = dict["cookie.prefs"] ?? I18N[DEFAULT_LANG]["cookie.prefs"];
-            gear.setAttribute("data-tip", tip);
-            gear.setAttribute("aria-label", tip);
+          const railEl = document.getElementById("lang-rail");
+          if (railEl){
+            railEl.querySelectorAll(".lang-pill").forEach(btn => {
+              const l = btn.getAttribute("data-lang");
+              btn.hidden = (l === lang);
+            });
+            railEl.scrollLeft = 0;
           }
 
-          setTimeout(() => {
-            nodes.forEach(el => el.classList.remove("mx-i18n-in"));
-          }, 220);
+          const nodes = Array.from(document.querySelectorAll("[data-i18n]"));
+          nodes.forEach(el => el.classList.add("mx-i18n-out"));
 
-          requestAnimationFrame(() => {
-            document.body.classList.remove("is-i18n-switching");
-          });
-        }, 160);
+          setTimeout(() => {
+            nodes.forEach(el => {
+              const key = el.getAttribute("data-i18n");
+              if (!key) return;
+              const val = dict[key] ?? I18N[DEFAULT_LANG][key];
+              if (typeof val !== "string") return;
+
+              scrambleSmart(el, val, 220, lang);
+
+              el.classList.remove("mx-i18n-out");
+              el.classList.add("mx-i18n-in");
+            });
+
+            const gear = document.getElementById("cookiePreferencesGear");
+            if (gear){
+              const tip = dict["cookie.prefs"] ?? I18N[DEFAULT_LANG]["cookie.prefs"];
+              gear.setAttribute("data-tip", tip);
+              gear.setAttribute("aria-label", tip);
+            }
+
+            setTimeout(() => nodes.forEach(el => el.classList.remove("mx-i18n-in")), 220);
+          }, 160);
+
+        } finally {
+          setTimeout(() => document.body.classList.remove("is-i18n-switching"), 260);
+        }
       }
 
       window.__mxApplyLang = applyLang;
@@ -829,7 +832,6 @@
         const rail = document.getElementById("lang-rail");
         if (!rail) return;
 
-        // ✅ prevent iOS "scroll into view" on focus
         const preventFocusScroll = (e) => {
           const btn = e.target && e.target.closest ? e.target.closest(".lang-pill") : null;
           if (btn) e.preventDefault();
@@ -857,7 +859,7 @@
           if (!btn || !rail.contains(btn)) return;
 
           const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
-          localStorage.setItem(storageKey, lang);
+          setLang(lang);
           window.__mxApplyLang(lang);
 
           btn.blur();
@@ -872,11 +874,10 @@
 
     })();
 
-    // ===== Language rail: timers + smart placement + (mobile fixed) =====
+    // ===== Language rail timers + smart placement (no fixed => iPad safe) =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
-      const headerEl = document.getElementById('mx-header');
       if (!switchEl || !railEl) return;
 
       let openTimer = null;
@@ -885,6 +886,7 @@
 
       const OPEN_DELAY_MS  = 500;
       const CLOSE_DELAY_MS = 3000;
+
       let firstOpen = true;
 
       function clearTimers(){
@@ -900,27 +902,6 @@
 
       function resetShift(){
         railEl.style.setProperty('--rail-shift', '0px');
-      }
-
-      function restoreAbsolute(){
-        railEl.style.position = "";
-        railEl.style.top = "";
-        railEl.style.left = "";
-        railEl.style.right = "";
-        railEl.style.transform = "";
-      }
-
-      function placeMobileFixed(){
-        const rect = headerEl ? headerEl.getBoundingClientRect() : null;
-        const top = (rect ? rect.bottom : 56) + 8;
-
-        railEl.style.position = "fixed";
-        railEl.style.top = `calc(${Math.round(top)}px + env(safe-area-inset-top, 0px))`;
-        railEl.style.left = `var(--px)`;
-        railEl.style.right = `var(--px)`;
-        railEl.style.transform = "translateX(var(--rail-shift))";
-
-        resetShift();
       }
 
       function clampRailIntoViewport(){
@@ -944,16 +925,6 @@
       }
 
       function placeRailSmart(){
-        const isMobile = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
-
-        if (isMobile){
-          placeMobileFixed();
-          requestAnimationFrame(() => clampRailIntoViewport());
-          return;
-        }
-
-        // desktop/tablet behavior (anchored to globe)
-        restoreAbsolute();
         switchEl.classList.remove('open-right');
         resetShift();
 
@@ -975,11 +946,11 @@
       }
 
       function openRail(){
-        // ✅ keep current scroll (extra safety for iOS)
         const y = window.scrollY || document.documentElement.scrollTop || 0;
         requestAnimationFrame(() => window.scrollTo(0, y));
 
         switchEl.classList.add('is-open');
+
         requestAnimationFrame(() => {
           ensureStartVisibleOnce();
           placeRailSmart();
@@ -991,7 +962,6 @@
         switchEl.classList.remove('is-open');
         switchEl.classList.remove('open-right');
         resetShift();
-        restoreAbsolute();
       }
 
       function scheduleOpen(){
@@ -1057,7 +1027,7 @@
       });
     })();
 
-    // ===== Verticals: click only, close outside / Escape =====
+    // ===== Verticals: click only (no hover), close outside / Escape =====
     (function(){
       const v = document.getElementById('verticals');
       if (!v) return;
