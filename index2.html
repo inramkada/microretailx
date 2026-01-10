@@ -278,6 +278,10 @@
 
       /* Premium rail transition (avoids "blink") */
       transition: opacity 0.4s ease, transform 0.2s ease;
+
+      /* iOS scroll optimization */
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
@@ -511,9 +515,15 @@
     [dir="rtl"] .navlink::after{ transform-origin:right; }
     [dir="rtl"] .footer-links{ flex-direction:row-reverse; }
 
+    /* CRITICAL: RTL rail always opens LEFT (towards center), never flips */
     [dir="rtl"] .lang-rail{
       left:auto;
       right: calc(100% + 10px);
+    }
+
+    /* RTL: Keep pills in LTR order (EN first, ID last) */
+    [dir="rtl"] .lang-rail{
+      direction: ltr;
     }
 
     [dir="rtl"] .verticals-menu{
@@ -543,6 +553,7 @@
       [dir="rtl"] .lang-rail{
         left:auto;
         right:0;
+        direction: ltr; /* Keep pills LTR on mobile */
       }
     }
   </style>
@@ -597,7 +608,7 @@
             </div>
           </div>
 
-          <a class="navlink" href="mailto:info@microretailx.com" data-i18n="nav.contact">Contact</a>
+          <a class="navlink" href="/cdn-cgi/l/email-protection#82ebece4edc2efebe1f0edf0e7f6e3ebeefaace1edef" data-i18n="nav.contact">Contact</a>
         </nav>
       </div>
     </header>
@@ -639,7 +650,7 @@
     </footer>
   </div>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ===== Instant i18n (no navigation) + RTL handling + premium micro-fade + text swap animation =====
     (function(){
       const I18N = {
@@ -867,13 +878,36 @@
 
       applyLang(getLang());
 
+      // Track if user is actively scrolling
+      let isScrolling = false;
+      let scrollTimeout = null;
+
       document.querySelectorAll(".lang-pill").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", (e) => {
+          // CRITICAL: Ignore clicks during scroll momentum (iPhone fix)
+          if (isScrolling) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+
           const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
           setLang(lang);
           applyLang(lang);
         });
       });
+
+      // Detect scrolling state
+      const railEl = document.getElementById('lang-rail');
+      if (railEl) {
+        railEl.addEventListener('scroll', () => {
+          isScrolling = true;
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+          }, 150); // 150ms debounce
+        });
+      }
     })();
 
     // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit (iPad-safe placement) =====
@@ -895,7 +929,7 @@
       }
 
       function ensureStartVisible(){
-        // EN is the first item -> guarantee it never starts clipped
+        // CRITICAL: Reset scroll BEFORE any measurements
         railEl.scrollLeft = 0;
       }
 
@@ -922,9 +956,13 @@
       }
 
       function openRail(){
+        // CRITICAL: Reset scroll FIRST (iPad fix)
+        ensureStartVisible();
+        
         switchEl.classList.add('is-open');
 
         requestAnimationFrame(() => {
+          // Double-check after layout
           ensureStartVisible();
           placeRailSmart();
         });
@@ -1022,10 +1060,4 @@
     (function(){
       const gear = document.getElementById('cookiePreferencesGear');
       if (!gear) return;
-      gear.addEventListener('click', () => {
-        alert('Open Cookie Preferences (hook to your consent modal).');
-      });
-    })();
-  </script>
-</body>
-</html>
+      gear.ad
