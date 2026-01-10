@@ -9,12 +9,14 @@
   <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
   <meta name="color-scheme" content="dark" />
 
+  <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="MICRORETAILX">
   <meta property="og:description" content="Advanced biotech and creative technology platforms.">
   <meta property="og:url" content="https://www.microretailx.com">
   <meta property="og:image" content="https://www.microretailx.com/og-image.jpg">
 
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="MICRORETAILX">
   <meta name="twitter:description" content="Advanced biotech and creative technology platforms.">
@@ -27,16 +29,22 @@
       --muted:rgba(255,255,255,.62);
       --hair:rgba(255,255,255,.12);
       --glass:rgba(0,0,0,.78);
+
       --px:clamp(12px, 2vw, 18px);
       --py:10px;
+
       --brand-size:clamp(12px, 1.2vw, 13px);
       --brand-track:0.20em;
+
       --nav-size:clamp(12px, 1.15vw, 12.5px);
       --nav-track:0.12em;
+
       --copy-size:clamp(6.5px, 1.1vw, 7px);
       --copy-track:0.06em;
+
       --radius:14px;
       --blur:10px;
+
       --menu-bg: rgba(0,0,0,.86);
       --menu-border: rgba(255,255,255,.14);
     }
@@ -48,10 +56,13 @@
       margin:0;
       background:var(--bg);
       color:var(--fg);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+                   "Liberation Mono", "Courier New", monospace;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
-      font-weight:400;
+      font-weight:400; /* no bold */
+
+      /* Premium micro-fade on language/dir changes */
       transition: opacity 0.18s ease-in-out;
     }
     body.is-i18n-switching{ opacity:0.92; }
@@ -138,6 +149,7 @@
     }
     .navlink:hover::after{ transform:scaleX(1); }
 
+    /* ===== Verticals dropdown (NO ENCUADRES) ===== */
     .verticals{
       position:relative;
       display:inline-flex;
@@ -151,18 +163,22 @@
       top:100%;
       left:0;
       margin-top:10px;
+
       display:flex;
       flex-direction:column;
       gap:10px;
+
       padding:0;
-      padding-top:2px;
+      padding-top:2px; /* ✅ separación leve arriba (BIOTECH no toca borde) */
       border:0;
       background:transparent;
       border-radius:0;
+
       opacity:0;
       pointer-events:none;
       transform: translateY(6px);
       transition: opacity 160ms ease, transform 160ms ease;
+
       white-space:nowrap;
       z-index:50;
       filter:none;
@@ -170,6 +186,7 @@
       -webkit-backdrop-filter:none;
     }
 
+    /* (opcional premium) micro-margen solo al primer item */
     .verticals-menu .v-item:first-child{ margin-top:2px; }
 
     .verticals.is-open .verticals-menu{
@@ -208,6 +225,7 @@
     .v-item:hover .v-main{ color:#fff; }
     .v-item:hover .v-sub{ color:rgba(255,255,255,.72); }
 
+    /* ===== Language rail (JS-controlled) ===== */
     .lang-switch{
       position:relative;
       display:flex;
@@ -233,28 +251,33 @@
 
     .lang-rail{
       position:absolute;
-      right: calc(100% + 10px);
+      right: calc(100% + 10px); /* open LEFT (towards inside) */
       top: 50%;
       transform: translateY(-50%);
+
       display:flex;
       align-items:center;
       gap:8px;
+
       padding:6px 8px;
       border:1px solid var(--menu-border);
       background: var(--menu-bg);
       border-radius: 999px;
+
       max-width: min(780px, calc(100vw - (2 * var(--px)) - 80px));
       overflow-x: auto;
       overflow-y: hidden;
       white-space: nowrap;
+
       opacity:0;
       pointer-events:none;
+
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+
+      /* Premium rail transition (avoids "blink") */
       transition: opacity 0.4s ease, transform 0.2s ease;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-x;
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
@@ -265,11 +288,13 @@
       pointer-events:auto;
     }
 
+    /* iPad/tablet fix: if rail would clip on the left, open to the RIGHT of the globe */
     .lang-switch.open-right .lang-rail{
       right:auto;
       left: calc(100% + 10px);
     }
 
+    /* RTL: mirror the same idea */
     [dir="rtl"] .lang-switch.open-right .lang-rail{
       left:auto;
       right: calc(100% + 10px);
@@ -280,18 +305,24 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
+
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.30);
       color: rgba(255,255,255,.86);
+
       height:26px;
       padding: 0 10px;
       border-radius: 999px;
+
       font-size: 11px;
       font-weight: 400;
       letter-spacing: .12em;
       text-transform: uppercase;
+
       cursor:pointer;
       user-select:none;
+
+      /* CAMBIO: scale en lugar de translateX para iOS */
       transform: scale(0.88);
       opacity: 0;
       transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), 
@@ -307,6 +338,7 @@
       opacity: 1;
     }
 
+    /* stagger (wave) */
     .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
     .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
     .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
@@ -332,18 +364,22 @@
       bottom: calc(100% + 8px);
       left: 50%;
       transform: translateX(-50%);
+
       background: rgba(0,0,0,.90);
       border: 1px solid rgba(255,255,255,.14);
       border-radius: 10px;
       padding: 6px 8px;
+
       font-size: 10px;
       font-weight: 400;
       letter-spacing: .06em;
       text-transform: uppercase;
       color: rgba(255,255,255,.92);
+
       opacity:0;
       pointer-events:none;
       white-space: nowrap;
+
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
@@ -398,12 +434,13 @@
     .copyright{
       font-size:var(--copy-size);
       letter-spacing:var(--copy-track);
-      opacity:.58;
+      opacity:.58; /* raised for accessibility */
       text-align:center;
       line-height:1.3;
       font-weight:400;
     }
 
+    /* ===== Cookie gear ===== */
     .cookie-gear{
       display:inline-flex;
       align-items:center;
@@ -451,6 +488,7 @@
     }
     .cookie-gear:hover::after{ opacity:1; }
 
+    /* ===== Premium text swap on i18n ===== */
     [data-i18n]{
       display:inline-block;
       transition: opacity 160ms ease, transform 160ms ease, filter 160ms ease;
@@ -467,6 +505,7 @@
       filter: blur(0);
     }
 
+    /* ===== RTL (Arabic): flip layout but keep rail opening LEFT (towards inside) ===== */
     [dir="rtl"] .topbar{ flex-direction:row-reverse; }
     [dir="rtl"] nav{ flex-direction:row-reverse; }
     [dir="rtl"] .navlink::after{ transform-origin:right; }
@@ -475,7 +514,7 @@
     [dir="rtl"] .lang-rail{
       left:auto;
       right: calc(100% + 10px);
-      direction: ltr;
+      direction: ltr; /* CAMBIO: Keep pills LTR order */
     }
 
     [dir="rtl"] .verticals-menu{
@@ -505,14 +544,14 @@
       [dir="rtl"] .lang-rail{
         left:auto;
         right:0;
-        direction: ltr;
+        direction: ltr; /* CAMBIO: Keep pills LTR on mobile */
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="page">
+  <div class="page" id="app-root">
     <header>
       <div class="topbar">
         <div class="brand">MICRORETAILX</div>
@@ -560,7 +599,7 @@
             </div>
           </div>
 
-          <a class="navlink" href="/cdn-cgi/l/email-protection#abc2c5cdc4ebc6c2c8d9c4d9cedfcac2c7d385c8c4c6" data-i18n="nav.contact">Contact</a>
+          <a class="navlink" href="mailto:info@microretailx.com" data-i18n="nav.contact">Contact</a>
         </nav>
       </div>
     </header>
@@ -579,7 +618,13 @@
 
           <span style="display:inline-flex; align-items:center;">
             <a href="cookies.html" data-i18n="footer.cookies">Cookies</a>
-            <button type="button" class="cookie-gear" id="cookiePreferencesGear" aria-label="Cookie Preferences" data-tip="Cookie Preferences">
+            <button
+              type="button"
+              class="cookie-gear"
+              id="cookiePreferencesGear"
+              aria-label="Cookie Preferences"
+              data-tip="Cookie Preferences"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0-.44-.17-.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
               </svg>
@@ -596,33 +641,160 @@
     </footer>
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
+    // ===== Instant i18n (no navigation) + RTL handling + premium micro-fade + text swap animation =====
     (function(){
       const I18N = {
-        en: {"nav.about": "About", "nav.verticals": "Verticals", "nav.contact": "Contact", "footer.terms": "Terms", "footer.privacy": "Privacy", "footer.cookies": "Cookies", "footer.legal": "Legal", "card.test": "We're working on it — coming back soon.", "cookie.prefs": "Cookie Preferences"},
-        es: {"nav.about": "Acerca de", "nav.verticals": "Verticales", "nav.contact": "Contacto", "footer.terms": "Términos", "footer.privacy": "Privacidad", "footer.cookies": "Cookies", "footer.legal": "Legal", "card.test": "Estamos trabajando — volvemos pronto.", "cookie.prefs": "Preferencias de cookies"},
-        fr: {"nav.about": "À propos", "nav.verticals": "Verticales", "nav.contact": "Contact", "footer.terms": "CGU", "footer.privacy": "Conf.", "footer.cookies": "Cookies", "footer.legal": "Légal", "card.test": "Nous travaillons — de retour bientôt.", "cookie.prefs": "Préférences cookies"},
-        ru: {"nav.about": "О нас", "nav.verticals": "Вертикали", "nav.contact": "Контакты", "footer.terms": "Усл.", "footer.privacy": "Конф.", "footer.cookies": "Cookies", "footer.legal": "Право", "card.test": "Мы работаем — скоро вернёмся.", "cookie.prefs": "Настройки cookies"},
-        pt: {"nav.about": "Sobre", "nav.verticals": "Verticais", "nav.contact": "Contato", "footer.terms": "Termos", "footer.privacy": "Privacidade", "footer.cookies": "Cookies", "footer.legal": "Legal", "card.test": "Estamos a trabalhar — voltamos em breve.", "cookie.prefs": "Preferências de cookies"},
-        de: {"nav.about": "Über uns", "nav.verticals": "Vertikalen", "nav.contact": "Kontakt", "footer.terms": "AGB", "footer.privacy": "DSGVO", "footer.cookies": "Cookies", "footer.legal": "Impressum", "card.test": "Wir arbeiten daran — bald zurück.", "cookie.prefs": "Cookie-Einstellungen"},
-        zh: {"nav.about": "关于", "nav.verticals": "领域", "nav.contact": "联系", "footer.terms": "条款", "footer.privacy": "隐私", "footer.cookies": "Cookies", "footer.legal": "法律", "card.test": "我们正在建设中,敬请期待。", "cookie.prefs": "Cookie 偏好设置"},
-        hi: {"nav.about": "परिचय", "nav.verticals": "वर्टिकल्स", "nav.contact": "संपर्क", "footer.terms": "शर्तें", "footer.privacy": "गोपनीयता", "footer.cookies": "Cookies", "footer.legal": "कानूनी", "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।", "cookie.prefs": "कुकी प्राथमिकताएँ"},
-        ar: {"nav.about": "حول", "nav.verticals": "القطاعات", "nav.contact": "تواصل", "footer.terms": "الشروط", "footer.privacy": "الخصوصية", "footer.cookies": "الكوكيز", "footer.legal": "قانوني", "card.test": "نعمل على ذلك — نعود قريبًا.", "cookie.prefs": "تفضيلات الكوكيز"},
-        ja: {"nav.about": "概要", "nav.verticals": "領域", "nav.contact": "連絡先", "footer.terms": "規約", "footer.privacy": "プライバシー", "footer.cookies": "Cookies", "footer.legal": "法的", "card.test": "現在準備中です。まもなく公開します。", "cookie.prefs": "Cookie設定"},
-        ca: {"nav.about": "Sobre", "nav.verticals": "Verticals", "nav.contact": "Contacte", "footer.terms": "Termes", "footer.privacy": "Privacitat", "footer.cookies": "Cookies", "footer.legal": "Legal", "card.test": "Estem treballant — tornem aviat.", "cookie.prefs": "Preferències de cookies"},
-        id: {"nav.about": "Tentang", "nav.verticals": "Vertikal", "nav.contact": "Kontak", "footer.terms": "S&K", "footer.privacy": "Priv.", "footer.cookies": "Cookies", "footer.legal": "Legal", "card.test": "Kami sedang mengerjakan — segera kembali.", "cookie.prefs": "Preferensi cookies"}
+        en: {
+          "nav.about": "About",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contact",
+          "footer.terms": "Terms",
+          "footer.privacy": "Privacy",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "We're working on it — coming back soon.",
+          "cookie.prefs": "Cookie Preferences"
+        },
+        es: {
+          "nav.about": "Acerca de",
+          "nav.verticals": "Verticales",
+          "nav.contact": "Contacto",
+          "footer.terms": "Términos",
+          "footer.privacy": "Privacidad",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estamos trabajando — volvemos pronto.",
+          "cookie.prefs": "Preferencias de cookies"
+        },
+        fr: {
+          "nav.about": "À propos",
+          "nav.verticals": "Verticales",
+          "nav.contact": "Contact",
+          "footer.terms": "CGU",
+          "footer.privacy": "Conf.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Légal",
+          "card.test": "Nous travaillons — de retour bientôt.",
+          "cookie.prefs": "Préférences cookies"
+        },
+        ru: {
+          "nav.about": "О нас",
+          "nav.verticals": "Вертикали",
+          "nav.contact": "Контакты",
+          "footer.terms": "Усл.",
+          "footer.privacy": "Конф.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Право",
+          "card.test": "Мы работаем — скоро вернёмся.",
+          "cookie.prefs": "Настройки cookies"
+        },
+        pt: {
+          "nav.about": "Sobre",
+          "nav.verticals": "Verticais",
+          "nav.contact": "Contato",
+          "footer.terms": "Termos",
+          "footer.privacy": "Privacidade",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estamos a trabalhar — voltamos em breve.",
+          "cookie.prefs": "Preferências de cookies"
+        },
+        de: {
+          "nav.about": "Über uns",
+          "nav.verticals": "Vertikalen",
+          "nav.contact": "Kontakt",
+          "footer.terms": "AGB",
+          "footer.privacy": "DSGVO",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Impressum",
+          "card.test": "Wir arbeiten daran — bald zurück.",
+          "cookie.prefs": "Cookie-Einstellungen"
+        },
+        zh: {
+          "nav.about": "关于",
+          "nav.verticals": "领域",
+          "nav.contact": "联系",
+          "footer.terms": "条款",
+          "footer.privacy": "隐私",
+          "footer.cookies": "Cookies",
+          "footer.legal": "法律",
+          "card.test": "我们正在建设中,敬请期待。",
+          "cookie.prefs": "Cookie 偏好设置"
+        },
+        hi: {
+          "nav.about": "परिचय",
+          "nav.verticals": "वर्टिकल्स",
+          "nav.contact": "संपर्क",
+          "footer.terms": "शर्तें",
+          "footer.privacy": "गोपनीयता",
+          "footer.cookies": "Cookies",
+          "footer.legal": "कानूनी",
+          "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।",
+          "cookie.prefs": "कुकी प्राथमिकताएँ"
+        },
+        ar: {
+          "nav.about": "حول",
+          "nav.verticals": "القطاعات",
+          "nav.contact": "تواصل",
+          "footer.terms": "الشروط",
+          "footer.privacy": "الخصوصية",
+          "footer.cookies": "الكوكيز",
+          "footer.legal": "قانوني",
+          "card.test": "نعمل على ذلك — نعود قريبًا.",
+          "cookie.prefs": "تفضيلات الكوكيز"
+        },
+        ja: {
+          "nav.about": "概要",
+          "nav.verticals": "領域",
+          "nav.contact": "連絡先",
+          "footer.terms": "規約",
+          "footer.privacy": "プライバシー",
+          "footer.cookies": "Cookies",
+          "footer.legal": "法的",
+          "card.test": "現在準備中です。まもなく公開します。",
+          "cookie.prefs": "Cookie設定"
+        },
+        ca: {
+          "nav.about": "Sobre",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contacte",
+          "footer.terms": "Termes",
+          "footer.privacy": "Privacitat",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estem treballant — tornem aviat.",
+          "cookie.prefs": "Preferències de cookies"
+        },
+        id: {
+          "nav.about": "Tentang",
+          "nav.verticals": "Vertikal",
+          "nav.contact": "Kontak",
+          "footer.terms": "S&K",
+          "footer.privacy": "Priv.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Kami sedang mengerjakan — segera kembali.",
+          "cookie.prefs": "Preferensi cookies"
+        }
       };
 
       const RTL_LANGS = new Set(["ar"]);
       const DEFAULT_LANG = "en";
       const storageKey = "mx_lang";
 
-      function getLang(){ return localStorage.getItem(storageKey) || DEFAULT_LANG; }
-      function setLang(lang){ localStorage.setItem(storageKey, lang); }
+      function getLang(){
+        return localStorage.getItem(storageKey) || DEFAULT_LANG;
+      }
+      function setLang(lang){
+        localStorage.setItem(storageKey, lang);
+      }
 
       function applyLang(lang){
         document.body.classList.add("is-i18n-switching");
+
         const dict = I18N[lang] || I18N[DEFAULT_LANG];
+
         const html = document.documentElement;
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
@@ -640,15 +812,21 @@
         const scrambleText = (el, finalText, durationMs = 180) => {
           const start = performance.now();
           const base = finalText;
+
           const tick = (t) => {
             const p = Math.min(1, (t - start) / durationMs);
             const reveal = Math.floor(p * base.length);
+
             let out = "";
             for (let i = 0; i < base.length; i++){
               if (i < reveal) out += base[i];
-              else { const ch = SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0]; out += (base[i] === " ") ? " " : ch; }
+              else {
+                const ch = SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+                out += (base[i] === " ") ? " " : ch;
+              }
             }
             el.textContent = out;
+
             if (p < 1) requestAnimationFrame(tick);
             else el.textContent = base;
           };
@@ -664,8 +842,10 @@
             if (!key) return;
             const val = dict[key] ?? I18N[DEFAULT_LANG][key];
             if (typeof val !== "string") return;
+
             if (shouldScramble(val)) scrambleText(el, val, 180);
             else el.textContent = val;
+
             el.classList.remove("mx-i18n-out");
             el.classList.add("mx-i18n-in");
           });
@@ -677,44 +857,39 @@
             gear.setAttribute("aria-label", tip);
           }
 
-          setTimeout(() => { nodes.forEach(el => el.classList.remove("mx-i18n-in")); }, 220);
-          requestAnimationFrame(() => { document.body.classList.remove("is-i18n-switching"); });
+          setTimeout(() => {
+            nodes.forEach(el => el.classList.remove("mx-i18n-in"));
+          }, 220);
+
+          requestAnimationFrame(() => {
+            document.body.classList.remove("is-i18n-switching");
+          });
         }, 160);
       }
 
       applyLang(getLang());
 
-      // CRITICAL: iPhone scroll momentum fix
-      const railEl = document.getElementById('lang-rail');
-      let isScrolling = false;
-      let scrollTimer = null;
-
-      if (railEl) {
-        railEl.addEventListener('scroll', () => {
-          isScrolling = true;
-          clearTimeout(scrollTimer);
-          scrollTimer = setTimeout(() => {
-            isScrolling = false;
-          }, 100);
-        }, { passive: true });
-      }
-
       document.querySelectorAll(".lang-pill").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          // Block click if rail is actively scrolling
-          if (isScrolling) {
-            e.preventDefault();
-            e.stopPropagation();
-            return;
-          }
-
-          const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
-          setLang(lang);
-          applyLang(lang);
+        btn.addEventListener("click", () => {
+          // CAMBIO MÍNIMO: Esperar 150ms para que el scroll se estabilice
+          const railEl = document.getElementById('lang-rail');
+          const scrollBefore = railEl ? railEl.scrollLeft : 0;
+          
+          setTimeout(() => {
+            const scrollAfter = railEl ? railEl.scrollLeft : 0;
+            
+            // Solo cambiar idioma si el scroll no cambió (no hubo momentum)
+            if (Math.abs(scrollAfter - scrollBefore) < 5) {
+              const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
+              setLang(lang);
+              applyLang(lang);
+            }
+          }, 150);
         });
       });
     })();
 
+    // ===== Language rail timers: open after 500ms, lock inside, close 3s after exit (iPad-safe placement) =====
     (function(){
       const switchEl = document.getElementById('lang-switch');
       const railEl   = document.getElementById('lang-rail');
@@ -732,25 +907,38 @@
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       }
 
+      function ensureStartVisible(){
+        // CAMBIO: Reset scroll SIEMPRE que se abra
+        railEl.scrollLeft = 0;
+      }
+
       function placeRailSmart(){
+        // Reset forced placement
         switchEl.classList.remove('open-right');
+
         const vw = window.innerWidth || document.documentElement.clientWidth;
         const margin = 10;
+
+        // Measure current placement (after is-open is applied)
         const rect = railEl.getBoundingClientRect();
-        if (rect.left < margin){ switchEl.classList.add('open-right'); }
+
+        // If it clips on the left, flip to the right
+        if (rect.left < margin){
+          switchEl.classList.add('open-right');
+        }
+
+        // Re-check: if now it clips on the right, revert back
         const rect2 = railEl.getBoundingClientRect();
-        if (rect2.right > (vw - margin)){ switchEl.classList.remove('open-right'); }
+        if (rect2.right > (vw - margin)){
+          switchEl.classList.remove('open-right');
+        }
       }
 
       function openRail(){
-        // CRITICAL: Reset scroll position FIRST (synchronously)
-        railEl.scrollLeft = 0;
-        
         switchEl.classList.add('is-open');
 
         requestAnimationFrame(() => {
-          // Double-check after CSS transitions apply
-          railEl.scrollLeft = 0;
+          ensureStartVisible();
           placeRailSmart();
         });
       }
@@ -761,8 +949,14 @@
         switchEl.classList.remove('open-right');
       }
 
-      function scheduleOpen(){ clearTimers(); openTimer = setTimeout(() => openRail(), OPEN_DELAY_MS); }
-      function scheduleClose(){ clearTimers(); closeTimer = setTimeout(() => closeRail(), CLOSE_DELAY_MS); }
+      function scheduleOpen(){
+        clearTimers();
+        openTimer = setTimeout(() => openRail(), OPEN_DELAY_MS);
+      }
+      function scheduleClose(){
+        clearTimers();
+        closeTimer = setTimeout(() => closeRail(), CLOSE_DELAY_MS);
+      }
 
       switchEl.addEventListener('pointerenter', () => {
         if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
@@ -776,8 +970,16 @@
         scheduleClose();
       });
 
-      railEl.addEventListener('pointerenter', () => { locked = true; clearTimers(); openRail(); });
-      railEl.addEventListener('pointerleave', () => { locked = false; scheduleClose(); });
+      railEl.addEventListener('pointerenter', () => {
+        locked = true;
+        clearTimers();
+        openRail();
+      });
+
+      railEl.addEventListener('pointerleave', () => {
+        locked = false;
+        scheduleClose();
+      });
 
       const trigger = switchEl.querySelector('.lang-trigger');
       trigger?.addEventListener('click', (e) => {
@@ -787,20 +989,25 @@
         else openRail();
       });
 
+      // iPad rotates a lot -> keep it inside viewport if open
       window.addEventListener('resize', () => {
         if (!switchEl.classList.contains('is-open')) return;
         requestAnimationFrame(() => {
-          railEl.scrollLeft = 0;
+          ensureStartVisible();
           placeRailSmart();
         });
       });
     })();
 
+    // ===== Verticals: click only (no hover), close outside / Escape =====
     (function(){
       const v = document.getElementById('verticals');
       if (!v) return;
 
-      function setOpen(isOpen){ v.classList.toggle('is-open', isOpen); v.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); }
+      function setOpen(isOpen){
+        v.classList.toggle('is-open', isOpen);
+        v.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      }
       function isOpen(){ return v.classList.contains('is-open'); }
 
       v.addEventListener('click', (e) => {
@@ -811,11 +1018,27 @@
         setOpen(!isOpen());
       });
 
-      document.addEventListener('click', (e) => { if (!v.contains(e.target)) setOpen(false); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-      v.querySelectorAll('a').forEach(a=>{ a.addEventListener('click', ()=> setOpen(false)); });
+      document.addEventListener('click', (e) => {
+        if (!v.contains(e.target)) setOpen(false);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setOpen(false);
+      });
+
+      v.querySelectorAll('a').forEach(a=>{
+        a.addEventListener('click', ()=> setOpen(false));
+      });
     })();
 
+    // Cookie preferences gear: hook to your real consent modal
     (function(){
       const gear = document.getElementById('cookiePreferencesGear');
       if (!gear) return;
+      gear.addEventListener('click', () => {
+        alert('Open Cookie Preferences (hook to your consent modal).');
+      });
+    })();
+  </script>
+</body>
+</html>
