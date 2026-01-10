@@ -328,6 +328,9 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* ✅ hide active language button */
+    .lang-pill[hidden]{ display:none !important; }
+
     .lang-switch.is-open .lang-pill{
       transform: translateX(0);
       opacity: 1;
@@ -657,7 +660,7 @@
           "cookie.prefs": "Cookie 偏好设置"
         },
         es: {
-          "nav.about": "Info",
+          "nav.about": "Acerca de",
           "nav.verticals": "Verticales",
           "nav.contact": "Contacto",
           "footer.terms": "Términos",
@@ -744,6 +747,16 @@
         const switchEl = document.getElementById("lang-switch");
         switchEl?.classList.remove("is-open");
         switchEl?.classList.remove("open-right");
+
+        // ✅ Hide current language pill (premium UX)
+        const railEl = document.getElementById("lang-rail");
+        if (railEl){
+          railEl.querySelectorAll(".lang-pill").forEach(btn => {
+            const l = btn.getAttribute("data-lang");
+            btn.hidden = (l === lang);
+          });
+          railEl.scrollLeft = 0;
+        }
 
         const shouldScramble = (text) => {
           if (!text) return false;
