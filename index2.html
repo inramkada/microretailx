@@ -282,6 +282,7 @@
       /* iOS: make it explicit that this is horizontal scrolling */
       touch-action: pan-x;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
     }
 
     .lang-rail::-webkit-scrollbar{ height:0; }
@@ -550,32 +551,31 @@
     /* ==========================
        ✅ iOS RTL: evitar empujón lateral del viewport al abrir el rail
        ========================== */
-    html[dir="rtl"], body[dir="rtl"], [dir="rtl"] body{
-      overflow-x: hidden !important;
+    html[dir="rtl"], body{
+      overflow-x: hidden;
     }
     [dir="rtl"] .page{
       overflow-x: clip;
     }
 
     /* =========================================================
-       ✅ SOLO EN ÁRABE: 8 idiomas, 2 filas, SIN scroll horizontal
-       EN ZH ES PT RU FR DE JA
-       (El resto de idiomas sigue igual en otros idiomas)
+       ✅ SOLO EN ÁRABE: MISMO DESPLIEGUE (1 fila horizontal)
+       8 idiomas: EN ZH ES PT RU FR DE JA
        ========================================================= */
     html.mx-ar-basic .lang-rail{
-      overflow-x: hidden !important;
-      overflow-y: hidden;
-      white-space: normal !important;
+      overflow-x: auto !important;         /* sigue horizontal como siempre */
+      overflow-y: hidden !important;
+      white-space: nowrap !important;
 
       direction: ltr;
       unicode-bidi: isolate;
 
-      display: flex;
-      flex-wrap: wrap !important;
-      gap: 6px 6px !important;
+      padding: 5px 6px !important;
+      gap: 6px !important;
 
-      padding: 6px 8px !important;
-      max-width: min(92vw, 520px);
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
     }
 
     html.mx-ar-basic .lang-rail .lang-pill{
@@ -595,7 +595,7 @@
 
     html.mx-ar-basic .lang-pill{
       height: 24px !important;
-      padding: 0 8px !important;
+      padding: 0 7px !important;
       font-size: 10px !important;
       letter-spacing: .10em !important;
       transform: none !important;
@@ -853,7 +853,7 @@
         html.lang = lang;
         html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
 
-        // ✅ SOLO EN ÁRABE: activar modo estable (8 idiomas + wrap) para iOS
+        // ✅ SOLO EN ÁRABE: activar modo estable (subset + compacto), sin despliegue vertical
         html.classList.toggle("mx-ar-basic", lang === "ar");
         if (lang === "ar"){
           const railEl = document.getElementById("lang-rail");
