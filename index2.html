@@ -383,6 +383,51 @@
     }
     .lang-pill:hover::after{ opacity:1; }
 
+    /* ===== Dialects (CA/EU) styling: subordinate + premium ===== */
+    .lang-pill.lang-dialect{
+      height:24px;
+      padding: 0 9px;
+      font-size: 10px;              /* 1px smaller */
+      letter-spacing: .14em;
+
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.045);
+      color: rgba(255,255,255,.92);
+    }
+
+    /* leading dot + subtle indent */
+    .lang-pill.lang-dialect::before{
+      content:"·";
+      margin-right: 8px;
+      opacity: .65;
+      transform: translateY(-0.5px);
+      display:inline-block;
+    }
+
+    /* micro badge */
+    .lang-pill .dial-tag{
+      margin-left: 8px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(0,0,0,.22);
+      font-size: 8px;
+      letter-spacing: .18em;
+      opacity: .9;
+      line-height: 1;
+      transform: translateY(-0.5px);
+      display:inline-block;
+    }
+
+    .lang-pill.lang-dialect:hover{
+      border-color: rgba(255,255,255,.36);
+      background: rgba(255,255,255,.075);
+    }
+
+    .lang-pill.lang-dialect::after{
+      border-color: rgba(255,255,255,.20);
+    }
+
     main{
       display:grid;
       place-items:center;
@@ -568,9 +613,13 @@
               <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
               <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
 
-              <!-- Only shown when Spanish is selected -->
-              <button class="lang-pill" data-lang="ca" data-label="Català" type="button" hidden>CA</button>
-              <button class="lang-pill" data-lang="eu" data-label="Euskara" type="button" hidden>EU</button>
+              <!-- Dialects (only visible when ES is active) -->
+              <button class="lang-pill lang-dialect" data-lang="ca" data-label="Català (Regional)" type="button" hidden>
+                CA <span class="dial-tag">REGIONAL</span>
+              </button>
+              <button class="lang-pill lang-dialect" data-lang="eu" data-label="Euskara (Regional)" type="button" hidden>
+                EU <span class="dial-tag">REGIONAL</span>
+              </button>
 
               <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
               <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
@@ -622,7 +671,7 @@
               data-tip="Cookie Preferences"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0 .44-.17.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
+                <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.4.12-.61l-1.92-3.32c-.11-.2-.36-.28-.57-.2l-2.39.96c-.5-.38-1.04-.7-1.64-.94l-.36-2.54A.49.49 0 0 0 13.9 1h-3.8c-.24 0-.44.17-.48.41l-.36 2.54c-.6.24-1.14.56-1.64.94l-2.39-.96c-.21-.08-.46 0-.57.2L1.74 7.45c-.11.21-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.4-.12.61l1.92 3.32c.11.2.36.28.57.2l2.39-.96c.5.38 1.04.7 1.64.94l.36 2.54c.04.24.24.41.48.41h3.8c.24 0-.44-.17-.48-.41l.36-2.54c.6-.24 1.14-.56 1.64-.94l2.39.96c.21.08.46 0 .57-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4z"/>
               </svg>
             </button>
           </span>
@@ -638,7 +687,7 @@
   </div>
 
   <script>
-    // ===== i18n + RTL + safe scramble (iPad-safe) + hide active lang =====
+    // ===== i18n + RTL + safe scramble (iPad-safe) + hide active lang + ES dialect visibility =====
     (function(){
       const I18N = {
         en: {
@@ -815,13 +864,13 @@
 
           const railEl = document.getElementById("lang-rail");
           if (railEl){
-            const showIberian = (lang === "es");
+            const showDialects = (lang === "es"); // SOLO visibles cuando ES está activo
             railEl.querySelectorAll(".lang-pill").forEach(btn => {
               const l = btn.getAttribute("data-lang");
               if (l === "ca" || l === "eu"){
-                btn.hidden = !showIberian;        // SOLO aparecen cuando estás en ES
+                btn.hidden = !showDialects;
               } else {
-                btn.hidden = (l === lang);        // oculta el idioma activo
+                btn.hidden = (l === lang);
               }
             });
             railEl.scrollLeft = 0;
@@ -861,7 +910,7 @@
       window.__mxApplyLang = applyLang;
       applyLang(getLang());
 
-      // ===== Robust tap selection inside the rail (FIX: HI selecting wrong on iOS) =====
+      // ===== Robust tap selection inside the rail (fix HI wrong selection) =====
       (function(){
         const rail = document.getElementById("lang-rail");
         if (!rail) return;
@@ -874,12 +923,11 @@
         let startX = 0, startY = 0, startScroll = 0;
         let dragging = false;
 
-        // Guardamos el botón tocado DESDE el inicio (evita que elementFromPoint se líe tras micro-scroll/RTL)
+        // Grab the pressed button on touchstart to avoid elementFromPoint mismatch
         let pressedBtn = null;
 
         function ptFromTouch(t){ return { x: t.clientX, y: t.clientY }; }
 
-        // Solo prevenimos default cuando tocas un botón (no bloquea el pan-x normal del rail)
         rail.addEventListener("touchstart", (e) => {
           const targetBtn = e.target && e.target.closest ? e.target.closest(".lang-pill") : null;
           pressedBtn = targetBtn && rail.contains(targetBtn) ? targetBtn : null;
@@ -892,7 +940,7 @@
           dragging = false;
 
           if (pressedBtn){
-            e.preventDefault(); // evita focus-scroll en Safari al tocar un botón
+            e.preventDefault(); // prevent iOS focus scroll
           }
         }, { passive:false });
 
@@ -912,7 +960,6 @@
         rail.addEventListener("touchend", (e) => {
           if (dragging){ pressedBtn = null; return; }
 
-          // Si tocó un botón, usamos ese (robusto). Si no, fallback a elementFromPoint.
           let btn = pressedBtn;
 
           if (!btn){
@@ -945,14 +992,13 @@
           pressedBtn = null;
         }, { passive:true });
 
-        // Cancela clicks fantasma
+        // Ghost clicks
         rail.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
         }, true);
 
         if (!isTouch){
-          // Desktop fallback (pointer)
           let downX = 0, downY = 0;
           let pDragging = false;
 
