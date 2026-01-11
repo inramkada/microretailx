@@ -98,7 +98,8 @@
 <footer class="footer-bar">
   <div class="copyright">
     © 2023–2026
-    <a class="brand-link" href="https://www.microretailx.com" target="_blank" rel="noopener noreferrer">MICRORETAILX</a>
+    <!-- CAMBIO ÚNICO: sin target="_blank" ni rel -->
+    <a class="brand-link" href="https://www.microretailx.com">MICRORETAILX</a>
     LLC — ALL RIGHTS RESERVED
   </div>
 </footer>
@@ -410,7 +411,7 @@
       }
 
       if (fF > fL && fF > fR) {
-        
+
       } else if (fL > fR) {
         p.a -= turn;
       } else if (fR > fL) {
@@ -512,7 +513,6 @@
       vctx.globalCompositeOperation = "lighter";
       vctx.lineCap = "round";
 
-     
       for (let i=0;i<corners.length;i++){
         const o = corners[i];
         const hx = lerp(o.x, cx, p);
@@ -522,12 +522,12 @@
         grad.addColorStop(0, `rgba(255,255,255,${0.15*p})`);
         grad.addColorStop(0.7, `rgba(255,255,255,${0.45*p})`);
         grad.addColorStop(1, `rgba(255,255,255,${0.75})`);
-        
+
         vctx.strokeStyle = grad;
         vctx.lineWidth = IS_MOBILE ? 2.8 : 3.4;
-        vctx.beginPath(); 
-        vctx.moveTo(o.x,o.y); 
-        vctx.lineTo(hx,hy); 
+        vctx.beginPath();
+        vctx.moveTo(o.x,o.y);
+        vctx.lineTo(hx,hy);
         vctx.stroke();
       }
       vctx.restore();
@@ -545,7 +545,6 @@
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
 
-    
       const rr = Math.min(W,H) * (0.35 + 0.25*intensity);
       const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
       g.addColorStop(0, `rgba(255,255,255,${0.95*intensity})`);
@@ -554,18 +553,17 @@
       g.addColorStop(0.65, `rgba(255,255,255,${0.15*intensity})`);
       g.addColorStop(1, "rgba(0,0,0,0)");
       vctx.fillStyle = g;
-      vctx.beginPath(); 
-      vctx.arc(cx,cy,rr,0,Math.PI*2); 
+      vctx.beginPath();
+      vctx.arc(cx,cy,rr,0,Math.PI*2);
       vctx.fill();
 
-      
       for (let i=0; i<4; i++) {
         const corner = corners[i];
         const rayGrad = vctx.createLinearGradient(cx, cy, corner.x, corner.y);
         rayGrad.addColorStop(0, `rgba(255,255,255,${0.65*intensity})`);
         rayGrad.addColorStop(0.5, `rgba(255,255,255,${0.25*intensity})`);
         rayGrad.addColorStop(1, "rgba(255,255,255,0)");
-        
+
         vctx.strokeStyle = rayGrad;
         vctx.lineWidth = (IS_MOBILE ? 2.0 : 2.8) * intensity;
         vctx.beginPath();
@@ -585,12 +583,10 @@
     const p3 = ease(clamp(t3 / T3, 0, 1));
 
     renderMaze();
-    
-   
+
     const fadeAlpha = (1 - p3);
     strokeX(fadeAlpha * 0.40, IS_MOBILE ? 3.6 : 4.4, IS_MOBILE ? 11.5 : 15.0);
 
-  
     if (p3 < 0.75) {
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
@@ -600,8 +596,8 @@
       g.addColorStop(0.5, `rgba(255,255,255,${0.10*(1-p3)})`);
       g.addColorStop(1, "rgba(0,0,0,0)");
       vctx.fillStyle = g;
-      vctx.beginPath(); 
-      vctx.arc(cx,cy,rr,0,Math.PI*2); 
+      vctx.beginPath();
+      vctx.arc(cx,cy,rr,0,Math.PI*2);
       vctx.fill();
       vctx.restore();
     }
