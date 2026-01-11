@@ -340,13 +340,15 @@
       opacity: 1;
     }
 
-    .lang-switch.is-open .lang-pill:nth-child(1) { transition-delay:  0ms; }
-    .lang-switch.is-open .lang-pill:nth-child(2) { transition-delay: 18ms; }
-    .lang-switch.is-open .lang-pill:nth-child(3) { transition-delay: 36ms; }
-    .lang-switch.is-open .lang-pill:nth-child(4) { transition-delay: 54ms; }
-    .lang-switch.is-open .lang-pill:nth-child(5) { transition-delay: 72ms; }
-    .lang-switch.is-open .lang-pill:nth-child(6) { transition-delay: 90ms; }
-    .lang-switch.is-open .lang-pill:nth-child(7) { transition-delay:108ms; }
+    .lang-switch.is-open .lang-pill:nth-child(1)  { transition-delay:  0ms; }
+    .lang-switch.is-open .lang-pill:nth-child(2)  { transition-delay: 18ms; }
+    .lang-switch.is-open .lang-pill:nth-child(3)  { transition-delay: 36ms; }
+    .lang-switch.is-open .lang-pill:nth-child(4)  { transition-delay: 54ms; }
+    .lang-switch.is-open .lang-pill:nth-child(5)  { transition-delay: 72ms; }
+    .lang-switch.is-open .lang-pill:nth-child(6)  { transition-delay: 90ms; }
+    .lang-switch.is-open .lang-pill:nth-child(7)  { transition-delay:108ms; }
+    .lang-switch.is-open .lang-pill:nth-child(8)  { transition-delay:126ms; }
+    .lang-switch.is-open .lang-pill:nth-child(9)  { transition-delay:144ms; }
 
     .lang-pill:hover{
       color:#fff;
@@ -561,10 +563,15 @@
             </button>
 
             <div class="lang-rail" id="lang-rail" aria-label="Languages">
-              <!-- order: EN → ZH → ES → FR → AR → RU → HI -->
+              <!-- order: EN → ZH → ES → (CA/EU appear only when ES) → FR → AR → RU → HI -->
               <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
               <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
               <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
+
+              <!-- Only shown when Spanish is selected -->
+              <button class="lang-pill" data-lang="ca" data-label="Català" type="button" hidden>CA</button>
+              <button class="lang-pill" data-lang="eu" data-label="Euskara" type="button" hidden>EU</button>
+
               <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
               <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
               <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
@@ -666,6 +673,28 @@
           "footer.legal": "Legal",
           "card.test": "Estamos trabajando — volvemos pronto.",
           "cookie.prefs": "Preferencias de cookies"
+        },
+        ca: {
+          "nav.about": "Sobre",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contacte",
+          "footer.terms": "Termes",
+          "footer.privacy": "Privadesa",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estem treballant — tornem aviat.",
+          "cookie.prefs": "Preferències de cookies"
+        },
+        eu: {
+          "nav.about": "Honi buruz",
+          "nav.verticals": "Bertikalak",
+          "nav.contact": "Kontaktua",
+          "footer.terms": "Baldintzak",
+          "footer.privacy": "Pribatutasuna",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Lege-oharra",
+          "card.test": "Lanean ari gara — laster itzuliko gara.",
+          "cookie.prefs": "Cookie ezarpenak"
         },
         fr: {
           "nav.about": "À propos",
@@ -786,9 +815,14 @@
 
           const railEl = document.getElementById("lang-rail");
           if (railEl){
+            const showIberian = (lang === "es");
             railEl.querySelectorAll(".lang-pill").forEach(btn => {
               const l = btn.getAttribute("data-lang");
-              btn.hidden = (l === lang);
+              if (l === "ca" || l === "eu"){
+                btn.hidden = !showIberian;        // SOLO aparecen cuando estás en ES
+              } else {
+                btn.hidden = (l === lang);        // oculta el idioma activo
+              }
             });
             railEl.scrollLeft = 0;
           }
@@ -827,112 +861,74 @@
       window.__mxApplyLang = applyLang;
       applyLang(getLang());
 
-      // ===== Robust tap selection inside the rail (iOS Safari / RTL-safe) =====
+      // ===== Robust tap selection inside the rail (FIX: HI selecting wrong on iOS) =====
       (function(){
         const rail = document.getElementById("lang-rail");
         if (!rail) return;
 
         const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
 
-        // Bloquea el "focus scroll" de Safari cuando intentas tocar un botón
-        function preventFocusScroll(e){
-          const btn = e.target && e.target.closest ? e.target.closest(".lang-pill") : null;
-          if (btn) e.preventDefault();
-        }
-
-        rail.addEventListener("touchstart", preventFocusScroll, { passive:false });
-
-        // Umbrales (más tolerantes para iOS: evita falsos "dragging")
-        const TAP_MOVE_PX = 14;          // movimiento del dedo
-        const TAP_SCROLL_PX = 6;         // cambio real del scroll del rail
+        const TAP_MOVE_PX = 14;
+        const TAP_SCROLL_PX = 6;
 
         let startX = 0, startY = 0, startScroll = 0;
         let dragging = false;
 
-        function getTouchPoint(t){
-          return { x: t.clientX, y: t.clientY };
-        }
+        // Guardamos el botón tocado DESDE el inicio (evita que elementFromPoint se líe tras micro-scroll/RTL)
+        let pressedBtn = null;
 
-        if (isTouch){
-          rail.addEventListener("touchstart", (e) => {
-            if (!e.touches || e.touches.length === 0) return;
+        function ptFromTouch(t){ return { x: t.clientX, y: t.clientY }; }
 
-            const p = getTouchPoint(e.touches[0]);
-            startX = p.x;
-            startY = p.y;
-            startScroll = rail.scrollLeft;
-            dragging = false;
-          }, { passive:true });
+        // Solo prevenimos default cuando tocas un botón (no bloquea el pan-x normal del rail)
+        rail.addEventListener("touchstart", (e) => {
+          const targetBtn = e.target && e.target.closest ? e.target.closest(".lang-pill") : null;
+          pressedBtn = targetBtn && rail.contains(targetBtn) ? targetBtn : null;
 
-          rail.addEventListener("touchmove", (e) => {
-            if (!e.touches || e.touches.length === 0) return;
-
-            const p = getTouchPoint(e.touches[0]);
-            const dx = Math.abs(p.x - startX);
-            const dy = Math.abs(p.y - startY);
-            const ds = Math.abs(rail.scrollLeft - startScroll);
-
-            if (dx > TAP_MOVE_PX || dy > TAP_MOVE_PX || ds > TAP_SCROLL_PX){
-              dragging = true;
-            }
-          }, { passive:true });
-
-          rail.addEventListener("touchend", (e) => {
-            if (dragging) return;
-
-            const ct = e.changedTouches && e.changedTouches[0];
-            if (!ct) return;
-
-            const p = getTouchPoint(ct);
-            const el = document.elementFromPoint(p.x, p.y);
-            const btn = el && el.closest ? el.closest(".lang-pill") : null;
-            if (!btn || !rail.contains(btn)) return;
-
-            // Evita que Safari procese un click fantasma / scroll raro
-            e.preventDefault();
-            e.stopPropagation();
-
-            const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
-            setLang(lang);
-            window.__mxApplyLang(lang);
-
-            // Limpia focus (evita auto-scroll / “empujón” en iOS)
-            btn.blur();
-            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-          }, { passive:false });
-
-          rail.addEventListener("touchcancel", () => {
-            dragging = false;
-          }, { passive:true });
-
-          // Cancela clicks fantasma
-          rail.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }, true);
-
-          return;
-        }
-
-        // Fallback desktop: pointer events
-        rail.addEventListener("pointerdown", preventFocusScroll, { passive:false });
-
-        let downX = 0, downY = 0;
-        rail.addEventListener("pointerdown", (e) => {
-          downX = e.clientX; downY = e.clientY;
+          if (!e.touches || e.touches.length === 0) return;
+          const p = ptFromTouch(e.touches[0]);
+          startX = p.x;
+          startY = p.y;
+          startScroll = rail.scrollLeft;
           dragging = false;
+
+          if (pressedBtn){
+            e.preventDefault(); // evita focus-scroll en Safari al tocar un botón
+          }
+        }, { passive:false });
+
+        rail.addEventListener("touchmove", (e) => {
+          if (!e.touches || e.touches.length === 0) return;
+
+          const p = ptFromTouch(e.touches[0]);
+          const dx = Math.abs(p.x - startX);
+          const dy = Math.abs(p.y - startY);
+          const ds = Math.abs(rail.scrollLeft - startScroll);
+
+          if (dx > TAP_MOVE_PX || dy > TAP_MOVE_PX || ds > TAP_SCROLL_PX){
+            dragging = true;
+          }
         }, { passive:true });
 
-        rail.addEventListener("pointermove", (e) => {
-          if (Math.abs(e.clientX - downX) > 10 || Math.abs(e.clientY - downY) > 10) dragging = true;
-        }, { passive:true });
+        rail.addEventListener("touchend", (e) => {
+          if (dragging){ pressedBtn = null; return; }
 
-        rail.addEventListener("pointerup", (e) => {
-          if (dragging) return;
+          // Si tocó un botón, usamos ese (robusto). Si no, fallback a elementFromPoint.
+          let btn = pressedBtn;
 
-          const el = document.elementFromPoint(e.clientX, e.clientY);
-          const btn = el && el.closest ? el.closest(".lang-pill") : null;
-          if (!btn || !rail.contains(btn)) return;
+          if (!btn){
+            const ct = e.changedTouches && e.changedTouches[0];
+            if (ct){
+              const p = ptFromTouch(ct);
+              const el = document.elementFromPoint(p.x, p.y);
+              const maybe = el && el.closest ? el.closest(".lang-pill") : null;
+              if (maybe && rail.contains(maybe)) btn = maybe;
+            }
+          }
+
+          if (!btn || btn.hidden){ pressedBtn = null; return; }
+
+          e.preventDefault();
+          e.stopPropagation();
 
           const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
           setLang(lang);
@@ -940,12 +936,52 @@
 
           btn.blur();
           if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+
+          pressedBtn = null;
+        }, { passive:false });
+
+        rail.addEventListener("touchcancel", () => {
+          dragging = false;
+          pressedBtn = null;
         }, { passive:true });
 
+        // Cancela clicks fantasma
         rail.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
         }, true);
+
+        if (!isTouch){
+          // Desktop fallback (pointer)
+          let downX = 0, downY = 0;
+          let pDragging = false;
+
+          rail.addEventListener("pointerdown", (e) => {
+            const btn = e.target && e.target.closest ? e.target.closest(".lang-pill") : null;
+            if (btn) e.preventDefault();
+            downX = e.clientX; downY = e.clientY;
+            pDragging = false;
+          }, { passive:false });
+
+          rail.addEventListener("pointermove", (e) => {
+            if (Math.abs(e.clientX - downX) > 10 || Math.abs(e.clientY - downY) > 10) pDragging = true;
+          }, { passive:true });
+
+          rail.addEventListener("pointerup", (e) => {
+            if (pDragging) return;
+
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            const btn = el && el.closest ? el.closest(".lang-pill") : null;
+            if (!btn || !rail.contains(btn) || btn.hidden) return;
+
+            const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
+            setLang(lang);
+            window.__mxApplyLang(lang);
+
+            btn.blur();
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+          }, { passive:true });
+        }
       })();
 
     })();
