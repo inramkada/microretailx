@@ -591,51 +591,43 @@
       color:rgba(255,255,255,.70);
     }
 
-    .mx-cmp-id{
+    /* CID: plain text line, no hover, no animation */
+    .mx-cmp-cid{
       margin-top:10px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 6px 10px;
-      border-radius: 999px;
+      padding: 8px 10px;
+      border-radius: 12px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.04);
-      color: rgba(255,255,255,.80);
-      font-size:10px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      user-select:none;
-      -webkit-user-select:none;
-      cursor:pointer;
-      position:relative;
-    }
-    .mx-cmp-id:hover{
-      border-color: rgba(255,255,255,.20);
-      background: rgba(255,255,255,.06);
-      color:#fff;
-    }
-    .mx-cmp-id::after{
-      content: attr(data-tip);
-      position:absolute;
-      bottom: calc(100% + 10px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.90);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 10px;
-      padding: 6px 8px;
+      color: rgba(255,255,255,.86);
       font-size: 10px;
-      font-weight: 400;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.92);
-      opacity:0;
-      pointer-events:none;
+      letter-spacing: .10em;
+      user-select:text;
+      -webkit-user-select:text;
       white-space: nowrap;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .mx-cmp-id:hover::after{ opacity:1; }
+    .mx-cmp-cid strong{
+      font-weight: 400;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      opacity: .85;
+      margin-right: 8px;
+    }
+
+    /* tiny confirmation label */
+    .mx-cmp-cid .mx-copied{
+      margin-left: 10px;
+      opacity: .55;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-size: 9px;
+      display:none;
+    }
+    .mx-cmp-cid.is-copied .mx-copied{
+      display:inline;
+      opacity:.85;
+    }
 
     .mx-cmp-body{
       padding: 12px 16px 14px;
@@ -750,6 +742,7 @@
       .mx-cmp-actions{ justify-content:stretch; }
       .mx-btn{ flex:1 1 auto; text-align:center; }
       .mx-cmp-row{ flex-direction:column; align-items:flex-start; }
+      .mx-cmp-cid{ white-space: normal; }
     }
   </style>
 </head>
@@ -850,8 +843,10 @@
           Essential cookies are always on. Choose whether to allow optional cookies.
         </p>
 
-        <!-- Hover + click to copy (no buttons) -->
-        <div class="mx-cmp-id" id="mx-cmp-id" data-tip="Click to copy"></div>
+        <!-- Plain text line. Click copies. Shows "COPIED" briefly. -->
+        <div class="mx-cmp-cid" id="mx-cmp-cid" title="Click to copy">
+          <strong>CID</strong><span id="mx-cid-text">—</span><span class="mx-copied" id="mx-copied">COPIED</span>
+        </div>
       </div>
 
       <div class="mx-cmp-body">
@@ -902,7 +897,9 @@
 
       const cmpEl = document.getElementById("mx-cmp");
       const appRoot = document.getElementById("app-root");
-      const idEl = document.getElementById("mx-cmp-id");
+
+      const cidLine = document.getElementById("mx-cmp-cid");
+      const cidText = document.getElementById("mx-cid-text");
 
       const tgAnalytics = document.getElementById("mx-tg-analytics");
       const tgMarketing = document.getElementById("mx-tg-marketing");
@@ -910,6 +907,8 @@
       const btnAccept = document.getElementById("mx-btn-accept");
       const btnReject = document.getElementById("mx-btn-reject");
       const btnSave   = document.getElementById("mx-btn-save");
+
+      let copiedTimer = null;
 
       function safeParse(json){
         try{ return JSON.parse(json); } catch(_){ return null; }
@@ -1008,25 +1007,17 @@
         }
       }
 
-      function setCIDLabel(normal){
-        if (!idEl) return;
-        idEl.textContent = normal;
-      }
-
-      function flashCopied(){
-        if (!idEl) return;
-        idEl.setAttribute("data-tip", "Copied");
-        idEl.style.transform = "translateY(-1px)";
-        setTimeout(() => {
-          idEl.style.transform = "translateY(0)";
-          idEl.setAttribute("data-tip", "Click to copy");
-        }, 650);
-      }
-
-      function updateCIDUI(){
+      function renderCID(){
         const cid = getCID();
-        setCIDLabel(`CID: ${cid}`);
-        idEl?.setAttribute("data-cid", cid);
+        if (cidText) cidText.textContent = `: ${cid}`;
+        if (cidLine) cidLine.setAttribute("data-cid", cid);
+      }
+
+      function showCopied(){
+        if (!cidLine) return;
+        if (copiedTimer) clearTimeout(copiedTimer);
+        cidLine.classList.add("is-copied");
+        copiedTimer = setTimeout(() => cidLine.classList.remove("is-copied"), 900);
       }
 
       function openCMP(forceLock){
@@ -1036,7 +1027,7 @@
         setToggle(tgAnalytics, existing?.choices?.analytics ? 1 : 0);
         setToggle(tgMarketing, existing?.choices?.marketing ? 1 : 0);
 
-        updateCIDUI();
+        renderCID();
 
         cmpEl.classList.add("is-open");
         if (forceLock) lockUI();
@@ -1074,24 +1065,23 @@
       btnReject?.addEventListener("click", (e) => { e.preventDefault(); rejectAll(); });
       btnSave?.addEventListener("click", (e) => { e.preventDefault(); savePrefs(); });
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key !== "Escape") return;
-        if (!isDecided() && cmpEl?.classList.contains("is-open")) return;
-        if (cmpEl?.classList.contains("is-open")) closeCMP();
-      });
-
       const gear = document.getElementById("cookiePreferencesGear");
       gear?.addEventListener("click", (e) => {
         e.preventDefault();
         openCMP(false);
       });
 
-      idEl?.addEventListener("click", async (e) => {
+      cidLine?.addEventListener("click", async (e) => {
         e.preventDefault();
-        e.stopPropagation();
-        const cid = idEl.getAttribute("data-cid") || getCID();
+        const cid = cidLine.getAttribute("data-cid") || getCID();
         const ok = await copyText(`CID:${cid}`);
-        if (ok) flashCopied();
+        if (ok) showCopied();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (!isDecided() && cmpEl?.classList.contains("is-open")) return;
+        if (cmpEl?.classList.contains("is-open")) closeCMP();
       });
 
       window.__mxConsent = {
