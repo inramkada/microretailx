@@ -533,6 +533,217 @@
 
     html[dir="rtl"], body{ overflow-x: hidden; }
     [dir="rtl"] .page{ overflow-x: clip; }
+
+    body.mx-consent-locked{
+      overflow:hidden;
+      touch-action:none;
+    }
+
+    body.mx-consent-locked #app-root{
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+
+    .mx-cmp{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+               max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      background: rgba(0,0,0,.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .mx-cmp.is-open{ display:flex; }
+
+    .mx-cmp-panel{
+      width:min(560px, 100%);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      background: rgba(0,0,0,.88);
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+
+    .mx-cmp-head{
+      padding: 14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+
+    .mx-cmp-title{
+      margin:0;
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      opacity:.92;
+      line-height:1.25;
+    }
+
+    .mx-cmp-sub{
+      margin:10px 0 0;
+      font-size:11px;
+      letter-spacing:.02em;
+      line-height:1.35;
+      color:rgba(255,255,255,.70);
+    }
+
+    /* CID: plain text line, no hover, no animation */
+    .mx-cmp-cid{
+      margin-top:10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.86);
+      font-size: 10px;
+      letter-spacing: .10em;
+      user-select:text;
+      -webkit-user-select:text;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mx-cmp-cid strong{
+      font-weight: 400;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      opacity: .85;
+      margin-right: 8px;
+    }
+
+    /* tiny confirmation label */
+    .mx-cmp-cid .mx-copied{
+      margin-left: 10px;
+      opacity: .55;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-size: 9px;
+      display:none;
+    }
+    .mx-cmp-cid.is-copied .mx-copied{
+      display:inline;
+      opacity:.85;
+    }
+
+    .mx-cmp-body{
+      padding: 12px 16px 14px;
+      display:grid;
+      gap:10px;
+    }
+
+    .mx-cmp-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding: 10px 12px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .mx-cmp-row strong{
+      display:block;
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.90);
+    }
+
+    .mx-cmp-row p{
+      margin:6px 0 0;
+      font-size:11px;
+      color:rgba(255,255,255,.65);
+      line-height:1.35;
+    }
+
+    .mx-switch{
+      width:44px;
+      height:24px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.35);
+      position:relative;
+      cursor:pointer;
+      flex:0 0 auto;
+      padding:0;
+    }
+
+    .mx-switch::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      left:3px;
+      width:18px;
+      height:18px;
+      transform: translateY(-50%);
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      transition: left 150ms ease, opacity 150ms ease;
+      opacity:.92;
+    }
+
+    .mx-switch[data-on="1"]{
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.22);
+    }
+
+    .mx-switch[data-on="1"]::after{ left:23px; }
+
+    .mx-switch[aria-disabled="true"]{
+      cursor:not-allowed;
+      opacity:.55;
+    }
+
+    .mx-cmp-actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      padding: 12px 16px 14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      flex-wrap:wrap;
+    }
+
+    .mx-btn{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.88);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 11px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      cursor:pointer;
+      line-height:1;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .mx-btn:hover{
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.07);
+      color:#fff;
+    }
+
+    .mx-btn.primary{
+      background: rgba(255,255,255,.10);
+      border-color: rgba(255,255,255,.22);
+    }
+
+    .mx-btn.primary:hover{
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.28);
+    }
+
+    @media (max-width: 560px){
+      .mx-cmp-actions{ justify-content:stretch; }
+      .mx-btn{ flex:1 1 auto; text-align:center; }
+      .mx-cmp-row{ flex-direction:column; align-items:flex-start; }
+      .mx-cmp-cid{ white-space: normal; }
+    }
   </style>
 </head>
 
@@ -624,7 +835,272 @@
     </footer>
   </div>
 
+  <div class="mx-cmp" id="mx-cmp" role="dialog" aria-modal="true" aria-labelledby="mx-cmp-title">
+    <div class="mx-cmp-panel">
+      <div class="mx-cmp-head">
+        <h2 class="mx-cmp-title" id="mx-cmp-title">Cookie & Consent</h2>
+        <p class="mx-cmp-sub" id="mx-cmp-desc">
+          Essential cookies are always on. Choose whether to allow optional cookies.
+        </p>
+
+        <!-- Plain text line. Click copies. Shows "COPIED" briefly. -->
+        <div class="mx-cmp-cid" id="mx-cmp-cid" title="Click to copy">
+          <strong>CID</strong><span id="mx-cid-text">—</span><span class="mx-copied" id="mx-copied">COPIED</span>
+        </div>
+      </div>
+
+      <div class="mx-cmp-body">
+        <div class="mx-cmp-row">
+          <div>
+            <strong>Necessary</strong>
+            <p>Security & core functionality.</p>
+          </div>
+          <div>
+            <div class="mx-switch" id="mx-tg-necessary" data-on="1" aria-disabled="true" aria-label="Necessary cookies"></div>
+          </div>
+        </div>
+
+        <div class="mx-cmp-row">
+          <div>
+            <strong>Analytics</strong>
+            <p>Usage insights to improve the site.</p>
+          </div>
+          <div>
+            <button class="mx-switch" id="mx-tg-analytics" type="button" data-on="0" aria-label="Analytics cookies"></button>
+          </div>
+        </div>
+
+        <div class="mx-cmp-row">
+          <div>
+            <strong>Marketing</strong>
+            <p>Personalization and campaign measurement.</p>
+          </div>
+          <div>
+            <button class="mx-switch" id="mx-tg-marketing" type="button" data-on="0" aria-label="Marketing cookies"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mx-cmp-actions">
+        <button class="mx-btn" id="mx-btn-reject" type="button">Reject</button>
+        <button class="mx-btn primary" id="mx-btn-accept" type="button">Accept</button>
+        <button class="mx-btn" id="mx-btn-save" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    (function(){
+      const CONSENT_KEY = "mx_consent";
+      const CONSENT_ID_KEY = "mx_consent_cid";
+      const CMP_VER = 1;
+
+      const cmpEl = document.getElementById("mx-cmp");
+      const appRoot = document.getElementById("app-root");
+
+      const cidLine = document.getElementById("mx-cmp-cid");
+      const cidText = document.getElementById("mx-cid-text");
+
+      const tgAnalytics = document.getElementById("mx-tg-analytics");
+      const tgMarketing = document.getElementById("mx-tg-marketing");
+
+      const btnAccept = document.getElementById("mx-btn-accept");
+      const btnReject = document.getElementById("mx-btn-reject");
+      const btnSave   = document.getElementById("mx-btn-save");
+
+      let copiedTimer = null;
+
+      function safeParse(json){
+        try{ return JSON.parse(json); } catch(_){ return null; }
+      }
+
+      function genCID(){
+        const bytes = new Uint8Array(12);
+        if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+        else for (let i=0;i<bytes.length;i++) bytes[i] = (Math.random()*256)|0;
+        return Array.from(bytes).map(b => b.toString(16).padStart(2,"0")).join("");
+      }
+
+      function getCID(){
+        let cid = localStorage.getItem(CONSENT_ID_KEY);
+        if (!cid){
+          cid = genCID();
+          localStorage.setItem(CONSENT_ID_KEY, cid);
+        }
+        return cid;
+      }
+
+      function readConsent(){
+        const v = localStorage.getItem(CONSENT_KEY);
+        const obj = safeParse(v);
+        if (!obj || typeof obj !== "object") return null;
+        if (obj.v !== CMP_VER) return null;
+        if (!obj.choices || typeof obj.choices !== "object") return null;
+        return obj;
+      }
+
+      function writeConsent(choices){
+        const payload = {
+          v: CMP_VER,
+          cid: getCID(),
+          ts: Date.now(),
+          choices: {
+            necessary: true,
+            analytics: !!choices.analytics,
+            marketing: !!choices.marketing
+          }
+        };
+        localStorage.setItem(CONSENT_KEY, JSON.stringify(payload));
+        return payload;
+      }
+
+      function isDecided(){ return !!readConsent(); }
+
+      function lockUI(){
+        document.body.classList.add("mx-consent-locked");
+        if (appRoot) appRoot.setAttribute("aria-hidden", "true");
+      }
+
+      function unlockUI(){
+        document.body.classList.remove("mx-consent-locked");
+        if (appRoot) appRoot.removeAttribute("aria-hidden");
+      }
+
+      function setToggle(btn, on){
+        if (!btn) return;
+        btn.setAttribute("data-on", on ? "1" : "0");
+      }
+
+      function getToggle(btn){
+        if (!btn) return 0;
+        return btn.getAttribute("data-on") === "1" ? 1 : 0;
+      }
+
+      function toggle(btn){
+        const on = getToggle(btn);
+        setToggle(btn, on ? 0 : 1);
+      }
+
+      async function copyText(text){
+        try{
+          if (navigator.clipboard && navigator.clipboard.writeText){
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch(_){}
+
+        try{
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "true");
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          ta.style.top = "0";
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand("copy");
+          document.body.removeChild(ta);
+          return !!ok;
+        } catch(_){
+          return false;
+        }
+      }
+
+      function renderCID(){
+        const cid = getCID();
+        if (cidText) cidText.textContent = `: ${cid}`;
+        if (cidLine) cidLine.setAttribute("data-cid", cid);
+      }
+
+      function showCopied(){
+        if (!cidLine) return;
+        if (copiedTimer) clearTimeout(copiedTimer);
+        cidLine.classList.add("is-copied");
+        copiedTimer = setTimeout(() => cidLine.classList.remove("is-copied"), 900);
+      }
+
+      function openCMP(forceLock){
+        if (!cmpEl) return;
+
+        const existing = readConsent();
+        setToggle(tgAnalytics, existing?.choices?.analytics ? 1 : 0);
+        setToggle(tgMarketing, existing?.choices?.marketing ? 1 : 0);
+
+        renderCID();
+
+        cmpEl.classList.add("is-open");
+        if (forceLock) lockUI();
+        else unlockUI();
+      }
+
+      function closeCMP(){
+        if (!cmpEl) return;
+        cmpEl.classList.remove("is-open");
+        unlockUI();
+      }
+
+      function acceptAll(){
+        writeConsent({ analytics:true, marketing:true });
+        closeCMP();
+      }
+
+      function rejectAll(){
+        writeConsent({ analytics:false, marketing:false });
+        closeCMP();
+      }
+
+      function savePrefs(){
+        writeConsent({
+          analytics: !!getToggle(tgAnalytics),
+          marketing: !!getToggle(tgMarketing)
+        });
+        closeCMP();
+      }
+
+      tgAnalytics?.addEventListener("click", (e) => { e.preventDefault(); toggle(tgAnalytics); });
+      tgMarketing?.addEventListener("click", (e) => { e.preventDefault(); toggle(tgMarketing); });
+
+      btnAccept?.addEventListener("click", (e) => { e.preventDefault(); acceptAll(); });
+      btnReject?.addEventListener("click", (e) => { e.preventDefault(); rejectAll(); });
+      btnSave?.addEventListener("click", (e) => { e.preventDefault(); savePrefs(); });
+
+      const gear = document.getElementById("cookiePreferencesGear");
+      gear?.addEventListener("click", (e) => {
+        e.preventDefault();
+        openCMP(false);
+      });
+
+      cidLine?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const cid = cidLine.getAttribute("data-cid") || getCID();
+        const ok = await copyText(`CID:${cid}`);
+        if (ok) showCopied();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (!isDecided() && cmpEl?.classList.contains("is-open")) return;
+        if (cmpEl?.classList.contains("is-open")) closeCMP();
+      });
+
+      window.__mxConsent = {
+        isDecided,
+        getCID,
+        getConsent: () => readConsent(),
+        open: () => openCMP(false),
+        openLocked: () => openCMP(true),
+        acceptAll,
+        rejectAll,
+        savePrefs,
+        reset: () => { localStorage.removeItem(CONSENT_KEY); openCMP(true); }
+      };
+
+      if (!isDecided()){
+        openCMP(true);
+      }
+    })();
+
     (function(){
       const I18N = {
         en: {
@@ -852,7 +1328,6 @@
 
         let startX = 0, startY = 0, startScroll = 0;
         let dragging = false;
-
         let pressedBtn = null;
 
         function ptFromTouch(t){ return { x: t.clientX, y: t.clientY }; }
@@ -1140,14 +1615,6 @@
 
       v.querySelectorAll('a').forEach(a=>{
         a.addEventListener('click', ()=> setOpen(false));
-      });
-    })();
-
-    (function(){
-      const gear = document.getElementById('cookiePreferencesGear');
-      if (!gear) return;
-      gear.addEventListener('click', () => {
-        alert('Open Cookie Preferences (hook to your consent modal).');
       });
     })();
   </script>
