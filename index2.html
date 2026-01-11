@@ -538,11 +538,11 @@
       overflow:hidden;
       touch-action:none;
     }
+
     body.mx-consent-locked #app-root{
       pointer-events:none;
       user-select:none;
       -webkit-user-select:none;
-      filter: blur(1px);
     }
 
     .mx-cmp{
@@ -550,54 +550,53 @@
       inset:0;
       z-index:9999;
       display:none;
-      align-items:flex-end;
+      align-items:center;
       justify-content:center;
-      padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
-      background: rgba(0,0,0,.68);
+      padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+               max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      background: rgba(0,0,0,.78);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
     .mx-cmp.is-open{ display:flex; }
 
     .mx-cmp-panel{
-      width:min(760px, 100%);
+      width:min(560px, 100%);
       border:1px solid rgba(255,255,255,.14);
-      border-radius: 18px;
-      background: rgba(0,0,0,.86);
+      border-radius: 16px;
+      background: rgba(0,0,0,.88);
       box-shadow: 0 18px 60px rgba(0,0,0,.55);
       overflow:hidden;
     }
+
     .mx-cmp-head{
-      padding: 14px 16px 10px;
+      padding: 14px 16px;
       border-bottom:1px solid rgba(255,255,255,.10);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
     }
+
     .mx-cmp-title{
+      margin:0;
       font-size:12px;
       letter-spacing:.18em;
       text-transform:uppercase;
       opacity:.92;
-      margin:0;
       line-height:1.25;
     }
+
     .mx-cmp-sub{
-      margin:8px 0 0;
+      margin:10px 0 0;
       font-size:11px;
       letter-spacing:.02em;
       line-height:1.35;
       color:rgba(255,255,255,.70);
-      max-width: 62ch;
     }
+
     .mx-cmp-id{
+      margin-top:10px;
       font-size:10px;
       letter-spacing:.12em;
       text-transform:uppercase;
       color:rgba(255,255,255,.45);
-      white-space:nowrap;
-      padding-top:2px;
     }
 
     .mx-cmp-body{
@@ -608,37 +607,30 @@
 
     .mx-cmp-row{
       display:flex;
-      align-items:flex-start;
+      align-items:center;
       justify-content:space-between;
       gap:14px;
-      padding: 10px 10px;
+      padding: 10px 12px;
       border:1px solid rgba(255,255,255,.10);
       border-radius: 14px;
       background: rgba(255,255,255,.03);
     }
+
     .mx-cmp-row strong{
       display:block;
       font-size:11px;
       letter-spacing:.14em;
       text-transform:uppercase;
       color:rgba(255,255,255,.90);
-      margin-bottom:6px;
     }
+
     .mx-cmp-row p{
-      margin:0;
+      margin:6px 0 0;
       font-size:11px;
       color:rgba(255,255,255,.65);
       line-height:1.35;
-      max-width: 60ch;
     }
 
-    .mx-toggle{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding-top:2px;
-      white-space:nowrap;
-    }
     .mx-switch{
       width:44px;
       height:24px;
@@ -648,7 +640,9 @@
       position:relative;
       cursor:pointer;
       flex:0 0 auto;
+      padding:0;
     }
+
     .mx-switch::after{
       content:"";
       position:absolute;
@@ -662,11 +656,14 @@
       transition: left 150ms ease, opacity 150ms ease;
       opacity:.92;
     }
+
     .mx-switch[data-on="1"]{
       background: rgba(255,255,255,.08);
       border-color: rgba(255,255,255,.22);
     }
+
     .mx-switch[data-on="1"]::after{ left:23px; }
+
     .mx-switch[aria-disabled="true"]{
       cursor:not-allowed;
       opacity:.55;
@@ -694,34 +691,27 @@
       line-height:1;
       -webkit-tap-highlight-color: transparent;
     }
+
     .mx-btn:hover{
       border-color: rgba(255,255,255,.22);
       background: rgba(255,255,255,.07);
       color:#fff;
     }
+
     .mx-btn.primary{
       background: rgba(255,255,255,.10);
       border-color: rgba(255,255,255,.22);
     }
+
     .mx-btn.primary:hover{
       background: rgba(255,255,255,.14);
       border-color: rgba(255,255,255,.28);
     }
 
     @media (max-width: 560px){
-      .mx-cmp{
-        align-items:flex-end;
-      }
-      .mx-cmp-actions{
-        justify-content:stretch;
-      }
-      .mx-btn{
-        flex:1 1 auto;
-        text-align:center;
-      }
-      .mx-cmp-sub{ max-width: 100%; }
-      .mx-cmp-row{ flex-direction:column; }
-      .mx-toggle{ justify-content:flex-start; }
+      .mx-cmp-actions{ justify-content:stretch; }
+      .mx-btn{ flex:1 1 auto; text-align:center; }
+      .mx-cmp-row{ flex-direction:column; align-items:flex-start; }
     }
   </style>
 </head>
@@ -805,6 +795,12 @@
           </span>
 
           <a href="legal.html" data-i18n="footer.legal">Legal</a>
+
+          <span id="mx-consent-trace" style="display:none; gap:10px; align-items:center;">
+            <span style="opacity:.55;">·</span>
+            <a href="javascript:void(0)" id="mx-consent-status" style="opacity:.75; text-decoration:none;">Consent</a>
+            <a href="javascript:void(0)" id="mx-consent-open" style="opacity:.85; text-decoration:none;">Preferences</a>
+          </span>
         </div>
 
         <div class="copyright">
@@ -817,12 +813,10 @@
   <div class="mx-cmp" id="mx-cmp" role="dialog" aria-modal="true" aria-labelledby="mx-cmp-title">
     <div class="mx-cmp-panel">
       <div class="mx-cmp-head">
-        <div>
-          <h2 class="mx-cmp-title" id="mx-cmp-title">Cookie & Consent</h2>
-          <p class="mx-cmp-sub" id="mx-cmp-desc">
-            We use essential cookies to operate this site. You can accept or reject optional cookies. You can change your choice anytime.
-          </p>
-        </div>
+        <h2 class="mx-cmp-title" id="mx-cmp-title">Cookie & Consent</h2>
+        <p class="mx-cmp-sub" id="mx-cmp-desc">
+          Essential cookies are always on. Choose whether to allow optional cookies.
+        </p>
         <div class="mx-cmp-id" id="mx-cmp-id"></div>
       </div>
 
@@ -830,9 +824,9 @@
         <div class="mx-cmp-row">
           <div>
             <strong>Necessary</strong>
-            <p>Required for core functionality and security. Always enabled.</p>
+            <p>Security & core functionality.</p>
           </div>
-          <div class="mx-toggle">
+          <div>
             <div class="mx-switch" id="mx-tg-necessary" data-on="1" aria-disabled="true" aria-label="Necessary cookies"></div>
           </div>
         </div>
@@ -840,9 +834,9 @@
         <div class="mx-cmp-row">
           <div>
             <strong>Analytics</strong>
-            <p>Helps us understand usage to improve the experience.</p>
+            <p>Usage insights to improve the site.</p>
           </div>
-          <div class="mx-toggle">
+          <div>
             <button class="mx-switch" id="mx-tg-analytics" type="button" data-on="0" aria-label="Analytics cookies"></button>
           </div>
         </div>
@@ -850,17 +844,17 @@
         <div class="mx-cmp-row">
           <div>
             <strong>Marketing</strong>
-            <p>Helps personalize content and measure campaigns.</p>
+            <p>Personalization and campaign measurement.</p>
           </div>
-          <div class="mx-toggle">
+          <div>
             <button class="mx-switch" id="mx-tg-marketing" type="button" data-on="0" aria-label="Marketing cookies"></button>
           </div>
         </div>
       </div>
 
       <div class="mx-cmp-actions">
-        <button class="mx-btn" id="mx-btn-reject" type="button">Reject all</button>
-        <button class="mx-btn primary" id="mx-btn-accept" type="button">Accept all</button>
+        <button class="mx-btn" id="mx-btn-reject" type="button">Reject</button>
+        <button class="mx-btn primary" id="mx-btn-accept" type="button">Accept</button>
         <button class="mx-btn" id="mx-btn-save" type="button">Save</button>
       </div>
     </div>
@@ -882,6 +876,10 @@
       const btnAccept = document.getElementById("mx-btn-accept");
       const btnReject = document.getElementById("mx-btn-reject");
       const btnSave   = document.getElementById("mx-btn-save");
+
+      const traceWrap  = document.getElementById("mx-consent-trace");
+      const traceStat  = document.getElementById("mx-consent-status");
+      const traceOpen  = document.getElementById("mx-consent-open");
 
       function safeParse(json){
         try{ return JSON.parse(json); } catch(_){ return null; }
@@ -923,35 +921,6 @@
         if (appRoot) appRoot.removeAttribute("aria-hidden");
       }
 
-      function openCMP(force){
-        if (!cmpEl) return;
-        idEl.textContent = CMP_ID;
-
-        const existing = readConsent();
-        const a = existing?.choices?.analytics ? 1 : 0;
-        const m = existing?.choices?.marketing ? 1 : 0;
-
-        setToggle(tgAnalytics, a);
-        setToggle(tgMarketing, m);
-
-        cmpEl.classList.add("is-open");
-        lockUI();
-
-        if (force !== true){
-          const decided = isDecided();
-          if (decided){
-            unlockUI();
-            cmpEl.classList.remove("is-open");
-          }
-        }
-      }
-
-      function closeCMP(){
-        if (!cmpEl) return;
-        cmpEl.classList.remove("is-open");
-        unlockUI();
-      }
-
       function setToggle(btn, on){
         if (!btn) return;
         btn.setAttribute("data-on", on ? "1" : "0");
@@ -967,13 +936,54 @@
         setToggle(btn, on ? 0 : 1);
       }
 
+      function updateFooterTrace(){
+        const c = readConsent();
+        if (!traceWrap || !traceStat || !traceOpen) return;
+
+        if (!c){
+          traceWrap.style.display = "none";
+          return;
+        }
+
+        traceWrap.style.display = "inline-flex";
+
+        const anyOptional = !!(c.choices.analytics || c.choices.marketing);
+        traceStat.textContent = anyOptional ? "Consent: Accepted" : "Consent: Rejected";
+      }
+
+      function openCMP(forceLock){
+        if (!cmpEl) return;
+
+        if (idEl) idEl.textContent = CMP_ID;
+
+        const existing = readConsent();
+        setToggle(tgAnalytics, existing?.choices?.analytics ? 1 : 0);
+        setToggle(tgMarketing, existing?.choices?.marketing ? 1 : 0);
+
+        cmpEl.classList.add("is-open");
+
+        if (forceLock){
+          lockUI();
+        } else {
+          unlockUI();
+        }
+      }
+
+      function closeCMP(){
+        if (!cmpEl) return;
+        cmpEl.classList.remove("is-open");
+        unlockUI();
+      }
+
       function acceptAll(){
         writeConsent({ analytics:true, marketing:true });
+        updateFooterTrace();
         closeCMP();
       }
 
       function rejectAll(){
         writeConsent({ analytics:false, marketing:false });
+        updateFooterTrace();
         closeCMP();
       }
 
@@ -982,6 +992,7 @@
           analytics: !!getToggle(tgAnalytics),
           marketing: !!getToggle(tgMarketing)
         });
+        updateFooterTrace();
         closeCMP();
       }
 
@@ -994,28 +1005,45 @@
 
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Escape") return;
+
         if (!isDecided() && cmpEl?.classList.contains("is-open")) return;
+
         if (cmpEl?.classList.contains("is-open")) closeCMP();
+      });
+
+      traceOpen?.addEventListener("click", (e) => {
+        e.preventDefault();
+        openCMP(false);
+      });
+
+      traceStat?.addEventListener("click", (e) => {
+        e.preventDefault();
+        openCMP(false);
+      });
+
+      const gear = document.getElementById("cookiePreferencesGear");
+      gear?.addEventListener("click", (e) => {
+        e.preventDefault();
+        openCMP(false);
       });
 
       window.__mxConsent = {
         cmpId: CMP_ID,
         isDecided,
         getConsent: () => readConsent(),
-        open: () => openCMP(true),
+        open: () => openCMP(false),
+        openLocked: () => openCMP(true),
         acceptAll,
         rejectAll,
         savePrefs,
-        reset: () => { localStorage.removeItem(CONSENT_KEY); openCMP(true); }
+        reset: () => { localStorage.removeItem(CONSENT_KEY); updateFooterTrace(); openCMP(true); }
       };
 
-      if (!isDecided()) openCMP(true);
+      updateFooterTrace();
 
-      const gear = document.getElementById("cookiePreferencesGear");
-      gear?.addEventListener("click", (e) => {
-        e.preventDefault();
+      if (!isDecided()){
         openCMP(true);
-      });
+      }
     })();
 
     (function(){
