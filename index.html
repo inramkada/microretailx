@@ -13,6 +13,12 @@
   <meta property="og:title" content="MICRORETAILX">
   <meta property="og:description" content="Advanced biotech and creative technology platforms.">
   <meta property="og:url" content="https://www.microretailx.com">
+  <meta property="og:image" content="https://www.microretailx.com/og-image.jpg">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MICRORETAILX">
+  <meta name="twitter:description" content="Advanced biotech and creative technology platforms.">
+  <meta name="twitter:image" content="https://www.microretailx.com/og-image.jpg">
 
   <style>
     :root{
@@ -152,18 +158,22 @@
       top:100%;
       left:0;
       margin-top:10px;
+
       display:flex;
       flex-direction:column;
       gap:10px;
+
       padding:0;
       padding-top:2px;
       border:0;
       background:transparent;
       border-radius:0;
+
       opacity:0;
       pointer-events:none;
       transform: translateY(6px);
       transition: opacity 160ms ease, transform 160ms ease;
+
       white-space:nowrap;
       z-index:50;
     }
@@ -234,29 +244,38 @@
 
     .lang-rail{
       --rail-shift: 0px;
+
       position:absolute;
       right: calc(100% + 10px);
       top: 50%;
       transform: translateY(-50%) translateX(var(--rail-shift));
+
       display:flex;
       align-items:center;
       gap:8px;
+
       padding:6px 8px;
       border:1px solid var(--menu-border);
       background: var(--menu-bg);
       border-radius: 999px;
+
       max-width: min(780px, calc(100vw - (2 * var(--px)) - 80px));
       overflow-x: auto;
       overflow-y: hidden;
       white-space: nowrap;
+
       direction:ltr;
       unicode-bidi:isolate;
+
       opacity:0;
       pointer-events:none;
+
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+
       transition: opacity 0.4s ease, transform 0.2s ease;
+
       touch-action: pan-x;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
@@ -338,18 +357,22 @@
       bottom: calc(100% + 8px);
       left: 50%;
       transform: translateX(-50%);
+
       background: rgba(0,0,0,.90);
       border: 1px solid rgba(255,255,255,.14);
       border-radius: 10px;
       padding: 6px 8px;
+
       font-size: 10px;
       font-weight: 400;
       letter-spacing: .06em;
       text-transform: uppercase;
       color: rgba(255,255,255,.92);
+
       opacity:0;
       pointer-events:none;
       white-space: nowrap;
+
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
@@ -410,11 +433,6 @@
       font-weight:400;
     }
 
-    .cookie-inline{
-      display:inline-flex;
-      align-items:center;
-    }
-
     .cookie-gear{
       display:inline-flex;
       align-items:center;
@@ -428,7 +446,6 @@
       cursor:pointer;
       position:relative;
       vertical-align:middle;
-      padding:0;
     }
     .cookie-gear:hover{
       border-color: rgba(255,255,255,.20);
@@ -574,20 +591,43 @@
       color:rgba(255,255,255,.70);
     }
 
-    .mx-cmp-legal{
-      margin:10px 0 0;
-      font-size:11px;
-      color:rgba(255,255,255,.62);
-      line-height:1.45;
+    /* CID: plain text line, no hover, no animation */
+    .mx-cmp-cid{
+      margin-top:10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.86);
+      font-size: 10px;
+      letter-spacing: .10em;
+      user-select:text;
+      -webkit-user-select:text;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mx-cmp-cid strong{
+      font-weight: 400;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      opacity: .85;
+      margin-right: 8px;
     }
 
-    .mx-cmp-legal a{
-      color:rgba(255,255,255,.86);
-      text-decoration:none;
-      border-bottom:1px solid rgba(255,255,255,.18);
-      padding-bottom:1px;
+    /* tiny confirmation label */
+    .mx-cmp-cid .mx-copied{
+      margin-left: 10px;
+      opacity: .55;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-size: 9px;
+      display:none;
     }
-    .mx-cmp-legal a:hover{ color:#fff; border-bottom-color:rgba(255,255,255,.34); }
+    .mx-cmp-cid.is-copied .mx-copied{
+      display:inline;
+      opacity:.85;
+    }
 
     .mx-cmp-body{
       padding: 12px 16px 14px;
@@ -651,6 +691,7 @@
       background: rgba(255,255,255,.08);
       border-color: rgba(255,255,255,.22);
     }
+
     .mx-switch[data-on="1"]::after{ left:23px; }
 
     .mx-switch[aria-disabled="true"]{
@@ -701,6 +742,7 @@
       .mx-cmp-actions{ justify-content:stretch; }
       .mx-btn{ flex:1 1 auto; text-align:center; }
       .mx-cmp-row{ flex-direction:column; align-items:flex-start; }
+      .mx-cmp-cid{ white-space: normal; }
     }
   </style>
 </head>
@@ -727,11 +769,11 @@
               <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
               <button class="lang-pill" data-lang="ca" data-label="Català" type="button">CA</button>
               <button class="lang-pill" data-lang="eu" data-label="Euskara" type="button">EU</button>
-              <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
-              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
-              <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
               <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
               <button class="lang-pill" data-lang="hi" data-label="हिंदी (Hindi)" type="button">HI</button>
+              <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
+              <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
+              <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
             </div>
           </div>
 
@@ -768,7 +810,7 @@
           <a href="terms.html" data-i18n="footer.terms">Terms</a>
           <a href="privacy.html" data-i18n="footer.privacy">Privacy</a>
 
-          <span class="cookie-inline">
+          <span style="display:inline-flex; align-items:center;">
             <a href="cookies.html" data-i18n="footer.cookies">Cookies</a>
             <button
               type="button"
@@ -796,46 +838,53 @@
   <div class="mx-cmp" id="mx-cmp" role="dialog" aria-modal="true" aria-labelledby="mx-cmp-title">
     <div class="mx-cmp-panel">
       <div class="mx-cmp-head">
-        <h2 class="mx-cmp-title" id="mx-cmp-title">Privacy controls</h2>
-        <p class="mx-cmp-sub">
-          We use essential technologies to operate securely. Optional cookies help us measure performance and improve experiences. You can accept, reject non-essential, or customize.
+        <h2 class="mx-cmp-title" id="mx-cmp-title">Cookie & Consent</h2>
+        <p class="mx-cmp-sub" id="mx-cmp-desc">
+          Essential cookies are always on. Choose whether to allow optional cookies.
         </p>
-        <p class="mx-cmp-legal">
-          Essential: security, load-balancing, preferences. Optional: analytics and marketing. Your choice applies on this device and can be changed anytime via the gear icon.
-          Learn more in <a href="cookies.html">Cookies</a> and <a href="privacy.html">Privacy</a>. If applicable, you may opt out of “sale/share” of data in our Privacy page.
-        </p>
+
+        <!-- Plain text line. Click copies. Shows "COPIED" briefly. -->
+        <div class="mx-cmp-cid" id="mx-cmp-cid" title="Click to copy">
+          <strong>CID</strong><span id="mx-cid-text">—</span><span class="mx-copied" id="mx-copied">COPIED</span>
+        </div>
       </div>
 
       <div class="mx-cmp-body">
         <div class="mx-cmp-row">
           <div>
             <strong>Necessary</strong>
-            <p>Security & core functionality. Always on.</p>
+            <p>Security & core functionality.</p>
           </div>
-          <button class="mx-switch" id="mx-tg-necessary" type="button" data-on="1" aria-disabled="true" aria-label="Necessary cookies"></button>
+          <div>
+            <div class="mx-switch" id="mx-tg-necessary" data-on="1" aria-disabled="true" aria-label="Necessary cookies"></div>
+          </div>
         </div>
 
         <div class="mx-cmp-row">
           <div>
             <strong>Analytics</strong>
-            <p>Helps us understand site usage and performance.</p>
+            <p>Usage insights to improve the site.</p>
           </div>
-          <button class="mx-switch" id="mx-tg-analytics" type="button" data-on="0" aria-label="Analytics cookies"></button>
+          <div>
+            <button class="mx-switch" id="mx-tg-analytics" type="button" data-on="0" aria-label="Analytics cookies"></button>
+          </div>
         </div>
 
         <div class="mx-cmp-row">
           <div>
             <strong>Marketing</strong>
-            <p>Personalization and campaign measurement (optional).</p>
+            <p>Personalization and campaign measurement.</p>
           </div>
-          <button class="mx-switch" id="mx-tg-marketing" type="button" data-on="0" aria-label="Marketing cookies"></button>
+          <div>
+            <button class="mx-switch" id="mx-tg-marketing" type="button" data-on="0" aria-label="Marketing cookies"></button>
+          </div>
         </div>
       </div>
 
       <div class="mx-cmp-actions">
-        <button class="mx-btn" id="mx-btn-reject" type="button">Reject non-essential</button>
-        <button class="mx-btn" id="mx-btn-save" type="button">Save choices</button>
-        <button class="mx-btn primary" id="mx-btn-accept" type="button">Accept all</button>
+        <button class="mx-btn" id="mx-btn-reject" type="button">Reject</button>
+        <button class="mx-btn primary" id="mx-btn-accept" type="button">Accept</button>
+        <button class="mx-btn" id="mx-btn-save" type="button">Save</button>
       </div>
     </div>
   </div>
@@ -843,10 +892,14 @@
   <script>
     (function(){
       const CONSENT_KEY = "mx_consent";
+      const CONSENT_ID_KEY = "mx_consent_cid";
       const CMP_VER = 1;
 
       const cmpEl = document.getElementById("mx-cmp");
       const appRoot = document.getElementById("app-root");
+
+      const cidLine = document.getElementById("mx-cmp-cid");
+      const cidText = document.getElementById("mx-cid-text");
 
       const tgAnalytics = document.getElementById("mx-tg-analytics");
       const tgMarketing = document.getElementById("mx-tg-marketing");
@@ -855,8 +908,26 @@
       const btnReject = document.getElementById("mx-btn-reject");
       const btnSave   = document.getElementById("mx-btn-save");
 
+      let copiedTimer = null;
+
       function safeParse(json){
         try{ return JSON.parse(json); } catch(_){ return null; }
+      }
+
+      function genCID(){
+        const bytes = new Uint8Array(12);
+        if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+        else for (let i=0;i<bytes.length;i++) bytes[i] = (Math.random()*256)|0;
+        return Array.from(bytes).map(b => b.toString(16).padStart(2,"0")).join("");
+      }
+
+      function getCID(){
+        let cid = localStorage.getItem(CONSENT_ID_KEY);
+        if (!cid){
+          cid = genCID();
+          localStorage.setItem(CONSENT_ID_KEY, cid);
+        }
+        return cid;
       }
 
       function readConsent(){
@@ -871,6 +942,7 @@
       function writeConsent(choices){
         const payload = {
           v: CMP_VER,
+          cid: getCID(),
           ts: Date.now(),
           choices: {
             necessary: true,
@@ -909,10 +981,53 @@
         setToggle(btn, on ? 0 : 1);
       }
 
+      async function copyText(text){
+        try{
+          if (navigator.clipboard && navigator.clipboard.writeText){
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch(_){}
+
+        try{
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "true");
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          ta.style.top = "0";
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand("copy");
+          document.body.removeChild(ta);
+          return !!ok;
+        } catch(_){
+          return false;
+        }
+      }
+
+      function renderCID(){
+        const cid = getCID();
+        if (cidText) cidText.textContent = `: ${cid}`;
+        if (cidLine) cidLine.setAttribute("data-cid", cid);
+      }
+
+      function showCopied(){
+        if (!cidLine) return;
+        if (copiedTimer) clearTimeout(copiedTimer);
+        cidLine.classList.add("is-copied");
+        copiedTimer = setTimeout(() => cidLine.classList.remove("is-copied"), 900);
+      }
+
       function openCMP(forceLock){
+        if (!cmpEl) return;
+
         const existing = readConsent();
         setToggle(tgAnalytics, existing?.choices?.analytics ? 1 : 0);
         setToggle(tgMarketing, existing?.choices?.marketing ? 1 : 0);
+
+        renderCID();
 
         cmpEl.classList.add("is-open");
         if (forceLock) lockUI();
@@ -920,6 +1035,7 @@
       }
 
       function closeCMP(){
+        if (!cmpEl) return;
         cmpEl.classList.remove("is-open");
         unlockUI();
       }
@@ -955,18 +1071,22 @@
         openCMP(false);
       });
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key !== "Escape") return;
-        if (!isDecided() && cmpEl.classList.contains("is-open")) return;
-        if (cmpEl.classList.contains("is-open")) closeCMP();
+      cidLine?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const cid = cidLine.getAttribute("data-cid") || getCID();
+        const ok = await copyText(`CID:${cid}`);
+        if (ok) showCopied();
       });
 
-      if (!isDecided()){
-        openCMP(true);
-      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (!isDecided() && cmpEl?.classList.contains("is-open")) return;
+        if (cmpEl?.classList.contains("is-open")) closeCMP();
+      });
 
       window.__mxConsent = {
         isDecided,
+        getCID,
         getConsent: () => readConsent(),
         open: () => openCMP(false),
         openLocked: () => openCMP(true),
@@ -975,6 +1095,344 @@
         savePrefs,
         reset: () => { localStorage.removeItem(CONSENT_KEY); openCMP(true); }
       };
+
+      if (!isDecided()){
+        openCMP(true);
+      }
+    })();
+
+    (function(){
+      const I18N = {
+        en: {
+          "nav.about": "About",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contact",
+          "footer.terms": "Terms",
+          "footer.privacy": "Privacy",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "We’re working on it — coming back soon.",
+          "cookie.prefs": "Cookie Preferences"
+        },
+        zh: {
+          "nav.about": "关于",
+          "nav.verticals": "领域",
+          "nav.contact": "联系",
+          "footer.terms": "条款",
+          "footer.privacy": "隐私",
+          "footer.cookies": "Cookies",
+          "footer.legal": "法律",
+          "card.test": "我们正在建设中，敬请期待。",
+          "cookie.prefs": "Cookie 偏好设置"
+        },
+        es: {
+          "nav.about": "Acerca de",
+          "nav.verticals": "Verticales",
+          "nav.contact": "Contacto",
+          "footer.terms": "Términos",
+          "footer.privacy": "Privacidad",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estamos trabajando — volvemos pronto.",
+          "cookie.prefs": "Preferencias de cookies"
+        },
+        ca: {
+          "nav.about": "Sobre",
+          "nav.verticals": "Verticals",
+          "nav.contact": "Contacte",
+          "footer.terms": "Termes",
+          "footer.privacy": "Privadesa",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Legal",
+          "card.test": "Estem treballant — tornem aviat.",
+          "cookie.prefs": "Preferències de cookies"
+        },
+        eu: {
+          "nav.about": "Honi buruz",
+          "nav.verticals": "Bertikalak",
+          "nav.contact": "Kontaktua",
+          "footer.terms": "Bald.",
+          "footer.privacy": "Prib.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Lege-oharra",
+          "card.test": "Lanean ari gara — laster itzuliko gara.",
+          "cookie.prefs": "Cookie ezarpenak"
+        },
+        fr: {
+          "nav.about": "À propos",
+          "nav.verticals": "Verticales",
+          "nav.contact": "Contact",
+          "footer.terms": "CGU",
+          "footer.privacy": "Conf.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Légal",
+          "card.test": "Nous travaillons — de retour bientôt.",
+          "cookie.prefs": "Préférences cookies"
+        },
+        ar: {
+          "nav.about": "حول",
+          "nav.verticals": "القطاعات",
+          "nav.contact": "تواصل",
+          "footer.terms": "الشروط",
+          "footer.privacy": "الخصوصية",
+          "footer.cookies": "الكوكيز",
+          "footer.legal": "قانوني",
+          "card.test": "نعمل على ذلك — نعود قريبًا.",
+          "cookie.prefs": "تفضيلات الكوكيز"
+        },
+        ru: {
+          "nav.about": "О нас",
+          "nav.verticals": "Вертикали",
+          "nav.contact": "Контакты",
+          "footer.terms": "Усл.",
+          "footer.privacy": "Конф.",
+          "footer.cookies": "Cookies",
+          "footer.legal": "Право",
+          "card.test": "Мы работаем — скоро вернёмся.",
+          "cookie.prefs": "Настройки cookies"
+        },
+        hi: {
+          "nav.about": "परिचय",
+          "nav.verticals": "वर्टिकल्स",
+          "nav.contact": "संपर्क",
+          "footer.terms": "शर्तें",
+          "footer.privacy": "गोपनीयता",
+          "footer.cookies": "Cookies",
+          "footer.legal": "कानूनी",
+          "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।",
+          "cookie.prefs": "कुकी प्राथमिकताएँ"
+        }
+      };
+
+      const RTL_LANGS = new Set(["ar"]);
+      const DEFAULT_LANG = "en";
+      const storageKey = "mx_lang";
+
+      function getLang(){ return localStorage.getItem(storageKey) || DEFAULT_LANG; }
+      function setLang(lang){ localStorage.setItem(storageKey, lang); }
+
+      const POOL_LATIN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const POOL_CYR   = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ0123456789";
+      const POOL_DEV   = "अआइईउऊएऐओऔकखगघचछजझटठडढतथदधनपफबभमयरलवशषसह०१२३४५६७८९";
+      const POOL_CJK   = "的一是在不了有人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经";
+      const POOL_AR    = "ابتثجحخدذرزسشصضطظعغفقكلمنهوي٠١٢٣٤٥٦٧٨٩";
+
+      function poolForLang(lang){
+        if (lang === "ru") return POOL_CYR;
+        if (lang === "hi") return POOL_DEV;
+        if (lang === "zh") return POOL_CJK;
+        if (lang === "ar") return POOL_AR;
+        return POOL_LATIN;
+      }
+
+      function scrambleSmart(el, finalText, durationMs, lang){
+        const base = String(finalText ?? "");
+        const pool = poolForLang(lang);
+        const isArabic = (lang === "ar");
+
+        const start = performance.now();
+        const tick = (t) => {
+          const p = Math.min(1, (t - start) / durationMs);
+          const reveal = Math.floor(p * base.length);
+
+          if (isArabic){
+            const shown = base.slice(0, reveal);
+            const hidden = base.slice(reveal).replace(/[^\s]/g, " ");
+            el.textContent = shown + hidden;
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = base;
+            return;
+          }
+
+          let out = "";
+          for (let i = 0; i < base.length; i++){
+            const c = base[i];
+            if (i < reveal) { out += c; continue; }
+            if (c === " ") { out += " "; continue; }
+            if (/[\.\,\!\?\:\;\-\—\–\(\)\[\]\/\&\+%#@€$£"']/.test(c)) { out += c; continue; }
+            out += pool[(Math.random() * pool.length) | 0];
+          }
+          el.textContent = out;
+
+          if (p < 1) requestAnimationFrame(tick);
+          else el.textContent = base;
+        };
+        requestAnimationFrame(tick);
+      }
+
+      function applyLang(lang){
+        document.body.classList.add("is-i18n-switching");
+
+        try{
+          const dict = I18N[lang] || I18N[DEFAULT_LANG];
+
+          const html = document.documentElement;
+          html.lang = lang;
+          html.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
+
+          const switchEl = document.getElementById("lang-switch");
+          switchEl?.classList.remove("is-open");
+          switchEl?.classList.remove("open-right");
+
+          const railEl = document.getElementById("lang-rail");
+          if (railEl){
+            railEl.querySelectorAll(".lang-pill").forEach(btn => {
+              const l = btn.getAttribute("data-lang");
+              btn.hidden = (l === lang);
+            });
+            railEl.scrollLeft = 0;
+          }
+
+          const nodes = Array.from(document.querySelectorAll("[data-i18n]"));
+          nodes.forEach(el => el.classList.add("mx-i18n-out"));
+
+          setTimeout(() => {
+            nodes.forEach(el => {
+              const key = el.getAttribute("data-i18n");
+              if (!key) return;
+              const val = dict[key] ?? I18N[DEFAULT_LANG][key];
+              if (typeof val !== "string") return;
+
+              scrambleSmart(el, val, 220, lang);
+
+              el.classList.remove("mx-i18n-out");
+              el.classList.add("mx-i18n-in");
+            });
+
+            const gear = document.getElementById("cookiePreferencesGear");
+            if (gear){
+              const tip = dict["cookie.prefs"] ?? I18N[DEFAULT_LANG]["cookie.prefs"];
+              gear.setAttribute("data-tip", tip);
+              gear.setAttribute("aria-label", tip);
+            }
+
+            setTimeout(() => nodes.forEach(el => el.classList.remove("mx-i18n-in")), 220);
+          }, 160);
+
+        } finally {
+          setTimeout(() => document.body.classList.remove("is-i18n-switching"), 260);
+        }
+      }
+
+      window.__mxApplyLang = applyLang;
+      applyLang(getLang());
+
+      (function(){
+        const rail = document.getElementById("lang-rail");
+        if (!rail) return;
+
+        const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+
+        const TAP_MOVE_PX = 14;
+        const TAP_SCROLL_PX = 6;
+
+        let startX = 0, startY = 0, startScroll = 0;
+        let dragging = false;
+        let pressedBtn = null;
+
+        function ptFromTouch(t){ return { x: t.clientX, y: t.clientY }; }
+
+        rail.addEventListener("touchstart", (e) => {
+          const targetBtn = e.target && e.target.closest ? e.target.closest(".lang-pill") : null;
+          pressedBtn = targetBtn && rail.contains(targetBtn) ? targetBtn : null;
+
+          if (!e.touches || e.touches.length === 0) return;
+          const p = ptFromTouch(e.touches[0]);
+          startX = p.x;
+          startY = p.y;
+          startScroll = rail.scrollLeft;
+          dragging = false;
+
+          if (pressedBtn){
+            e.preventDefault();
+          }
+        }, { passive:false });
+
+        rail.addEventListener("touchmove", (e) => {
+          if (!e.touches || e.touches.length === 0) return;
+
+          const p = ptFromTouch(e.touches[0]);
+          const dx = Math.abs(p.x - startX);
+          const dy = Math.abs(p.y - startY);
+          const ds = Math.abs(rail.scrollLeft - startScroll);
+
+          if (dx > TAP_MOVE_PX || dy > TAP_MOVE_PX || ds > TAP_SCROLL_PX){
+            dragging = true;
+          }
+        }, { passive:true });
+
+        rail.addEventListener("touchend", (e) => {
+          if (dragging){ pressedBtn = null; return; }
+
+          let btn = pressedBtn;
+
+          if (!btn){
+            const ct = e.changedTouches && e.changedTouches[0];
+            if (ct){
+              const p = ptFromTouch(ct);
+              const el = document.elementFromPoint(p.x, p.y);
+              const maybe = el && el.closest ? el.closest(".lang-pill") : null;
+              if (maybe && rail.contains(maybe)) btn = maybe;
+            }
+          }
+
+          if (!btn || btn.hidden){ pressedBtn = null; return; }
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
+          setLang(lang);
+          window.__mxApplyLang(lang);
+
+          btn.blur();
+          if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+
+          pressedBtn = null;
+        }, { passive:false });
+
+        rail.addEventListener("touchcancel", () => {
+          dragging = false;
+          pressedBtn = null;
+        }, { passive:true });
+
+        rail.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }, true);
+
+        if (!isTouch){
+          let downX = 0, downY = 0;
+          let pDragging = false;
+
+          rail.addEventListener("pointerdown", (e) => {
+            const btn = e.target && e.target.closest ? e.target.closest(".lang-pill") : null;
+            if (btn) e.preventDefault();
+            downX = e.clientX; downY = e.clientY;
+            pDragging = false;
+          }, { passive:false });
+
+          rail.addEventListener("pointermove", (e) => {
+            if (Math.abs(e.clientX - downX) > 10 || Math.abs(e.clientY - downY) > 10) pDragging = true;
+          }, { passive:true });
+
+          rail.addEventListener("pointerup", (e) => {
+            if (pDragging) return;
+
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            const btn = el && el.closest ? el.closest(".lang-pill") : null;
+            if (!btn || !rail.contains(btn) || btn.hidden) return;
+
+            const lang = btn.getAttribute("data-lang") || DEFAULT_LANG;
+            setLang(lang);
+            window.__mxApplyLang(lang);
+
+            btn.blur();
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+          }, { passive:true });
+        }
+      })();
+
     })();
 
     (function(){
