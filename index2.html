@@ -480,6 +480,23 @@
     }
     .cookie-gear:hover::after{ opacity:1; }
 
+    .mx-cid{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      cursor:pointer;
+      user-select:none;
+      -webkit-user-select:none;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .mx-cid:hover{
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.05);
+    }
+
     [data-i18n]{
       display:inline-block;
       transition: opacity 160ms ease, transform 160ms ease, filter 160ms ease;
@@ -796,10 +813,9 @@
 
           <a href="legal.html" data-i18n="footer.legal">Legal</a>
 
-          <span id="mx-consent-trace" style="display:none; gap:10px; align-items:center;">
-            <span style="opacity:.55;">·</span>
-            <a href="javascript:void(0)" id="mx-consent-status" style="opacity:.75; text-decoration:none;">Consent</a>
-            <a href="javascript:void(0)" id="mx-consent-open" style="opacity:.85; text-decoration:none;">Preferences</a>
+          <span id="mx-consent-trace" class="mx-cid" style="display:none;" title="Click to copy">
+            <span style="opacity:.62; letter-spacing:.14em;">CID:</span>
+            <span id="mx-consent-cid-val" style="opacity:.88; letter-spacing:.10em;"></span>
           </span>
         </div>
 
@@ -862,9 +878,9 @@
 
   <script>
     (function(){
-      const CMP_ID = "mx-cmp-v1";
-      const CMP_VER = 1;
       const CONSENT_KEY = "mx_consent";
+      const CONSENT_ID_KEY = "mx_consent_cid";
+      const CMP_VER = 1;
 
       const cmpEl = document.getElementById("mx-cmp");
       const appRoot = document.getElementById("app-root");
@@ -878,26 +894,43 @@
       const btnSave   = document.getElementById("mx-btn-save");
 
       const traceWrap  = document.getElementById("mx-consent-trace");
-      const traceStat  = document.getElementById("mx-consent-status");
-      const traceOpen  = document.getElementById("mx-consent-open");
+      const traceCidVal = document.getElementById("mx-consent-cid-val");
+
+      let traceUnlocked = false;
 
       function safeParse(json){
         try{ return JSON.parse(json); } catch(_){ return null; }
+      }
+
+      function genCID(){
+        const bytes = new Uint8Array(12);
+        if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+        else for (let i=0;i<bytes.length;i++) bytes[i] = (Math.random()*256)|0;
+        return Array.from(bytes).map(b => b.toString(16).padStart(2,"0")).join("");
+      }
+
+      function getCID(){
+        let cid = localStorage.getItem(CONSENT_ID_KEY);
+        if (!cid){
+          cid = genCID();
+          localStorage.setItem(CONSENT_ID_KEY, cid);
+        }
+        return cid;
       }
 
       function readConsent(){
         const v = localStorage.getItem(CONSENT_KEY);
         const obj = safeParse(v);
         if (!obj || typeof obj !== "object") return null;
-        if (obj.cmp_id !== CMP_ID || obj.v !== CMP_VER) return null;
+        if (obj.v !== CMP_VER) return null;
         if (!obj.choices || typeof obj.choices !== "object") return null;
         return obj;
       }
 
       function writeConsent(choices){
         const payload = {
-          cmp_id: CMP_ID,
           v: CMP_VER,
+          cid: getCID(),
           ts: Date.now(),
           choices: {
             necessary: true,
@@ -936,37 +969,77 @@
         setToggle(btn, on ? 0 : 1);
       }
 
-      function updateFooterTrace(){
-        const c = readConsent();
-        if (!traceWrap || !traceStat || !traceOpen) return;
+      function setTraceVisible(visible){
+        if (!traceWrap) return;
+        traceWrap.style.display = visible ? "inline-flex" : "none";
+      }
 
-        if (!c){
-          traceWrap.style.display = "none";
-          return;
+      function updateCIDUI(){
+        const cid = getCID();
+
+        if (traceCidVal){
+          traceCidVal.textContent = cid;
         }
 
-        traceWrap.style.display = "inline-flex";
+        if (idEl){
+          idEl.textContent = `CID: ${cid}`;
+        }
 
-        const anyOptional = !!(c.choices.analytics || c.choices.marketing);
-        traceStat.textContent = anyOptional ? "Consent: Accepted" : "Consent: Rejected";
+        // Solo mostrarlo cuando:
+        // - el usuario ya decidió, o
+        // - abrió el CMP mediante el engranaje (traceUnlocked)
+        setTraceVisible(isDecided() || traceUnlocked);
+      }
+
+      async function copyText(text){
+        try{
+          if (navigator.clipboard && navigator.clipboard.writeText){
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch(_){}
+
+        try{
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "true");
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          ta.style.top = "0";
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand("copy");
+          document.body.removeChild(ta);
+          return !!ok;
+        } catch(_){
+          return false;
+        }
+      }
+
+      function flashCopied(){
+        if (!traceWrap) return;
+        const prev = traceWrap.getAttribute("title") || "";
+        traceWrap.setAttribute("title", "Copied");
+        traceWrap.style.transform = "translateY(-1px)";
+        setTimeout(() => {
+          traceWrap.style.transform = "translateY(0)";
+          traceWrap.setAttribute("title", prev || "Click to copy");
+        }, 650);
       }
 
       function openCMP(forceLock){
         if (!cmpEl) return;
 
-        if (idEl) idEl.textContent = CMP_ID;
-
         const existing = readConsent();
         setToggle(tgAnalytics, existing?.choices?.analytics ? 1 : 0);
         setToggle(tgMarketing, existing?.choices?.marketing ? 1 : 0);
 
-        cmpEl.classList.add("is-open");
+        updateCIDUI();
 
-        if (forceLock){
-          lockUI();
-        } else {
-          unlockUI();
-        }
+        cmpEl.classList.add("is-open");
+        if (forceLock) lockUI();
+        else unlockUI();
       }
 
       function closeCMP(){
@@ -977,13 +1050,13 @@
 
       function acceptAll(){
         writeConsent({ analytics:true, marketing:true });
-        updateFooterTrace();
+        updateCIDUI();
         closeCMP();
       }
 
       function rejectAll(){
         writeConsent({ analytics:false, marketing:false });
-        updateFooterTrace();
+        updateCIDUI();
         closeCMP();
       }
 
@@ -992,7 +1065,7 @@
           analytics: !!getToggle(tgAnalytics),
           marketing: !!getToggle(tgMarketing)
         });
-        updateFooterTrace();
+        updateCIDUI();
         closeCMP();
       }
 
@@ -1005,42 +1078,43 @@
 
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Escape") return;
-
         if (!isDecided() && cmpEl?.classList.contains("is-open")) return;
-
         if (cmpEl?.classList.contains("is-open")) closeCMP();
       });
 
-      traceOpen?.addEventListener("click", (e) => {
-        e.preventDefault();
-        openCMP(false);
-      });
-
-      traceStat?.addEventListener("click", (e) => {
-        e.preventDefault();
-        openCMP(false);
-      });
-
+      // Engranaje abre CMP y "desbloquea" el CID en footer
       const gear = document.getElementById("cookiePreferencesGear");
       gear?.addEventListener("click", (e) => {
         e.preventDefault();
+        traceUnlocked = true;
+        updateCIDUI();
         openCMP(false);
       });
 
+      // CID clicable: copia al portapapeles
+      traceWrap?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const ok = await copyText(`CID:${getCID()}`);
+        if (ok) flashCopied();
+      });
+
       window.__mxConsent = {
-        cmpId: CMP_ID,
         isDecided,
+        getCID,
         getConsent: () => readConsent(),
-        open: () => openCMP(false),
-        openLocked: () => openCMP(true),
+        open: () => { traceUnlocked = true; updateCIDUI(); openCMP(false); },
+        openLocked: () => { traceUnlocked = true; updateCIDUI(); openCMP(true); },
         acceptAll,
         rejectAll,
         savePrefs,
-        reset: () => { localStorage.removeItem(CONSENT_KEY); updateFooterTrace(); openCMP(true); }
+        reset: () => { localStorage.removeItem(CONSENT_KEY); updateCIDUI(); openCMP(true); }
       };
 
-      updateFooterTrace();
+      // Inicial: no mostrar CID hasta que abran engranaje o decidan
+      updateCIDUI();
 
+      // Bloqueo inicial hasta decidir
       if (!isDecided()){
         openCMP(true);
       }
