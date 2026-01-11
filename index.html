@@ -591,44 +591,6 @@
       color:rgba(255,255,255,.70);
     }
 
-    /* CID: plain text line, no hover, no animation */
-    .mx-cmp-cid{
-      margin-top:10px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      color: rgba(255,255,255,.86);
-      font-size: 10px;
-      letter-spacing: .10em;
-      user-select:text;
-      -webkit-user-select:text;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .mx-cmp-cid strong{
-      font-weight: 400;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      opacity: .85;
-      margin-right: 8px;
-    }
-
-    /* tiny confirmation label */
-    .mx-cmp-cid .mx-copied{
-      margin-left: 10px;
-      opacity: .55;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      font-size: 9px;
-      display:none;
-    }
-    .mx-cmp-cid.is-copied .mx-copied{
-      display:inline;
-      opacity:.85;
-    }
-
     .mx-cmp-body{
       padding: 12px 16px 14px;
       display:grid;
@@ -742,7 +704,6 @@
       .mx-cmp-actions{ justify-content:stretch; }
       .mx-btn{ flex:1 1 auto; text-align:center; }
       .mx-cmp-row{ flex-direction:column; align-items:flex-start; }
-      .mx-cmp-cid{ white-space: normal; }
     }
   </style>
 </head>
@@ -838,22 +799,15 @@
   <div class="mx-cmp" id="mx-cmp" role="dialog" aria-modal="true" aria-labelledby="mx-cmp-title">
     <div class="mx-cmp-panel">
       <div class="mx-cmp-head">
-        <h2 class="mx-cmp-title" id="mx-cmp-title">Cookie & Consent</h2>
-        <p class="mx-cmp-sub" id="mx-cmp-desc">
-          Essential cookies are always on. Choose whether to allow optional cookies.
-        </p>
-
-        <!-- Plain text line. Click copies. Shows "COPIED" briefly. -->
-        <div class="mx-cmp-cid" id="mx-cmp-cid" title="Click to copy">
-          <strong>CID</strong><span id="mx-cid-text">—</span><span class="mx-copied" id="mx-copied">COPIED</span>
-        </div>
+        <h2 class="mx-cmp-title" id="mx-cmp-title" data-i18n="cmp.title">Privacy & Cookies</h2>
+        <p class="mx-cmp-sub" id="mx-cmp-desc" data-i18n="cmp.desc">We respect your privacy. This site does not use advertising or tracking cookies. Necessary cookies are always on for security and basic functionality. You can accept or reject optional cookies.</p>
       </div>
 
       <div class="mx-cmp-body">
         <div class="mx-cmp-row">
           <div>
-            <strong>Necessary</strong>
-            <p>Security & core functionality.</p>
+            <strong data-i18n="cmp.necessary">Necessary</strong>
+            <p data-i18n="cmp.necessary.desc">Security & core functionality.</p>
           </div>
           <div>
             <div class="mx-switch" id="mx-tg-necessary" data-on="1" aria-disabled="true" aria-label="Necessary cookies"></div>
@@ -862,8 +816,8 @@
 
         <div class="mx-cmp-row">
           <div>
-            <strong>Analytics</strong>
-            <p>Usage insights to improve the site.</p>
+            <strong data-i18n="cmp.analytics">Analytics</strong>
+            <p data-i18n="cmp.analytics.desc">Optional, anonymous usage insights to improve the site.</p>
           </div>
           <div>
             <button class="mx-switch" id="mx-tg-analytics" type="button" data-on="0" aria-label="Analytics cookies"></button>
@@ -872,8 +826,8 @@
 
         <div class="mx-cmp-row">
           <div>
-            <strong>Marketing</strong>
-            <p>Personalization and campaign measurement.</p>
+            <strong data-i18n="cmp.marketing">Marketing</strong>
+            <p data-i18n="cmp.marketing.desc">Optional personalization and campaign measurement.</p>
           </div>
           <div>
             <button class="mx-switch" id="mx-tg-marketing" type="button" data-on="0" aria-label="Marketing cookies"></button>
@@ -882,9 +836,9 @@
       </div>
 
       <div class="mx-cmp-actions">
-        <button class="mx-btn" id="mx-btn-reject" type="button">Reject</button>
-        <button class="mx-btn primary" id="mx-btn-accept" type="button">Accept</button>
-        <button class="mx-btn" id="mx-btn-save" type="button">Save</button>
+        <button class="mx-btn" id="mx-btn-reject" type="button" data-i18n="cmp.reject">Reject all</button>
+        <button class="mx-btn primary" id="mx-btn-accept" type="button" data-i18n="cmp.accept">Accept all</button>
+        <button class="mx-btn" id="mx-btn-save" type="button" data-i18n="cmp.save">Save preferences</button>
       </div>
     </div>
   </div>
@@ -892,14 +846,10 @@
   <script>
     (function(){
       const CONSENT_KEY = "mx_consent";
-      const CONSENT_ID_KEY = "mx_consent_cid";
       const CMP_VER = 1;
 
       const cmpEl = document.getElementById("mx-cmp");
       const appRoot = document.getElementById("app-root");
-
-      const cidLine = document.getElementById("mx-cmp-cid");
-      const cidText = document.getElementById("mx-cid-text");
 
       const tgAnalytics = document.getElementById("mx-tg-analytics");
       const tgMarketing = document.getElementById("mx-tg-marketing");
@@ -908,26 +858,8 @@
       const btnReject = document.getElementById("mx-btn-reject");
       const btnSave   = document.getElementById("mx-btn-save");
 
-      let copiedTimer = null;
-
       function safeParse(json){
         try{ return JSON.parse(json); } catch(_){ return null; }
-      }
-
-      function genCID(){
-        const bytes = new Uint8Array(12);
-        if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
-        else for (let i=0;i<bytes.length;i++) bytes[i] = (Math.random()*256)|0;
-        return Array.from(bytes).map(b => b.toString(16).padStart(2,"0")).join("");
-      }
-
-      function getCID(){
-        let cid = localStorage.getItem(CONSENT_ID_KEY);
-        if (!cid){
-          cid = genCID();
-          localStorage.setItem(CONSENT_ID_KEY, cid);
-        }
-        return cid;
       }
 
       function readConsent(){
@@ -942,7 +874,6 @@
       function writeConsent(choices){
         const payload = {
           v: CMP_VER,
-          cid: getCID(),
           ts: Date.now(),
           choices: {
             necessary: true,
@@ -981,53 +912,12 @@
         setToggle(btn, on ? 0 : 1);
       }
 
-      async function copyText(text){
-        try{
-          if (navigator.clipboard && navigator.clipboard.writeText){
-            await navigator.clipboard.writeText(text);
-            return true;
-          }
-        } catch(_){}
-
-        try{
-          const ta = document.createElement("textarea");
-          ta.value = text;
-          ta.setAttribute("readonly", "true");
-          ta.style.position = "fixed";
-          ta.style.left = "-9999px";
-          ta.style.top = "0";
-          document.body.appendChild(ta);
-          ta.focus();
-          ta.select();
-          const ok = document.execCommand("copy");
-          document.body.removeChild(ta);
-          return !!ok;
-        } catch(_){
-          return false;
-        }
-      }
-
-      function renderCID(){
-        const cid = getCID();
-        if (cidText) cidText.textContent = `: ${cid}`;
-        if (cidLine) cidLine.setAttribute("data-cid", cid);
-      }
-
-      function showCopied(){
-        if (!cidLine) return;
-        if (copiedTimer) clearTimeout(copiedTimer);
-        cidLine.classList.add("is-copied");
-        copiedTimer = setTimeout(() => cidLine.classList.remove("is-copied"), 900);
-      }
-
       function openCMP(forceLock){
         if (!cmpEl) return;
 
         const existing = readConsent();
         setToggle(tgAnalytics, existing?.choices?.analytics ? 1 : 0);
         setToggle(tgMarketing, existing?.choices?.marketing ? 1 : 0);
-
-        renderCID();
 
         cmpEl.classList.add("is-open");
         if (forceLock) lockUI();
@@ -1071,13 +961,6 @@
         openCMP(false);
       });
 
-      cidLine?.addEventListener("click", async (e) => {
-        e.preventDefault();
-        const cid = cidLine.getAttribute("data-cid") || getCID();
-        const ok = await copyText(`CID:${cid}`);
-        if (ok) showCopied();
-      });
-
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Escape") return;
         if (!isDecided() && cmpEl?.classList.contains("is-open")) return;
@@ -1086,7 +969,6 @@
 
       window.__mxConsent = {
         isDecided,
-        getCID,
         getConsent: () => readConsent(),
         open: () => openCMP(false),
         openLocked: () => openCMP(true),
@@ -1112,7 +994,18 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
           "card.test": "We’re working on it — coming back soon.",
-          "cookie.prefs": "Cookie Preferences"
+          "cookie.prefs": "Cookie Preferences",
+          "cmp.title": "Privacy & Cookies",
+          "cmp.desc": "We respect your privacy. This site does not use advertising or tracking cookies. Necessary cookies are always on for security and basic functionality. You can accept or reject optional cookies.",
+          "cmp.necessary": "Necessary",
+          "cmp.necessary.desc": "Security & core functionality.",
+          "cmp.analytics": "Analytics",
+          "cmp.analytics.desc": "Optional, anonymous usage insights to improve the site.",
+          "cmp.marketing": "Marketing",
+          "cmp.marketing.desc": "Optional personalization and campaign measurement.",
+          "cmp.reject": "Reject all",
+          "cmp.accept": "Accept all",
+          "cmp.save": "Save preferences"
         },
         zh: {
           "nav.about": "关于",
@@ -1123,7 +1016,18 @@
           "footer.cookies": "Cookies",
           "footer.legal": "法律",
           "card.test": "我们正在建设中，敬请期待。",
-          "cookie.prefs": "Cookie 偏好设置"
+          "cookie.prefs": "Cookie 偏好设置",
+          "cmp.title": "隐私与 Cookies",
+          "cmp.desc": "我们尊重您的隐私。本网站不使用广告或追踪 Cookies。为安全与基本功能所必需的 Cookies 始终启用。您可以接受或拒绝可选 Cookies。",
+          "cmp.necessary": "必要",
+          "cmp.necessary.desc": "安全与基本功能。",
+          "cmp.analytics": "分析",
+          "cmp.analytics.desc": "可选：匿名使用数据，用于改进网站。",
+          "cmp.marketing": "营销",
+          "cmp.marketing.desc": "可选：个性化与活动效果衡量。",
+          "cmp.reject": "全部拒绝",
+          "cmp.accept": "全部接受",
+          "cmp.save": "保存偏好"
         },
         es: {
           "nav.about": "Acerca de",
@@ -1134,7 +1038,18 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
           "card.test": "Estamos trabajando — volvemos pronto.",
-          "cookie.prefs": "Preferencias de cookies"
+          "cookie.prefs": "Preferencias de cookies",
+          "cmp.title": "Privacidad y cookies",
+          "cmp.desc": "Respetamos su privacidad. Este sitio no utiliza cookies publicitarias ni de seguimiento. Las cookies necesarias siempre están activas por seguridad y funcionamiento básico. Puede aceptar o rechazar cookies opcionales.",
+          "cmp.necessary": "Necesarias",
+          "cmp.necessary.desc": "Seguridad y funcionamiento básico.",
+          "cmp.analytics": "Analítica",
+          "cmp.analytics.desc": "Opcional: métricas anónimas para mejorar el sitio.",
+          "cmp.marketing": "Marketing",
+          "cmp.marketing.desc": "Opcional: personalización y medición de campañas.",
+          "cmp.reject": "Rechazar todo",
+          "cmp.accept": "Aceptar todo",
+          "cmp.save": "Guardar preferencias"
         },
         ca: {
           "nav.about": "Sobre",
@@ -1145,7 +1060,18 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Legal",
           "card.test": "Estem treballant — tornem aviat.",
-          "cookie.prefs": "Preferències de cookies"
+          "cookie.prefs": "Preferències de cookies",
+          "cmp.title": "Privadesa i cookies",
+          "cmp.desc": "Respectem la vostra privadesa. Aquest lloc no utilitza cookies publicitàries ni de seguiment. Les cookies necessàries sempre estan activades per seguretat i funcionament bàsic. Podeu acceptar o rebutjar cookies opcionals.",
+          "cmp.necessary": "Necessàries",
+          "cmp.necessary.desc": "Seguretat i funcionament bàsic.",
+          "cmp.analytics": "Analítica",
+          "cmp.analytics.desc": "Opcional: estadístiques anònimes per millorar el lloc.",
+          "cmp.marketing": "Màrqueting",
+          "cmp.marketing.desc": "Opcional: personalització i mesura de campanyes.",
+          "cmp.reject": "Rebutjar-ho tot",
+          "cmp.accept": "Acceptar-ho tot",
+          "cmp.save": "Desar preferències"
         },
         eu: {
           "nav.about": "Honi buruz",
@@ -1156,7 +1082,18 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Lege-oharra",
           "card.test": "Lanean ari gara — laster itzuliko gara.",
-          "cookie.prefs": "Cookie ezarpenak"
+          "cookie.prefs": "Cookie ezarpenak",
+          "cmp.title": "Pribatutasuna eta cookieak",
+          "cmp.desc": "Zure pribatutasuna errespetatzen dugu. Gune honek ez du publizitateko edo jarraipeneko cookierik erabiltzen. Beharrezko cookieak beti aktibo daude segurtasunerako eta oinarrizko funtziorako. Aukerako cookieak onartu edo baztertu ditzakezu.",
+          "cmp.necessary": "Beharrezkoak",
+          "cmp.necessary.desc": "Segurtasuna eta oinarrizko funtzionamendua.",
+          "cmp.analytics": "Analitika",
+          "cmp.analytics.desc": "Aukerakoa: estatistika anonimoak gunea hobetzeko.",
+          "cmp.marketing": "Marketina",
+          "cmp.marketing.desc": "Aukerakoa: pertsonalizazioa eta kanpainen neurketa.",
+          "cmp.reject": "Guztiak baztertu",
+          "cmp.accept": "Guztiak onartu",
+          "cmp.save": "Hobespenak gorde"
         },
         fr: {
           "nav.about": "À propos",
@@ -1167,7 +1104,18 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Légal",
           "card.test": "Nous travaillons — de retour bientôt.",
-          "cookie.prefs": "Préférences cookies"
+          "cookie.prefs": "Préférences cookies",
+          "cmp.title": "Confidentialité et cookies",
+          "cmp.desc": "Nous respectons votre vie privée. Ce site n’utilise pas de cookies publicitaires ou de suivi. Les cookies nécessaires sont toujours activés pour la sécurité et le fonctionnement de base. Vous pouvez accepter ou refuser les cookies optionnels.",
+          "cmp.necessary": "Nécessaires",
+          "cmp.necessary.desc": "Sécurité et fonctionnement de base.",
+          "cmp.analytics": "Analyse",
+          "cmp.analytics.desc": "Optionnel : statistiques anonymes pour améliorer le site.",
+          "cmp.marketing": "Marketing",
+          "cmp.marketing.desc": "Optionnel : personnalisation et mesure de campagne.",
+          "cmp.reject": "Tout refuser",
+          "cmp.accept": "Tout accepter",
+          "cmp.save": "Enregistrer les préférences"
         },
         ar: {
           "nav.about": "حول",
@@ -1178,7 +1126,18 @@
           "footer.cookies": "الكوكيز",
           "footer.legal": "قانوني",
           "card.test": "نعمل على ذلك — نعود قريبًا.",
-          "cookie.prefs": "تفضيلات الكوكيز"
+          "cookie.prefs": "تفضيلات الكوكيز",
+          "cmp.title": "الخصوصية وملفات تعريف الارتباط",
+          "cmp.desc": "نحن نحترم خصوصيتك. هذا الموقع لا يستخدم ملفات تعريف ارتباط إعلانية أو للتتبع. ملفات تعريف الارتباط الضرورية تكون مفعّلة دائمًا للأمان والوظائف الأساسية. يمكنك قبول أو رفض الملفات الاختيارية.",
+          "cmp.necessary": "ضرورية",
+          "cmp.necessary.desc": "الأمان والوظائف الأساسية.",
+          "cmp.analytics": "تحليلات",
+          "cmp.analytics.desc": "اختياري: إحصاءات مجهولة لتحسين الموقع.",
+          "cmp.marketing": "تسويق",
+          "cmp.marketing.desc": "اختياري: تخصيص وقياس الحملات.",
+          "cmp.reject": "رفض الكل",
+          "cmp.accept": "قبول الكل",
+          "cmp.save": "حفظ الإعدادات"
         },
         ru: {
           "nav.about": "О нас",
@@ -1189,7 +1148,18 @@
           "footer.cookies": "Cookies",
           "footer.legal": "Право",
           "card.test": "Мы работаем — скоро вернёмся.",
-          "cookie.prefs": "Настройки cookies"
+          "cookie.prefs": "Настройки cookies",
+          "cmp.title": "Конфиденциальность и cookies",
+          "cmp.desc": "Мы уважаем вашу конфиденциальность. Этот сайт не использует рекламные или отслеживающие cookies. Необходимые cookies всегда включены для безопасности и базовой работы. Вы можете принять или отклонить необязательные cookies.",
+          "cmp.necessary": "Необходимые",
+          "cmp.necessary.desc": "Безопасность и базовая функциональность.",
+          "cmp.analytics": "Аналитика",
+          "cmp.analytics.desc": "Необязательно: анонимная статистика для улучшения сайта.",
+          "cmp.marketing": "Маркетинг",
+          "cmp.marketing.desc": "Необязательно: персонализация и измерение кампаний.",
+          "cmp.reject": "Отклонить все",
+          "cmp.accept": "Принять все",
+          "cmp.save": "Сохранить настройки"
         },
         hi: {
           "nav.about": "परिचय",
@@ -1200,7 +1170,18 @@
           "footer.cookies": "Cookies",
           "footer.legal": "कानूनी",
           "card.test": "हम काम कर रहे हैं — जल्द वापस आएँगे।",
-          "cookie.prefs": "कुकी प्राथमिकताएँ"
+          "cookie.prefs": "कुकी प्राथमिकताएँ",
+          "cmp.title": "गोपनीयता और कुकीज़",
+          "cmp.desc": "हम आपकी गोपनीयता का सम्मान करते हैं। यह साइट विज्ञापन या ट्रैकिंग कुकीज़ का उपयोग नहीं करती। सुरक्षा और मूल कार्यक्षमता के लिए आवश्यक कुकीज़ हमेशा चालू रहती हैं। आप वैकल्पिक कुकीज़ स्वीकार या अस्वीकार कर सकते हैं।",
+          "cmp.necessary": "आवश्यक",
+          "cmp.necessary.desc": "सुरक्षा और मूल कार्यक्षमता।",
+          "cmp.analytics": "विश्लेषण",
+          "cmp.analytics.desc": "वैकल्पिक: साइट सुधार के लिए अनाम आँकड़े।",
+          "cmp.marketing": "मार्केटिंग",
+          "cmp.marketing.desc": "वैकल्पिक: वैयक्तिकरण और अभियान मापन।",
+          "cmp.reject": "सभी अस्वीकार करें",
+          "cmp.accept": "सभी स्वीकार करें",
+          "cmp.save": "प्राथमिकताएँ सहेजें"
         }
       };
 
