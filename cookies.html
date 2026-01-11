@@ -70,6 +70,16 @@
       opacity: 0.45; text-align: center;
     }
 
+    .brand-link,
+    .brand-link:visited,
+    .brand-link:hover,
+    .brand-link:active,
+    .brand-link:focus {
+      color: inherit;
+      text-decoration: none;
+      outline: none;
+    }
+
     @media (max-width: 600px) {
       .brand { font-size: 11px; letter-spacing: 3px; }
       .footer-links { flex-wrap: wrap; justify-content:center; gap: 14px; }
@@ -85,17 +95,14 @@
       <div class="brand">UNDER MAINTENANCE</div>
     </div>
 
-<div class="footer-bar">
-  <div class="footer-links">
-    <a href="index.html">TERMS</a>
-    <a href="index.html">PRIVACY</a>
-    <a href="index.html">COOKIES</a>
-    <a href="index.html">LEGAL</a>
-  </div>
+<footer class="footer-bar">
   <div class="copyright">
-    © 2023–2026 MICRORETAILX LLC. ALL RIGHTS RESERVED.
+    © 2023–2026
+    <a class="brand-link" href="https://www.microretailx.com" target="_blank" rel="noopener noreferrer">MICRORETAILX</a>
+    LLC — ALL RIGHTS RESERVED
   </div>
-</div>
+</footer>
+
 
 <script>
 
@@ -135,9 +142,9 @@
 
   const INTRO = {
     start: performance.now(),
-    durIn: 1800,      // barrido lento
-    durFlash: 320,    // flash
-    durOut: 900,      // fade MÁS LENTO (era 650)
+    durIn: 1800,      
+    durFlash: 320,   
+    durOut: 900,      
     get active() {
       const t = performance.now() - this.start;
       return t < (this.durIn + this.durFlash + this.durOut);
@@ -403,7 +410,7 @@
       }
 
       if (fF > fL && fF > fR) {
-        // straight
+        
       } else if (fL > fR) {
         p.a -= turn;
       } else if (fR > fL) {
@@ -505,7 +512,7 @@
       vctx.globalCompositeOperation = "lighter";
       vctx.lineCap = "round";
 
-      // Segmentos barridos
+     
       for (let i=0;i<corners.length;i++){
         const o = corners[i];
         const hx = lerp(o.x, cx, p);
@@ -538,7 +545,7 @@
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
 
-      // Explosión central
+    
       const rr = Math.min(W,H) * (0.35 + 0.25*intensity);
       const g = vctx.createRadialGradient(cx,cy,0,cx,cy,rr);
       g.addColorStop(0, `rgba(255,255,255,${0.95*intensity})`);
@@ -551,7 +558,7 @@
       vctx.arc(cx,cy,rr,0,Math.PI*2); 
       vctx.fill();
 
-      // Rayos siguiendo las diagonales de la X
+      
       for (let i=0; i<4; i++) {
         const corner = corners[i];
         const rayGrad = vctx.createLinearGradient(cx, cy, corner.x, corner.y);
@@ -579,11 +586,11 @@
 
     renderMaze();
     
-    // Fade MÁS LENTO con más presencia
+   
     const fadeAlpha = (1 - p3);
     strokeX(fadeAlpha * 0.40, IS_MOBILE ? 3.6 : 4.4, IS_MOBILE ? 11.5 : 15.0);
 
-    // Brillo residual más persistente
+  
     if (p3 < 0.75) {
       vctx.save();
       vctx.globalCompositeOperation = "lighter";
