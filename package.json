@@ -1,0 +1,13 @@
+{
+  "name": "microretailx-site",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs --dev",
+    "build": "node esbuild.config.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}
