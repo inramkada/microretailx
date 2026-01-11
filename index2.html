@@ -563,15 +563,12 @@
             </button>
 
             <div class="lang-rail" id="lang-rail" aria-label="Languages">
-              <!-- order: EN → ZH → ES → (CA/EU appear only when ES) → FR → AR → RU → HI -->
+              <!-- order: EN → CA → EU → ZH → ES → FR → AR → RU → HI -->
               <button class="lang-pill" data-lang="en" data-label="English" type="button">EN</button>
+              <button class="lang-pill" data-lang="ca" data-label="Català" type="button">CA</button>
+              <button class="lang-pill" data-lang="eu" data-label="Euskara" type="button">EU</button>
               <button class="lang-pill" data-lang="zh" data-label="中文 (Chinese)" type="button">ZH</button>
               <button class="lang-pill" data-lang="es" data-label="Español" type="button">ES</button>
-
-              <!-- Only shown when Spanish is selected -->
-              <button class="lang-pill" data-lang="ca" data-label="Català" type="button" hidden>CA</button>
-              <button class="lang-pill" data-lang="eu" data-label="Euskara" type="button" hidden>EU</button>
-
               <button class="lang-pill" data-lang="fr" data-label="Français" type="button">FR</button>
               <button class="lang-pill" data-lang="ar" data-label="العربية (Arabic)" type="button">AR</button>
               <button class="lang-pill" data-lang="ru" data-label="Русский" type="button">RU</button>
@@ -689,10 +686,10 @@
           "nav.about": "Honi buruz",
           "nav.verticals": "Bertikalak",
           "nav.contact": "Kontaktua",
-          "footer.terms": "Baldintzak",
-          "footer.privacy": "Pribatutasuna",
+          "footer.terms": "Bald.",
+          "footer.privacy": "Prib.",
           "footer.cookies": "Cookies",
-          "footer.legal": "Lege-oharra",
+          "footer.legal": "Lege.",
           "card.test": "Lanean ari gara — laster itzuliko gara.",
           "cookie.prefs": "Cookie ezarpenak"
         },
@@ -815,14 +812,9 @@
 
           const railEl = document.getElementById("lang-rail");
           if (railEl){
-            const showIberian = (lang === "es");
             railEl.querySelectorAll(".lang-pill").forEach(btn => {
               const l = btn.getAttribute("data-lang");
-              if (l === "ca" || l === "eu"){
-                btn.hidden = !showIberian;        // SOLO aparecen cuando estás en ES
-              } else {
-                btn.hidden = (l === lang);        // oculta el idioma activo
-              }
+              btn.hidden = (l === lang); // oculta el idioma activo
             });
             railEl.scrollLeft = 0;
           }
